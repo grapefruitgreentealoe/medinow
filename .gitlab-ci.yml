@@ -41,10 +41,10 @@ build-frontend:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
-              - apps/frontend/**
+        - apps/frontend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
-              - apps/frontend/**
+        - apps/frontend/**
 
 
 build-backend:
@@ -54,10 +54,10 @@ build-backend:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
-                - apps/backend/**
+          - apps/backend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
-              - apps/backend/**
+        - apps/backend/**
 
 docker-build-frontend:
   stage: docker-build
@@ -82,7 +82,7 @@ docker-build-frontend:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
-          - apps/frontend/**
+        - apps/frontend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
         - apps/frontend/**
@@ -111,10 +111,10 @@ docker-build-backend:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
-              - apps/backend/**
+        - apps/backend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
-              - apps/backend/**
+        - apps/backend/**
 
 
 docker-build-backend:
@@ -140,10 +140,10 @@ docker-build-backend:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
-              - apps/backend/**
+        - apps/backend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
-              - apps/backend/**
+        - apps/backend/**
 
 deploy-frontend:
   stage: deploy
@@ -191,8 +191,8 @@ deploy-backend:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
-              - apps/backend/**
+        - apps/backend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
-              - apps/backend/**
+        - apps/backend/**
 
