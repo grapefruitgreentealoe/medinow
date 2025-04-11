@@ -57,7 +57,9 @@ docker-build-frontend:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
     - docker build -f apps/frontend/Dockerfile -t $DOCKER_IMAGE/frontend:latest .
+    - docker tag $DOCKER_IMAGE/frontend:latest $DOCKER_IMAGE/frontend:$CI_COMMIT_SHORT_SHA
     - docker push $DOCKER_IMAGE/frontend:latest
+    - docker push $DOCKER_IMAGE/frontend:$CI_COMMIT_SHORT_SHA
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
@@ -70,7 +72,9 @@ docker-build-backend:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
     - docker build -f apps/backend/Dockerfile -t $DOCKER_IMAGE/backend:latest .
+    - docker tag $DOCKER_IMAGE/backend:latest $DOCKER_IMAGE/backend:$CI_COMMIT_SHORT_SHA
     - docker push $DOCKER_IMAGE/backend:latest
+    - docker push $DOCKER_IMAGE/backend:$CI_COMMIT_SHORT_SHA
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
