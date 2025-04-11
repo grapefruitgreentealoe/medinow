@@ -9,7 +9,6 @@ stages:
 variables:
   NODE_ENV: production
   PNPM_HOME: /root/.pnpm
-  PATH: $PNPM_HOME:$PATH
   DOCKER_DRIVER: overlay2
 
 default:
