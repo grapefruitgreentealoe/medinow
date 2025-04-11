@@ -40,6 +40,12 @@ build-frontend:
     - pnpm build --filter=frontend...
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+              - apps/frontend/**
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+              - apps/frontend/**
+
 
 build-backend:
   stage: build
@@ -47,6 +53,11 @@ build-backend:
     - pnpm build --filter=backend...
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+                - apps/backend/**
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+              - apps/backend/**
 
 docker-build-frontend:
   stage: docker-build
@@ -70,7 +81,11 @@ docker-build-frontend:
       fi
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+          - apps/frontend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+        - apps/frontend/**
 
 # 동일하게 backend도 아래와 같이 처리
 docker-build-backend:
@@ -95,7 +110,11 @@ docker-build-backend:
       fi
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+              - apps/backend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+              - apps/backend/**
 
 
 docker-build-backend:
@@ -120,7 +139,11 @@ docker-build-backend:
       fi
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+              - apps/backend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+              - apps/backend/**
 
 deploy-frontend:
   stage: deploy
@@ -141,7 +164,11 @@ deploy-frontend:
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-frontend.sh && ~/deploy-frontend.sh"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - apps/frontend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+        - apps/frontend/**
 
 
 deploy-backend:
@@ -163,5 +190,9 @@ deploy-backend:
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-backend.sh && ~/deploy-backend.sh"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+              - apps/backend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+              - apps/backend/**
 
