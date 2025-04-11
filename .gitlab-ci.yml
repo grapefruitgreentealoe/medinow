@@ -1,0 +1,106 @@
+stages:
+  - install
+  - lint
+  - test
+  - build
+  - docker-build
+  - deploy
+
+variables:
+  NODE_ENV: production
+  PNPM_HOME: /root/.pnpm
+  PATH: $PNPM_HOME:$PATH
+  DOCKER_DRIVER: overlay2
+
+default:
+  image: node:18
+
+before_script:
+  - corepack enable
+  - corepack prepare pnpm@latest --activate
+  - pnpm install
+
+install:
+  stage: install
+  script:
+    - echo "pnpm install already done in before_script"
+
+lint:
+  stage: lint
+  script:
+    - pnpm lint
+
+test:
+  stage: test
+  script:
+    - pnpm test
+
+build-frontend:
+  stage: build
+  script:
+    - pnpm build --filter=frontend...
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+build-backend:
+  stage: build
+  script:
+    - pnpm build --filter=backend...
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+docker-build-frontend:
+  stage: docker-build
+  image: docker:20
+  services:
+    - docker:dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f apps/frontend/Dockerfile -t $CI_REGISTRY_IMAGE/frontend:latest .
+    - docker push $CI_REGISTRY_IMAGE/frontend:latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+docker-build-backend:
+  stage: docker-build
+  image: docker:20
+  services:
+    - docker:dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - docker build -f apps/backend/Dockerfile -t $CI_REGISTRY_IMAGE/backend:latest .
+    - docker push $CI_REGISTRY_IMAGE/backend:latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+deploy-frontend:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
+  script:
+    - scp scripts/deploy-frontend.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-frontend.sh
+    - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-frontend.sh && ~/deploy-frontend.sh"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+deploy-backend:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
+  script:
+    - scp scripts/deploy-backend.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-backend.sh
+    - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-backend.sh && ~/deploy-backend.sh"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
