@@ -1,4 +1,8 @@
 {
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
@@ -14,5 +18,8 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "setup:env": "cp .env.frontend.template .env.frontend && cp .env.backend.template .env.backend"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
