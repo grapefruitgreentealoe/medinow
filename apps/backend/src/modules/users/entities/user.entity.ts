@@ -4,7 +4,7 @@ import { UserRole } from '../../../../../../packages/shared/enums/roles.enum';
 
 @Entity()
 export class User extends BaseEntity {
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column({ nullable: true })
@@ -13,7 +13,7 @@ export class User extends BaseEntity {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ unique: true })
   nickname: string;
 
   @Column({ nullable: true })
