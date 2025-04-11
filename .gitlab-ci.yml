@@ -54,10 +54,10 @@ docker-build-frontend:
   services:
     - docker:dind
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
-    - docker build -f apps/frontend/Dockerfile -t $CI_REGISTRY_IMAGE/frontend:latest .
-    - docker push $CI_REGISTRY_IMAGE/frontend:latest
+    - docker build -f apps/frontend/Dockerfile -t $DOCKER_IMAGE/frontend:latest .
+    - docker push $DOCKER_IMAGE/frontend:latest
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
@@ -67,10 +67,10 @@ docker-build-backend:
   services:
     - docker:dind
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
-    - docker build -f apps/backend/Dockerfile -t $CI_REGISTRY_IMAGE/backend:latest .
-    - docker push $CI_REGISTRY_IMAGE/backend:latest
+    - docker build -f apps/backend/Dockerfile -t $DOCKER_IMAGE/backend:latest .
+    - docker push $DOCKER_IMAGE/backend:latest
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
