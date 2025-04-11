@@ -1,8 +1,3 @@
-좋아! 😊  
-지금까지 우리가 설정한 **Turborepo 기반 Medinow 프로젝트의 실제 개발 환경 구조를 반영한 README**를 아래에 정리해줄게.
-
----
-
 # 🏥 Medinow (Monorepo with Turborepo)
 
 > 실시간 병원 정보, 혼잡도 시각화, 후기 및 즐겨찾기, 실시간 채팅까지  
