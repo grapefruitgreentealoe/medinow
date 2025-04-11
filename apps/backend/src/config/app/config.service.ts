@@ -9,7 +9,6 @@ export class AppConfigService {
     return this.configService.get<string>('app.jwtSecret');
   }
 
- 
   get port() {
     return this.configService.get<number>('app.port');
   }
