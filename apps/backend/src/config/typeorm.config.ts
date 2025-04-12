@@ -12,6 +12,7 @@ const dbConfigService = new DbConfigService(new ConfigService());
 
 const entities = [join(__dirname, '../**/*.entity.{js,ts}')];
 const migrations = [join(__dirname, '../migrations/*.{js,ts}')];
+const subscribers = [join(__dirname, '../**/*.subscriber.{js,ts}')];
 
 // 데이터 소스 설정
 export const typeOrmConfig = new DataSource({
@@ -25,4 +26,5 @@ export const typeOrmConfig = new DataSource({
   migrations,
   synchronize: dbConfigService.dbSynchronize,
   logging: dbConfigService.dbLogging,
+  subscribers,
 });

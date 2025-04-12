@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2021",
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../../packages/shared/*"]
+    },
     "moduleResolution": "node",
     "resolveJsonModule": true
   }
