@@ -1,18 +1,32 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { CareUnitPharmacyService } from './services/care-unit-pharmacy.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { CareUnitService } from './care-unit.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { CareUnit } from './entities/care-unit.entity';
 
-// describe('CareUnitService', () => {
-//   let service: CareUnitPharmacyService;
+describe('CareUnitService', () => {
+  let service: CareUnitService;
 
-//   beforeEach(async () => {
-//     const module: TestingModule = await Test.createTestingModule({
-//       providers: [CareUnitPharmacyService],
-//     }).compile();
+  const mockCareUnitRepository = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    save: jest.fn(),
+  };
 
-//     service = module.get<CareUnitPharmacyService>(CareUnitPharmacyService);
-//   });
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        CareUnitService,
+        {
+          provide: getRepositoryToken(CareUnit),
+          useValue: mockCareUnitRepository,
+        },
+      ],
+    }).compile();
 
-//   it('should be defined', () => {
-//     expect(service).toBeDefined();
-//   });
-// });
+    service = module.get<CareUnitService>(CareUnitService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+});
