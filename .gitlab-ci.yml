@@ -46,7 +46,6 @@ build-frontend:
       changes:
         - apps/frontend/**
 
-
 build-backend:
   stage: build
   script:
@@ -54,7 +53,7 @@ build-backend:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
-          - apps/backend/**
+        - apps/backend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
         - apps/backend/**
@@ -116,35 +115,6 @@ docker-build-backend:
       changes:
         - apps/backend/**
 
-
-docker-build-backend:
-  stage: docker-build
-  image: docker:20
-  services:
-    - docker:dind
-  before_script:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  script:
-    - >
-      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
-        docker build -f apps/backend/Dockerfile -t $DOCKER_IMAGE/backend:latest .
-        docker tag $DOCKER_IMAGE/backend:latest $DOCKER_IMAGE/backend:$CI_COMMIT_SHORT_SHA
-        docker push $DOCKER_IMAGE/backend:latest
-        docker push $DOCKER_IMAGE/backend:$CI_COMMIT_SHORT_SHA
-      elif [ "$CI_COMMIT_BRANCH" = "dev" ]; then
-        docker build -f apps/backend/Dockerfile -t $DOCKER_IMAGE/backend:dev .
-        docker tag $DOCKER_IMAGE/backend:dev $DOCKER_IMAGE/backend:dev-$CI_COMMIT_SHORT_SHA
-        docker push $DOCKER_IMAGE/backend:dev
-        docker push $DOCKER_IMAGE/backend:dev-$CI_COMMIT_SHORT_SHA
-      fi
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      changes:
-        - apps/backend/**
-    - if: '$CI_COMMIT_BRANCH == "dev"'
-      changes:
-        - apps/backend/**
-
 deploy-frontend:
   stage: deploy
   image: alpine:latest
@@ -170,7 +140,6 @@ deploy-frontend:
       changes:
         - apps/frontend/**
 
-
 deploy-backend:
   stage: deploy
   image: alpine:latest
@@ -195,4 +164,3 @@ deploy-backend:
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
         - apps/backend/**
-
