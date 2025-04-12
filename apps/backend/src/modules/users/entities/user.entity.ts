@@ -1,12 +1,13 @@
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { Column, Entity } from 'typeorm';
-import { UserRole } from '../../../../../../packages/shared/enums/roles.enum';
-
+import { UserRole } from '../../../common/enums/roles.enum';
+import { Exclude } from 'class-transformer';
 @Entity()
 export class User extends BaseEntity {
   @Column({ unique: true })
   email: string;
 
+  @Exclude()
   @Column({ nullable: true })
   password: string;
 
@@ -22,6 +23,10 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   age: number;
 
-  @Column({ enum: UserRole, default: UserRole.USER })
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
   role: UserRole;
 }

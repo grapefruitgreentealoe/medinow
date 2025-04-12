@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
+import { AuthService } from './auth.service';
+import { UsersService } from '../users/users.service';
 
 // UsersService 모킹
 const mockUsersService = {
@@ -8,13 +8,13 @@ const mockUsersService = {
   findUserByEmail: jest.fn(),
 };
 
-describe('UsersController', () => {
-  let controller: UsersController;
+describe('AuthService', () => {
+  let service: AuthService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [UsersController],
       providers: [
+        AuthService,
         {
           provide: UsersService,
           useValue: mockUsersService,
@@ -22,10 +22,10 @@ describe('UsersController', () => {
       ],
     }).compile();
 
-    controller = module.get<UsersController>(UsersController);
+    service = module.get<AuthService>(AuthService);
   });
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
+    expect(service).toBeDefined();
   });
 });
