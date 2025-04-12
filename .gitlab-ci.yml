@@ -86,8 +86,8 @@ deploy-frontend:
     - chmod 700 ~/.ssh
     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
   script:
-    - scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-frontend.sh
-    - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-frontend.sh && ~/deploy-frontend.sh"
+    - scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-frontend-dev.sh
+    - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-frontend-dev.sh && ~/scripts/deploy-frontend-dev.sh"
   only:
     - dev
 
@@ -101,7 +101,7 @@ deploy-backend:
     - chmod 700 ~/.ssh
     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
   script:
-    - scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-backend.sh
-    - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-backend.sh && ~/deploy-backend.sh"
+    - scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-backend-dev.sh
+    - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-backend-dev.sh && ~/scripts/deploy-backend-dev.sh"
   only:
     - dev
