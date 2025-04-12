@@ -10,6 +10,8 @@ variables:
   NODE_ENV: production
   PNPM_HOME: /root/.pnpm
   DOCKER_DRIVER: overlay2
+  DOCKER_IMAGE_FRONTEND: grapefruitgreentealoe/medinow-frontend
+  DOCKER_IMAGE_BACKEND: grapefruitgreentealoe/medinow-backend
 
 default:
   image: node:18
@@ -39,22 +41,15 @@ build-frontend:
   script:
     - pnpm build --filter=frontend...
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      changes:
-        - apps/frontend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
         - apps/frontend/**
-
 
 build-backend:
   stage: build
   script:
     - pnpm build --filter=backend...
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      changes:
-          - apps/backend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
         - apps/backend/**
@@ -68,54 +63,14 @@ docker-build-frontend:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
     - >
-      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
-        docker build -f apps/frontend/Dockerfile -t $DOCKER_IMAGE/frontend:latest .
-        docker tag $DOCKER_IMAGE/frontend:latest $DOCKER_IMAGE/frontend:$CI_COMMIT_SHORT_SHA
-        docker push $DOCKER_IMAGE/frontend:latest
-        docker push $DOCKER_IMAGE/frontend:$CI_COMMIT_SHORT_SHA
-      elif [ "$CI_COMMIT_BRANCH" = "dev" ]; then
-        docker build -f apps/frontend/Dockerfile -t $DOCKER_IMAGE/frontend:dev .
-        docker tag $DOCKER_IMAGE/frontend:dev $DOCKER_IMAGE/frontend:dev-$CI_COMMIT_SHORT_SHA
-        docker push $DOCKER_IMAGE/frontend:dev
-        docker push $DOCKER_IMAGE/frontend:dev-$CI_COMMIT_SHORT_SHA
-      fi
+      docker build --platform=linux/amd64 -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:dev .
+      docker tag $DOCKER_IMAGE_FRONTEND:dev $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
+      docker push $DOCKER_IMAGE_FRONTEND:dev
+      docker push $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      changes:
-        - apps/frontend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
         - apps/frontend/**
-
-# 동일하게 backend도 아래와 같이 처리
-docker-build-backend:
-  stage: docker-build
-  image: docker:20
-  services:
-    - docker:dind
-  before_script:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  script:
-    - >
-      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
-        docker build -f apps/backend/Dockerfile -t $DOCKER_IMAGE/backend:latest .
-        docker tag $DOCKER_IMAGE/backend:latest $DOCKER_IMAGE/backend:$CI_COMMIT_SHORT_SHA
-        docker push $DOCKER_IMAGE/backend:latest
-        docker push $DOCKER_IMAGE/backend:$CI_COMMIT_SHORT_SHA
-      elif [ "$CI_COMMIT_BRANCH" = "dev" ]; then
-        docker build -f apps/backend/Dockerfile -t $DOCKER_IMAGE/backend:dev .
-        docker tag $DOCKER_IMAGE/backend:dev $DOCKER_IMAGE/backend:dev-$CI_COMMIT_SHORT_SHA
-        docker push $DOCKER_IMAGE/backend:dev
-        docker push $DOCKER_IMAGE/backend:dev-$CI_COMMIT_SHORT_SHA
-      fi
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      changes:
-        - apps/backend/**
-    - if: '$CI_COMMIT_BRANCH == "dev"'
-      changes:
-        - apps/backend/**
-
 
 docker-build-backend:
   stage: docker-build
@@ -126,21 +81,11 @@ docker-build-backend:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
     - >
-      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
-        docker build -f apps/backend/Dockerfile -t $DOCKER_IMAGE/backend:latest .
-        docker tag $DOCKER_IMAGE/backend:latest $DOCKER_IMAGE/backend:$CI_COMMIT_SHORT_SHA
-        docker push $DOCKER_IMAGE/backend:latest
-        docker push $DOCKER_IMAGE/backend:$CI_COMMIT_SHORT_SHA
-      elif [ "$CI_COMMIT_BRANCH" = "dev" ]; then
-        docker build -f apps/backend/Dockerfile -t $DOCKER_IMAGE/backend:dev .
-        docker tag $DOCKER_IMAGE/backend:dev $DOCKER_IMAGE/backend:dev-$CI_COMMIT_SHORT_SHA
-        docker push $DOCKER_IMAGE/backend:dev
-        docker push $DOCKER_IMAGE/backend:dev-$CI_COMMIT_SHORT_SHA
-      fi
+      docker build --platform=linux/amd64 -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:dev .
+      docker tag $DOCKER_IMAGE_BACKEND:dev $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
+      docker push $DOCKER_IMAGE_BACKEND:dev
+      docker push $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      changes:
-        - apps/backend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
         - apps/backend/**
@@ -156,20 +101,12 @@ deploy-frontend:
     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
   script:
     - >
-      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
-        scp scripts/deploy-frontend-prod.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-frontend.sh
-      elif [ "$CI_COMMIT_BRANCH" = "dev" ]; then
-        scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-frontend.sh
-      fi
+      scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-frontend.sh
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-frontend.sh && ~/deploy-frontend.sh"
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      changes:
-        - apps/frontend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
         - apps/frontend/**
-
 
 deploy-backend:
   stage: deploy
@@ -182,17 +119,9 @@ deploy-backend:
     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
   script:
     - >
-      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
-        scp scripts/deploy-backend-prod.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-backend.sh
-      elif [ "$CI_COMMIT_BRANCH" = "dev" ]; then
-        scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-backend.sh
-      fi
+      scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-backend.sh
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-backend.sh && ~/deploy-backend.sh"
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      changes:
-        - apps/backend/**
     - if: '$CI_COMMIT_BRANCH == "dev"'
       changes:
         - apps/backend/**
-
