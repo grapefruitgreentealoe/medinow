@@ -60,8 +60,6 @@ docker-build-frontend:
     - docker tag $DOCKER_IMAGE_FRONTEND:dev $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
     - docker push $DOCKER_IMAGE_FRONTEND:dev
     - docker push $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
-  only:
-    - dev
 
 docker-build-backend:
   stage: docker-build
@@ -73,8 +71,6 @@ docker-build-backend:
     - docker tag $DOCKER_IMAGE_BACKEND:dev $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
     - docker push $DOCKER_IMAGE_BACKEND:dev
     - docker push $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
-  only:
-    - dev
 
 deploy-frontend:
   stage: deploy
@@ -93,9 +89,6 @@ deploy-frontend:
     - scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-frontend-dev.sh
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-frontend-dev.sh && ~/scripts/deploy-frontend-dev.sh"
 
-  only:
-    - dev
-
 deploy-backend:
   stage: deploy
   image: node:20
@@ -111,5 +104,3 @@ deploy-backend:
   script:
     - scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-backend-dev.sh
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-backend-dev.sh && ~/scripts/deploy-backend-dev.sh"
-  only:
-    - dev
