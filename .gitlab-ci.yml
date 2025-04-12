@@ -42,8 +42,6 @@ build-frontend:
     - pnpm build --filter=frontend...
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev"'
-      changes:
-        - apps/frontend/**
 
 build-backend:
   stage: build
@@ -69,8 +67,6 @@ docker-build-frontend:
       docker push $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev"'
-      changes:
-        - apps/frontend/**
 
 docker-build-backend:
   stage: docker-build
@@ -87,8 +83,6 @@ docker-build-backend:
       docker push $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev"'
-      changes:
-        - apps/backend/**
 
 deploy-frontend:
   stage: deploy
@@ -105,8 +99,6 @@ deploy-frontend:
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-frontend.sh && ~/deploy-frontend.sh"
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev"'
-      changes:
-        - apps/frontend/**
 
 deploy-backend:
   stage: deploy
@@ -123,5 +115,3 @@ deploy-backend:
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-backend.sh && ~/deploy-backend.sh"
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev"'
-      changes:
-        - apps/backend/**
