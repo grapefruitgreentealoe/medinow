@@ -14,7 +14,7 @@ variables:
   DOCKER_IMAGE_BACKEND: grapefruitgreentealoe/medinow-backend
 
 default:
-  image: node:18
+  image: node:20
 
 before_script:
   - corepack enable
