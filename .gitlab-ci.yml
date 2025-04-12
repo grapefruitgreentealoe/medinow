@@ -53,40 +53,28 @@ build-backend:
 docker-build-frontend:
   stage: docker-build
   image: docker:20
-  services:
-    - docker:dind
-  variables:
-    DOCKER_TLS_CERTDIR: ''
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
-    - >
-      docker build --platform=linux/amd64 -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:dev .
-      docker tag $DOCKER_IMAGE_FRONTEND:dev $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
-      docker push $DOCKER_IMAGE_FRONTEND:dev
-      docker push $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
+    - docker build --platform=linux/amd64 -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:dev .
+    - docker tag $DOCKER_IMAGE_FRONTEND:dev $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
+    - docker push $DOCKER_IMAGE_FRONTEND:dev
+    - docker push $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
   only:
     - dev
-  privileged: true
 
 docker-build-backend:
   stage: docker-build
   image: docker:20
-  services:
-    - docker:dind
-  variables:
-    DOCKER_TLS_CERTDIR: ''
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
-    - >
-      docker build --platform=linux/amd64 -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:dev .
-      docker tag $DOCKER_IMAGE_BACKEND:dev $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
-      docker push $DOCKER_IMAGE_BACKEND:dev
-      docker push $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
+    - docker build --platform=linux/amd64 -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:dev .
+    - docker tag $DOCKER_IMAGE_BACKEND:dev $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
+    - docker push $DOCKER_IMAGE_BACKEND:dev
+    - docker push $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
   only:
     - dev
-  privileged: true
 
 deploy-frontend:
   stage: deploy
@@ -98,8 +86,7 @@ deploy-frontend:
     - chmod 700 ~/.ssh
     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
   script:
-    - >
-      scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-frontend.sh
+    - scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-frontend.sh
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-frontend.sh && ~/deploy-frontend.sh"
   only:
     - dev
@@ -114,8 +101,7 @@ deploy-backend:
     - chmod 700 ~/.ssh
     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
   script:
-    - >
-      scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-backend.sh
+    - scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-backend.sh
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-backend.sh && ~/deploy-backend.sh"
   only:
     - dev
