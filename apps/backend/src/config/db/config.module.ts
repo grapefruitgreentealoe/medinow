@@ -10,7 +10,7 @@ import * as Joi from 'joi';
       envFilePath: [
         // 모든 환경의 개인 설정 (git에 포함되지 않음)
         '.env.local',
-        '.env.backend',
+        '.env.production',
       ],
       validationSchema: Joi.object({
         DATABASE_HOST: Joi.string().required(),

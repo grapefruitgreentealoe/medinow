@@ -12,8 +12,8 @@ async function bootstrap() {
 
   // Create Swagger
   const config = new DocumentBuilder()
-    .setTitle('ERP API')
-    .setDescription('API description for ERP')
+    .setTitle('MediNow API')
+    .setDescription('MediNow API 문서입니다.')
     .setVersion('0.0.1')
     .addBearerAuth()
     .addServer('api/v1')
