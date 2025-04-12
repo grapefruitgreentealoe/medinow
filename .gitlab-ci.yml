@@ -40,21 +40,23 @@ build-frontend:
   stage: build
   script:
     - pnpm build --filter=frontend...
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
+  only:
+    - dev
 
 build-backend:
   stage: build
   script:
     - pnpm build --filter=backend...
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
+  only:
+    - dev
 
 docker-build-frontend:
   stage: docker-build
   image: docker:20
   services:
     - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: ''
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
@@ -63,14 +65,17 @@ docker-build-frontend:
       docker tag $DOCKER_IMAGE_FRONTEND:dev $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
       docker push $DOCKER_IMAGE_FRONTEND:dev
       docker push $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
+  only:
+    - dev
+  privileged: true
 
 docker-build-backend:
   stage: docker-build
   image: docker:20
   services:
     - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: ''
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
@@ -79,8 +84,9 @@ docker-build-backend:
       docker tag $DOCKER_IMAGE_BACKEND:dev $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
       docker push $DOCKER_IMAGE_BACKEND:dev
       docker push $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
+  only:
+    - dev
+  privileged: true
 
 deploy-frontend:
   stage: deploy
@@ -95,8 +101,8 @@ deploy-frontend:
     - >
       scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-frontend.sh
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-frontend.sh && ~/deploy-frontend.sh"
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
+  only:
+    - dev
 
 deploy-backend:
   stage: deploy
@@ -111,5 +117,5 @@ deploy-backend:
     - >
       scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-backend.sh
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-backend.sh && ~/deploy-backend.sh"
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
+  only:
+    - dev
