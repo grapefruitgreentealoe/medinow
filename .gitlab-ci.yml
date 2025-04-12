@@ -79,24 +79,23 @@ docker-build-backend:
 deploy-frontend:
   stage: deploy
   image: alpine:latest
-before_script:
-  - apk add --no-cache openssh-client
-  - eval $(ssh-agent -s)
-  - mkdir -p ~/.ssh
-  # 줄바꿈 문제 방지하며 파일로 저장 → ssh-add에 직접 사용
-  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-  - chmod 600 ~/.ssh/id_rsa
-  - ssh-add ~/.ssh/id_rsa
-  - chmod 700 ~/.ssh
-  - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - mkdir -p ~/.ssh
+    # 줄바꿈 문제 방지하며 파일로 저장 → ssh-add에 직접 사용
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-add ~/.ssh/id_rsa
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
 
-script:
-  - scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-frontend-dev.sh
-  - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-frontend-dev.sh && ~/scripts/deploy-frontend-dev.sh"
+  script:
+    - scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-frontend-dev.sh
+    - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-frontend-dev.sh && ~/scripts/deploy-frontend-dev.sh"
 
-only:
-  - dev
-
+  only:
+    - dev
 
 deploy-backend:
   stage: deploy
