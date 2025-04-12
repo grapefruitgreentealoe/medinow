@@ -12,7 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env.backend'],
+      envFilePath: ['.env.local', '.env.production'],
     }),
     TypeOrmModule.forRoot(typeOrmConfig.options),
     UsersModule,
