@@ -1,6 +1,6 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
-
+import { CareUnitCategory } from '../../../common/enums/careUnits.enum';
 @Entity()
 export class CareUnit extends BaseEntity {
   @Column()
@@ -12,58 +12,58 @@ export class CareUnit extends BaseEntity {
   @Column()
   tel: string;
 
-  @Column()
+  @Column({ enum: CareUnitCategory })
   category: string;
 
-  @Column()
+  @Column({ unique: true })
   hpid: string;
 
-  @Column()
+  @Column({ nullable: true })
   mondayOpen: string;
 
-  @Column()
+  @Column({ nullable: true })
   mondayClose: string;
 
-  @Column()
+  @Column({ nullable: true })
   tuesdayOpen: string;
 
-  @Column()
+  @Column({ nullable: true })
   tuesdayClose: string;
 
-  @Column()
+  @Column({ nullable: true })
   wednesdayOpen: string;
 
-  @Column()
+  @Column({ nullable: true })
   wednesdayClose: string;
 
-  @Column()
+  @Column({ nullable: true })
   thursdayOpen: string;
 
-  @Column()
+  @Column({ nullable: true })
   thursdayClose: string;
 
-  @Column()
+  @Column({ nullable: true })
   fridayOpen: string;
 
-  @Column()
+  @Column({ nullable: true })
   fridayClose: string;
 
-  @Column()
+  @Column({ nullable: true })
   saturdayOpen: string;
 
-  @Column()
+  @Column({ nullable: true })
   saturdayClose: string;
 
-  @Column()
+  @Column({ nullable: true })
   sundayOpen: string;
 
-  @Column()
+  @Column({ nullable: true })
   sundayClose: string;
 
-  @Column()
+  @Column({ nullable: true })
   holidayOpen: string;
 
-  @Column()
+  @Column({ nullable: true })
   holidayClose: string;
 
   @Column()
