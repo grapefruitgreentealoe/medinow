@@ -9,8 +9,9 @@ stages:
 variables:
   NODE_ENV: production
   PNPM_HOME: /root/.pnpm
-  PATH: $PNPM_HOME:$PATH
   DOCKER_DRIVER: overlay2
+  DOCKER_IMAGE_FRONTEND: grapefruitgreentealoe/medinow-frontend
+  DOCKER_IMAGE_BACKEND: grapefruitgreentealoe/medinow-backend
 
 default:
   image: node:18
@@ -40,14 +41,18 @@ build-frontend:
   script:
     - pnpm build --filter=frontend...
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+        - apps/frontend/**
 
 build-backend:
   stage: build
   script:
     - pnpm build --filter=backend...
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+        - apps/backend/**
 
 docker-build-frontend:
   stage: docker-build
@@ -55,12 +60,17 @@ docker-build-frontend:
   services:
     - docker:dind
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
-    - docker build -f apps/frontend/Dockerfile -t $CI_REGISTRY_IMAGE/frontend:latest .
-    - docker push $CI_REGISTRY_IMAGE/frontend:latest
+    - >
+      docker build --platform=linux/amd64 -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:dev .
+      docker tag $DOCKER_IMAGE_FRONTEND:dev $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
+      docker push $DOCKER_IMAGE_FRONTEND:dev
+      docker push $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+        - apps/frontend/**
 
 docker-build-backend:
   stage: docker-build
@@ -68,12 +78,17 @@ docker-build-backend:
   services:
     - docker:dind
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
-    - docker build -f apps/backend/Dockerfile -t $CI_REGISTRY_IMAGE/backend:latest .
-    - docker push $CI_REGISTRY_IMAGE/backend:latest
+    - >
+      docker build --platform=linux/amd64 -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:dev .
+      docker tag $DOCKER_IMAGE_BACKEND:dev $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
+      docker push $DOCKER_IMAGE_BACKEND:dev
+      docker push $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+        - apps/backend/**
 
 deploy-frontend:
   stage: deploy
@@ -85,10 +100,13 @@ deploy-frontend:
     - chmod 700 ~/.ssh
     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
   script:
-    - scp scripts/deploy-frontend.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-frontend.sh
+    - >
+      scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-frontend.sh
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-frontend.sh && ~/deploy-frontend.sh"
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+        - apps/frontend/**
 
 deploy-backend:
   stage: deploy
@@ -100,7 +118,10 @@ deploy-backend:
     - chmod 700 ~/.ssh
     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
   script:
-    - scp scripts/deploy-backend.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-backend.sh
+    - >
+      scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-backend.sh
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-backend.sh && ~/deploy-backend.sh"
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      changes:
+        - apps/backend/**
