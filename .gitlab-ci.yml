@@ -63,18 +63,18 @@ docker-build-frontend:
   only:
     - dev
 
-# docker-build-backend:
-#   stage: docker-build
-#   image: docker:20
-#   before_script:
-#     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-#   script:
-#     - docker build --platform=linux/amd64 -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:dev .
-#     - docker tag $DOCKER_IMAGE_BACKEND:dev $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
-#     - docker push $DOCKER_IMAGE_BACKEND:dev
-#     - docker push $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
-#   only:
-#     - dev
+docker-build-backend:
+  stage: docker-build
+  image: docker:20
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  script:
+    - docker build --platform=linux/amd64 -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:dev .
+    - docker tag $DOCKER_IMAGE_BACKEND:dev $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
+    - docker push $DOCKER_IMAGE_BACKEND:dev
+    - docker push $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
+  only:
+    - dev
 
 deploy-frontend:
   stage: deploy
@@ -90,17 +90,18 @@ deploy-frontend:
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-frontend.sh && ~/deploy-frontend.sh"
   only:
     - dev
-# deploy-backend:
-#   stage: deploy
-#   image: alpine:latest
-#   before_script:
-#     - apk add --no-cache openssh-client
-#     - mkdir -p ~/.ssh
-#     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-#     - chmod 700 ~/.ssh
-#     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
-#   script:
-#     - scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-backend.sh
-#     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-backend.sh && ~/deploy-backend.sh"
-#   only:
-#     - dev
+
+deploy-backend:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
+  script:
+    - scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/deploy-backend.sh
+    - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/deploy-backend.sh && ~/deploy-backend.sh"
+  only:
+    - dev
