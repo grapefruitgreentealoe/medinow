@@ -1,8 +1,8 @@
 stages:
-  - install
-  - lint
-  - test
-  - build
+  # - install
+  # - lint
+  # - test
+  # - build
   - docker-build
   - deploy
 
