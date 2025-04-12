@@ -1,0 +1,4 @@
+node_modules
+dist
+.next
+pnpm-lock.yaml # (원하면, lockfile 없이 캐시 쓰기 위함)
