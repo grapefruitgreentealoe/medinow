@@ -21,34 +21,30 @@ before_script:
   - corepack prepare pnpm@latest --activate
   - pnpm install
 
-# install:
-#   stage: install
-#   script:
-#     - echo "pnpm install already done in before_script"
+install:
+  stage: install
+  script:
+    - echo "pnpm install already done in before_script"
 
-# lint:
-#   stage: lint
-#   script:
-#     - pnpm lint
+lint:
+  stage: lint
+  script:
+    - pnpm lint
 
-# test:
-#   stage: test
-#   script:
-#     - pnpm test
+test:
+  stage: test
+  script:
+    - pnpm test
 
-# build-frontend:
-#   stage: build
-#   script:
-#     - pnpm build --filter=frontend...
-#   only:
-#     - dev
+build-frontend:
+  stage: build
+  script:
+    - pnpm build --filter=frontend...
 
-# build-backend:
-#   stage: build
-#   script:
-#     - pnpm build --filter=backend...
-#   only:
-#     - dev
+build-backend:
+  stage: build
+  script:
+    - pnpm build --filter=backend...
 
 docker-build-frontend:
   stage: docker-build
