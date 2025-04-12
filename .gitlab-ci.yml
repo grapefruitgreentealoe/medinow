@@ -16,10 +16,10 @@ variables:
 default:
   image: node:20
 
-# before_script:
-#   - corepack enable
-#   - corepack prepare pnpm@latest --activate
-#   - pnpm install
+before_script:
+  - corepack enable
+  - corepack prepare pnpm@latest --activate
+  - pnpm install
 
 # install:
 #   stage: install
