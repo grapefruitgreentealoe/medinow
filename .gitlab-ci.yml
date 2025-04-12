@@ -49,8 +49,6 @@ build-backend:
     - pnpm build --filter=backend...
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev"'
-      changes:
-        - apps/backend/**
 
 docker-build-frontend:
   stage: docker-build
