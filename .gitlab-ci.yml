@@ -72,7 +72,7 @@ before_script:
 
 deploy-frontend:
   stage: deploy
-  image: node:20
+  image: docker:20
 
   script:
     - set -xe
