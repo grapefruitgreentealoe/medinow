@@ -7,12 +7,12 @@ stages:
   - deploy
 
 include:
-  - local: './ci/common-variables.yml'
-  - local: './ci/jobs/lint.yml'
-  - local: './ci/jobs/test.yml'
-  - local: './ci/jobs/build-frontend.yml'
-  - local: './ci/jobs/build-backend.yml'
-  - local: './ci/jobs/docker-build-frontend.yml'
-  - local: './ci/jobs/docker-build-backend.yml'
-  - local: './ci/jobs/deploy-frontend.yml'
-  - local: './ci/jobs/deploy-backend.yml'
+  - local: '.ci/common-variables.yml'
+  - local: '.ci/jobs/lint.yml'
+  - local: '.ci/jobs/test.yml'
+  - local: '.ci/jobs/build-frontend.yml'
+  - local: '.ci/jobs/build-backend.yml'
+  - local: '.ci/jobs/docker-build-frontend.yml'
+  - local: '.ci/jobs/docker-build-backend.yml'
+  - local: '.ci/jobs/deploy-frontend.yml'
+  - local: '.ci/jobs/deploy-backend.yml'
