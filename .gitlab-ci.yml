@@ -73,24 +73,13 @@ before_script:
 deploy-frontend:
   stage: deploy
   image: node:20
-  before_script:
-    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - mkdir -p ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
-    - eval $(ssh-agent -s)
-    - ssh-add ~/.ssh/id_rsa
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    # - ssh-keyscan -v -H $DEPLOY_HOST
-    # - echo $?
-    # - ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts || true
+
   script:
     - set -xe
-    - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@localhost "mkdir -p ~/scripts"
-    - scp -o StrictHostKeyChecking=no scripts/deploy-frontend-dev.sh $DEPLOY_USER@localhost:~/scripts/deploy-frontend-dev.sh
-    - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@localhost "chmod +x ~/scripts/deploy-frontend-dev.sh && ~/scripts/deploy-frontend-dev.sh"
+    - echo "📦 배포 스크립트 실행 시작"
+    - mkdir -p ./scripts
+    - chmod +x ./scripts/deploy-frontend-dev.sh
+    - ./scripts/deploy-frontend-dev.sh
 # deploy-backend:
 #   stage: deploy
 #   image: node:20
