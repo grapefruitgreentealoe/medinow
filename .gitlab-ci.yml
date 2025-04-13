@@ -88,9 +88,9 @@ deploy-frontend:
     # - ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts || true
   script:
     - set -xe
-    - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "mkdir -p ~/scripts"
-    - scp -o StrictHostKeyChecking=no scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-frontend-dev.sh
-    - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-frontend-dev.sh && ~/scripts/deploy-frontend-dev.sh"
+    - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@localhost "mkdir -p ~/scripts"
+    - scp -o StrictHostKeyChecking=no scripts/deploy-frontend-dev.sh $DEPLOY_USER@localhost:~/scripts/deploy-frontend-dev.sh
+    - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@localhost "chmod +x ~/scripts/deploy-frontend-dev.sh && ~/scripts/deploy-frontend-dev.sh"
 # deploy-backend:
 #   stage: deploy
 #   image: node:20
