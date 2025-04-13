@@ -1,4 +1,4 @@
-.deploy-backend-template:
+deploy-backend-dev:
   stage: deploy
   image: node:20
   before_script:
@@ -7,19 +7,21 @@
     - set -xe
     - echo "📦 배포 스크립트 실행 시작"
     - mkdir -p ./scripts
-    - chmod +x ./scripts/deploy-backend-${DEPLOY_ENV}.sh
-    - ./scripts/deploy-backend-${DEPLOY_ENV}.sh
-
-deploy-backend-dev:
-  extends: .deploy-backend-template
-  variables:
-    DEPLOY_ENV: dev
+    - chmod +x ./scripts/deploy-backend-dev.sh
+    - ./scripts/deploy-backend-dev.sh
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
 
 deploy-backend-prod:
-  extends: .deploy-backend-template
-  variables:
-    DEPLOY_ENV: prod
+  stage: deploy
+  image: node:20
+  before_script:
+    - apt-get update && apt-get install -y docker.io
+  script:
+    - set -xe
+    - echo "📦 배포 스크립트 실행 시작"
+    - mkdir -p ./scripts
+    - chmod +x ./scripts/deploy-backend-prod.sh
+    - ./scripts/deploy-backend-prod.sh
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'

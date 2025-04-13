@@ -1,25 +1,27 @@
-.docker-build-frontend-template:
+docker-build-frontend-dev:
   stage: docker-build
   image: docker:20
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
     - set -xe
-    - docker build --platform=linux/amd64 --progress=plain -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:$TAG .
-    - docker tag $DOCKER_IMAGE_FRONTEND:$TAG $DOCKER_IMAGE_FRONTEND:$TAG-$CI_COMMIT_SHORT_SHA
-    - docker push $DOCKER_IMAGE_FRONTEND:$TAG
-    - docker push $DOCKER_IMAGE_FRONTEND:$TAG-$CI_COMMIT_SHORT_SHA
-
-docker-build-frontend-dev:
-  extends: .docker-build-frontend-template
-  variables:
-    TAG: dev
+    - docker build --platform=linux/amd64 --progress=plain -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:dev .
+    - docker tag $DOCKER_IMAGE_FRONTEND:dev $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
+    - docker push $DOCKER_IMAGE_FRONTEND:dev
+    - docker push $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
 
 docker-build-frontend-prod:
-  extends: .docker-build-frontend-template
-  variables:
-    TAG: latest
+  stage: docker-build
+  image: docker:20
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  script:
+    - set -xe
+    - docker build --platform=linux/amd64 --progress=plain -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:latest .
+    - docker tag $DOCKER_IMAGE_FRONTEND:latest $DOCKER_IMAGE_FRONTEND:latest-$CI_COMMIT_SHORT_SHA
+    - docker push $DOCKER_IMAGE_FRONTEND:latest
+    - docker push $DOCKER_IMAGE_FRONTEND:latest-$CI_COMMIT_SHORT_SHA
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
