@@ -4,23 +4,23 @@ import { UserRole } from '../../../common/enums/roles.enum';
 import { Exclude } from 'class-transformer';
 @Entity()
 export class User extends BaseEntity {
-  @Column({ unique: true })
+  @Column({ type: 'text', unique: true })
   email: string;
 
   @Exclude()
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   password: string;
 
-  @Column()
+  @Column({ type: 'text' })
   name: string;
 
-  @Column({ unique: true })
+  @Column({ type: 'text' })
   nickname: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   address: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'integer', nullable: true })
   age: number;
 
   @Column({
@@ -29,4 +29,8 @@ export class User extends BaseEntity {
     default: UserRole.USER,
   })
   role: UserRole;
+
+  @Exclude()
+  @Column({ type: 'text', nullable: true, default: null })
+  refreshToken: string | null;
 }
