@@ -1,3 +1,11 @@
+.frontend_changes: &frontend_changes
+  - apps/frontend/**/*
+  - scripts/**/*
+  - .ci/**/*
+  - pnpm-lock.yaml
+  - package.json
+  - pnpm-workspace.yaml
+
 .docker-build-frontend-template:
   stage: docker-build
   image: docker:20
@@ -16,6 +24,7 @@ docker-build-frontend-dev:
     TAG: dev
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
+      changes: *frontend_changes
 
 docker-build-frontend-prod:
   extends: .docker-build-frontend-template
@@ -23,3 +32,4 @@ docker-build-frontend-prod:
     TAG: latest
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes: *frontend_changes

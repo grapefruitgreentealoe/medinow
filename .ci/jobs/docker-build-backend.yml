@@ -1,3 +1,11 @@
+.backend_changes: &backend_changes
+  - apps/backend/**/*
+  - scripts/**/*
+  - .ci/**/*
+  - pnpm-lock.yaml
+  - package.json
+  - pnpm-workspace.yaml
+
 .docker-build-backend-template:
   stage: docker-build
   image: docker:20
@@ -16,6 +24,7 @@ docker-build-backend-dev:
     TAG: dev
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
+      changes: *backend_changes
 
 docker-build-backend-prod:
   extends: .docker-build-backend-template
@@ -23,3 +32,4 @@ docker-build-backend-prod:
     TAG: latest
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes: *backend_changes
