@@ -87,13 +87,17 @@ deploy-frontend:
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
+    - eval $(ssh-agent -s)
     - ssh-add ~/.ssh/id_rsa
+    - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
+    - ssh-keygen -R $DEPLOY_HOST || true
+    - ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts || echo "ssh-keyscan failed"
   script:
     - set -xe
-    - scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-frontend-dev.sh
-    - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-frontend-dev.sh && ~/scripts/deploy-frontend-dev.sh"
+    - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "mkdir -p ~/scripts"
+    - scp -o StrictHostKeyChecking=no scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-frontend-dev.sh
+    - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-frontend-dev.sh && ~/scripts/deploy-frontend-dev.sh"
   only:
     - dev
 
