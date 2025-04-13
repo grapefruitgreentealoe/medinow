@@ -16,6 +16,7 @@ deploy-backend-dev:
     DEPLOY_ENV: dev
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
+      changes: *backend_changes
 
 deploy-backend-prod:
   extends: .deploy-backend-template
@@ -23,3 +24,4 @@ deploy-backend-prod:
     DEPLOY_ENV: prod
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes: *backend_changes

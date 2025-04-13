@@ -5,6 +5,13 @@ variables:
   DOCKER_IMAGE_FRONTEND: grapefruitgreentealoe/medinow-frontend
   DOCKER_IMAGE_BACKEND: grapefruitgreentealoe/medinow-backend
 
+.default-change-paths: &default_changes
+  - scripts/**/*
+  - .ci/**/*
+  - pnpm-lock.yaml
+  - package.json
+  - pnpm-workspace.yaml
+
 default:
   image: node:20
 

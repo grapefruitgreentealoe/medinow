@@ -9,6 +9,10 @@
 
 ```bash
 medinow/
+├── .ci/
+│   ├── jobs/   # stage별 job yml파일들(lint,test,build,deploy)
+│   └── common-variables.yml          # 공통 변수 설정 yml
+│
 ├── apps/
 │   ├── frontend/             # Next.js 기반 프론트엔드
 │   │   └── .env.local        # 로컬 개발용

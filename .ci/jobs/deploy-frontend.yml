@@ -16,6 +16,7 @@ deploy-frontend-dev:
     DEPLOY_ENV: dev
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
+      changes: *frontend_changes
 
 deploy-frontend-prod:
   extends: .deploy-frontend-template
@@ -23,3 +24,4 @@ deploy-frontend-prod:
     DEPLOY_ENV: prod
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes: *frontend_changes
