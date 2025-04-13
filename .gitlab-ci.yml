@@ -36,27 +36,27 @@ before_script:
 #   script:
 #     - pnpm test
 
-build-frontend:
-  stage: build
-  script:
-    - pnpm build --filter=frontend...
+# build-frontend:
+#   stage: build
+#   script:
+#     - pnpm build --filter=frontend...
 
 # build-backend:
 #   stage: build
 #   script:
 #     - pnpm build --filter=backend...
 
-docker-build-frontend:
-  stage: docker-build
-  image: docker:20
-  before_script:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  script:
-    - set -xe
-    - docker build --platform=linux/amd64 --progress=plain -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:dev .
-    - docker tag $DOCKER_IMAGE_FRONTEND:dev $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
-    - docker push $DOCKER_IMAGE_FRONTEND:dev
-    - docker push $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
+# docker-build-frontend:
+#   stage: docker-build
+#   image: docker:20
+#   before_script:
+#     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+#   script:
+#     - set -xe
+#     - docker build --platform=linux/amd64 --progress=plain -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:dev .
+#     - docker tag $DOCKER_IMAGE_FRONTEND:dev $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
+#     - docker push $DOCKER_IMAGE_FRONTEND:dev
+#     - docker push $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
 
 # docker-build-backend:
 #   stage: docker-build
@@ -91,7 +91,6 @@ deploy-frontend:
     - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "mkdir -p ~/scripts"
     - scp -o StrictHostKeyChecking=no scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-frontend-dev.sh
     - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-frontend-dev.sh && ~/scripts/deploy-frontend-dev.sh"
-
 # deploy-backend:
 #   stage: deploy
 #   image: node:20
