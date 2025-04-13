@@ -56,7 +56,8 @@ docker-build-frontend:
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
-    - docker build --platform=linux/amd64 -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:dev .
+    - set -xe
+    - docker build --platform=linux/amd64 --progress=plain -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:dev .
     - docker tag $DOCKER_IMAGE_FRONTEND:dev $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
     - docker push $DOCKER_IMAGE_FRONTEND:dev
     - docker push $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
@@ -69,7 +70,8 @@ docker-build-backend:
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
-    - docker build --platform=linux/amd64 -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:dev .
+    - set -xe
+    - docker build --platform=linux/amd64 --progress=plain -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:dev .
     - docker tag $DOCKER_IMAGE_BACKEND:dev $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
     - docker push $DOCKER_IMAGE_BACKEND:dev
     - docker push $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
@@ -88,11 +90,10 @@ deploy-frontend:
     - ssh-add ~/.ssh/id_rsa
     - chmod 700 ~/.ssh
     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
-
   script:
+    - set -xe
     - scp scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-frontend-dev.sh
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-frontend-dev.sh && ~/scripts/deploy-frontend-dev.sh"
-
   only:
     - dev
 
@@ -109,6 +110,7 @@ deploy-backend:
     - chmod 700 ~/.ssh
     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
   script:
+    - set -xe
     - scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-backend-dev.sh
     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-backend-dev.sh && ~/scripts/deploy-backend-dev.sh"
   only:
