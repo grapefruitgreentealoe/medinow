@@ -48,7 +48,7 @@ build-backend:
 
 docker-build-frontend:
   stage: docker-build
-  image: node:20
+  image: docker:20
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
@@ -60,7 +60,7 @@ docker-build-frontend:
 
 docker-build-backend:
   stage: docker-build
-  image: node:20
+  image: docker:20
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
@@ -90,8 +90,6 @@ deploy-frontend:
     - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "mkdir -p ~/scripts"
     - scp -o StrictHostKeyChecking=no scripts/deploy-frontend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-frontend-dev.sh
     - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-frontend-dev.sh && ~/scripts/deploy-frontend-dev.sh"
-  only:
-    - dev
 
 deploy-backend:
   stage: deploy
