@@ -9,6 +9,10 @@
 
 ```bash
 medinow/
+├── .ci/
+│   ├── jobs/   # stage별 job yml파일들(lint,test,build,deploy)
+│   └── common-variables.yml          # 공통 변수 설정 yml
+│
 ├── apps/
 │   ├── frontend/             # Next.js 기반 프론트엔드
 │   │   └── .env.local        # 로컬 개발용
@@ -18,6 +22,7 @@ medinow/
 │   ├── shared/               # 실행 코드에서 사용하는 공통 타입, 상수, 이벤트
 │   ├── eslint-config-custom/ # ESLint 공통 설정 패키지
 │   └── tsconfig/             # TypeScript base 설정
+├── scripts                   # VM에서 사용되는 배포 스크립트(실행이나 배포용X 아카이브용)
 ├── .env.frontend             # Docker용 프론트 env
 ├── .env.backend              # Docker용 백엔드 env
 ├── .env.frontend.template    # 프론트 env 템플릿 (Git에 포함)
@@ -102,7 +107,7 @@ REDIS_URL=redis://localhost:6379
 // .eslintrc.js
 module.exports = {
   root: true,
-  extends: ["eslint-config-custom"],
+  extends: ['eslint-config-custom'],
 };
 ```
 
