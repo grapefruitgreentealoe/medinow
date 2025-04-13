@@ -3,16 +3,20 @@
 # -------------------------
 FROM node:20 AS builder
 
-ENV PNPM_HOME=/root/.local/share/pnpm
-ENV PATH=$PNPM_HOME:$PATH
-
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
+# 작업 디렉토리
 WORKDIR /app
+
+# 전체 모노레포 복사
 COPY . .
 
+# Corepack 활성화 및 pnpm 설정
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# 전체 의존성 설치 (개발 + 프로덕션)
 RUN pnpm install
-RUN pnpm run build --filter=backend...
+
+# 백엔드만 빌드
+RUN pnpm run build --filter=backend
 
 # -------------------------
 # 2. Runtime Stage
@@ -24,15 +28,18 @@ ENV PORT=4000
 
 WORKDIR /app
 
-# 빌드된 파일, 패키지 복사
+# 빌드 결과물 + 필요한 패키지만 복사
 COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/apps/backend/package.json ./apps/backend/
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/apps/backend/package.json ./apps/backend/package.json
 
-# pnpm 세팅 + 프로덕션 의존성 설치
+# Corepack 설정 및 의존성 설치 (프로덕션 전용)
 RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN pnpm install --prod
 
+# 포트 오픈
 EXPOSE 4000
 
-CMD ["node", "apps/backend/dist/main.js"]
+# 실행
+CMD ["node", "dist/main.js"]
