@@ -10,7 +10,10 @@ import { AppConfigService } from './config.service';
       load: [configuration],
       envFilePath: ['.env.local', '.env.production'],
       validationSchema: Joi.object({
-        JWT_SECRET: Joi.string().required(),
+        JWT_ACCESS_SECRET: Joi.string().required(),
+        JWT_ACCESS_EXPIRATION_TIME: Joi.number().required(),
+        JWT_REFRESH_SECRET: Joi.string().required(),
+        JWT_REFRESH_EXPIRATION_TIME: Joi.number().required(),
         PORT: Joi.number().required(),
       }),
       isGlobal: true,
