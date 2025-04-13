@@ -6,96 +6,13 @@ stages:
   - docker-build
   - deploy
 
-variables:
-  NODE_ENV: production
-  PNPM_HOME: /root/.pnpm
-  DOCKER_DRIVER: overlay2
-  DOCKER_IMAGE_FRONTEND: grapefruitgreentealoe/medinow-frontend
-  DOCKER_IMAGE_BACKEND: grapefruitgreentealoe/medinow-backend
-
-default:
-  image: node:20
-
-before_script:
-  - corepack enable
-  - corepack prepare pnpm@latest --activate
-  - pnpm install
-
-# install:
-#   stage: install
-#   script:
-#     - echo "pnpm install already done in before_script"
-
-# lint:
-#   stage: lint
-#   script:
-#     - pnpm lint
-
-# test:
-#   stage: test
-#   script:
-#     - pnpm test
-
-# build-frontend:
-#   stage: build
-#   script:
-#     - pnpm build --filter=frontend...
-
-# build-backend:
-#   stage: build
-#   script:
-#     - pnpm build --filter=backend...
-
-# docker-build-frontend:
-#   stage: docker-build
-#   image: docker:20
-#   before_script:
-#     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-#   script:
-#     - set -xe
-#     - docker build --platform=linux/amd64 --progress=plain -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:dev .
-#     - docker tag $DOCKER_IMAGE_FRONTEND:dev $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
-#     - docker push $DOCKER_IMAGE_FRONTEND:dev
-#     - docker push $DOCKER_IMAGE_FRONTEND:dev-$CI_COMMIT_SHORT_SHA
-
-# docker-build-backend:
-#   stage: docker-build
-#   image: docker:20
-#   before_script:
-#     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-#   script:
-#     - set -xe
-#     - docker build --platform=linux/amd64 --progress=plain -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:dev .
-#     - docker tag $DOCKER_IMAGE_BACKEND:dev $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
-#     - docker push $DOCKER_IMAGE_BACKEND:dev
-#     - docker push $DOCKER_IMAGE_BACKEND:dev-$CI_COMMIT_SHORT_SHA
-
-deploy-frontend:
-  stage: deploy
-  image: node:20
-
-  before_script:
-    - apt-get update && apt-get install -y docker.io
-
-  script:
-    - set -xe
-    - echo "📦 배포 스크립트 실행 시작"
-    - mkdir -p ./scripts
-    - chmod +x ./scripts/deploy-frontend-dev.sh
-    - ./scripts/deploy-frontend-dev.sh
-# deploy-backend:
-#   stage: deploy
-#   image: node:20
-#   before_script:
-#     - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
-#     - eval $(ssh-agent -s)
-#     - mkdir -p ~/.ssh
-#     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-#     - chmod 600 ~/.ssh/id_rsa
-#     - ssh-add ~/.ssh/id_rsa
-#     - chmod 700 ~/.ssh
-#     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
-#   script:
-#     - set -xe
-#     - scp scripts/deploy-backend-dev.sh $DEPLOY_USER@$DEPLOY_HOST:~/scripts/deploy-backend-dev.sh
-#     - ssh $DEPLOY_USER@$DEPLOY_HOST "chmod +x ~/scripts/deploy-backend-dev.sh && ~/scripts/deploy-backend-dev.sh"
+include:
+  - local: '.ci/common-variables.yml'
+  - local: '.ci/jobs/lint.yml'
+  - local: '.ci/jobs/test.yml'
+  - local: '.ci/jobs/build-frontend.yml'
+  - local: '.ci/jobs/build-backend.yml'
+  - local: '.ci/jobs/docker-build-frontend.yml'
+  - local: '.ci/jobs/docker-build-backend.yml'
+  - local: '.ci/jobs/deploy-frontend.yml'
+  - local: '.ci/jobs/deploy-backend.yml'
