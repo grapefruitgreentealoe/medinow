@@ -12,6 +12,15 @@ variables:
   - package.json
   - pnpm-workspace.yaml
 
+.frontend_changes: &frontend_changes
+  - apps/frontend/**/*
+  - *default_changes
+
+.backend_changes: &backend_changes
+  - apps/backend/**/*
+  - *default_changes
+
+
 default:
   image: node:20
 
