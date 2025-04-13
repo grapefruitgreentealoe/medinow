@@ -5,12 +5,17 @@ import {
   HttpStatus,
   UseInterceptors,
   ClassSerializerInterceptor,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { LoginDto } from './dto/login.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 import { ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
-import { SignupResponseDto } from './dto/signup.response.dto';
+import { SignupResponseDto } from './dto/signup-response.dto';
 import { plainToInstance } from 'class-transformer';
+import { RequestOrigin } from 'src/common/decorators/request-origin.decorator';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -33,9 +38,57 @@ export class AuthController {
     @Body() createUserDto: CreateUserDto,
   ): Promise<SignupResponseDto> {
     const user = await this.authService.signup(createUserDto);
-    return plainToInstance(SignupResponseDto, {
-      message: '회원가입 성공',
-      user,
+    return plainToInstance(SignupResponseDto, user);
+  }
+
+  @ApiOperation({ summary: '로그인' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '로그인 성공',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '로그인 실패',
+  })
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Post('login')
+  async login(
+    @Body() loginDto: LoginDto,
+    @RequestOrigin() requestOrigin: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<LoginResponseDto> {
+    const { accessToken, accessOptions, refreshToken, refreshOptions } =
+      await this.authService.login(loginDto, requestOrigin);
+
+    response.cookie('accessToken', accessToken, accessOptions);
+    response.cookie('refreshToken', refreshToken, refreshOptions);
+
+    return plainToInstance(LoginResponseDto, {
+      message: '로그인 성공',
     });
+  }
+
+  @ApiOperation({ summary: '로그아웃' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '로그아웃 성공',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '로그아웃 실패',
+  })
+  @Post('logout')
+  logout(
+    @Res({ passthrough: true }) response: Response,
+    @RequestOrigin() requestOrigin: string,
+  ) {
+    const { accessOptions, refreshOptions } =
+      this.authService.expireJwtToken(requestOrigin);
+    response.clearCookie('accessToken', accessOptions);
+    response.clearCookie('refreshToken', refreshOptions);
+    return {
+      message: '로그아웃 성공',
+    };
   }
 }

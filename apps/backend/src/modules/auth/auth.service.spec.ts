@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
+import { AppConfigService } from 'src/config/app/config.service';
+import { JwtService } from '@nestjs/jwt';
 
 // UsersService 모킹
 const mockUsersService = {
@@ -17,7 +19,22 @@ describe('AuthService', () => {
         AuthService,
         {
           provide: UsersService,
-          useValue: mockUsersService,
+          useValue: UsersService,
+        },
+        {
+          provide: AppConfigService,
+          useValue: {
+            jwtAccessSecret: 'test-access-secret',
+            jwtRefreshSecret: 'test-refresh-secret',
+            jwtAccessExpirationTime: 3600,
+            jwtRefreshExpirationTime: 604800,
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            signAsync: jest.fn().mockResolvedValue('mock-token'),
+          },
         },
       ],
     }).compile();
