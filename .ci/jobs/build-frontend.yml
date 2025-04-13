@@ -1,7 +1,15 @@
+.frontend_changes: &frontend_changes
+  - apps/frontend/**/*
+  - scripts/**/*
+  - .ci/**/*
+  - package.json
+
 build-frontend:
   stage: build
   script:
     - pnpm build --filter=frontend...
   rules:
     - if: '$CI_COMMIT_BRANCH != "dev"'
+      changes: *frontend_changes
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes: *frontend_changes
