@@ -1,3 +1,11 @@
+.backend_changes: &backend_changes
+  - apps/backend/**/*
+  - scripts/**/*
+  - .ci/**/*
+  - pnpm-lock.yaml
+  - package.json
+  - pnpm-workspace.yaml
+
 .docker-build-backend-template:
   stage: docker-build
   image: docker:20
