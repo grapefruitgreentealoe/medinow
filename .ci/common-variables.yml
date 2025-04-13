@@ -14,12 +14,19 @@ variables:
 
 .frontend_changes: &frontend_changes
   - apps/frontend/**/*
-  - *default_changes
+  - scripts/**/*
+  - .ci/**/*
+  - pnpm-lock.yaml
+  - package.json
+  - pnpm-workspace.yaml
 
 .backend_changes: &backend_changes
   - apps/backend/**/*
-  - *default_changes
-
+  - scripts/**/*
+  - .ci/**/*
+  - pnpm-lock.yaml
+  - package.json
+  - pnpm-workspace.yaml
 
 default:
   image: node:20
