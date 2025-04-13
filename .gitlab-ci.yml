@@ -83,7 +83,6 @@ deploy-frontend:
     - ssh-add ~/.ssh/id_rsa
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - ssh-keygen -R $DEPLOY_HOST || true
     - ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts || echo "ssh-keyscan failed"
   script:
     - set -xe
