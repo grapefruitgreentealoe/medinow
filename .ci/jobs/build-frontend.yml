@@ -7,7 +7,7 @@ build-frontend:
   stage: build
   script:
     - pnpm build --filter=frontend...
-  when: manual
   rules:
     - if: '$CI_COMMIT_BRANCH != "dev" && $CI_PIPELINE_SOURCE == "merge_request_event"'
       changes: *frontend_changes
+      when: manual
