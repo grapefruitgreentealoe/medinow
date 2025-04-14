@@ -11,7 +11,6 @@ docker pull $IMAGE_NAME
 
 docker run -d \
   --name $APP_NAME \
-  --env-file /home/cloud/.env \
   -p 4001:4000 \
   --restart always \
   $IMAGE_NAME

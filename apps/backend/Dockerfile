@@ -33,7 +33,9 @@ COPY --from=builder /app/apps/backend/package.json ./package.json
 COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=builder /app/apps/backend/.env .env
 
-RUN cat .env
+COPY ./apps/backend/.env .env
+
+RUN echo "✅ .env file in container:" && cat .env
 
 # Corepack 설정 및 의존성 설치 (프로덕션 전용)
 RUN corepack enable && corepack prepare pnpm@latest --activate
