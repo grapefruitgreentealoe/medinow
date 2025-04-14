@@ -10,7 +10,9 @@ import { AppConfigService } from './config.service';
       load: [configuration],
       isGlobal: true,
       envFilePath:
-        process.env.NODE_ENV === 'production' ? '/app/.env' : '.env.local',
+        process.env.NODE_ENV === 'production'
+          ? '/apps/backend/.env'
+          : '.env.local',
       validationSchema: Joi.object({
         JWT_ACCESS_SECRET: Joi.string().required(),
         JWT_ACCESS_EXPIRATION_TIME: Joi.number().required(),
