@@ -31,6 +31,7 @@ WORKDIR /app
 # 빌드 결과물 + 필요한 패키지만 복사
 COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
 COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/apps/backend/package.json ./apps/backend/package.json
 COPY --from=builder /app/apps/backend/.env.production .env.production
 
