@@ -9,8 +9,9 @@
   image: docker:20
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    - echo "$ENV_PRODUCTION" > apps/backend/.env
+    
   script:
+    - echo "$ENV_PRODUCTION" > apps/backend/.env
     - set -xe
     - docker build --platform=linux/amd64 --progress=plain -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:$TAG .
     - docker tag $DOCKER_IMAGE_BACKEND:$TAG $DOCKER_IMAGE_BACKEND:$TAG-$CI_COMMIT_SHORT_SHA
