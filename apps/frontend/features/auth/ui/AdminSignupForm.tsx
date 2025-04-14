@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { useAdminSignup } from '../model/useAdminSignup';
 import { useRouter } from 'next/navigation';
-import { SignupData } from '../type';
+import type { SignupData } from '../type';
 
 type FormData = z.infer<typeof adminSignupSchema>;
 

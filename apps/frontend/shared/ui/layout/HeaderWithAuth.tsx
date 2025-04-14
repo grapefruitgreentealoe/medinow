@@ -1,5 +1,3 @@
-// 'use client';
-
 import Header from './Header';
 import AuthInitProvider from '@/providers/AuthInitProvider';
 
