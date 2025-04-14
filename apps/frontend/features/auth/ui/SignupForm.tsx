@@ -1,5 +1,5 @@
 'use client';
-
+import { useRouter } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signupSchema } from '../schema/signupSchema';
@@ -13,6 +13,8 @@ import { useState } from 'react';
 type FormData = z.infer<typeof signupSchema>;
 
 export default function SignupForm() {
+  const router = useRouter(); // ✅ 라우터 객체 생성
+
   const {
     register,
     handleSubmit,
@@ -34,6 +36,7 @@ export default function SignupForm() {
 
   const { mutateAsync: checkEmail } = useEmailCheck();
   const [checking, setChecking] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data: FormData) => {
     setChecking(true);
@@ -46,6 +49,16 @@ export default function SignupForm() {
 
     // TODO: 회원가입 API 연동
     console.log('회원가입 성공', data);
+    setLoading(true);
+
+    // TODO: API 연결
+    await new Promise((r) => setTimeout(r, 700));
+    console.log('회원가입 성공:', data);
+
+    setLoading(false);
+
+    // ✅ 회원가입 후 홈페이지로 이동
+    router.push('/');
   };
 
   return (
@@ -103,7 +116,7 @@ export default function SignupForm() {
         <p className="text-sm text-red-500">{errors.terms.message}</p>
       )}
 
-      <Button type="submit" disabled={checking}>
+      <Button type="submit" disabled={checking || loading}>
         {checking ? '이메일 확인 중...' : '회원가입'}
       </Button>
     </form>
