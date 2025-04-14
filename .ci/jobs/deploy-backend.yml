@@ -11,6 +11,7 @@
     - apt-get update && apt-get install -y docker.io
     - echo "$ENV_PRODUCTION" > apps/backend/.env
   script:
+    - echo "✅ .env file in container:" && cat apps/backend/.env
     - set -xe
     - echo "📦 배포 스크립트 실행 시작"
     - mkdir -p ./scripts
