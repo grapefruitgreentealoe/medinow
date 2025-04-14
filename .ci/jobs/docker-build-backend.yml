@@ -27,9 +27,9 @@ docker-build-backend-dev:
   extends: .docker-build-backend-template
   variables:
     TAG: dev
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
-      changes: *backend_changes
+  # rules:
+  #   - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
+  #     changes: *backend_changes
 
 docker-build-backend-prod:
   extends: .docker-build-backend-template
