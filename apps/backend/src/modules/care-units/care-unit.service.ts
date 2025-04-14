@@ -16,8 +16,7 @@ export class CareUnitService {
     'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncFullDown';
   private readonly PHARMACY_API_URL =
     'http://apis.data.go.kr/B552657/ErmctInsttInfoInqireService/getParmacyFullDown';
-  private readonly SERVICE_KEY =
-    'uSYZZA0PJht7szpyncFpPD55eZWnYbffebVFDNDkueIAXV1KOfeo1EBaJNNe342q8EseesWBpyWSsRwpNcborA==';
+  private readonly SERVICE_KEY = process.env.SERVICE_KEY;
 
   constructor(
     @InjectRepository(CareUnit)
@@ -30,40 +29,40 @@ export class CareUnitService {
     numOfRows: number = 10,
   ): Promise<ResponseCareUnitDto[]> {
     try {
-      const emergency_url = `${this.EMERGENCY_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=${pageNo}&numOfRows=${numOfRows}&_type=json`;
-      const hospital_url = `${this.HOSPITAL_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=${pageNo}&numOfRows=${numOfRows}&_type=json`;
-      const pharmacy_url = `${this.PHARMACY_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=${pageNo}&numOfRows=${numOfRows}&_type=json`;
+      const emergencyUrl = `${this.EMERGENCY_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=${pageNo}&numOfRows=${numOfRows}&_type=json`;
+      const hospitalUrl = `${this.HOSPITAL_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=${pageNo}&numOfRows=${numOfRows}&_type=json`;
+      const pharmacyUrl = `${this.PHARMACY_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=${pageNo}&numOfRows=${numOfRows}&_type=json`;
 
-      const emergency_response = await fetch(emergency_url, {
+      const emergencyResponse = await fetch(emergencyUrl, {
         headers: {
           Accept: 'application/json',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
         },
       });
-      const hospital_response = await fetch(hospital_url, {
+      const hospitalResponse = await fetch(hospitalUrl, {
         headers: {
           Accept: 'application/json',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
         },
       });
-      const pharmacy_response = await fetch(pharmacy_url, {
+      const pharmacyResponse = await fetch(pharmacyUrl, {
         headers: {
           Accept: 'application/json',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
         },
       });
 
-      const emergency_text = await emergency_response.text();
-      console.log('응답 내용 (첫 300자):', emergency_text.slice(0, 300));
-      const hospital_text = await hospital_response.text();
-      console.log('응답 내용 (첫 300자):', hospital_text.slice(0, 300));
-      const pharmacy_text = await pharmacy_response.text();
-      console.log('응답 내용 (첫 300자):', pharmacy_text.slice(0, 300));
+      const emergencyText = await emergencyResponse.text();
+      console.log('응답 내용 (첫 300자):', emergencyText.slice(0, 300));
+      const hospitalText = await hospitalResponse.text();
+      console.log('응답 내용 (첫 300자):', hospitalText.slice(0, 300));
+      const pharmacyText = await pharmacyResponse.text();
+      console.log('응답 내용 (첫 300자):', pharmacyText.slice(0, 300));
 
       if (
-        emergency_text.startsWith('<') ||
-        hospital_text.startsWith('<') ||
-        pharmacy_text.startsWith('<')
+        emergencyText.startsWith('<') ||
+        hospitalText.startsWith('<') ||
+        pharmacyText.startsWith('<')
       ) {
         console.error('❌ HTML/XML 응답 감지');
         throw new BadRequestException(
@@ -71,29 +70,29 @@ export class CareUnitService {
         );
       }
 
-      const emergency_data = JSON.parse(emergency_text);
-      const hospital_data = JSON.parse(hospital_text);
-      const pharmacy_data = JSON.parse(pharmacy_text);
+      const emergencyData = JSON.parse(emergencyText);
+      const hospitalData = JSON.parse(hospitalText);
+      const pharmacyData = JSON.parse(pharmacyText);
 
-      const emergency_items = emergency_data.response.body.items.item;
-      const hospital_items = hospital_data.response.body.items.item;
-      const pharmacy_items = pharmacy_data.response.body.items.item;
+      const emergencyItems = emergencyData.response.body.items.item;
+      const hospitalItems = hospitalData.response.body.items.item;
+      const pharmacyItems = pharmacyData.response.body.items.item;
 
-      const emergencies = Array.isArray(emergency_items)
-        ? emergency_items
-        : [emergency_items];
-      const hospitals = Array.isArray(hospital_items)
-        ? hospital_items
-        : [hospital_items];
-      const pharmacies = Array.isArray(pharmacy_items)
-        ? pharmacy_items
-        : [pharmacy_items];
+      const emergencies = Array.isArray(emergencyItems)
+        ? emergencyItems
+        : [emergencyItems];
+      const hospitals = Array.isArray(hospitalItems)
+        ? hospitalItems
+        : [hospitalItems];
+      const pharmacies = Array.isArray(pharmacyItems)
+        ? pharmacyItems
+        : [pharmacyItems];
 
       console.log('처리된 응급실 수:', emergencies.length);
       console.log('처리된 병의원 수:', hospitals.length);
       console.log('처리된 약국국 수:', pharmacies.length);
 
-      const emergency_return = emergencies.map(
+      const emergencyReturn = emergencies.map(
         (emergency): ResponseCareUnitDto => ({
           name: emergency.dutyName,
           address: emergency.dutyAddr,
@@ -114,7 +113,7 @@ export class CareUnitService {
           holiday: { open: emergency.dutyTime8s, close: emergency.dutyTime8c },
         }),
       );
-      const hospital_return = hospitals.map(
+      const hospitalReturn = hospitals.map(
         (hospital): ResponseCareUnitDto => ({
           name: hospital.dutyName,
           address: hospital.dutyAddr,
@@ -132,7 +131,7 @@ export class CareUnitService {
           holiday: { open: hospital.dutyTime8s, close: hospital.dutyTime8c },
         }),
       );
-      const pharmacy_return = pharmacies.map(
+      const pharmacyReturn = pharmacies.map(
         (pharmacy): ResponseCareUnitDto => ({
           name: pharmacy.dutyName,
           address: pharmacy.dutyAddr,
@@ -150,7 +149,7 @@ export class CareUnitService {
           holiday: { open: pharmacy.dutyTime8s, close: pharmacy.dutyTime8c },
         }),
       );
-      return [...emergency_return, ...hospital_return, ...pharmacy_return];
+      return [...emergencyReturn, ...hospitalReturn, ...pharmacyReturn];
     } catch (error: unknown) {
       const err = error as Error;
       console.error('❌ 에러 발생:', {
@@ -164,25 +163,26 @@ export class CareUnitService {
     }
   }
 
-  //🏥 상세 정보 조회 
+  //🏥 상세 정보 조회
   async getCareUnitDetail(id: string) {
     return this.careUnitRepository.findOne({ where: { id } });
   }
 
-  //🏥 위치 조회 
-  async getCareUnitLocation(pageNo: number = 1, numOfRows: number = 10) {
-    try {
-      const url = `${this.EMERGENCY_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=${pageNo}&numOfRows=${numOfRows}&_type=json`;
-    } catch (error: unknown) {
-      const err = error as Error;
-      console.error('❌ 에러 발생:', {
-        name: err.name,
-        message: err.message,
-        stack: err.stack,
-      });
-      throw new NotFoundException(
-        `Failed to fetch pharmacy data: ${err.message}`,
-      );
-    }
-  } 
+  //🏥 위치 조회
+  // async getCareUnitLocation(pageNo: number = 1, numOfRows: number = 10) {
+  //   try {
+  //     const url = `${this.EMERGENCY_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=${pageNo}&numOfRows=${numOfRows}&_type=json`;
+  //    return [];
+  // } catch (error: unknown) {
+  //     const err = error as Error;
+  //     console.error('❌ 에러 발생:', {
+  //       name: err.name,
+  //       message: err.message,
+  //       stack: err.stack,
+  //     });
+  //     throw new NotFoundException(
+  //       `Failed to fetch pharmacy data: ${err.message}`,
+  //     );
+  //   }
+  // }
 }

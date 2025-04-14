@@ -7,11 +7,11 @@ import * as Joi from 'joi';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [
-        // 모든 환경의 개인 설정 (git에 포함되지 않음)
-        '.env.local',
-        '.env.production',
-      ],
+      envFilePath: (() => {
+        const env = process.env.NODE_ENV;
+        if (env === 'production') return '.env.production';
+        return '.env.local'; // default: development
+      })(),
       validationSchema: Joi.object({
         DATABASE_HOST: Joi.string().required(),
         DATABASE_PORT: Joi.number().required(),

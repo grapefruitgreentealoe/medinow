@@ -3,7 +3,7 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 import { CareUnitCategory } from '../../../common/enums/careUnits.enum';
 @Entity()
 export class CareUnit extends BaseEntity {
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
   @Column()
@@ -18,59 +18,62 @@ export class CareUnit extends BaseEntity {
   @Column({ unique: true })
   hpid: string;
 
-  @Column({ nullable: true })
-  mondayOpen: string;
+  @Column({ type: 'float8', nullable: true })
+  mondayOpen: number;
 
-  @Column({ nullable: true })
-  mondayClose: string;
+  @Column({ type: 'float8', nullable: true })
+  mondayClose: number;
 
-  @Column({ nullable: true })
-  tuesdayOpen: string;
+  @Column({ type: 'float8', nullable: true })
+  tuesdayOpen: number;
 
-  @Column({ nullable: true })
-  tuesdayClose: string;
+  @Column({ type: 'float8', nullable: true })
+  tuesdayClose: number;
 
-  @Column({ nullable: true })
-  wednesdayOpen: string;
+  @Column({ type: 'float8', nullable: true })
+  wednesdayOpen: number;
 
-  @Column({ nullable: true })
-  wednesdayClose: string;
+  @Column({ type: 'float8', nullable: true })
+  wednesdayClose: number;
 
-  @Column({ nullable: true })
-  thursdayOpen: string;
+  @Column({ type: 'float8', nullable: true })
+  thursdayOpen: number;
 
-  @Column({ nullable: true })
-  thursdayClose: string;
+  @Column({ type: 'float8', nullable: true })
+  thursdayClose: number;
 
-  @Column({ nullable: true })
-  fridayOpen: string;
+  @Column({ type: 'float8', nullable: true })
+  fridayOpen: number;
 
-  @Column({ nullable: true })
-  fridayClose: string;
+  @Column({ type: 'float8', nullable: true })
+  fridayClose: number;
 
-  @Column({ nullable: true })
-  saturdayOpen: string;
+  @Column({ type: 'float8', nullable: true })
+  saturdayOpen: number;
 
-  @Column({ nullable: true })
-  saturdayClose: string;
+  @Column({ type: 'float8', nullable: true })
+  saturdayClose: number;
 
-  @Column({ nullable: true })
-  sundayOpen: string;
+  @Column({ type: 'float8', nullable: true })
+  sundayOpen: number;
 
-  @Column({ nullable: true })
-  sundayClose: string;
+  @Column({ type: 'float8', nullable: true })
+  sundayClose: number;
 
-  @Column({ nullable: true })
-  holidayOpen: string;
+  @Column({ type: 'float8', nullable: true })
+  holidayOpen: number;
 
-  @Column({ nullable: true })
-  holidayClose: string;
+  @Column({ type: 'float8', nullable: true })
+  holidayClose: number;
 
-  @Column()
+  @Column({ type: 'float8' })
   lat: number;
 
-  @Column()
+  @Column({ type: 'float8' })
   lng: number;
+
+  @Column({ default: false })
+  is_emergency: boolean;
 
   @Column({ default: false })
   is_badged: boolean;
