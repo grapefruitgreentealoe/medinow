@@ -8,7 +8,7 @@ import * as Joi from 'joi';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath:
-        process.env.NODE_ENV === 'production' ? '.env' : '.env.local',
+        process.env.NODE_ENV === 'production' ? '/app/.env' : '.env.local',
       validationSchema: Joi.object({
         DATABASE_HOST: Joi.string().required(),
         DATABASE_PORT: Joi.number().required(),
