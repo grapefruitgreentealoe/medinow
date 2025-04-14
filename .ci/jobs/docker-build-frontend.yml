@@ -23,9 +23,8 @@ docker-build-frontend-dev:
     TAG: dev
   allow_failure: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"
+    - if: '$CI_COMMIT_BRANCH == "dev"'
       when: manual
-
 
 docker-build-frontend-prod:
   extends: .docker-build-frontend-template
@@ -33,5 +32,5 @@ docker-build-frontend-prod:
     TAG: latest
   allow_failure: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"
+    - if: '$CI_COMMIT_BRANCH == "main"'
       when: manual
