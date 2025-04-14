@@ -6,6 +6,11 @@
 
 build-frontend:
   stage: build
+  cache:
+    key: shared-pnpm
+    paths:
+      - .pnpm-store
+      - node_modules
   script:
     - pnpm build --filter=frontend...
   rules:

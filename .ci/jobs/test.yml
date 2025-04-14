@@ -1,5 +1,10 @@
-test:
+test-frontend:
   stage: test
+  cache:
+    key: shared-pnpm
+    paths:
+      - .pnpm-store
+      - node_modules
   script:
     - pnpm test
   rules:
