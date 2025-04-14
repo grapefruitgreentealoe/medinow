@@ -3,5 +3,4 @@ lint-frontend:
   script:
     - pnpm lint
   rules:
-    - if: '$CI_COMMIT_BRANCH != "dev"'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH != "dev" && $CI_PIPELINE_SOURCE == "merge_request_event"'
