@@ -23,6 +23,7 @@
       sort -r -k2 | \
       awk 'NR>3 {print $1}' | \
       xargs -r docker rmi || echo "정리할 이미지 없음"
+
 docker-build-backend-dev:
   extends: .docker-build-backend-template
   variables:
@@ -30,6 +31,8 @@ docker-build-backend-dev:
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
       changes: *backend_changes
+      when: always
+    - when: manual
 
 docker-build-backend-prod:
   extends: .docker-build-backend-template
@@ -38,3 +41,5 @@ docker-build-backend-prod:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       changes: *backend_changes
+      when: always
+    - when: manual

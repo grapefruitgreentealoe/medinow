@@ -4,3 +4,5 @@ test-frontend:
     - pnpm test
   rules:
     - if: '$CI_COMMIT_BRANCH != "dev" && $CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - when: manual
