@@ -24,7 +24,6 @@ docker-build-backend-dev:
     TAG: dev
   allow_failure: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
       when: manual
 
 docker-build-backend-prod:

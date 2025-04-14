@@ -16,7 +16,6 @@ deploy-backend-dev:
     DEPLOY_ENV: dev
   allow_failure: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
       when: manual
 
 deploy-backend-prod:
