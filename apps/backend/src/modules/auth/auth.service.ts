@@ -2,9 +2,9 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { comparePassword } from 'src/common/utils/password.util';
+import { comparePassword } from '../../common/utils/password.util';
 import { CookieOptions } from 'express';
-import { AppConfigService } from 'src/config/app/config.service';
+import { AppConfigService } from '../../config/app/config.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
 
@@ -63,10 +63,12 @@ export class AuthService {
     const expiresIn = this.appConfigService.jwtAccessExpirationTime!;
     const maxAge = expiresIn * 1000;
     const accessOptions = this.setCookieOptions(maxAge, requestOrigin);
+
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.appConfigService.jwtAccessSecret,
       expiresIn,
     });
+
     return { accessToken, accessOptions };
   }
 
@@ -95,6 +97,8 @@ export class AuthService {
       user,
       requestOrigin,
     );
+
+    await this.usersService.updateUserRefreshToken(user.id, refreshToken);
     return {
       accessToken,
       refreshToken,
@@ -103,10 +107,37 @@ export class AuthService {
     };
   }
 
+  async reissueJwtAccessToken(refreshToken: string, requestOrigin: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.appConfigService.jwtRefreshSecret,
+      });
+
+      const user = await this.usersService.findUserById(payload.sub);
+      if (!user || user.refreshToken !== refreshToken) {
+        throw new UnauthorizedException('토큰 불일치');
+      }
+
+      const { accessToken, accessOptions } = await this.setJwtAccessToken(
+        user,
+        requestOrigin,
+      );
+
+      return { accessToken, accessOptions };
+    } catch (error) {
+      throw new UnauthorizedException('유효하지 않은 리프레시 토큰');
+    }
+  }
+
   expireJwtToken(requestOrigin: string) {
     return {
       accessOptions: this.setCookieOptions(0, requestOrigin),
       refreshOptions: this.setCookieOptions(0, requestOrigin),
     };
+  }
+
+  async logout(userId: string, requestOrigin: string) {
+    await this.usersService.deleteUserRefreshToken(userId);
+    return this.expireJwtToken(requestOrigin);
   }
 }
