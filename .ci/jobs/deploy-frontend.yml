@@ -24,6 +24,7 @@ deploy-frontend-dev:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
       changes: *frontend_changes
       when: always
+    - when: manual
 
 deploy-frontend-prod:
   extends: .deploy-frontend-template
@@ -33,3 +34,4 @@ deploy-frontend-prod:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       changes: *frontend_changes
       when: always
+    - when: manual
