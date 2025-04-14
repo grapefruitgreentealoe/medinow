@@ -16,8 +16,8 @@ deploy-backend-dev:
     DEPLOY_ENV: dev
   allow_failure: true
   rules:
-    - when: always
-    - when: manual
+    - if: '$CI_COMMIT_BRANCH == "dev"
+      when: manual
 
 deploy-backend-prod:
   extends: .deploy-backend-template
@@ -25,5 +25,5 @@ deploy-backend-prod:
     DEPLOY_ENV: prod
   allow_failure: true
   rules:
-    - when: always
-    - when: manual
+    - if: '$CI_COMMIT_BRANCH == "main"
+      when: manual

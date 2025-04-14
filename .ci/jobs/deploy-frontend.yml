@@ -16,14 +16,14 @@ deploy-frontend-dev:
     DEPLOY_ENV: dev
   allow_failure: true
   rules:
-    - when: always
-    - when: manual
-    
+    - if: '$CI_COMMIT_BRANCH == "dev"
+      when: manual
+
 deploy-frontend-prod:
   extends: .deploy-frontend-template
   variables:
     DEPLOY_ENV: prod
   allow_failure: true
   rules:
-    - when: always
-    - when: manual
+    - if: '$CI_COMMIT_BRANCH == "main"
+      when: manual
