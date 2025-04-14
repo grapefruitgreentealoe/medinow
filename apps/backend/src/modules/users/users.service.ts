@@ -25,4 +25,16 @@ export class UsersService {
   async findUserByEmail(email: string) {
     return this.userRepository.findOne({ where: { email } });
   }
+
+  async findUserById(id: string) {
+    return this.userRepository.findOne({ where: { id } });
+  }
+
+  async updateUserRefreshToken(userId: string, refreshToken: string) {
+    return await this.userRepository.update(userId, { refreshToken });
+  }
+
+  async deleteUserRefreshToken(userId: string) {
+    return await this.userRepository.update(userId, { refreshToken: null });
+  }
 }

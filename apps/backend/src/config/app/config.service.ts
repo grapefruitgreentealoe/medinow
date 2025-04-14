@@ -5,8 +5,20 @@ import { ConfigService } from '@nestjs/config';
 export class AppConfigService {
   constructor(private configService: ConfigService) {}
 
-  get jwtSecret() {
-    return this.configService.get<string>('app.jwtSecret');
+  get jwtAccessSecret() {
+    return this.configService.get<string>('app.jwtAccessSecret');
+  }
+
+  get jwtAccessExpirationTime() {
+    return this.configService.get<number>('app.jwtAccessExpirationTime');
+  }
+
+  get jwtRefreshSecret() {
+    return this.configService.get<string>('app.jwtRefreshSecret');
+  }
+
+  get jwtRefreshExpirationTime() {
+    return this.configService.get<number>('app.jwtRefreshExpirationTime');
   }
 
   get port() {

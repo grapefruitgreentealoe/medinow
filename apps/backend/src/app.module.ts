@@ -7,6 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
 import { CareUnitModule } from './modules/care-units/care-unit.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { DbConfigModule } from './config/db/config.module';
+import { AppConfigModule } from './config/app/config.module';
 
 @Module({
   imports: [

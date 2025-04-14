@@ -1,0 +1,35 @@
+.backend_changes: &backend_changes
+  - apps/backend/**/*
+  - scripts/**/*
+  - .ci/**/*
+  - pnpm-lock.yaml
+  - package.json
+  - pnpm-workspace.yaml
+
+.docker-build-backend-template:
+  stage: docker-build
+  image: docker:20
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  script:
+    - set -xe
+    - docker build --platform=linux/amd64 --progress=plain -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:$TAG .
+    - docker tag $DOCKER_IMAGE_BACKEND:$TAG $DOCKER_IMAGE_BACKEND:$TAG-$CI_COMMIT_SHORT_SHA
+    - docker push $DOCKER_IMAGE_BACKEND:$TAG
+    - docker push $DOCKER_IMAGE_BACKEND:$TAG-$CI_COMMIT_SHORT_SHA
+
+docker-build-backend-dev:
+  extends: .docker-build-backend-template
+  variables:
+    TAG: dev
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
+      changes: *backend_changes
+
+docker-build-backend-prod:
+  extends: .docker-build-backend-template
+  variables:
+    TAG: latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes: *backend_changes

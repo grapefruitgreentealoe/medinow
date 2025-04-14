@@ -1,36 +1,44 @@
-# 1. Node.js 기반 빌드 이미지 생성
+# -------------------------
+# 1. Builder Stage
+# -------------------------
 FROM node:20 AS builder
 
-# 2. PNPM 설정
-ENV PNPM_HOME=/root/.local/share/pnpm
-ENV PATH=$PNPM_HOME:$PATH
-
-# 3. 패키지 매니저 활성화 및 최신 버전 설치
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-# 4. nestjs cli 설치
-RUN pnpm install -g @nestjs/cli
-
-# 5. 빌드 컨텍스트 복사
+# 작업 디렉토리
 WORKDIR /app
+
+# 전체 모노레포 복사
 COPY . .
 
-# 6. 패키지 설치 및 빌드
-RUN pnpm install && pnpm run build --filter=backend...
+# Corepack 활성화 및 pnpm 설정
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# 7. 런타임 이미지
+# 전체 의존성 설치 (개발 + 프로덕션)
+RUN pnpm install
+
+# 백엔드만 빌드
+RUN pnpm run build --filter=backend
+
+# -------------------------
+# 2. Runtime Stage
+# -------------------------
 FROM node:20 AS runner
 
-# 8. 패키지 매니저 설정 및 프로덕션 의존성 설치
-RUN corepack enable && corepack prepare pnpm@latest --activate && \
-    pnpm install --prod
-
-# 9. 환경 변수 설정
 ENV NODE_ENV=production
 ENV PORT=4000
 
-# 10. 포트 노출
+WORKDIR /app
+
+# 빌드 결과물 + 필요한 패키지만 복사
+COPY --from=builder /app/apps/backend/dist ./dist
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/apps/backend/package.json ./package.json
+
+# Corepack 설정 및 의존성 설치 (프로덕션 전용)
+RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN pnpm install --prod
+
+# 포트 오픈
 EXPOSE 4000
 
-# 11. 애플리케이션 실행
-CMD ["node", "apps/backend/dist/main.js"]
+# 실행
+CMD ["node", "dist/main.js"]
