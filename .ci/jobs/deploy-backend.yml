@@ -9,7 +9,7 @@
   image: node:20
   before_script:
     - apt-get update && apt-get install -y docker.io
-    - echo "$ENV_PRODUCTION" > /app/.env
+    - echo "$ENV_PRODUCTION" > apps/backend/.env
   script:
     - set -xe
     - echo "📦 배포 스크립트 실행 시작"
