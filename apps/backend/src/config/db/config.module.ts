@@ -9,7 +9,7 @@ import * as Joi from 'joi';
       isGlobal: true,
       envFilePath: (() => {
         const env = process.env.NODE_ENV;
-        if (env === 'production') return '/apps/backend/.env.production';
+        if (env === 'production') return '/app/apps/backend/.env.production';
         return '.env.local'; // default: development
       })(),
       validationSchema: Joi.object({
