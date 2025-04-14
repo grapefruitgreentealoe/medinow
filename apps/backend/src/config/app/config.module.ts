@@ -8,9 +8,10 @@ import { AppConfigService } from './config.service';
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
+      isGlobal: true,
       envFilePath: (() => {
         const env = process.env.NODE_ENV;
-        if (env === 'production') return '.env.production';
+        if (env === 'production') return '/apps/backend/.env.production';
         return '.env.local'; // default: development
       })(),
       validationSchema: Joi.object({
@@ -21,7 +22,6 @@ import { AppConfigService } from './config.service';
         PORT: Joi.number().required(),
         NODE_ENV: Joi.string().required(),
       }),
-      isGlobal: true,
     }),
   ],
   providers: [ConfigService, AppConfigService],
