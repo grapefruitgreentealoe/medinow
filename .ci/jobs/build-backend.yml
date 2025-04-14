@@ -1,6 +1,5 @@
 .backend_changes: &backend_changes
   - apps/backend/**/*
-  - scripts/**/*
   - .ci/**/*
   - package.json
 

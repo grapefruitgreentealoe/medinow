@@ -1,6 +1,5 @@
 .frontend_changes: &frontend_changes
   - apps/frontend/**/*
-  - scripts/**/*
   - .ci/**/*
   - package.json
 
