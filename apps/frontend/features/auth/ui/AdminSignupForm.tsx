@@ -109,7 +109,9 @@ export default function AdminSignupForm() {
 
       <Input type="file" accept="image/*" {...register('businessLicense')} />
       {errors.businessLicense && (
-        <p className="text-red-500">{errors.businessLicense.message}</p>
+        <p className="text-red-500">
+          {errors.businessLicense?.message?.toString()}
+        </p>
       )}
 
       <div className="flex items-center gap-2">
