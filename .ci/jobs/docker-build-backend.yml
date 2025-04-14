@@ -9,7 +9,7 @@
   image: docker:20
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    - echo "$ENV_PRODUCTION" > apps/backend/.env
+    - echo "$ENV_PRODUCTION" > app/apps/backend/.env
   script:
     - set -xe
     - docker build --platform=linux/amd64 --progress=plain -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:$TAG .
