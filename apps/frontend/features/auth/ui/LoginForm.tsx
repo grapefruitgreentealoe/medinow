@@ -8,6 +8,7 @@ import { useLogin } from '../model/useLogin';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -21,6 +22,7 @@ export default function LoginForm() {
     defaultValues: {
       email: 'test@example.com',
       password: 'password123',
+      isAdmin: true,
     },
   });
 
@@ -51,7 +53,12 @@ export default function LoginForm() {
       {errors.password && (
         <p className="text-sm text-red-500">{errors.password.message}</p>
       )}
-
+      <div className="flex items-center gap-2">
+        <Checkbox id="terms" {...register('isAdmin')} />
+        <label htmlFor="terms" className="text-sm">
+          관리자 로그인
+        </label>
+      </div>
       <Button type="submit" className="w-full">
         로그인
       </Button>
