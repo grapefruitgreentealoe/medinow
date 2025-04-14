@@ -10,4 +10,4 @@ build-backend:
   rules:
     - if: '$CI_COMMIT_BRANCH != "dev" && $CI_PIPELINE_SOURCE == "merge_request_event"'
       changes: *backend_changes
-      when: manual
+      when: always

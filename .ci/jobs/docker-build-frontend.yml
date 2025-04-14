@@ -30,7 +30,7 @@ docker-build-frontend-dev:
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
       changes: *frontend_changes
-      when: manual
+      when: always
 
 docker-build-frontend-prod:
   extends: .docker-build-frontend-template
@@ -39,4 +39,4 @@ docker-build-frontend-prod:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       changes: *frontend_changes
-      when: manual
+      when: always
