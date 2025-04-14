@@ -30,4 +30,20 @@ export class CareUnitController {
   ): Promise<ResponseCareUnitDto[]> {
     return this.careUnitService.getAllCareUnit(pageNo, numOfRows);
   }
+
+
+  @Get('location')
+  @ApiOperation({ summary: '위치 조회' })
+  @ApiQuery({ name: 'pageNo', required: false, type: Number })
+  @ApiQuery({ name: 'numOfRows', required: false, type: Number })
+  async getCareUnitLocation(
+    @Query('pageNo') pageNo: number = 1,
+    @Query('numOfRows') numOfRows: number = 10,
+  ): Promise<ResponseCareUnitDto[]> {
+    return this.careUnitService.getCareUnitLocation(pageNo, numOfRows);
+  }
+
+
+  
+
 }

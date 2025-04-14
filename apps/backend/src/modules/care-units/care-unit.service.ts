@@ -164,11 +164,25 @@ export class CareUnitService {
     }
   }
 
-  async findAll() {
-    return this.careUnitRepository.find();
-  }
-
-  async findOne(id: string) {
+  //🏥 상세 정보 조회 
+  async getCareUnitDetail(id: string) {
     return this.careUnitRepository.findOne({ where: { id } });
   }
+
+  //🏥 위치 조회 
+  async getCareUnitLocation(pageNo: number = 1, numOfRows: number = 10) {
+    try {
+      const url = `${this.EMERGENCY_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=${pageNo}&numOfRows=${numOfRows}&_type=json`;
+    } catch (error: unknown) {
+      const err = error as Error;
+      console.error('❌ 에러 발생:', {
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+      });
+      throw new NotFoundException(
+        `Failed to fetch pharmacy data: ${err.message}`,
+      );
+    }
+  } 
 }
