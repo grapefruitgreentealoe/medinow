@@ -26,7 +26,7 @@ FROM node:20 AS runner
 ENV NODE_ENV=production
 ENV PORT=4000
 
-WORKDIR /app/apps/backend
+WORKDIR /app
 
 # 빌드 결과물 + 필요한 패키지만 복사
 COPY --from=builder /app/apps/backend/dist ./dist
@@ -34,6 +34,8 @@ COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 # COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/apps/backend/package.json ./package.json
 COPY --from=builder /app/apps/backend/.env.production .env.production
+
+RUN cat .env.production
 
 # Corepack 설정 및 의존성 설치 (프로덕션 전용)
 RUN corepack enable && corepack prepare pnpm@latest --activate

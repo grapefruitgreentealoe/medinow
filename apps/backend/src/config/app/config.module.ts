@@ -11,6 +11,7 @@ import { AppConfigService } from './config.service';
       isGlobal: true,
       envFilePath: (() => {
         const env = process.env.NODE_ENV;
+        console.log('env', env);
         if (env === 'production') return '.env.production';
         return '.env.local'; // default: development
       })(),
