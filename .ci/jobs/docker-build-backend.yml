@@ -24,7 +24,7 @@ docker-build-backend-dev:
     TAG: dev
   allow_failure: true
   rules:
-      when: manual
+    - when: manual
 
 docker-build-backend-prod:
   extends: .docker-build-backend-template

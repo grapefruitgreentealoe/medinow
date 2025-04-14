@@ -23,7 +23,7 @@ docker-build-frontend-dev:
     TAG: dev
   allow_failure: true
   rules:
-      when: manual
+    - when: manual
 
 docker-build-frontend-prod:
   extends: .docker-build-frontend-template

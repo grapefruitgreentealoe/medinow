@@ -16,7 +16,7 @@ deploy-backend-dev:
     DEPLOY_ENV: dev
   allow_failure: true
   rules:
-      when: manual
+    - when: manual
 
 deploy-backend-prod:
   extends: .deploy-backend-template
