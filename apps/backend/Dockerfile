@@ -32,7 +32,7 @@ WORKDIR /app
 COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
 COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=builder /app/apps/backend/package.json ./apps/backend/package.json
-COPY --from=builder /app/apps/backend/.env.production ./apps/backend/.env.production
+COPY --from=builder /app/apps/backend/.env.production .env.production
 
 # Corepack 설정 및 의존성 설치 (프로덕션 전용)
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -42,4 +42,4 @@ RUN pnpm install --prod
 EXPOSE 4000
 
 # 실행
-CMD ["node", "dist/main.js"]
+CMD ["node", "apps/backend/dist/main.js"]
