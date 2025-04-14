@@ -6,17 +6,27 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
-import { ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
+  ApiTags,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { SignupResponseDto } from './dto/signup-response.dto';
 import { plainToInstance } from 'class-transformer';
-import { RequestOrigin } from 'src/common/decorators/request-origin.decorator';
+import { RequestOrigin } from '../../common/decorators/request-origin.decorator';
+import { RequestUserId } from '../../common/decorators/request-userId.decorator';
 import { Response } from 'express';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
+@ApiTags('인증')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -66,9 +76,12 @@ export class AuthController {
 
     return plainToInstance(LoginResponseDto, {
       message: '로그인 성공',
+      accessToken,
     });
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '로그아웃' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -79,10 +92,12 @@ export class AuthController {
     description: '로그아웃 실패',
   })
   @Post('logout')
-  logout(
+  async logout(
+    @RequestUserId() userId: string,
     @Res({ passthrough: true }) response: Response,
     @RequestOrigin() requestOrigin: string,
   ) {
+    await this.authService.logout(userId, requestOrigin);
     const { accessOptions, refreshOptions } =
       this.authService.expireJwtToken(requestOrigin);
     response.clearCookie('accessToken', accessOptions);
