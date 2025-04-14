@@ -1,9 +1,3 @@
-.frontend_changes: &frontend_changes
-  - apps/frontend/**/*
-  - .ci/**/*
-  - package.json
-  - pnpm-workspace.yaml
-
 .deploy-frontend-template:
   stage: deploy
   image: node:20
@@ -20,14 +14,15 @@ deploy-frontend-dev:
   extends: .deploy-frontend-template
   variables:
     DEPLOY_ENV: dev
+  allow_failure: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
-      changes: *frontend_changes
+    - when: manual
 
 deploy-frontend-prod:
   extends: .deploy-frontend-template
   variables:
     DEPLOY_ENV: prod
+  allow_failure: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
-      changes: *frontend_changes
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual

@@ -1,9 +1,3 @@
-.backend_changes: &backend_changes
-  - apps/backend/**/*
-  - .ci/**/*
-  - package.json
-  - pnpm-workspace.yaml
-
 .docker-build-backend-template:
   stage: docker-build
   image: docker:20
@@ -23,18 +17,20 @@
       sort -r -k2 | \
       awk 'NR>3 {print $1}' | \
       xargs -r docker rmi || echo "정리할 이미지 없음"
+
 docker-build-backend-dev:
   extends: .docker-build-backend-template
   variables:
     TAG: dev
+  allow_failure: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
-      changes: *backend_changes
+    - when: manual
 
 docker-build-backend-prod:
   extends: .docker-build-backend-template
   variables:
     TAG: latest
+  allow_failure: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
-      changes: *backend_changes
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
