@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signupSchema } from '../schema/signupSchema';
 import { z } from 'zod';
@@ -16,10 +16,20 @@ export default function SignupForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    control,
     setError,
+    formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: 'test@example.com',
+      password: 'Abcd1234!',
+      name: '테스터',
+      nickname: '테스트닉',
+      address: '서울시 강남구',
+      age: '29',
+      terms: true,
+    },
   });
 
   const { mutateAsync: checkEmail } = useEmailCheck();
@@ -73,12 +83,22 @@ export default function SignupForm() {
         <p className="text-sm text-red-500">{errors.age.message}</p>
       )}
 
-      <div className="flex items-center gap-2">
-        <Checkbox id="terms" {...register('terms')} />
-        <label htmlFor="terms" className="text-sm">
-          약관에 동의합니다
-        </label>
-      </div>
+      <Controller
+        name="terms"
+        control={control}
+        render={({ field }) => (
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="terms"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+            <label htmlFor="terms" className="text-sm">
+              약관에 동의합니다
+            </label>
+          </div>
+        )}
+      />
       {errors.terms && (
         <p className="text-sm text-red-500">{errors.terms.message}</p>
       )}
