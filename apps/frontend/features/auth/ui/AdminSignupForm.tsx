@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { useAdminSignup } from '../model/useAdminSignup';
 import { useRouter } from 'next/navigation';
+import { SignupData } from '../type';
 
 type FormData = z.infer<typeof adminSignupSchema>;
 
@@ -36,7 +37,7 @@ export default function AdminSignupForm() {
     },
   });
 
-  const { mutateAsync: signupAdmin, isPending } = useAdminSignup();
+  const { mutateAsync: signupAdmin } = useAdminSignup();
 
   const onSubmit = async (data: FormData) => {
     const formData = new FormData();
@@ -49,7 +50,10 @@ export default function AdminSignupForm() {
       }
     }
 
-    await signupAdmin(formData);
+    const signupData: SignupData = Object.fromEntries(
+      formData.entries()
+    ) as unknown as SignupData;
+    await signupAdmin(signupData);
     router?.push('/');
   };
 

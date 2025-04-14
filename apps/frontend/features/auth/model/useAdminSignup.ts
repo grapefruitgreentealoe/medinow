@@ -1,10 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-
-// 임시 모킹 함수
-interface SignupData {
-  email: string;
-  password: string;
-}
+import { SignupData } from '../type';
 
 // 임시 모킹 함수
 async function mockAdminSignup(data: SignupData) {
