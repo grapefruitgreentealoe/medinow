@@ -15,6 +15,7 @@
     - mkdir -p ./scripts
     - chmod +x ./scripts/deploy-backend-${DEPLOY_ENV}.sh
     - ./scripts/deploy-backend-${DEPLOY_ENV}.sh
+  when: manual
 
 deploy-backend-dev:
   extends: .deploy-backend-template

@@ -22,6 +22,8 @@
       sort -r -k2 | \
       awk 'NR>3 {print $1}' | \
       xargs -r docker rmi || echo "정리할 이미지 없음"
+  when: manual
+
 docker-build-backend-dev:
   extends: .docker-build-backend-template
   variables:
