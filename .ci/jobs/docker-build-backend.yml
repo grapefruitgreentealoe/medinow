@@ -30,7 +30,6 @@ docker-build-backend-dev:
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
       changes: *backend_changes
-      when: manual
 
 docker-build-backend-prod:
   extends: .docker-build-backend-template
@@ -39,4 +38,3 @@ docker-build-backend-prod:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       changes: *backend_changes
-      when: manual
