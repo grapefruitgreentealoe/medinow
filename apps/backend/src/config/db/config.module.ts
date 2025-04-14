@@ -10,7 +10,7 @@ import * as Joi from 'joi';
       envFilePath: (() => {
         const env = process.env.NODE_ENV;
         if (env === 'production') return '.env.production';
-        return '.env'; // default: development
+        return '.env.local'; // default: development
       })(),
       validationSchema: Joi.object({
         DATABASE_HOST: Joi.string().required(),

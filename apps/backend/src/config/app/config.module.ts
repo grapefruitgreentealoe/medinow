@@ -11,7 +11,7 @@ import { AppConfigService } from './config.service';
       envFilePath: (() => {
         const env = process.env.NODE_ENV;
         if (env === 'production') return '.env.production';
-        return '.env'; // default: development
+        return '.env.local'; // default: development
       })(),
       validationSchema: Joi.object({
         JWT_ACCESS_SECRET: Joi.string().required(),
@@ -19,6 +19,7 @@ import { AppConfigService } from './config.service';
         JWT_REFRESH_SECRET: Joi.string().required(),
         JWT_REFRESH_EXPIRATION_TIME: Joi.number().required(),
         PORT: Joi.number().required(),
+        NODE_ENV: Joi.string().required(),
       }),
       isGlobal: true,
     }),
