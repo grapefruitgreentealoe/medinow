@@ -5,7 +5,7 @@ import {
   UpdateEvent,
 } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { hashPassword } from 'src/common/utils/password.util';
+import { hashPassword } from '../../../common/utils/password.util';
 
 @EventSubscriber()
 export class UserSubscriber implements EntitySubscriberInterface<User> {
