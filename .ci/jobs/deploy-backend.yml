@@ -14,16 +14,16 @@ deploy-backend-dev:
   extends: .deploy-backend-template
   variables:
     DEPLOY_ENV: dev
-  when: manual
   allow_failure: true
   rules:
     - when: always
+    - when: manual
 
 deploy-backend-prod:
   extends: .deploy-backend-template
   variables:
     DEPLOY_ENV: prod
-  when: manual
   allow_failure: true
   rules:
     - when: always
+    - when: manual

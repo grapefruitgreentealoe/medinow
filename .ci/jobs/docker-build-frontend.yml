@@ -21,16 +21,17 @@ docker-build-frontend-dev:
   extends: .docker-build-frontend-template
   variables:
     TAG: dev
-  when: manual
   allow_failure: true
   rules:
     - when: always
+    - when: manual
+
 
 docker-build-frontend-prod:
   extends: .docker-build-frontend-template
   variables:
     TAG: latest
-  when: manual
   allow_failure: true
   rules:
     - when: always
+    - when: manual
