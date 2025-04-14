@@ -31,10 +31,10 @@ WORKDIR /app
 # 빌드 결과물 + 필요한 패키지만 복사
 COPY --from=builder /app/apps/backend/dist ./dist
 COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
-# COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/apps/backend/package.json ./package.json
 COPY --from=builder /app/apps/backend/.env.production .env.production
 
+# 환경 변수 확인 (빌드 시에만 출력, 실제 운영에서는 제거 권장)
 RUN cat .env.production
 
 # Corepack 설정 및 의존성 설치 (프로덕션 전용)
