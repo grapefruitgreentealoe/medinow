@@ -15,7 +15,6 @@
     - mkdir -p ./scripts
     - chmod +x ./scripts/deploy-backend-${DEPLOY_ENV}.sh
     - ./scripts/deploy-backend-${DEPLOY_ENV}.sh
-  when: manual
 
 deploy-backend-dev:
   extends: .deploy-backend-template
@@ -24,6 +23,7 @@ deploy-backend-dev:
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
       changes: *backend_changes
+      when: manual
 
 deploy-backend-prod:
   extends: .deploy-backend-template
@@ -32,3 +32,4 @@ deploy-backend-prod:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       changes: *backend_changes
+      when: manual

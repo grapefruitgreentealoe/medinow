@@ -22,7 +22,6 @@
       sort -r -k2 | \
       awk 'NR>3 {print $1}' | \
       xargs -r docker rmi || echo "정리할 이미지 없음"
-  when: manual
 
 docker-build-frontend-dev:
   extends: .docker-build-frontend-template
@@ -31,6 +30,7 @@ docker-build-frontend-dev:
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
       changes: *frontend_changes
+      when: manual
 
 docker-build-frontend-prod:
   extends: .docker-build-frontend-template
@@ -39,3 +39,4 @@ docker-build-frontend-prod:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       changes: *frontend_changes
+      when: manual
