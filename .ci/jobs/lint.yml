@@ -1,10 +1,5 @@
 lint-frontend:
   stage: lint
-  cache:
-    key: shared-pnpm
-    paths:
-      - .pnpm-store
-      - node_modules
   script:
     - pnpm lint
   rules:
