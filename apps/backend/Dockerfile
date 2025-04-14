@@ -29,9 +29,10 @@ ENV PORT=4000
 WORKDIR /app
 
 # 빌드 결과물 + 필요한 패키지만 복사
-COPY --from=builder /app/apps/backend/dist ./dist
+COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
 COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY --from=builder /app/apps/backend/package.json ./package.json
+COPY --from=builder /app/apps/backend/package.json ./apps/backend/package.json
+COPY --from=builder /app/apps/backend/.env.production ./apps/backend/.env.production
 
 # Corepack 설정 및 의존성 설치 (프로덕션 전용)
 RUN corepack enable && corepack prepare pnpm@latest --activate
