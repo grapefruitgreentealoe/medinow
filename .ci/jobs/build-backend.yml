@@ -1,6 +1,5 @@
 .backend_changes: &backend_changes
   - apps/backend/**/*
-  - scripts/**/*
   - .ci/**/*
   - package.json
 
@@ -9,8 +8,5 @@ build-backend:
   script:
     - pnpm build --filter=backend...
   rules:
-  rules:
-    - if: '$CI_COMMIT_BRANCH != "dev"'
-      changes: *backend_changes
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH != "dev" && $CI_PIPELINE_SOURCE == "merge_request_event"'
       changes: *backend_changes

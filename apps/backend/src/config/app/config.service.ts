@@ -24,4 +24,8 @@ export class AppConfigService {
   get port() {
     return this.configService.get<number>('app.port');
   }
+
+  get nodeEnv() {
+    return this.configService.get<string>('app.nodeEnv');
+  }
 }

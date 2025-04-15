@@ -1,8 +1,6 @@
 .frontend_changes: &frontend_changes
   - apps/frontend/**/*
-  - scripts/**/*
   - .ci/**/*
-  - pnpm-lock.yaml
   - package.json
   - pnpm-workspace.yaml
 
