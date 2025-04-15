@@ -1,7 +1,4 @@
-# -------------------------
-# 1. Builder Stage
-# -------------------------
-FROM node:20 AS builder
+FROM node:20
 
 # 작업 디렉토리
 WORKDIR /app
@@ -18,27 +15,21 @@ RUN pnpm install
 # 백엔드만 빌드
 RUN pnpm --filter ./apps/backend run build
 
-# -------------------------
-# 2. Runtime Stage
-# -------------------------
-FROM node:20 AS runner
-
+# 환경 변수 설정
 ENV NODE_ENV=production
 ENV PORT=4000
 
-WORKDIR /app
+# 백엔드 디렉토리로 이동
+WORKDIR /app/apps/backend
 
-COPY --from=builder /app/apps/backend/dist ./dist
-COPY --from=builder /app/apps/backend/package.json ./package.json
-COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY --from=builder /app/apps/backend/.env .env
-
-# Corepack 설정 및 의존성 설치 (프로덕션 전용)
-RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install --prod
+# 빌드된 파일 복사
+# COPY --from=builder /app/apps/backend/dist ./dist
+# # COPY --from=builder /app/apps/backend/package.json ./package.json
+# # COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+# # COPY --from=builder /app/apps/backend/.env .env
 
 # 포트 오픈
 EXPOSE 4000
 
 # 실행
-CMD ["node", "dist/main.js"]
+CMD ["pnpm", "start"]
