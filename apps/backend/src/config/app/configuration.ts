@@ -18,4 +18,3 @@ export default registerAs('app', () => ({
   hospitalApiUrl: process.env.HOSPITAL_API_URL,
   pharmacyApiUrl: process.env.PHARMACY_API_URL,
 }));
-

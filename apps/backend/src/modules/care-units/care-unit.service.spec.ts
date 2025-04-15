@@ -6,6 +6,7 @@ import { CareUnitAdminService } from './services/care-unit-admin.service';
 import { S3Service } from '../s3/s3.service';
 import { AwsConfigService } from '../../config/aws/config.service';
 import { ConfigService } from '@nestjs/config';
+import { AppConfigService } from '../../config/app/config.service';
 
 describe('CareUnitService', () => {
   let service: CareUnitService;
@@ -37,6 +38,12 @@ describe('CareUnitService', () => {
               if (key === 'AWS_BUCKET_NAME') return 'test-bucket';
               return null;
             }),
+          },
+        },
+        {
+          provide: AppConfigService,
+          useValue: {
+            get: jest.fn(),
           },
         },
       ],

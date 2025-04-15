@@ -23,7 +23,8 @@ export class S3Service {
     }
     const date = new Date();
     const buffer = Buffer.from(file.originalname, 'latin1');
-    const fileName = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${dirPath}/${buffer}`;
+    const originalName = buffer.toString('utf8');
+    const fileName = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${dirPath}/${originalName}`;
     const uploadParams = {
       Bucket: this.awsConfigService.awsBucketName,
       Key: fileName,
