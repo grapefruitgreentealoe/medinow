@@ -47,6 +47,12 @@ export class CareUnitController {
     return this.careUnitAdminService.saveAllCareUnits();
   }
 
+  @Get('hpid')
+  @ApiOperation({ summary: 'Care Unit 상세 정보 조회' })
+  async getCareUnitDetailByHpid(@Query('hpid') hpid: string) {
+    return this.careUnitService.getCareUnitDetailByHpid(hpid);
+  }
+
   @Get('location')
   @ApiOperation({ summary: 'Care Unit 위치 조회' })
   async getCareUnitDetailByLocation(

@@ -16,7 +16,7 @@ export class CareUnit extends BaseEntity {
   @Column({ enum: CareUnitCategory })
   category: string;
 
-  @Column({ unique: true })
+  @Column()
   hpid: string;
 
   @Column({ type: 'float8', nullable: true })

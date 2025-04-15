@@ -169,6 +169,10 @@ export class CareUnitService {
   async getCareUnitDetail(id: string) {
     return this.careUnitRepository.findOne({ where: { id } });
   }
+  //🏥 상세 정보 조회 by hpid
+  async getCareUnitDetailByHpid(hpid: string) {
+    return this.careUnitRepository.find({ where: { hpid } });
+  }
 
   //🏥 상세 정보 조회 by 위치
   async getCareUnitDetailByLocation(lat: number, lng: number) {
