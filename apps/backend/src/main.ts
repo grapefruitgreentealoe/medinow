@@ -22,11 +22,19 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
+  const corsOptions = {
+    origin: ['http://localhost:3000'], // 또는 실제 프론트 주소
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  };
+
   // Set Global Prefix
   app.setGlobalPrefix('api/v1', {
     exclude: ['docs'],
   });
 
+  // Use Cors
+  app.enableCors(corsOptions);
   // Start Server
   await app.listen(process.env.PORT ?? 4000);
 }

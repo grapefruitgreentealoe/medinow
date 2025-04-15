@@ -7,7 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
 import { CareUnitModule } from './modules/care-units/care-unit.module';
 import { AuthModule } from './modules/auth/auth.module';
-
+import { ImagesModule } from './modules/images/images.module';
+import { S3Module } from './modules/s3/s3.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,6 +20,8 @@ import { AuthModule } from './modules/auth/auth.module';
     UsersModule,
     CareUnitModule,
     AuthModule,
+    S3Module,
+    ImagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
