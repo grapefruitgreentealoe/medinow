@@ -8,22 +8,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ResponseCareUnitDto } from '../dto/response-care-unit.dto';
 import { CareUnitCategory } from 'src/common/enums/careUnits.enum';
+import { AppConfigService } from 'src/config/app/config.service';
 
 @Injectable()
 export class CareUnitAdminService {
-  private readonly EMERGENCY_API_URL =
-    'http://apis.data.go.kr/B552657/ErmctInfoInqireService/getEgytBassInfoInqire';
-  private readonly HOSPITAL_API_URL =
-    'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncFullDown';
-  private readonly PHARMACY_API_URL =
-    'http://apis.data.go.kr/B552657/ErmctInsttInfoInqireService/getParmacyFullDown';
-  private readonly API_URL =
-    'https://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncFullDown';
-  private readonly SERVICE_KEY = process.env.SERVICE_KEY;
+  private readonly API_URL = this.appConfigService.hospitalApiUrl;
+  private readonly SERVICE_KEY = this.appConfigService.serviceKey;
 
   constructor(
     @InjectRepository(CareUnit)
     private readonly careUnitRepository: Repository<CareUnit>,
+    private readonly appConfigService: AppConfigService,
   ) {}
 
   // 초기 DB세팅 - 모든 careUnit 데이터 저장

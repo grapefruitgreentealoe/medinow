@@ -4,8 +4,9 @@ import { CareUnitController } from './care-unit.controller';
 import { CareUnitService } from './services/care-unit.service';
 import { CareUnit } from './entities/care-unit.entity';
 import { CareUnitAdminService } from './services/care-unit-admin.service';
+import { AppConfigModule } from 'src/config/app/config.module';
 @Module({
-  imports: [TypeOrmModule.forFeature([CareUnit])],
+  imports: [TypeOrmModule.forFeature([CareUnit]), AppConfigModule],
   controllers: [CareUnitController],
   providers: [CareUnitService, CareUnitAdminService],
   exports: [CareUnitService, CareUnitAdminService],

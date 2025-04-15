@@ -7,22 +7,19 @@ import { CareUnit } from '../entities/care-unit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { ResponseCareUnitDto } from '../dto/response-care-unit.dto';
+import { AppConfigService } from 'src/config/app/config.service';
 
 @Injectable()
 export class CareUnitService {
-  private readonly EMERGENCY_API_URL =
-    'http://apis.data.go.kr/B552657/ErmctInfoInqireService/getEgytBassInfoInqire';
-  private readonly HOSPITAL_API_URL =
-    'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncFullDown';
-  private readonly PHARMACY_API_URL =
-    'http://apis.data.go.kr/B552657/ErmctInsttInfoInqireService/getParmacyFullDown';
-  private readonly API_URL =
-    'https://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncFullDown';
-  private readonly SERVICE_KEY = process.env.SERVICE_KEY;
+  private readonly EMERGENCY_API_URL = this.appConfigService.emergencyApiUrl;
+  private readonly HOSPITAL_API_URL = this.appConfigService.hospitalApiUrl;
+  private readonly PHARMACY_API_URL = this.appConfigService.pharmacyApiUrl;
+  private readonly SERVICE_KEY = this.appConfigService.serviceKey;
 
   constructor(
     @InjectRepository(CareUnit)
     private readonly careUnitRepository: Repository<CareUnit>,
+    private readonly appConfigService: AppConfigService,
   ) {}
 
   //🏥응급실, 병의원, 약국 FullData 조회 - Api 통한
@@ -196,7 +193,7 @@ export class CareUnitService {
     });
   }
 
-  //🏥 응급실, 병의원, 약국 반경 별 카테고리 조회  (읍,면,동 단위) -> 반환값 없으면 더 넓은 값(버튼클릭릭)
+  //🏥 응급실, 병의원, 약국 반경 별 카테고리 조회  (읍,면,동 단위) -> 반환값 없으면 더 넓은 값(버튼클릭)
   async getCareUnitByCategoryAndLocation(
     lat: number,
     lng: number,
@@ -205,7 +202,7 @@ export class CareUnitService {
     const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
     queryBuilder
       .where('careUnit.lat BETWEEN :minLat AND :maxLat', {
-        minLat: lat - 0.005,
+        minLat: lat - 0.005, // 0.005도 즉 0.5km 즉 500m
         maxLat: lat + 0.005,
       })
       .andWhere('careUnit.lng BETWEEN :minLng AND :maxLng', {
@@ -239,7 +236,7 @@ export class CareUnitService {
     return careUnit;
   }
 
-  // ⏱️실시간 운영 여부
+  // ⏱️실시간 운영 여부 (프론트에서 호버 하면 좌표로 조회, 상세조회시에도)
   async checkNowOpen(id: string) {
     const careUnit = await this.careUnitRepository.findOne({ where: { id } });
     if (!careUnit) {
