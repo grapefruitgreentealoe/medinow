@@ -1,0 +1,12 @@
+그럼 pre-push안에 
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+echo "🚀 pre-push 훅 실행됨!"
+
+pnpm lint
+pnpm test
+pnpm build --filter=frontend...
+pnpm build --filter=backend...
+
+
+
