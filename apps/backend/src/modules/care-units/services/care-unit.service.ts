@@ -3,10 +3,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CareUnit } from './entities/care-unit.entity';
+import { CareUnit } from '../entities/care-unit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { ResponseCareUnitDto } from './dto/response-care-unit.dto';
+import { Repository, Between } from 'typeorm';
+import { ResponseCareUnitDto } from '../dto/response-care-unit.dto';
 
 @Injectable()
 export class CareUnitService {
@@ -16,6 +16,8 @@ export class CareUnitService {
     'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncFullDown';
   private readonly PHARMACY_API_URL =
     'http://apis.data.go.kr/B552657/ErmctInsttInfoInqireService/getParmacyFullDown';
+  private readonly API_URL =
+    'https://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncFullDown';
   private readonly SERVICE_KEY = process.env.SERVICE_KEY;
 
   constructor(
@@ -23,7 +25,7 @@ export class CareUnitService {
     private readonly careUnitRepository: Repository<CareUnit>,
   ) {}
 
-  //🏥응급실, 병의원, 약국 FullData 조회
+  //🏥응급실, 병의원, 약국 FullData 조회 - Api 통한
   async getAllCareUnit(
     pageNo: number = 1,
     numOfRows: number = 10,
@@ -163,26 +165,99 @@ export class CareUnitService {
     }
   }
 
-  //🏥 상세 정보 조회
+  //🏥 상세 정보 조회 by id
   async getCareUnitDetail(id: string) {
     return this.careUnitRepository.findOne({ where: { id } });
   }
 
-  //🏥 위치 조회
-  // async getCareUnitLocation(pageNo: number = 1, numOfRows: number = 10) {
-  //   try {
-  //     const url = `${this.EMERGENCY_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=${pageNo}&numOfRows=${numOfRows}&_type=json`;
-  //    return [];
-  // } catch (error: unknown) {
-  //     const err = error as Error;
-  //     console.error('❌ 에러 발생:', {
-  //       name: err.name,
-  //       message: err.message,
-  //       stack: err.stack,
-  //     });
-  //     throw new NotFoundException(
-  //       `Failed to fetch pharmacy data: ${err.message}`,
-  //     );
-  //   }
-  // }
+  //🏥 상세 정보 조회 by 위치
+  async getCareUnitDetailByLocation(lat: number, lng: number) {
+    return this.careUnitRepository.find({
+      where: {
+        lat,
+        lng,
+      },
+    });
+  }
+
+  //🏥 응급실, 병의원, 약국 카테고리별 조회  (로딩 김 주의)
+  async getCareUnitByCategory(category: string) {
+    return this.careUnitRepository.find({
+      where: {
+        category,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  //🏥 응급실, 병의원, 약국 반경 별 카테고리 조회  (읍,면,동 단위) -> 반환값 없으면 더 넓은 값(버튼클릭릭)
+  async getCareUnitByCategoryAndLocation(
+    lat: number,
+    lng: number,
+    category?: string,
+  ) {
+    const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
+    queryBuilder
+      .where('careUnit.lat BETWEEN :minLat AND :maxLat', {
+        minLat: lat - 0.005,
+        maxLat: lat + 0.005,
+      })
+      .andWhere('careUnit.lng BETWEEN :minLng AND :maxLng', {
+        minLng: lng - 0.005,
+        maxLng: lng + 0.005,
+      });
+    // 카테고리 필터
+    if (category) {
+      queryBuilder.andWhere('careUnit.category = :category', { category });
+      // 특정 카테고리 조회시 이름 오름차순
+      queryBuilder.orderBy('careUnit.name', 'ASC');
+    } else {
+      // 전체 조회시 카테고리별 정렬 후 생성일자 내림차순
+      queryBuilder
+        .orderBy('careUnit.category', 'ASC')
+        .addOrderBy('careUnit.createdAt', 'DESC');
+    }
+    return queryBuilder.getMany();
+  }
+
+  // 💫배지 추가
+  async addBadge(id: string) {
+    // 감사 기능 구현 후 감사 수에 따른 자동 배치 추가 필요
+    const careUnit = await this.careUnitRepository.findOne({ where: { id } });
+    if (!careUnit) {
+      throw new NotFoundException('Care unit not found');
+    }
+    careUnit.is_badged = true;
+    await this.careUnitRepository.save(careUnit);
+    console.log('💫배지 추가 완료');
+    return careUnit;
+  }
+
+  // ⏱️실시간 운영 여부
+  async checkNowOpen(id: string) {
+    const careUnit = await this.careUnitRepository.findOne({ where: { id } });
+    if (!careUnit) {
+      throw new NotFoundException('Care unit not found');
+    }
+    const date = new Date();
+    const now = date.getHours() * 100 + date.getMinutes(); // 1430 형식 (14:30)
+    console.log('date', date, 'now', now);
+    if (
+      (careUnit.mondayOpen <= now && careUnit.mondayClose >= now) ||
+      (careUnit.tuesdayOpen <= now && careUnit.tuesdayClose >= now) ||
+      (careUnit.wednesdayOpen <= now && careUnit.wednesdayClose >= now) ||
+      (careUnit.thursdayOpen <= now && careUnit.thursdayClose >= now) ||
+      (careUnit.fridayOpen <= now && careUnit.fridayClose >= now) ||
+      (careUnit.saturdayOpen <= now && careUnit.saturdayClose >= now) ||
+      (careUnit.sundayOpen <= now && careUnit.sundayClose >= now) ||
+      (careUnit.holidayOpen <= now && careUnit.holidayClose >= now)
+    ) {
+      console.log('⏱️지금 운영 중입니다');
+      return true;
+    }
+    console.log('❌지금 운영 중이 아닙니다');
+    return false;
+  }
 }

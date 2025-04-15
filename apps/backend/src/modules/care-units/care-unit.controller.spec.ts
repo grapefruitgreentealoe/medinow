@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CareUnitController } from './care-unit.controller';
-import { CareUnitService } from './care-unit.service';
+import { CareUnitService } from './services/care-unit.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CareUnit } from './entities/care-unit.entity';
 

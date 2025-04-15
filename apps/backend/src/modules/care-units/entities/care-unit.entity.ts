@@ -1,6 +1,7 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { CareUnitCategory } from '../../../common/enums/careUnits.enum';
+
 @Entity()
 export class CareUnit extends BaseEntity {
   @Column({ nullable: true })
@@ -71,9 +72,6 @@ export class CareUnit extends BaseEntity {
 
   @Column({ type: 'float8' })
   lng: number;
-
-  @Column({ default: false })
-  is_emergency: boolean;
 
   @Column({ default: false })
   is_badged: boolean;
