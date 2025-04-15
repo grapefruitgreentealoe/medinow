@@ -5,10 +5,6 @@ stages:
 
 include:
   - '.ci/common-variables.yml'
-  - '.ci/jobs/lint.yml'
-  - '.ci/jobs/test.yml'
-  - '.ci/jobs/build-frontend.yml'
-  - '.ci/jobs/build-backend.yml'
   - '.ci/jobs/docker-build-frontend.yml'
   - '.ci/jobs/docker-build-backend.yml'
   - '.ci/jobs/deploy-frontend.yml'
