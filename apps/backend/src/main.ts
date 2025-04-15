@@ -35,7 +35,7 @@ async function bootstrap() {
 
   // Set Global Prefix
   app.setGlobalPrefix('api/v1', {
-    exclude: ['/swagger(.*)'],
+    exclude: ['swagger'],
   });
 
   // Use Cors
