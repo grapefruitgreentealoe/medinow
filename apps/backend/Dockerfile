@@ -16,7 +16,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN pnpm install
 
 # 백엔드만 빌드
-RUN pnpm run build --filter=backend
+RUN pnpm --filter backend run build
 
 # -------------------------
 # 2. Runtime Stage
