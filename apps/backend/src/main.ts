@@ -31,11 +31,11 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('swagger', app, document);
 
   // Set Global Prefix
   app.setGlobalPrefix('api/v1', {
-    exclude: ['docs'],
+    exclude: ['/swagger(.*)'],
   });
 
   // Use Cors
