@@ -1,7 +1,7 @@
 #!/bin/bash
 
 APP_NAME="backend-dev"
-COMPOSE_FILE="/home/cloud/docker-compose.dev.yml"
+COMPOSE_FILE="/apps/backend/docker-compose.dev.yml"
 
 echo "�� [DEV] 백엔드 배포 시작"
 
