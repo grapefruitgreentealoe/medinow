@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { AwsConfigService } from '../../config/aws/config.service';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Express } from 'express';
+import { Buffer } from 'buffer';
 
 @Injectable()
 export class S3Service {
@@ -20,15 +21,16 @@ export class S3Service {
     if (!file) {
       throw new BadRequestException('파일이 없습니다.');
     }
-    const fileName = `${Date.now()}-${file.originalname}`;
-    const key = `${dirPath}/${fileName.toString()}`;
+    const date = new Date();
+    const buffer = Buffer.from(file.originalname, 'latin1');
+    const fileName = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${dirPath}/${buffer}`;
     const uploadParams = {
       Bucket: this.awsConfigService.awsBucketName,
-      Key: key,
+      Key: fileName,
       Body: file.buffer,
       ContentType: file.mimetype,
     };
     await this.s3.send(new PutObjectCommand(uploadParams));
-    return `https://${this.awsConfigService.awsBucketName}.s3.${this.awsConfigService.awsRegion}.amazonaws.com/${key}`;
+    return `https://${this.awsConfigService.awsBucketName}.s3.${this.awsConfigService.awsRegion}.amazonaws.com/${fileName}`;
   }
 }

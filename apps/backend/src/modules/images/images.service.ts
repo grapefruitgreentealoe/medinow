@@ -13,7 +13,7 @@ export class ImagesService {
     private readonly s3Service: S3Service,
   ) {}
   async uploadImage(file: Express.Multer.File) {
-    const { originalname, buffer } = file;
+  
     // const fileName = `${Date.now()}-${originalname}}`;
     const filePath = `userUploads`;
     const imgUrl = await this.s3Service.uploadFile(file, filePath);

@@ -13,4 +13,9 @@ export default registerAs('app', () => ({
     process.env.JWT_REFRESH_EXPIRATION_TIME || '604800',
     10,
   ),
+  serviceKey: process.env.SERVICE_KEY,
+  emergencyApiUrl: process.env.EMERGENCY_API_URL,
+  hospitalApiUrl: process.env.HOSPITAL_API_URL,
+  pharmacyApiUrl: process.env.PHARMACY_API_URL,
 }));
+
