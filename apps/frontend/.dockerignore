@@ -1,36 +1,36 @@
-# 빌드 결과물
+# ✅ 빌드 결과물
 .next
 out
 dist
 
-# 의존성
+# ✅ 의존성 (루트 or 패키지별 node_modules)
 node_modules
 .pnpm
 
-# 환경 변수
+# ✅ 환경 변수 파일
 .env
-.env.*  # .env.local, .env.production 등
+.env.*   # e.g., .env.local, .env.production
 
-# 로그 및 임시 파일
+# ✅ 로그 / 캐시 / 임시 파일
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-*.swp
 *.log
+*.swp
+*.tmp
+*.temp
 
-# 테스트 관련
+# ✅ 테스트 관련
 coverage
-*.test.ts
-*.test.tsx
-*.spec.ts
-*.spec.tsx
 .vitest
+*.test.*
+*.spec.*
 
-# IDE/Editor 설정
+# ✅ IDE/에디터 설정
 .vscode
 .idea
 .DS_Store
 
-# 기타
+# ✅ 기타
 *.local
