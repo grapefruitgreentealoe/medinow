@@ -9,7 +9,6 @@
   image: docker:20
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    - echo "$ENV_PRODUCTION" > apps/backend/.env.production
   script:
     - set -xe
     - docker build --platform=linux/amd64 --progress=plain -f apps/backend/Dockerfile -t $DOCKER_IMAGE_BACKEND:$TAG .
@@ -28,8 +27,8 @@ docker-build-backend-dev:
   variables:
     TAG: dev
   rules:
-    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
-      changes: *backend_changes
+  #   - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
+      # changes: *backend_changes
 
 docker-build-backend-prod:
   extends: .docker-build-backend-template
