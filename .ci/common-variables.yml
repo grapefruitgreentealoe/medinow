@@ -11,4 +11,4 @@ default:
 before_script:
   - corepack enable
   - corepack prepare pnpm@latest --activate
-  - pnpm install
+  - HUSKY=0 pnpm install

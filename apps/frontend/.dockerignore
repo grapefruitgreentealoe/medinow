@@ -1,0 +1,36 @@
+# ✅ 빌드 결과물
+.next
+out
+dist
+
+# ✅ 의존성 (루트 or 패키지별 node_modules)
+node_modules
+.pnpm
+
+# ✅ 환경 변수 파일
+.env
+.env.*   # e.g., .env.local, .env.production
+
+# ✅ 로그 / 캐시 / 임시 파일
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+*.swp
+*.tmp
+*.temp
+
+# ✅ 테스트 관련
+coverage
+.vitest
+*.test.*
+*.spec.*
+
+# ✅ IDE/에디터 설정
+.vscode
+.idea
+.DS_Store
+
+# ✅ 기타
+*.local
