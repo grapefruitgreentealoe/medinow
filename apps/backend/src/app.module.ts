@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
 import { CareUnitModule } from './modules/care-units/care-unit.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { RedisModule } from './modules/redis/redis.module';
 import { ImagesModule } from './modules/images/images.module';
 import { S3Module } from './modules/s3/s3.module';
 @Module({
@@ -20,6 +21,7 @@ import { S3Module } from './modules/s3/s3.module';
     UsersModule,
     CareUnitModule,
     AuthModule,
+    RedisModule,
     S3Module,
     ImagesModule,
   ],
