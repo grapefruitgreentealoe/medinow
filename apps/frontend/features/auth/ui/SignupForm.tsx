@@ -47,11 +47,9 @@ export default function SignupForm() {
       return;
     }
 
-    // TODO: 회원가입 API 연동
     console.log('회원가입 성공', data);
     setLoading(true);
 
-    // TODO: API 연결
     await new Promise((r) => setTimeout(r, 700));
     console.log('회원가입 성공:', data);
 

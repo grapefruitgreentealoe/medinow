@@ -10,8 +10,15 @@ export default function Header() {
         🏥 Medinow
       </Link>
       <nav className="flex gap-4">
+        <Link href="/signup/admin">
+          <Button variant="outline" className="text-black">
+            관리자 회원가입
+          </Button>
+        </Link>
         <Link href="/signup">
-          <Button variant="outline">회원가입</Button>
+          <Button variant="outline" className="text-black">
+            회원가입
+          </Button>
         </Link>
         <Link href="/login">
           <Button>로그인</Button>
