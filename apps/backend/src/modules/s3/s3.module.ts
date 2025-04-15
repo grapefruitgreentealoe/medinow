@@ -4,7 +4,6 @@ import { AwsConfigModule } from '../../config/aws/config.module';
 
 @Module({
   imports: [AwsConfigModule],
-
   providers: [S3Service],
   exports: [S3Service],
 })

@@ -23,7 +23,7 @@ import {
 import { CareUnitAdminService } from './services/care-unit-admin.service';
 
 @ApiTags('Care Unit')
-@Controller('careUnit')
+@Controller('care-units')
 export class CareUnitController {
   constructor(
     private readonly careUnitService: CareUnitService,
@@ -73,7 +73,7 @@ export class CareUnitController {
   async getCareUnitByCategory(@Query('category') category: string) {
     return this.careUnitService.getCareUnitByCategory(category);
   }
-  @Get('locationbycategory')
+  @Get('location-by-category')
   @ApiOperation({ summary: 'Care Unit 위치 조회' })
   @ApiQuery({ name: 'category', required: false, type: String })
   @ApiQuery({ name: 'lat', required: true, type: Number })
@@ -110,7 +110,7 @@ export class CareUnitController {
     return this.careUnitService.addBadge(id);
   }
 
-  @Post('checkNowOpen')
+  @Post('check-now-open')
   @ApiOperation({ summary: 'Care Unit 실시간 운영 여부 확인' })
   async checkNowOpen(@Param('id') id: string) {
     return this.careUnitService.checkNowOpen(id);

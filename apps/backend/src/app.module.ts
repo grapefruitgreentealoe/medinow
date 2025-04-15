@@ -8,7 +8,8 @@ import { typeOrmConfig } from './config/typeorm.config';
 import { CareUnitModule } from './modules/care-units/care-unit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { RedisModule } from './modules/redis/redis.module';
-
+import { ImagesModule } from './modules/images/images.module';
+import { S3Module } from './modules/s3/s3.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,6 +22,8 @@ import { RedisModule } from './modules/redis/redis.module';
     CareUnitModule,
     AuthModule,
     RedisModule,
+    S3Module,
+    ImagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

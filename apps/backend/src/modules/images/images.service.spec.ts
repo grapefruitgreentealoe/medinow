@@ -1,17 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CareUnitService } from './services/care-unit.service';
+import { ImagesService } from './images.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { CareUnit } from './entities/care-unit.entity';
-import { CareUnitAdminService } from './services/care-unit-admin.service';
+import { Image } from './entities/image.entity';
 import { S3Service } from '../s3/s3.service';
 import { AwsConfigService } from '../../config/aws/config.service';
 import { ConfigService } from '@nestjs/config';
-import { AppConfigService } from '../../config/app/config.service';
 
-describe('CareUnitService', () => {
-  let service: CareUnitService;
+describe('ImagesService', () => {
+  let service: ImagesService;
 
-  const mockCareUnitRepository = {
+  const mockImageRepository = {
     find: jest.fn(),
     findOne: jest.fn(),
     save: jest.fn(),
@@ -20,13 +18,12 @@ describe('CareUnitService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CareUnitService,
-        CareUnitAdminService,
+        ImagesService,
         S3Service,
         AwsConfigService,
         {
-          provide: getRepositoryToken(CareUnit),
-          useValue: mockCareUnitRepository,
+          provide: getRepositoryToken(Image),
+          useValue: mockImageRepository,
         },
         {
           provide: ConfigService,
@@ -40,16 +37,10 @@ describe('CareUnitService', () => {
             }),
           },
         },
-        {
-          provide: AppConfigService,
-          useValue: {
-            get: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
-    service = module.get<CareUnitService>(CareUnitService);
+    service = module.get<ImagesService>(ImagesService);
   });
 
   it('should be defined', () => {

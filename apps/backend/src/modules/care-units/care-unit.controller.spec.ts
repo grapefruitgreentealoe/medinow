@@ -1,12 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CareUnitController } from './care-unit.controller';
 import { CareUnitService } from './services/care-unit.service';
+import { CareUnitAdminService } from './services/care-unit-admin.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CareUnit } from './entities/care-unit.entity';
-import { CareUnitAdminService } from './services/care-unit-admin.service';
 import { S3Service } from '../s3/s3.service';
 import { AwsConfigService } from '../../config/aws/config.service';
 import { ConfigService } from '@nestjs/config';
+import { AppConfigService } from '../../config/app/config.service';
 
 describe('CareUnitController', () => {
   let controller: CareUnitController;
@@ -39,6 +40,12 @@ describe('CareUnitController', () => {
               if (key === 'AWS_BUCKET_NAME') return 'test-bucket';
               return null;
             }),
+          },
+        },
+        {
+          provide: AppConfigService,
+          useValue: {
+            get: jest.fn(),
           },
         },
       ],
