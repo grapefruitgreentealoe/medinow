@@ -37,14 +37,14 @@ export class UsersService {
 
   async updateUserRefreshToken(userId: string, refreshToken: string) {
     if (!userId) {
-      throw new Error('User ID is required for updating refresh token');
+      throw new Error('유저 아이디가 없습니다.');
     }
     return await this.userRepository.update({ id: userId }, { refreshToken });
   }
 
   async deleteUserRefreshToken(userId: string) {
     if (!userId) {
-      console.warn('Attempted to delete refresh token with empty userId');
+      console.warn('유저 아이디가 없습니다.');
       return;
     }
     return await this.userRepository.update(
