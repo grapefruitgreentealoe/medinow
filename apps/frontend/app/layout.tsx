@@ -1,6 +1,5 @@
 import './globals.css';
-import Header from '@/shared/ui/layout/Header';
-import QueryProvider from '@/providers/QueryProvider';
+import AppProvider from '@/providers/AppProvider';
 
 export default function RootLayout({
   children,
@@ -10,10 +9,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body suppressHydrationWarning>
-        <QueryProvider>
-          <Header />
-          <main className="min-h-screen">{children}</main>
-        </QueryProvider>
+        <AppProvider>
+          <main>{children}</main>
+        </AppProvider>
       </body>
     </html>
   );
