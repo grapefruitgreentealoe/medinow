@@ -3,7 +3,7 @@
 APP_NAME="backend-dev"
 COMPOSE_FILE="/apps/backend/docker-compose.dev.yml"
 
-echo "�� [DEV] 백엔드 배포 시작"
+echo "🚀 [DEV] 백엔드 배포 시작"
 
 # ✅ 기존 컨테이너 및 네트워크 정리
 docker compose -f $COMPOSE_FILE down
