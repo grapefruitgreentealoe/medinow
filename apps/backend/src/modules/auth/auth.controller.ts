@@ -61,7 +61,6 @@ export class AuthController {
     status: HttpStatus.BAD_REQUEST,
     description: '로그인 실패',
   })
-  @UseInterceptors(ClassSerializerInterceptor)
   @Post('login')
   async login(
     @Body() loginDto: LoginDto,
@@ -76,7 +75,6 @@ export class AuthController {
 
     return plainToInstance(LoginResponseDto, {
       message: '로그인 성공',
-      accessToken,
     });
   }
 
