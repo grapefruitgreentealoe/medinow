@@ -9,6 +9,10 @@
   image: node:20
   before_script:
     - apt-get update && apt-get install -y docker.io
+    - curl -L "https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    - chmod +x /usr/local/bin/docker-compose
+    - ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+    - ls -al apps/backend
   script:
     - set -xe
     - echo "📦 배포 스크립트 실행 시작"
@@ -20,9 +24,9 @@ deploy-backend-dev:
   extends: .deploy-backend-template
   variables:
     DEPLOY_ENV: dev
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
-      changes: *backend_changes
+  # rules:
+  #   - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
+  #     changes: *backend_changes
 
 deploy-backend-prod:
   extends: .deploy-backend-template
