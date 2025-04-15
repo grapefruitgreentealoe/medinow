@@ -10,14 +10,16 @@
     "eslint-config-prettier": "^10.1.2",
     "prettier": "^3.5.3",
     "turbo": "^2.5.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "husky": "^8.0.0"
   },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "setup:env": "cp .env.frontend.template .env.frontend && cp .env.backend.template .env.backend"
+    "setup:env": "cp .env.frontend.template .env.frontend && cp .env.backend.template .env.backend",
+    "prepare": "husky install"
   },
   "engines": {
     "node": ">=20"
