@@ -19,7 +19,7 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "setup:env": "cp .env.frontend.template .env.frontend && cp .env.backend.template .env.backend",
-    "prepare": "husky install"
+    "prepare": "cross-env-shell \"[ \\\"$HUSKY\\\" != \\\"0\\\" ] && husky install"
   },
   "engines": {
     "node": ">=20"
