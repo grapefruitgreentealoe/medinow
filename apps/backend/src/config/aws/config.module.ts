@@ -20,5 +20,3 @@ import { AwsConfigService } from './config.service';
   exports: [ConfigService, AwsConfigService],
 })
 export class AwsConfigModule {}
-
-
