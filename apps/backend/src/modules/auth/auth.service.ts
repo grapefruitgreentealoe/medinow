@@ -38,7 +38,10 @@ export class AuthService {
   }
 
   setCookieOptions(maxAge: number, requestOrigin: string): CookieOptions {
-    const url = new URL(requestOrigin);
+    const fullUrl = requestOrigin.includes('http')
+      ? requestOrigin
+      : `http://${requestOrigin}`;
+    const url = new URL(fullUrl);
     const isLocalhost =
       url.hostname.includes('localhost') || url.hostname.includes('127.0.0.1');
 
@@ -55,11 +58,7 @@ export class AuthService {
   }
 
   async setJwtAccessToken(user: User, requestOrigin: string) {
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    };
+    const payload = { sub: user.id };
     const expiresIn = this.appConfigService.jwtAccessExpirationTime!;
     const maxAge = expiresIn * 1000;
     const accessOptions = this.setCookieOptions(maxAge, requestOrigin);
@@ -73,11 +72,7 @@ export class AuthService {
   }
 
   async setJwtRefreshToken(user: User, requestOrigin: string) {
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    };
+    const payload = { sub: user.id };
     const expiresIn = this.appConfigService.jwtRefreshExpirationTime!;
     const maxAge = expiresIn * 1000;
     const refreshOptions = this.setCookieOptions(maxAge, requestOrigin);
