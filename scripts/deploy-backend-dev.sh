@@ -6,10 +6,10 @@ COMPOSE_FILE="/apps/backend/docker-compose.dev.yml"
 echo "🚀 [DEV] 백엔드 배포 시작"
 
 # ✅ 기존 컨테이너 및 네트워크 정리
-docker compose -f $COMPOSE_FILE down
+docker-compose -f $COMPOSE_FILE down
 
 # ✅ 새로 빌드 및 실행
-docker compose -f $COMPOSE_FILE up -d --build
+docker-compose -f $COMPOSE_FILE up -d --build
 
 echo "✅ [DEV] 백엔드 배포 완료"
 
