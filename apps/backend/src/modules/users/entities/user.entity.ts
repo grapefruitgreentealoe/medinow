@@ -1,4 +1,4 @@
-import { BaseEntity } from 'src/common/entities/base.entity';
+import { BaseEntity } from '../../../common/entities/base.entity';
 import { Column, Entity } from 'typeorm';
 import { UserRole } from '../../../common/enums/roles.enum';
 import { Exclude } from 'class-transformer';
