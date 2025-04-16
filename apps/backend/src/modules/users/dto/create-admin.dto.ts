@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   IsEnum,
+  IsNumber,
 } from 'class-validator';
 import { CareUnitCategory } from '../../../common/enums/careUnits.enum';
 
@@ -50,14 +51,44 @@ export class CreateAdminDto extends CreateUserDto {
   readonly name: string;
 
   @ApiProperty({
+    type: Number,
+    description: '위도',
+    example: 37.566535,
+    required: true,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  readonly latitude: number;
+
+  @ApiProperty({
     type: String,
-    description: 'hpId',
-    example: 'A1023456',
+    description: '경도',
+    example: '126.915261',
+    required: true,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  readonly longitude: number;
+
+  @ApiProperty({
+    type: String,
+    description: '의료기관 이름',
+    example: '서울대학교병원',
     required: true,
   })
   @IsString()
   @IsNotEmpty()
-  readonly hpId: string;
+  readonly careUnitName: string;
+
+  @ApiProperty({
+    type: String,
+    description: '의료기관 주소',
+    example: '서울특별시 관악구 남부순환로 180',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  readonly careUnitAddress: string;
 
   @ApiProperty({
     type: CareUnitCategory,

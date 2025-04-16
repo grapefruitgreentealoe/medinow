@@ -67,13 +67,4 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @Max(150)
   @IsOptional()
   readonly age: number;
-
-  @ApiProperty({
-    type: String,
-    description: '프로필 이미지 URL',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  readonly imgUrl: string;
 }

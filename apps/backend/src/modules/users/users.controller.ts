@@ -8,7 +8,7 @@ import {
   UseGuards,
   Delete,
   Param,
-  Put,
+  Patch,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -116,7 +116,7 @@ export class UsersController {
     };
   }
 
-  @Put(':userId')
+  @Patch(':userId')
   @ApiCookieAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '사용자 수정' })

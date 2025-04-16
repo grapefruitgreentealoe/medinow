@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { CareUnit } from '../entities/care-unit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository, Between, Raw, Like } from 'typeorm';
 import { ResponseCareUnitDto } from '../dto/response-care-unit.dto';
 import { AppConfigService } from 'src/config/app/config.service';
 
@@ -173,6 +173,71 @@ export class CareUnitService {
     } else {
       return this.careUnitRepository.find({ where: { hpId } });
     }
+  }
+
+  //🏥 위치, 주소, 이름 필터 조회
+  async findCareUnitByFilters(
+    lat: number,
+    lng: number,
+    address: string,
+    name: string,
+    category: string,
+  ) {
+    if (!lat || !lng || !address || !name || !category) {
+      throw new BadRequestException('입력값이 올바르지 않습니다');
+    }
+
+    const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
+
+    if (lat) {
+      const latPrefix = Math.floor(lat * 100) / 100;
+      queryBuilder.andWhere(`CAST(careUnit.lat AS TEXT) LIKE :lat`, {
+        lat: `${latPrefix}%`,
+      });
+    } else {
+      throw new BadRequestException('위도 값이 없습니다');
+    }
+
+    if (lng) {
+      const lngPrefix = Math.floor(lng * 100) / 100;
+      queryBuilder.andWhere(`CAST(careUnit.lng AS TEXT) LIKE :lng`, {
+        lng: `${lngPrefix}%`,
+      });
+    } else {
+      throw new BadRequestException('경도 값이 없습니다');
+    }
+
+    if (address) {
+      const addressParts = address.split(' ');
+      if (addressParts.length > 1) {
+        const remainingAddress = addressParts.slice(1).join(' ');
+        queryBuilder.andWhere('careUnit.address LIKE :address', {
+          address: `%${remainingAddress}%`,
+        });
+      } else {
+        queryBuilder.andWhere('careUnit.address LIKE :address', {
+          address: `%${address}%`,
+        });
+      }
+    } else {
+      throw new BadRequestException('주소 값이 없습니다');
+    }
+
+    if (name) {
+      queryBuilder.andWhere('careUnit.name LIKE :name', {
+        name: `%${name}%`,
+      });
+    } else {
+      throw new BadRequestException('이름 값이 없습니다');
+    }
+
+    if (category) {
+      queryBuilder.andWhere('careUnit.category = :category', { category });
+    } else {
+      throw new BadRequestException('카테고리 값이 없습니다');
+    }
+
+    return await queryBuilder.getMany();
   }
 
   //🏥 상세 정보 조회 by 위치
