@@ -8,7 +8,6 @@ import {
   Res,
   UseGuards,
   UploadedFile,
-  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -20,8 +19,8 @@ import {
   ApiBody,
   ApiResponse,
   ApiTags,
-  ApiBearerAuth,
   ApiConsumes,
+  ApiCookieAuth,
 } from '@nestjs/swagger';
 import { SignupResponseDto } from './dto/signup-response.dto';
 import { plainToInstance } from 'class-transformer';
@@ -122,7 +121,7 @@ export class AuthController {
     });
   }
 
-  @ApiBearerAuth()
+  @ApiCookieAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '로그아웃' })
   @ApiResponse({

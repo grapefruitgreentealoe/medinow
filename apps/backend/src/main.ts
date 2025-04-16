@@ -9,14 +9,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const corsOptions = {
-    allowedHeaders: [
-      'content-type',
-      'authorization',
-      'Accept',
-      'Authorization',
+    origin: [
+      'http://localhost:3000',
+      'https://kdt-node-2-team02.elicecoding.com',
     ],
-    origin: 'http://localhost:3000',
     credentials: true,
+    allowedHeaders: ['content-type', 'Authorization'],
   };
 
   app.use(cookieParser());
@@ -29,7 +27,7 @@ async function bootstrap() {
     .setTitle('MediNow API')
     .setDescription('MediNow API 문서입니다.')
     .setVersion('0.0.1')
-    .addBearerAuth()
+    .addCookieAuth('accessToken')
     .addServer('api/v1')
     .build();
 
