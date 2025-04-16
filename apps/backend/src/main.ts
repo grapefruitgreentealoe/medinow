@@ -7,25 +7,39 @@ async function bootstrap() {
   // Create App
   const app = await NestFactory.create(AppModule);
 
+  const corsOptions = {
+    allowedHeaders: [
+      'content-type',
+      'authorization',
+      'Accept',
+      'Authorization',
+    ],
+    origin: 'http://localhost:3000',
+    credentials: true,
+  };
+
   // Use Global Pipes
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   // Create Swagger
   const config = new DocumentBuilder()
-    .setTitle('ERP API')
-    .setDescription('API description for ERP')
+    .setTitle('MediNow API')
+    .setDescription('MediNow API 문서입니다.')
     .setVersion('0.0.1')
     .addBearerAuth()
     .addServer('api/v1')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('swagger', app, document);
 
   // Set Global Prefix
   app.setGlobalPrefix('api/v1', {
-    exclude: ['docs'],
+    exclude: ['swagger'],
   });
+
+  // Use Cors
+  app.enableCors(corsOptions);
 
   // Start Server
   await app.listen(process.env.PORT ?? 4000);

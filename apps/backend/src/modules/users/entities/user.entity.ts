@@ -1,27 +1,29 @@
-import { BaseEntity } from 'src/common/entities/base.entity';
-import { Column, Entity } from 'typeorm';
-import { UserRole } from '../../../../../../packages/shared/enums/roles.enum';
+import { BaseEntity } from '../../../common/entities/base.entity';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { UserRole } from '../../../common/enums/roles.enum';
+import { Exclude } from 'class-transformer';
+import { UserProfile } from './user-profile.entity';
 
 @Entity()
 export class User extends BaseEntity {
-  @Column({ unique: true })
+  @Column({ type: 'text', unique: true })
   email: string;
 
-  @Column({ nullable: true })
-  password: string;
+  @Exclude()
+  @Column({ type: 'text', nullable: true })
+  password: string | null;
 
-  @Column()
-  name: string;
-
-  @Column({ unique: true })
-  nickname: string;
-
-  @Column({ nullable: true })
-  address: string;
-
-  @Column({ nullable: true })
-  age: number;
-
-  @Column({ enum: UserRole, default: UserRole.USER })
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
   role: UserRole;
+
+  @Exclude()
+  @Column({ type: 'text', nullable: true, default: null })
+  refreshToken: string | null;
+
+  @OneToOne(() => UserProfile, (userProfile) => userProfile.user)
+  userProfile: UserProfile;
 }

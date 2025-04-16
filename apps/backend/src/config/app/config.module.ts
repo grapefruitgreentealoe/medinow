@@ -8,11 +8,21 @@ import { AppConfigService } from './config.service';
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
-      validationSchema: Joi.object({
-        JWT_SECRET: Joi.string().required(),
-        PORT: Joi.number().required(),
-      }),
       isGlobal: true,
+      envFilePath:
+        process.env.NODE_ENV === 'production' ? '/app/.env' : '.env.local',
+      validationSchema: Joi.object({
+        JWT_ACCESS_SECRET: Joi.string().required(),
+        JWT_ACCESS_EXPIRATION_TIME: Joi.number().required(),
+        JWT_REFRESH_SECRET: Joi.string().required(),
+        JWT_REFRESH_EXPIRATION_TIME: Joi.number().required(),
+        PORT: Joi.number().required(),
+        NODE_ENV: Joi.string().required(),
+        SERVICE_KEY: Joi.string().required(),
+        EMERGENCY_API_URL: Joi.string().required(),
+        HOSPITAL_API_URL: Joi.string().required(),
+        PHARMACY_API_URL: Joi.string().required(),
+      }),
     }),
   ],
   providers: [ConfigService, AppConfigService],
