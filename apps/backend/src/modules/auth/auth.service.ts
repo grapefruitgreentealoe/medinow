@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { CreateAdminDto } from '../users/dto/create-admin.dto';
 import { LoginDto } from './dto/login.dto';
 import { comparePassword } from '../../common/utils/password.util';
 import { CookieOptions } from 'express';
@@ -18,9 +19,19 @@ export class AuthService {
   ) {}
 
   async signup(createUserDto: CreateUserDto) {
-    const user = await this.usersService.createUser(createUserDto);
+    await this.usersService.createUser(createUserDto);
     return {
       message: '회원가입 성공',
+    };
+  }
+
+  async signupAdmin(
+    createUserDto: CreateAdminDto,
+    businessLicense?: Express.Multer.File,
+  ) {
+    await this.usersService.createAdminUser(createUserDto, businessLicense);
+    return {
+      message: '관리자 회원가입 성공',
     };
   }
 

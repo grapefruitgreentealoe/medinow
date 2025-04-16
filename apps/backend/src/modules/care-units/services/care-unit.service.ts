@@ -168,7 +168,11 @@ export class CareUnitService {
   }
   //🏥 상세 정보 조회 by hpid & category
   async getCareUnitDetailByHpid(hpid: string, category?: string) {
-    return this.careUnitRepository.find({ where: { hpid, category } });
+    if (category) {
+      return this.careUnitRepository.findOne({ where: { hpid, category } });
+    } else {
+      return this.careUnitRepository.find({ where: { hpid } });
+    }
   }
 
   //🏥 상세 정보 조회 by 위치

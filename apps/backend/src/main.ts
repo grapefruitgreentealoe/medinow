@@ -2,21 +2,22 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   // Create App
   const app = await NestFactory.create(AppModule);
 
   const corsOptions = {
-    allowedHeaders: [
-      'content-type',
-      'authorization',
-      'Accept',
-      'Authorization',
+    origin: [
+      'http://localhost:3000',
+      'https://kdt-node-2-team02.elicecoding.com',
     ],
-    origin: 'http://localhost:3000',
     credentials: true,
+    allowedHeaders: ['content-type', 'Authorization'],
   };
+
+  app.use(cookieParser());
 
   // Use Global Pipes
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
@@ -26,7 +27,7 @@ async function bootstrap() {
     .setTitle('MediNow API')
     .setDescription('MediNow API 문서입니다.')
     .setVersion('0.0.1')
-    .addBearerAuth()
+    .addCookieAuth('accessToken')
     .addServer('api/v1')
     .build();
 
