@@ -119,7 +119,7 @@ export class UsersService {
           savedUser,
           careUnit[0],
         );
-        newUserProfile.images = image;
+        newUserProfile.image = image;
       }
 
       await queryRunner.manager.save(newUserProfile);

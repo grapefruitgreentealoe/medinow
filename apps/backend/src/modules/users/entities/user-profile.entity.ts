@@ -34,5 +34,5 @@ export class UserProfile extends BaseEntity {
     cascade: true,
     nullable: true,
   })
-  images: Image | null;
+  image: Image | null;
 }
