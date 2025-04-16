@@ -17,14 +17,19 @@ RUN pnpm --filter ./apps/backend run build
 
 # 환경 변수 설정
 ENV NODE_ENV=production
-
 ENV PORT=4000
 
 # 백엔드 디렉토리로 이동
 WORKDIR /app/apps/backend
 
+# 빌드된 파일 복사
+# COPY --from=builder /app/apps/backend/dist ./dist
+# # COPY --from=builder /app/apps/backend/package.json ./package.json
+# # COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+# # COPY --from=builder /app/apps/backend/.env .env
+
 # 포트 오픈
 EXPOSE 4000
 
 # 실행
-CMD ["sh", "-c", "pnpm run migration:run && pnpm run start:prod"]
+CMD ["pnpm", "start"]

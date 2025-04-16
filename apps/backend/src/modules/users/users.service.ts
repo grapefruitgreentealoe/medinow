@@ -4,24 +4,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserProfile } from './entities/user-profile.entity';
-import { ImagesService } from '../images/images.service';
-import { UserRole } from '../../common/enums/roles.enum';
-import { CareUnitService } from '../care-units/services/care-unit.service';
+
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private userRepository: Repository<User>,
     @InjectRepository(UserProfile)
-    private readonly userProfileRepository: Repository<UserProfile>,
-    private readonly imagesService: ImagesService,
-    private readonly careUnitService: CareUnitService,
+    private userProfileRepository: Repository<UserProfile>,
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
@@ -49,79 +44,6 @@ export class UsersService {
         ...userProfile,
         user: savedUser,
       });
-      await queryRunner.manager.save(newUserProfile);
-
-      await queryRunner.commitTransaction();
-
-      return savedUser;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
-  }
-
-  async createAdminUser(
-    createUserDto: CreateAdminDto,
-    businessLicense?: Express.Multer.File,
-  ): Promise<User> {
-    const user = await this.findUserByEmail(createUserDto.email);
-    if (user) {
-      throw new ConflictException('이미 존재하는 이메일입니다.');
-    }
-
-    const {
-      email,
-      password,
-      name,
-      careUnitCategory,
-      careUnitAddress,
-      careUnitName,
-      latitude,
-      longitude,
-    } = createUserDto;
-
-    const queryRunner =
-      this.userRepository.manager.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const newUser = this.userRepository.create({
-        email,
-        password,
-        role: UserRole.ADMIN,
-      });
-      const savedUser = await queryRunner.manager.save(newUser);
-
-      const careUnit = await this.careUnitService.findCareUnitByFilters(
-        latitude,
-        longitude,
-        careUnitAddress,
-        careUnitName,
-        careUnitCategory,
-      );
-
-      if (!careUnit) {
-        throw new NotFoundException('존재하지 않는 의료기관입니다.');
-      }
-
-      const newUserProfile = this.userProfileRepository.create({
-        name,
-        address: careUnit[0].address,
-        user: savedUser,
-      });
-
-      if (businessLicense) {
-        const image = await this.imagesService.uploadBusinessLicense(
-          businessLicense,
-          savedUser,
-          careUnit[0],
-        );
-        newUserProfile.image = image;
-      }
-
       await queryRunner.manager.save(newUserProfile);
 
       await queryRunner.commitTransaction();

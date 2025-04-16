@@ -44,11 +44,4 @@ export class AppConfigService {
   get pharmacyApiUrl() {
     return this.configService.get<string>('app.pharmacyApiUrl');
   }
-
-  get hospitalBasicApiUrl() {
-    return this.configService.get<string>('app.hospitalBasicApiUrl');
-  }
-  get emergencyCongestionApiUrl() {
-    return this.configService.get<string>('app.emergencyCongestionApiUrl');
-  }
 }

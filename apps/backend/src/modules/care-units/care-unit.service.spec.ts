@@ -7,7 +7,6 @@ import { S3Service } from '../s3/s3.service';
 import { AwsConfigService } from '../../config/aws/config.service';
 import { ConfigService } from '@nestjs/config';
 import { AppConfigService } from '../../config/app/config.service';
-import { Department } from '../departments/entities/department.entity';
 
 describe('CareUnitService', () => {
   let service: CareUnitService;
@@ -16,27 +15,6 @@ describe('CareUnitService', () => {
     find: jest.fn(),
     findOne: jest.fn(),
     save: jest.fn(),
-    create: jest.fn(),
-    createQueryBuilder: jest.fn(() => ({
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      orderBy: jest.fn().mockReturnThis(),
-      getMany: jest.fn().mockResolvedValue([]),
-    })),
-  };
-
-  const mockDepartmentRepository = {
-    find: jest.fn(),
-    findOne: jest.fn(),
-    save: jest.fn(),
-    create: jest.fn(),
-  };
-
-  const mockConfigService = {
-    emergencyApiUrl: 'test-url',
-    hospitalApiUrl: 'test-url',
-    pharmacyApiUrl: 'test-url',
-    serviceKey: 'test-key',
   };
 
   beforeEach(async () => {
@@ -49,10 +27,6 @@ describe('CareUnitService', () => {
         {
           provide: getRepositoryToken(CareUnit),
           useValue: mockCareUnitRepository,
-        },
-        {
-          provide: getRepositoryToken(Department),
-          useValue: mockDepartmentRepository,
         },
         {
           provide: ConfigService,
@@ -68,7 +42,9 @@ describe('CareUnitService', () => {
         },
         {
           provide: AppConfigService,
-          useValue: mockConfigService,
+          useValue: {
+            get: jest.fn(),
+          },
         },
       ],
     }).compile();

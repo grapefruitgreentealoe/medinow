@@ -7,13 +7,11 @@ import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import { useAdminSignup } from '../model/useAdminSignup';
 import { useRouter } from 'next/navigation';
 import type { SignupData } from '../type';
 
 type FormData = z.infer<typeof adminSignupSchema>;
-import { useState } from 'react';
-import HospitalSearchModal from '@/components/HospitalSearchModal';
-import { adminSignup } from '../api';
 
 export default function AdminSignupForm() {
   const router = useRouter();
@@ -21,7 +19,6 @@ export default function AdminSignupForm() {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(adminSignupSchema),
@@ -29,28 +26,18 @@ export default function AdminSignupForm() {
       email: 'admin@clinic.com',
       password: 'Admin123!',
       managerName: '홍길동',
+      institutionName: '강남의원',
+      contact: '02-123-4567',
       address: '서울특별시 강남구 역삼동',
-      medicalCenterName: '',
       businessHourStart: '09:00',
       businessHourEnd: '18:00',
+      medicalLicenseNumber: 'MED-2024-0001',
       institutionType: '병원',
       terms: true,
-      lat: '',
-      lng: '',
     },
   });
-  const [hospitalModalOpen, setHospitalModalOpen] = useState(false);
-  const handleHospitalSelect = (data: {
-    name: string;
-    address: string;
-    lat: string;
-    lng: string;
-  }) => {
-    setValue('address', data.address);
-    setValue('medicalCenterName', data.name);
-    setValue('lat', data.lat);
-    setValue('lng', data.lng);
-  };
+
+  const { mutateAsync: signupAdmin } = useAdminSignup();
 
   const onSubmit = async (data: FormData) => {
     const formData = new FormData();
@@ -66,18 +53,12 @@ export default function AdminSignupForm() {
     const signupData: SignupData = Object.fromEntries(
       formData.entries()
     ) as unknown as SignupData;
-    await adminSignup(signupData);
+    await signupAdmin(signupData);
     router?.push('/');
   };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSubmit(onSubmit);
-      }}
-      className="space-y-4"
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <Input placeholder="이메일" {...register('email')} />
       {errors.email && <p className="text-red-500">{errors.email.message}</p>}
 
@@ -87,33 +68,35 @@ export default function AdminSignupForm() {
       )}
 
       <Input placeholder="담당자 이름" {...register('managerName')} />
-      <div className="space-y-1">
-        <label className="text-sm">병원 검색</label>
-        <button
-          type="button"
-          onClick={() => setHospitalModalOpen(true)}
-          className="border p-2 rounded w-full bg-gray-50 text-left"
-        >
-          병원 검색 팝업 열기
-        </button>
+      <Input placeholder="기관명" {...register('institutionName')} />
+      <Input placeholder="연락처" {...register('contact')} />
+      <Input placeholder="주소" {...register('address')} />
+      <div className="flex items-center gap-2">
+        <div className="w-1/2">
+          <label className="text-sm">운영 시작</label>
+          <Input type="time" {...register('businessHourStart')} />
+          {errors.businessHourStart && (
+            <p className="text-red-500 text-sm">
+              {errors.businessHourStart.message}
+            </p>
+          )}
+        </div>
+        <div className="w-1/2">
+          <label className="text-sm">운영 종료</label>
+          <Input type="time" {...register('businessHourEnd')} />
+          {errors.businessHourEnd && (
+            <p className="text-red-500 text-sm">
+              {errors.businessHourEnd.message}
+            </p>
+          )}
+        </div>
       </div>
 
-      <Input placeholder="병원명" {...register('medicalCenterName')} />
-      <Input placeholder="주소" {...register('address')} />
-      <input type="hidden" {...register('lat')} />
-      <input type="hidden" {...register('lng')} />
-
-      <HospitalSearchModal
-        open={hospitalModalOpen}
-        onClose={() => setHospitalModalOpen(false)}
-        onSelect={handleHospitalSelect}
+      <Input
+        placeholder="의료기관 허가번호"
+        {...register('medicalLicenseNumber')}
       />
 
-      {/* 좌표 hidden input */}
-      <input type="hidden" {...register('lat')} />
-      <input type="hidden" {...register('lng')} />
-
-      {/* <span>{getValue}</span> */}
       <label className="text-sm">의료기관 유형</label>
       <select
         {...register('institutionType')}

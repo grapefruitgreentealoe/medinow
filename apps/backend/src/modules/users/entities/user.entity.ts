@@ -1,9 +1,8 @@
 import { BaseEntity } from '../../../common/entities/base.entity';
-import { Column, Entity, OneToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { UserRole } from '../../../common/enums/roles.enum';
 import { Exclude } from 'class-transformer';
 import { UserProfile } from './user-profile.entity';
-import { Image } from 'src/modules/images/entities/image.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -27,9 +26,4 @@ export class User extends BaseEntity {
 
   @OneToOne(() => UserProfile, (userProfile) => userProfile.user)
   userProfile: UserProfile;
-
-  @OneToMany(() => Image, (image) => image.user, {
-    cascade: true,
-  })
-  images: Image[];
 }

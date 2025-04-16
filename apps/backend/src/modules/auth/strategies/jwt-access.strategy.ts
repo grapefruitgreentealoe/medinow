@@ -6,7 +6,6 @@ import { UsersService } from '../../users/users.service';
 import { JwtPayload } from '../types/jwt-payload.interface';
 import { plainToInstance } from 'class-transformer';
 import { User } from '../../users/entities/user.entity';
-import { Request } from 'express';
 
 @Injectable()
 export class JwtAccessStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -21,10 +20,7 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, 'jwt') {
     }
 
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([
-        ExtractJwt.fromAuthHeaderAsBearerToken(),
-        (request: Request) => request?.cookies?.accessToken,
-      ]),
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: jwtAccessSecret,
     });
