@@ -26,6 +26,7 @@ import { RequestOrigin } from '../../common/decorators/request-origin.decorator'
 import { RequestUserId } from '../../common/decorators/request-userId.decorator';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { UserRole } from '../../common/enums/roles.enum';
 
 @ApiTags('인증')
 @Controller('auth')
@@ -68,14 +69,16 @@ export class AuthController {
     @RequestOrigin() requestOrigin: string,
     @Res({ passthrough: true }) response: Response,
   ): Promise<LoginResponseDto> {
-    const { accessToken, accessOptions, refreshToken, refreshOptions } =
-      await this.authService.login(loginDto, requestOrigin);
+    const { accessToken, accessOptions, isAdmin } = await this.authService.login(
+      loginDto,
+      requestOrigin,
+    );
 
     response.cookie('accessToken', accessToken, accessOptions);
-    response.cookie('refreshToken', refreshToken, refreshOptions);
 
     return plainToInstance(LoginResponseDto, {
       message: '로그인 성공',
+      isAdmin,
     });
   }
 

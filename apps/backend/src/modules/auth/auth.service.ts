@@ -25,18 +25,17 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto, requestOrigin: string) {
-    const user = await this.usersService.findUserByEmail(loginDto.email);
+    const { email, password } = loginDto;
+    const user = await this.usersService.findUserByEmail(email);
     if (!user) {
       throw new UnauthorizedException('이메일과 비밀번호가 일치하지 않습니다.');
     }
 
-    const isPasswordValid = await comparePassword(
-      loginDto.password,
-      user.password!,
-    );
+    const isPasswordValid = await comparePassword(password, user.password!);
     if (!isPasswordValid) {
       throw new UnauthorizedException('이메일과 비밀번호가 일치하지 않습니다.');
     }
+
     return this.setJwtTokenBuilder(user, requestOrigin);
   }
 
@@ -96,8 +95,12 @@ export class AuthService {
       requestOrigin,
     );
 
+    const isAdmin = user.role === UserRole.ADMIN ? true : false;
+
     await this.usersService.updateUserRefreshToken(user.id, refreshToken);
     return {
+      message: '로그인 성공',
+      isAdmin,
       accessToken,
       refreshToken,
       accessOptions,
