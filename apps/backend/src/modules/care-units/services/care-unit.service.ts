@@ -166,9 +166,9 @@ export class CareUnitService {
   async getCareUnitDetail(id: string) {
     return this.careUnitRepository.findOne({ where: { id } });
   }
-  //🏥 상세 정보 조회 by hpid
-  async getCareUnitDetailByHpid(hpid: string) {
-    return this.careUnitRepository.find({ where: { hpid } });
+  //🏥 상세 정보 조회 by hpid & category
+  async getCareUnitDetailByHpid(hpid: string, category?: string) {
+    return this.careUnitRepository.find({ where: { hpid, category } });
   }
 
   //🏥 상세 정보 조회 by 위치
@@ -178,12 +178,16 @@ export class CareUnitService {
         lat,
         lng,
       },
+      order: {
+        category: 'ASC',
+        name: 'ASC',
+      },
     });
   }
 
   //🏥 응급실, 병의원, 약국 카테고리별 조회  (로딩 김 주의)
   async getCareUnitByCategory(category: string) {
-    return this.careUnitRepository.find({
+    return await this.careUnitRepository.find({
       where: {
         category,
       },
@@ -242,23 +246,48 @@ export class CareUnitService {
     if (!careUnit) {
       throw new NotFoundException('Care unit not found');
     }
+    let open;
+    let close;
     const date = new Date();
+    const day = date.getDay();
+    if(day === 0) {
+      open = careUnit.sundayOpen;
+      close = careUnit.sundayClose;
+    } else if(day === 1) {
+      open = careUnit.mondayOpen;
+      close = careUnit.mondayClose;
+    } else if(day === 2) {
+      open = careUnit.tuesdayOpen;
+      close = careUnit.tuesdayClose;
+    } else if(day === 3) {
+      open = careUnit.wednesdayOpen;
+      close = careUnit.wednesdayClose;
+    } else if(day === 4) {
+      open = careUnit.thursdayOpen;
+      close = careUnit.thursdayClose;
+    } else if(day === 5) {
+      open = careUnit.fridayOpen;
+      close = careUnit.fridayClose;
+    } else if(day === 6) {
+      open = careUnit.saturdayOpen;
+      close = careUnit.saturdayClose;
+    } else {
+      open = careUnit.holidayOpen;
+      close = careUnit.holidayClose;
+    }
     const now = date.getHours() * 100 + date.getMinutes(); // 1430 형식 (14:30)
     console.log('date', date, 'now', now);
     if (
-      (careUnit.mondayOpen <= now && careUnit.mondayClose >= now) ||
-      (careUnit.tuesdayOpen <= now && careUnit.tuesdayClose >= now) ||
-      (careUnit.wednesdayOpen <= now && careUnit.wednesdayClose >= now) ||
-      (careUnit.thursdayOpen <= now && careUnit.thursdayClose >= now) ||
-      (careUnit.fridayOpen <= now && careUnit.fridayClose >= now) ||
-      (careUnit.saturdayOpen <= now && careUnit.saturdayClose >= now) ||
-      (careUnit.sundayOpen <= now && careUnit.sundayClose >= now) ||
-      (careUnit.holidayOpen <= now && careUnit.holidayClose >= now)
+      (open <= now && close >= now)
     ) {
       console.log('⏱️지금 운영 중입니다');
-      return true;
+      careUnit.now_open = true;
+      await this.careUnitRepository.save(careUnit);
+      return { message: '지금 운영 중입니다' };
     }
     console.log('❌지금 운영 중이 아닙니다');
-    return false;
+    careUnit.now_open = false;
+    await this.careUnitRepository.save(careUnit);
+    return { message: '지금 운영 중이 아닙니다' };
   }
 }

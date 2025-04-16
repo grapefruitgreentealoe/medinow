@@ -1,9 +1,10 @@
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, Index, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { CareUnitCategory } from '../../../common/enums/careUnits.enum';
 import { UserProfile } from 'src/modules/users/entities/user-profile.entity';
 
 @Entity()
+@Index(['hpid', 'category'], { unique: true })
 export class CareUnit extends BaseEntity {
   @Column({ nullable: true })
   name: string;
