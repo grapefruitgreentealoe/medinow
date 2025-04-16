@@ -18,6 +18,7 @@ import {
   ApiResponse,
   ApiTags,
   ApiBearerAuth,
+  ApiCookieAuth,
 } from '@nestjs/swagger';
 import { SignupResponseDto } from './dto/signup-response.dto';
 import { plainToInstance } from 'class-transformer';
@@ -44,11 +45,11 @@ export class AuthController {
   })
   @UseInterceptors(ClassSerializerInterceptor)
   @Post('signup')
-  async signup(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<SignupResponseDto> {
+  async signup(@Body() createUserDto: CreateUserDto) {
     const user = await this.authService.signup(createUserDto);
-    return plainToInstance(SignupResponseDto, user);
+    return {
+      message: '회원가입 성공',
+    };
   }
 
   @ApiOperation({ summary: '로그인' })

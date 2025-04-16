@@ -1,14 +1,22 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UserProfile } from './entities/user-profile.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(UserProfile)
+    private userProfileRepository: Repository<UserProfile>,
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
@@ -18,16 +26,55 @@ export class UsersService {
       throw new ConflictException('이미 존재하는 이메일입니다.');
     }
 
-    const newUser = this.userRepository.create(createUserDto);
-    return this.userRepository.save(newUser);
+    const { email, password, ...userProfile } = createUserDto;
+
+    const queryRunner =
+      this.userRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const newUser = this.userRepository.create({
+        email,
+        password,
+      });
+      const savedUser = await queryRunner.manager.save(newUser);
+
+      const newUserProfile = this.userProfileRepository.create({
+        ...userProfile,
+        user: savedUser,
+      });
+      await queryRunner.manager.save(newUserProfile);
+
+      await queryRunner.commitTransaction();
+
+      return savedUser;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async findUsers(): Promise<User[]> {
+    return this.userRepository.find({
+      relations: ['userProfile'],
+    });
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { email } });
+    return this.userRepository.findOne({
+      where: { email },
+      relations: ['userProfile'],
+    });
   }
 
   async findUserById(id: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { id } });
+    return this.userRepository.findOne({
+      where: { id },
+      relations: ['userProfile'],
+    });
   }
 
   async isExistEmail(email: string): Promise<boolean> {
@@ -35,21 +82,125 @@ export class UsersService {
     return !!user;
   }
 
+  async updateUser(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    const user = await this.findUserById(userId);
+    if (!user) {
+      throw new NotFoundException('유저를 찾을 수 없습니다.');
+    }
+
+    const { email, password, ...userProfile } = updateUserDto;
+
+    const queryRunner =
+      this.userRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.update(
+        User,
+        { id: userId },
+        { email, password },
+      );
+
+      if (userProfile) {
+        await queryRunner.manager.update(
+          UserProfile,
+          { user: { id: userId } },
+          { ...userProfile },
+        );
+      }
+
+      await queryRunner.commitTransaction();
+
+      const updatedUser = await this.findUserById(userId);
+      if (!updatedUser) {
+        throw new NotFoundException('업데이트된 유저를 찾을 수 없습니다.');
+      }
+      return updatedUser;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async deleteUser(userId: string) {
+    const user = await this.findUserById(userId);
+    if (!user) {
+      throw new NotFoundException('유저를 찾을 수 없습니다.');
+    }
+
+    const queryRunner =
+      this.userRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.delete(UserProfile, { user: { id: userId } });
+      await queryRunner.manager.delete(User, { id: userId });
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
   async updateUserRefreshToken(userId: string, refreshToken: string) {
     if (!userId) {
-      throw new Error('유저 아이디가 없습니다.');
+      throw new NotFoundException('유저 아이디가 없습니다.');
     }
-    return await this.userRepository.update({ id: userId }, { refreshToken });
+    const user = await this.findUserById(userId);
+    if (!user) {
+      throw new NotFoundException('유저를 찾을 수 없습니다.');
+    }
+
+    const queryRunner =
+      this.userRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.update(User, { id: userId }, { refreshToken });
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async deleteUserRefreshToken(userId: string) {
     if (!userId) {
-      console.warn('유저 아이디가 없습니다.');
-      return;
+      throw new NotFoundException('유저 아이디가 없습니다.');
     }
-    return await this.userRepository.update(
-      { id: userId },
-      { refreshToken: null },
-    );
+    const user = await this.findUserById(userId);
+    if (!user) {
+      throw new NotFoundException('유저를 찾을 수 없습니다.');
+    }
+
+    const queryRunner =
+      this.userRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.update(
+        User,
+        { id: userId },
+        { refreshToken: null },
+      );
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
