@@ -18,21 +18,23 @@ export class AuthService {
 
   async signup(createUserDto: CreateUserDto) {
     const user = await this.usersService.createUser(createUserDto);
-    return user;
+    return {
+      message: '회원가입 성공',
+    };
   }
 
   async login(loginDto: LoginDto, requestOrigin: string) {
     const user = await this.usersService.findUserByEmail(loginDto.email);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('이메일과 비밀번호가 일치하지 않습니다.');
     }
 
     const isPasswordValid = await comparePassword(
       loginDto.password,
-      user.password,
+      user.password!,
     );
     if (!isPasswordValid) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('이메일과 비밀번호가 일치하지 않습니다.');
     }
     return this.setJwtTokenBuilder(user, requestOrigin);
   }
