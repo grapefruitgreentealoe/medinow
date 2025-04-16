@@ -8,7 +8,7 @@ import {
   UseGuards,
   Delete,
   Param,
-  Put,
+  Patch,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,7 +18,6 @@ import {
   ApiBody,
   ApiResponse,
   ApiTags,
-  ApiBearerAuth,
   ApiCookieAuth,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
@@ -30,7 +29,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiBearerAuth()
+  @ApiCookieAuth()
   @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: '사용자 등록' })
@@ -78,7 +77,7 @@ export class UsersController {
   }
 
   @Get()
-  @ApiBearerAuth()
+  @ApiCookieAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '사용자 목록 조회' })
   @ApiResponse({
@@ -98,7 +97,7 @@ export class UsersController {
   }
 
   @Get(':userId')
-  @ApiBearerAuth()
+  @ApiCookieAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '사용자 상세 조회' })
   @ApiResponse({
@@ -117,8 +116,8 @@ export class UsersController {
     };
   }
 
-  @Put(':userId')
-  @ApiBearerAuth()
+  @Patch(':userId')
+  @ApiCookieAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '사용자 수정' })
   async updateUser(
@@ -132,7 +131,7 @@ export class UsersController {
   }
 
   @Delete(':userId')
-  @ApiBearerAuth()
+  @ApiCookieAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '사용자 삭제' })
   @ApiResponse({
