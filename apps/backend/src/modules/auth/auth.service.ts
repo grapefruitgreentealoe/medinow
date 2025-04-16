@@ -7,6 +7,7 @@ import { CookieOptions } from 'express';
 import { AppConfigService } from '../../config/app/config.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
+import { UserRole } from '../../common/enums/roles.enum';
 
 @Injectable()
 export class AuthService {
