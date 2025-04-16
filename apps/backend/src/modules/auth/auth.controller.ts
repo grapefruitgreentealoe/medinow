@@ -7,9 +7,11 @@ import {
   ClassSerializerInterceptor,
   Res,
   UseGuards,
+  UploadedFile,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { CreateAdminDto } from '../users/dto/create-admin.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import {
@@ -17,7 +19,7 @@ import {
   ApiBody,
   ApiResponse,
   ApiTags,
-  ApiBearerAuth,
+  ApiConsumes,
   ApiCookieAuth,
 } from '@nestjs/swagger';
 import { SignupResponseDto } from './dto/signup-response.dto';
@@ -26,11 +28,16 @@ import { RequestOrigin } from '../../common/decorators/request-origin.decorator'
 import { RequestUserId } from '../../common/decorators/request-userId.decorator';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImagesService } from '../images/images.service';
 
 @ApiTags('인증')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly imagesService: ImagesService,
+  ) {}
 
   @ApiOperation({ summary: '회원가입' })
   @ApiBody({ type: CreateUserDto })
@@ -46,9 +53,44 @@ export class AuthController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto) {
-    const user = await this.authService.signup(createUserDto);
+    await this.authService.signup(createUserDto);
     return {
       message: '회원가입 성공',
+    };
+  }
+
+  @ApiOperation({ summary: '관리자 회원가입' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateUserDto })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: '관리자 회원가입 성공',
+  })
+  @UseInterceptors(
+    FileInterceptor('businessLicense', {
+      fileFilter: (req, file, callback) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|pdf)$/)) {
+          return callback(
+            new Error('이미지 또는 PDF 파일만 업로드 가능합니다.'),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+      limits: {
+        fileSize: 1024 * 1024 * 5, // 5MB
+      },
+    }),
+  )
+  @Post('admin-signup')
+  async adminSignup(
+    @Body() createAdminDto: CreateAdminDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    await this.authService.signupAdmin(createAdminDto, file);
+
+    return {
+      message: '관리자 회원가입 성공',
     };
   }
 
@@ -68,18 +110,18 @@ export class AuthController {
     @RequestOrigin() requestOrigin: string,
     @Res({ passthrough: true }) response: Response,
   ): Promise<LoginResponseDto> {
-    const { accessToken, accessOptions, refreshToken, refreshOptions } =
+    const { accessToken, accessOptions, isAdmin } =
       await this.authService.login(loginDto, requestOrigin);
 
     response.cookie('accessToken', accessToken, accessOptions);
-    response.cookie('refreshToken', refreshToken, refreshOptions);
 
     return plainToInstance(LoginResponseDto, {
       message: '로그인 성공',
+      isAdmin,
     });
   }
 
-  @ApiBearerAuth()
+  @ApiCookieAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '로그아웃' })
   @ApiResponse({

@@ -3,6 +3,7 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 import { CareUnitCategory } from '../../../common/enums/careUnits.enum';
 import { UserProfile } from 'src/modules/users/entities/user-profile.entity';
 import { Department } from 'src/modules/departments/entities/department.entity';
+import { Image } from 'src/modules/images/entities/image.entity';
 
 @Entity()
 @Index(['hpId', 'category'], { unique: true })
@@ -96,4 +97,9 @@ export class CareUnit extends BaseEntity {
     onDelete: 'CASCADE',
   })
   departments: Department[];
+  @OneToOne(() => Image, (image) => image.careUnit, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  images: Image | null;
 }

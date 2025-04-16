@@ -167,8 +167,12 @@ export class CareUnitService {
     return this.careUnitRepository.findOne({ where: { id } });
   }
   //🏥 상세 정보 조회 by hpId & category
-  async getCareUnitDetailByhpId(hpId: string, category?: string) {
-    return this.careUnitRepository.find({ where: { hpId, category } });
+  async getCareUnitDetailByHpid(hpId: string, category?: string) {
+    if (category) {
+      return this.careUnitRepository.findOne({ where: { hpId, category } });
+    } else {
+      return this.careUnitRepository.find({ where: { hpId } });
+    }
   }
 
   //🏥 상세 정보 조회 by 위치
