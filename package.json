@@ -6,8 +6,10 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
+    "cross-env": "^7.0.3",
     "eslint": "^9.24.0",
     "eslint-config-prettier": "^10.1.2",
+    "husky": "^8.0.0",
     "prettier": "^3.5.3",
     "turbo": "^2.5.0",
     "typescript": "^5.8.3"
@@ -17,10 +19,11 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "setup:env": "cp .env.frontend.template .env.frontend && cp .env.backend.template .env.backend"
+    "setup:env": "cp .env.frontend.template .env.frontend && cp .env.backend.template .env.backend",
+    "prepare": "cross-env-shell \"[ \\\"$HUSKY\\\" != \\\"0\\\" ] && husky install || echo 'Skip husky'\""
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "packageManager": "pnpm@10.8.0+sha512.0e82714d1b5b43c74610193cb20734897c1d00de89d0e18420aebc5977fa13d780a9cb05734624e81ebd81cc876cd464794850641c48b9544326b5622ca29971"
 }

@@ -1,3 +1,6 @@
 node_modules
-.env
 .turbo
+.git
+.gitignore
+.env.local
+dist

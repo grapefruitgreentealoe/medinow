@@ -1,42 +1,148 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
-  Param,
+  HttpStatus,
+  Get,
+  Query,
+  UseGuards,
   Delete,
+  Param,
+  Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import {
+  ApiOperation,
+  ApiQuery,
+  ApiBody,
+  ApiResponse,
+  ApiTags,
+  ApiBearerAuth,
+  ApiCookieAuth,
+} from '@nestjs/swagger';
+import { User } from './entities/user.entity';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 
+@ApiTags('사용자 / 관리자')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @ApiOperation({ summary: '사용자 등록' })
+  @ApiBody({ type: CreateUserDto })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: '사용자 등록 성공',
+    type: User,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '사용자 등록 실패',
+  })
+  async createUser(@Body() createUserDto: CreateUserDto) {
+    const user = await this.usersService.createUser(createUserDto);
+    return {
+      message: '사용자 등록 성공',
+    };
+  }
+
+  @Get('check-email')
+  @ApiOperation({ summary: '이메일 중복 확인' })
+  @ApiQuery({
+    name: 'email',
+    type: String,
+    description: '이메일',
+    required: true,
+    example: 'test@test.com',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '이메일 중복 확인 성공',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '이메일 중복 확인 실패',
+  })
+  async checkEmail(@Query('email') email: string) {
+    const isExist = await this.usersService.isExistEmail(email);
+    return {
+      message: '이메일 중복 확인 성공',
+      email,
+      isDuplicate: isExist,
+    };
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '사용자 목록 조회' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '사용자 목록 조회 성공',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: '사용자 목록 조회 실패',
+  })
+  async getUsers() {
+    const users = await this.usersService.findUsers();
+    return {
+      message: '사용자 목록 조회 성공',
+      users,
+    };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  @Get(':userId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '사용자 상세 조회' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '사용자 상세 조회 성공',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: '사용자 상세 조회 실패',
+  })
+  async getUser(@Param('userId') userId: string) {
+    const user = await this.usersService.findUserById(userId);
+    return {
+      message: '사용자 상세 조회 성공',
+      user,
+    };
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @Put(':userId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '사용자 수정' })
+  async updateUser(
+    @Param('userId') userId: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    await this.usersService.updateUser(userId, updateUserDto);
+    return {
+      message: '사용자 수정 성공',
+    };
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @Delete(':userId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '사용자 삭제' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '사용자 삭제 성공',
+  })
+  async deleteUser(@Param('userId') userId: string) {
+    await this.usersService.deleteUser(userId);
+    return {
+      message: '사용자 삭제 성공',
+    };
   }
 }
