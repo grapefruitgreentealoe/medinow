@@ -1,13 +1,12 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class AddImageAndDepartmentsAndCongestionAndUpdateAll1744821559311 implements MigrationInterface {
-    name = 'AddImageAndDepartmentsAndCongestionAndUpdateAll1744821559311'
+export class AddImageAndDepartmentsAndCongestionAndUpdateAll1744822925806 implements MigrationInterface {
+    name = 'AddImageAndDepartmentsAndCongestionAndUpdateAll1744822925806'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "department" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, "name" character varying NOT NULL, "careUnitId" uuid NOT NULL, CONSTRAINT "PK_9a2213262c1593bffb581e382f5" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "congestion_time" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, "hour" integer NOT NULL, "congestionLevel" character varying NOT NULL, CONSTRAINT "PK_9a85e1a80841c34b077de9e7bf7" PRIMARY KEY ("id"))`);
         await queryRunner.query(`ALTER TABLE "user_profile" DROP COLUMN "imgUrl"`);
-        await queryRunner.query(`CREATE TYPE "public"."images_type_enum" AS ENUM('user_profile', 'care_unit', 'business_license')`);
         await queryRunner.query(`ALTER TABLE "images" ADD "type" "public"."images_type_enum"`);
         await queryRunner.query(`ALTER TABLE "images" ADD "userId" uuid`);
         await queryRunner.query(`ALTER TABLE "images" ADD "userProfileId" uuid`);
@@ -37,7 +36,6 @@ export class AddImageAndDepartmentsAndCongestionAndUpdateAll1744821559311 implem
         await queryRunner.query(`ALTER TABLE "images" DROP COLUMN "userProfileId"`);
         await queryRunner.query(`ALTER TABLE "images" DROP COLUMN "userId"`);
         await queryRunner.query(`ALTER TABLE "images" DROP COLUMN "type"`);
-        await queryRunner.query(`DROP TYPE "public"."images_type_enum"`);
         await queryRunner.query(`ALTER TABLE "user_profile" ADD "imgUrl" text`);
         await queryRunner.query(`DROP TABLE "congestion_time"`);
         await queryRunner.query(`DROP TABLE "department"`);
