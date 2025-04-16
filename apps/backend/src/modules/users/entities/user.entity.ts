@@ -1,7 +1,10 @@
 import { BaseEntity } from '../../../common/entities/base.entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToOne, OneToMany } from 'typeorm';
 import { UserRole } from '../../../common/enums/roles.enum';
 import { Exclude } from 'class-transformer';
+import { UserProfile } from './user-profile.entity';
+import { Image } from 'src/modules/images/entities/image.entity';
+
 @Entity()
 export class User extends BaseEntity {
   @Column({ type: 'text', unique: true })
@@ -9,19 +12,7 @@ export class User extends BaseEntity {
 
   @Exclude()
   @Column({ type: 'text', nullable: true })
-  password: string;
-
-  @Column({ type: 'text' })
-  name: string;
-
-  @Column({ type: 'text' })
-  nickname: string;
-
-  @Column({ type: 'text', nullable: true })
-  address: string;
-
-  @Column({ type: 'integer', nullable: true })
-  age: number;
+  password: string | null;
 
   @Column({
     type: 'enum',
@@ -33,4 +24,12 @@ export class User extends BaseEntity {
   @Exclude()
   @Column({ type: 'text', nullable: true, default: null })
   refreshToken: string | null;
+
+  @OneToOne(() => UserProfile, (userProfile) => userProfile.user)
+  userProfile: UserProfile;
+
+  @OneToMany(() => Image, (image) => image.user, {
+    cascade: true,
+  })
+  images: Image[];
 }

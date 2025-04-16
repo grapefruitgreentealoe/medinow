@@ -8,22 +8,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ResponseCareUnitDto } from '../dto/response-care-unit.dto';
 import { CareUnitCategory } from 'src/common/enums/careUnits.enum';
-
+import { AppConfigService } from 'src/config/app/config.service';
+import { Department } from 'src/modules/departments/entities/department.entity';
 @Injectable()
 export class CareUnitAdminService {
-  private readonly EMERGENCY_API_URL =
-    'http://apis.data.go.kr/B552657/ErmctInfoInqireService/getEgytBassInfoInqire';
-  private readonly HOSPITAL_API_URL =
-    'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncFullDown';
-  private readonly PHARMACY_API_URL =
-    'http://apis.data.go.kr/B552657/ErmctInsttInfoInqireService/getParmacyFullDown';
-  private readonly API_URL =
-    'https://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncFullDown';
-  private readonly SERVICE_KEY = process.env.SERVICE_KEY;
+  private readonly API_URL = this.appConfigService.hospitalApiUrl;
+  private readonly HOSPITAL_BASIC_API_URL =
+    this.appConfigService.hospitalBasicApiUrl;
+  private readonly SERVICE_KEY = this.appConfigService.serviceKey;
 
   constructor(
     @InjectRepository(CareUnit)
     private readonly careUnitRepository: Repository<CareUnit>,
+    @InjectRepository(Department)
+    private readonly departmentRepository: Repository<Department>,
+    private readonly appConfigService: AppConfigService,
   ) {}
 
   // 초기 DB세팅 - 모든 careUnit 데이터 저장
@@ -51,7 +50,7 @@ export class CareUnitAdminService {
         const batch = items.slice(i, i + batchSize);
         const careUnits = batch
           .map((item) => {
-            if (!item?.hpid) return null;
+            if (!item?.hpId) return null;
 
             const parseTime = (
               value: string | number | null | undefined,
@@ -65,7 +64,7 @@ export class CareUnitAdminService {
               name: item.dutyName,
               address: item.dutyAddr,
               tel: item.dutyTel1,
-              hpid: item.hpid,
+              hpId: item.hpId,
               lat: parseFloat(item.wgs84Lat),
               lng: parseFloat(item.wgs84Lon),
               mondayOpen: parseTime(item.dutyTime1s),
@@ -106,7 +105,7 @@ export class CareUnitAdminService {
       for (let i = 0; i < emergencyItems.length; i += batchSize) {
         const batch = emergencyItems.slice(i, i + batchSize);
         const emergencyUnits = batch.map((item) => {
-          if (!item?.hpid) return null;
+          if (!item?.hpId) return null;
 
           const parseTime = (
             value: string | number | null | undefined,
@@ -120,7 +119,7 @@ export class CareUnitAdminService {
             name: item.dutyName,
             address: item.dutyAddr,
             tel: item.dutyTel3,
-            hpid: item.hpid,
+            hpId: item.hpId,
             lat: parseFloat(item.wgs84Lat),
             lng: parseFloat(item.wgs84Lon),
             mondayOpen: parseTime(item.dutyTime1s),
@@ -156,6 +155,51 @@ export class CareUnitAdminService {
     } catch (error) {
       console.error('❌ 에러 발생:', error);
       throw new NotFoundException('Failed to save care units');
+    }
+  }
+
+  // 초기 DB세팅 - hospital 진료과목 데이터 저장
+  async saveHospitalDepartments() {
+    try {
+      const url = `${this.HOSPITAL_BASIC_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
+      const response = await fetch(url, {
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        },
+      });
+      const text = await response.text();
+      if (text.startsWith('<')) {
+        throw new BadRequestException('API가 XML/HTML을 반환했습니다.');
+      }
+      const data = JSON.parse(text);
+      const items = Array.isArray(data.response?.body?.items?.item)
+        ? data.response.body.items.item
+        : [data.response.body.items.item];
+      // 1. category에서 hospital 데이터만 추출
+      const hospitalItems = items.filter(
+        (item) => item.category === 'hospital',
+      );
+      // 2. 각 병원별 진료과목 데이터 저장
+      for (const hospital of hospitalItems) {
+        const HospitalCareUnit = await this.careUnitRepository.findOne({
+          where: { hpId: hospital.hpId, category: hospital.category },
+        });
+        if (!HospitalCareUnit) {
+          throw new NotFoundException('Care unit not found');
+        }
+        const departments = hospital.dgidIdName.split(',').map((dgIdName) => {
+          return this.departmentRepository.create({
+            name: dgIdName,
+            careUnitId: HospitalCareUnit.id,
+          });
+        });
+        await this.departmentRepository.save(departments);
+        return { status: 'success', message: '병원 진료과목 저장 완료' };
+      }
+    } catch (error) {
+      console.error('❌ 에러 발생:', error);
+      throw new NotFoundException('Failed to save hospital departments');
     }
   }
 }

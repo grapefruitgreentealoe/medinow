@@ -1,12 +1,14 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { CreateAdminDto } from '../users/dto/create-admin.dto';
 import { LoginDto } from './dto/login.dto';
 import { comparePassword } from '../../common/utils/password.util';
 import { CookieOptions } from 'express';
 import { AppConfigService } from '../../config/app/config.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
+import { UserRole } from '../../common/enums/roles.enum';
 
 @Injectable()
 export class AuthService {
@@ -17,28 +19,42 @@ export class AuthService {
   ) {}
 
   async signup(createUserDto: CreateUserDto) {
-    const user = await this.usersService.createUser(createUserDto);
-    return user;
+    await this.usersService.createUser(createUserDto);
+    return {
+      message: '회원가입 성공',
+    };
+  }
+
+  async signupAdmin(
+    createUserDto: CreateAdminDto,
+    businessLicense?: Express.Multer.File,
+  ) {
+    await this.usersService.createAdminUser(createUserDto, businessLicense);
+    return {
+      message: '관리자 회원가입 성공',
+    };
   }
 
   async login(loginDto: LoginDto, requestOrigin: string) {
-    const user = await this.usersService.findUserByEmail(loginDto.email);
+    const { email, password } = loginDto;
+    const user = await this.usersService.findUserByEmail(email);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('이메일과 비밀번호가 일치하지 않습니다.');
     }
 
-    const isPasswordValid = await comparePassword(
-      loginDto.password,
-      user.password,
-    );
+    const isPasswordValid = await comparePassword(password, user.password!);
     if (!isPasswordValid) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('이메일과 비밀번호가 일치하지 않습니다.');
     }
+
     return this.setJwtTokenBuilder(user, requestOrigin);
   }
 
   setCookieOptions(maxAge: number, requestOrigin: string): CookieOptions {
-    const url = new URL(requestOrigin);
+    const fullUrl = requestOrigin.includes('http')
+      ? requestOrigin
+      : `http://${requestOrigin}`;
+    const url = new URL(fullUrl);
     const isLocalhost =
       url.hostname.includes('localhost') || url.hostname.includes('127.0.0.1');
 
@@ -55,11 +71,7 @@ export class AuthService {
   }
 
   async setJwtAccessToken(user: User, requestOrigin: string) {
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    };
+    const payload = { sub: user.id };
     const expiresIn = this.appConfigService.jwtAccessExpirationTime!;
     const maxAge = expiresIn * 1000;
     const accessOptions = this.setCookieOptions(maxAge, requestOrigin);
@@ -73,11 +85,7 @@ export class AuthService {
   }
 
   async setJwtRefreshToken(user: User, requestOrigin: string) {
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    };
+    const payload = { sub: user.id };
     const expiresIn = this.appConfigService.jwtRefreshExpirationTime!;
     const maxAge = expiresIn * 1000;
     const refreshOptions = this.setCookieOptions(maxAge, requestOrigin);
@@ -98,8 +106,12 @@ export class AuthService {
       requestOrigin,
     );
 
+    const isAdmin = user.role === UserRole.ADMIN ? true : false;
+
     await this.usersService.updateUserRefreshToken(user.id, refreshToken);
     return {
+      message: '로그인 성공',
+      isAdmin,
       accessToken,
       refreshToken,
       accessOptions,
