@@ -134,7 +134,7 @@ export class CareUnitController {
     @Query('hpId') hpId: string,
     @Query('category') category?: string,
   ) {
-    return this.careUnitService.getCareUnitDetailByhpId(hpId, category);
+    return await this.careUnitService.getCareUnitDetailByHpid(hpId, category);
   }
 
   @Get('location')
