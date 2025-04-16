@@ -250,25 +250,25 @@ export class CareUnitService {
     let close;
     const date = new Date();
     const day = date.getDay();
-    if(day === 0) {
+    if (day === 0) {
       open = careUnit.sundayOpen;
       close = careUnit.sundayClose;
-    } else if(day === 1) {
+    } else if (day === 1) {
       open = careUnit.mondayOpen;
       close = careUnit.mondayClose;
-    } else if(day === 2) {
+    } else if (day === 2) {
       open = careUnit.tuesdayOpen;
       close = careUnit.tuesdayClose;
-    } else if(day === 3) {
+    } else if (day === 3) {
       open = careUnit.wednesdayOpen;
       close = careUnit.wednesdayClose;
-    } else if(day === 4) {
+    } else if (day === 4) {
       open = careUnit.thursdayOpen;
       close = careUnit.thursdayClose;
-    } else if(day === 5) {
+    } else if (day === 5) {
       open = careUnit.fridayOpen;
       close = careUnit.fridayClose;
-    } else if(day === 6) {
+    } else if (day === 6) {
       open = careUnit.saturdayOpen;
       close = careUnit.saturdayClose;
     } else {
@@ -277,9 +277,7 @@ export class CareUnitService {
     }
     const now = date.getHours() * 100 + date.getMinutes(); // 1430 형식 (14:30)
     console.log('date', date, 'now', now);
-    if (
-      (open <= now && close >= now)
-    ) {
+    if (open <= now && close >= now) {
       console.log('⏱️지금 운영 중입니다');
       careUnit.now_open = true;
       await this.careUnitRepository.save(careUnit);
