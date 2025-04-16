@@ -69,7 +69,7 @@ export class CareUnitController {
     type: String,
   })
   async saveHospitalDepartments() {
-    return this.careUnitAdminService.saveHospitalDepartments();
+    return await this.careUnitAdminService.saveHospitalDepartments();
   }
 
   @Get('category')
