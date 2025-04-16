@@ -61,6 +61,17 @@ export class CareUnitController {
     return this.careUnitAdminService.saveAllCareUnits();
   }
 
+  @Post('hospital-departments')
+  @ApiOperation({ summary: 'Admin: 병원 진료과목 저장' })
+  @ApiResponse({
+    status: 200,
+    description: '성공',
+    type: String,
+  })
+  async saveHospitalDepartments() {
+    return this.careUnitAdminService.saveHospitalDepartments();
+  }
+
   @Get('category')
   @ApiOperation({ summary: 'Admin : 카테고리별 조회 (전체 DB대상)' })
   @ApiQuery({
@@ -97,12 +108,12 @@ export class CareUnitController {
     return this.careUnitService.addBadge(id);
   }
 
-  @Get('hpid')
+  @Get('hpId')
   @ApiOperation({
-    summary: '사용자, 기관관리자 : hpid와 category로 상세 정보 조회',
+    summary: '사용자, 기관관리자 : hpId와 category로 상세 정보 조회',
   })
   @ApiQuery({
-    name: 'hpid',
+    name: 'hpId',
     required: true,
     type: String,
     description: '기관 고유 아이디',
@@ -119,11 +130,11 @@ export class CareUnitController {
     description: '성공',
     type: CareUnit,
   })
-  async getCareUnitDetailByHpid(
-    @Query('hpid') hpid: string,
+  async getCareUnitDetailByhpId(
+    @Query('hpId') hpId: string,
     @Query('category') category?: string,
   ) {
-    return this.careUnitService.getCareUnitDetailByHpid(hpid, category);
+    return await this.careUnitService.getCareUnitDetailByHpid(hpId, category);
   }
 
   @Get('location')
@@ -142,7 +153,7 @@ export class CareUnitController {
           address: '서울특별시 종로구 대학로 101',
           tel: '02-2072-2114',
           category: 'hospital',
-          hpid: 'A1100027',
+          hpId: 'A1100027',
           mondayOpen: 900,
           mondayClose: 1700,
           tuesdayOpen: 900,
@@ -175,7 +186,7 @@ export class CareUnitController {
     return await this.careUnitService.getCareUnitDetailByLocation(lat, lng);
   }
 
-  // 위치로 조회하나, name, category, hpid 반환하기
+  // 위치로 조회하나, name, category, hpId 반환하기
   @Get('location-signup')
   @ApiOperation({ summary: '사용자 : 위치로 기관 조회 (가입 페이지)' })
   @ApiQuery({ name: 'lat', required: true, type: Number })
@@ -183,13 +194,12 @@ export class CareUnitController {
   @ApiResponse({
     status: 200,
     description: '성공',
-    type: [CareUnit],
     schema: {
       example: [
         {
           name: '서울대학교병원',
           category: 'hospital',
-          hpid: 'A1100027',
+          hpId: 'A1100027',
         },
       ],
     },
@@ -205,17 +215,24 @@ export class CareUnitController {
     return careUnits.map((careUnit) => ({
       name: careUnit.name,
       category: careUnit.category,
-      hpid: careUnit.hpid,
+      hpId: careUnit.hpId,
     }));
   }
 
   @Get('location-by-category')
-  @ApiOperation({ summary: '사용자 : Care Unit 위치와 카테고리로 조회' })
+  @ApiOperation({ summary: '사용자 : 위치와 카테고리로 반경 조회' })
   @ApiQuery({
     name: 'category',
     required: false,
     type: String,
     enum: ['emergency', 'hospital', 'pharmacy'],
+  })
+  @ApiQuery({
+    name: 'level',
+    required: true,
+    type: Number,
+    description: '반경 레벨 (예시: 1)',
+    example: 1,
   })
   @ApiQuery({
     name: 'lat',
@@ -241,7 +258,7 @@ export class CareUnitController {
           address: '서울특별시 종로구 대학로 101',
           tel: '02-2072-2114',
           category: 'hospital',
-          hpid: 'A1100027',
+          hpId: 'A1100027',
           mondayOpen: 900,
           mondayClose: 1700,
           tuesdayOpen: 900,
@@ -270,11 +287,13 @@ export class CareUnitController {
   async getCareUnitByCategoryAndLocation(
     @Query('lat') lat: number,
     @Query('lng') lng: number,
+    @Query('level') level: number = 1,
     @Query('category') category?: string,
   ) {
     return this.careUnitService.getCareUnitByCategoryAndLocation(
       lat,
       lng,
+      level,
       category,
     );
   }
@@ -304,7 +323,7 @@ export class CareUnitController {
     required: true,
     type: String,
     description: '기관 고유 아이디',
-    example: 'A2108916',
+    example: 'c81845c9-4008-4fd8-8f47-903dc73d9f61',
   })
   @ApiResponse({
     status: 200,

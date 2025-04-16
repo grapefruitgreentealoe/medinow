@@ -27,7 +27,7 @@ export class AddImageAndUpdateAll1744807060375 implements MigrationInterface {
       `ALTER TABLE "images" ALTER COLUMN "filePath" DROP NOT NULL`,
     );
     await queryRunner.query(
-      `CREATE UNIQUE INDEX "IDX_0e700a702cce5000e98620ceb9" ON "care_unit" ("hpid", "category") `,
+      `CREATE UNIQUE INDEX "IDX_0e700a702cce5000e98620ceb9" ON "care_unit" ("hpId", "category") `,
     );
     await queryRunner.query(
       `ALTER TABLE "images" ADD CONSTRAINT "FK_96514329909c945f10974aff5f8" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
