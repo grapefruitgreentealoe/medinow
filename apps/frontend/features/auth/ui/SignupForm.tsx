@@ -7,8 +7,8 @@ import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useEmailCheck } from '../model/useEmailCheck';
 import { useState } from 'react';
+import { checkEmail, signup } from '../api';
 
 type FormData = z.infer<typeof signupSchema>;
 
@@ -30,11 +30,9 @@ export default function SignupForm() {
       nickname: '테스트닉',
       address: '서울시 강남구',
       age: '29',
-      terms: true,
     },
   });
 
-  const { mutateAsync: checkEmail } = useEmailCheck();
   const [checking, setChecking] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -47,10 +45,10 @@ export default function SignupForm() {
       return;
     }
 
-    console.log('회원가입 성공', data);
-    setLoading(true);
-
-    await new Promise((r) => setTimeout(r, 700));
+    await signup({
+      ...data,
+      age: Number(data.age),
+    });
     console.log('회원가입 성공:', data);
 
     setLoading(false);

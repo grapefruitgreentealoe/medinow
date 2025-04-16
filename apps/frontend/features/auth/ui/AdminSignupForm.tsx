@@ -7,13 +7,13 @@ import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { useAdminSignup } from '../model/useAdminSignup';
 import { useRouter } from 'next/navigation';
 import type { SignupData } from '../type';
 
 type FormData = z.infer<typeof adminSignupSchema>;
 import { useState } from 'react';
 import HospitalSearchModal from '@/components/HospitalSearchModal';
+import { adminSignup } from '../api';
 
 export default function AdminSignupForm() {
   const router = useRouter();
@@ -51,7 +51,6 @@ export default function AdminSignupForm() {
     setValue('lat', data.lat);
     setValue('lng', data.lng);
   };
-  const { mutateAsync: signupAdmin } = useAdminSignup();
 
   const onSubmit = async (data: FormData) => {
     const formData = new FormData();
@@ -67,7 +66,7 @@ export default function AdminSignupForm() {
     const signupData: SignupData = Object.fromEntries(
       formData.entries()
     ) as unknown as SignupData;
-    await signupAdmin(signupData);
+    await adminSignup(signupData);
     router?.push('/');
   };
 

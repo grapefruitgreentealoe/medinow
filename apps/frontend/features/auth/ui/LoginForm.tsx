@@ -4,10 +4,10 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '../schema/loginSchema';
-import { useLogin } from '../model/useLogin';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { login } from '../api';
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -21,16 +21,14 @@ export default function LoginForm() {
     defaultValues: {
       email: 'test@example.com',
       password: 'password123',
-      isAdmin: true,
     },
   });
 
-  const { mutate } = useLogin();
   const router = useRouter();
 
   const onSubmit = async (data: FormData) => {
     try {
-      const result = await mutate(data);
+      const result = await login(data);
       localStorage.setItem('isAdmin', result.isAdmin);
       router.push('/');
     } catch (e) {
