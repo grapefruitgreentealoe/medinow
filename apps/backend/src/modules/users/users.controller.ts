@@ -6,6 +6,9 @@ import {
   Get,
   Query,
   UseGuards,
+  Delete,
+  Param,
+  Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,9 +19,11 @@ import {
   ApiResponse,
   ApiTags,
   ApiBearerAuth,
+  ApiCookieAuth,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('사용자 / 관리자')
 @Controller('users')
@@ -43,7 +48,6 @@ export class UsersController {
     const user = await this.usersService.createUser(createUserDto);
     return {
       message: '사용자 등록 성공',
-      user,
     };
   }
 
@@ -67,8 +71,78 @@ export class UsersController {
   async checkEmail(@Query('email') email: string) {
     const isExist = await this.usersService.isExistEmail(email);
     return {
+      message: '이메일 중복 확인 성공',
       email,
       isDuplicate: isExist,
+    };
+  }
+
+  @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '사용자 목록 조회' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '사용자 목록 조회 성공',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: '사용자 목록 조회 실패',
+  })
+  async getUsers() {
+    const users = await this.usersService.findUsers();
+    return {
+      message: '사용자 목록 조회 성공',
+      users,
+    };
+  }
+
+  @Get(':userId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '사용자 상세 조회' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '사용자 상세 조회 성공',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: '사용자 상세 조회 실패',
+  })
+  async getUser(@Param('userId') userId: string) {
+    const user = await this.usersService.findUserById(userId);
+    return {
+      message: '사용자 상세 조회 성공',
+      user,
+    };
+  }
+
+  @Put(':userId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '사용자 수정' })
+  async updateUser(
+    @Param('userId') userId: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    await this.usersService.updateUser(userId, updateUserDto);
+    return {
+      message: '사용자 수정 성공',
+    };
+  }
+
+  @Delete(':userId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '사용자 삭제' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '사용자 삭제 성공',
+  })
+  async deleteUser(@Param('userId') userId: string) {
+    await this.usersService.deleteUser(userId);
+    return {
+      message: '사용자 삭제 성공',
     };
   }
 }

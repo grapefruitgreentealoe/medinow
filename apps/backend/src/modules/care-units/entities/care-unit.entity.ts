@@ -1,7 +1,7 @@
 import { Column, Entity, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { CareUnitCategory } from '../../../common/enums/careUnits.enum';
-import { User } from 'src/modules/users/entities/user.entity';
+import { UserProfile } from 'src/modules/users/entities/user-profile.entity';
 
 @Entity()
 export class CareUnit extends BaseEntity {
@@ -83,9 +83,9 @@ export class CareUnit extends BaseEntity {
   @Column({ nullable: true })
   kakao_url: string;
 
-  @OneToOne(() => User, (user) => user.careUnit, {
+  @OneToOne(() => UserProfile, (userProfile) => userProfile.careUnit, {
     nullable: true,
     onDelete: 'SET NULL',
   })
-  user: User | null;
+  user: UserProfile | null;
 }
