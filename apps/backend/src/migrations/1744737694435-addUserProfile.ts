@@ -255,7 +255,7 @@ export class AddUserProfile1744737694435 implements MigrationInterface {
       `ALTER TABLE "care_unit" ADD "mondayOpen" character varying`,
     );
     await queryRunner.query(
-      `ALTER TABLE "care_unit" ADD CONSTRAINT "UQ_b4b96513b1e4db7b8f967e98b75" UNIQUE ("hpid")`,
+      `ALTER TABLE "care_unit" ADD CONSTRAINT "UQ_b4b96513b1e4db7b8f967e98b75" UNIQUE ("hpId")`,
     );
     await queryRunner.query(
       `ALTER TABLE "care_unit" ALTER COLUMN "name" SET NOT NULL`,

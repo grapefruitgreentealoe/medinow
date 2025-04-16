@@ -96,7 +96,7 @@ export class CareUnitService {
           name: emergency.dutyName,
           address: emergency.dutyAddr,
           tel: emergency.dutyTel1,
-          hpid: emergency.hpid,
+          hpId: emergency.hpId,
           lat: parseFloat(emergency.wgs84Lat),
           lng: parseFloat(emergency.wgs84Lon),
           monday: { open: emergency.dutyTime1s, close: emergency.dutyTime1c },
@@ -117,7 +117,7 @@ export class CareUnitService {
           name: hospital.dutyName,
           address: hospital.dutyAddr,
           tel: hospital.dutyTel1,
-          hpid: hospital.hpid,
+          hpId: hospital.hpId,
           lat: parseFloat(hospital.wgs84Lat),
           lng: parseFloat(hospital.wgs84Lon),
           monday: { open: hospital.dutyTime1s, close: hospital.dutyTime1c },
@@ -135,7 +135,7 @@ export class CareUnitService {
           name: pharmacy.dutyName,
           address: pharmacy.dutyAddr,
           tel: pharmacy.dutyTel1,
-          hpid: pharmacy.hpid,
+          hpId: pharmacy.hpId,
           lat: parseFloat(pharmacy.wgs84Lat),
           lng: parseFloat(pharmacy.wgs84Lon),
           monday: { open: pharmacy.dutyTime1s, close: pharmacy.dutyTime1c },
@@ -166,9 +166,9 @@ export class CareUnitService {
   async getCareUnitDetail(id: string) {
     return this.careUnitRepository.findOne({ where: { id } });
   }
-  //🏥 상세 정보 조회 by hpid & category
-  async getCareUnitDetailByHpid(hpid: string, category?: string) {
-    return this.careUnitRepository.find({ where: { hpid, category } });
+  //🏥 상세 정보 조회 by hpId & category
+  async getCareUnitDetailByhpId(hpId: string, category?: string) {
+    return this.careUnitRepository.find({ where: { hpId, category } });
   }
 
   //🏥 상세 정보 조회 by 위치
@@ -201,17 +201,19 @@ export class CareUnitService {
   async getCareUnitByCategoryAndLocation(
     lat: number,
     lng: number,
+    level: number = 1,
     category?: string,
-  ) {
+  ): Promise<CareUnit[]> {
+    const maxLevel = 5;
     const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
     queryBuilder
       .where('careUnit.lat BETWEEN :minLat AND :maxLat', {
-        minLat: lat - 0.005, // 0.005도 즉 0.5km 즉 500m
-        maxLat: lat + 0.005,
+        minLat: lat - 0.005 * level, // 0.005도 즉 0.5km 즉 500m
+        maxLat: lat + 0.005 * level,
       })
       .andWhere('careUnit.lng BETWEEN :minLng AND :maxLng', {
-        minLng: lng - 0.005,
-        maxLng: lng + 0.005,
+        minLng: lng - 0.005 * level,
+        maxLng: lng + 0.005 * level,
       });
     // 카테고리 필터
     if (category) {
@@ -219,12 +221,21 @@ export class CareUnitService {
       // 특정 카테고리 조회시 이름 오름차순
       queryBuilder.orderBy('careUnit.name', 'ASC');
     } else {
-      // 전체 조회시 카테고리별 정렬 후 생성일자 내림차순
+      // 전체 조회시 카테고리별 정렬 후 이름 오름차순
       queryBuilder
         .orderBy('careUnit.category', 'ASC')
-        .addOrderBy('careUnit.createdAt', 'DESC');
+        .addOrderBy('careUnit.name', 'ASC');
     }
-    return queryBuilder.getMany();
+    const careUnits = await queryBuilder.getMany();
+    // 결과가 없으면 level을 증가시켜 재검색
+    if (careUnits.length === 0 && level <= maxLevel) {
+      level += 1;
+      return this.getCareUnitByCategoryAndLocation(lat, lng, level, category);
+    } else if (careUnits.length === 0 && level > maxLevel) {
+      console.log('🚫 해당 반경 내 조회 결과가 없습니다. 위치를 이동해주세요.');
+      return [];
+    }
+    return careUnits;
   }
 
   // 💫배지 추가
@@ -250,25 +261,25 @@ export class CareUnitService {
     let close;
     const date = new Date();
     const day = date.getDay();
-    if(day === 0) {
+    if (day === 0) {
       open = careUnit.sundayOpen;
       close = careUnit.sundayClose;
-    } else if(day === 1) {
+    } else if (day === 1) {
       open = careUnit.mondayOpen;
       close = careUnit.mondayClose;
-    } else if(day === 2) {
+    } else if (day === 2) {
       open = careUnit.tuesdayOpen;
       close = careUnit.tuesdayClose;
-    } else if(day === 3) {
+    } else if (day === 3) {
       open = careUnit.wednesdayOpen;
       close = careUnit.wednesdayClose;
-    } else if(day === 4) {
+    } else if (day === 4) {
       open = careUnit.thursdayOpen;
       close = careUnit.thursdayClose;
-    } else if(day === 5) {
+    } else if (day === 5) {
       open = careUnit.fridayOpen;
       close = careUnit.fridayClose;
-    } else if(day === 6) {
+    } else if (day === 6) {
       open = careUnit.saturdayOpen;
       close = careUnit.saturdayClose;
     } else {
@@ -277,9 +288,7 @@ export class CareUnitService {
     }
     const now = date.getHours() * 100 + date.getMinutes(); // 1430 형식 (14:30)
     console.log('date', date, 'now', now);
-    if (
-      (open <= now && close >= now)
-    ) {
+    if (open <= now && close >= now) {
       console.log('⏱️지금 운영 중입니다');
       careUnit.now_open = true;
       await this.careUnitRepository.save(careUnit);

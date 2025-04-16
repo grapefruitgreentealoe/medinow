@@ -10,6 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { ImagesModule } from './modules/images/images.module';
 import { S3Module } from './modules/s3/s3.module';
+import { DepartmentsModule } from './modules/departments/departments.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,6 +25,7 @@ import { S3Module } from './modules/s3/s3.module';
     RedisModule,
     S3Module,
     ImagesModule,
+    DepartmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
