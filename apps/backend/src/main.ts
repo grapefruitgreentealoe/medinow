@@ -26,12 +26,7 @@ async function bootstrap() {
     .setTitle('MediNow API')
     .setDescription('MediNow API 문서입니다.')
     .setVersion('0.0.1')
-    // .addBearerAuth() // 헤더에 토큰을 넣어서 요청할 때 사용
-    .addCookieAuth('accessToken', {
-      type: 'apiKey',
-      in: 'cookie',
-      name: 'accessToken',
-    }) // 쿠키에 토큰을 넣어서 요청할 때 사용
+    .addBearerAuth()
     .addServer('api/v1')
     .build();
 
