@@ -24,7 +24,7 @@ export class Image extends BaseEntity {
   @JoinColumn()
   user: User | null;
 
-  @OneToOne(() => UserProfile, (userProfile) => userProfile.images, {
+  @OneToOne(() => UserProfile, (userProfile) => userProfile.image, {
     nullable: true,
     onDelete: 'SET NULL',
   })
