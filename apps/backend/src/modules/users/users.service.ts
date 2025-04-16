@@ -71,7 +71,16 @@ export class UsersService {
       throw new ConflictException('이미 존재하는 이메일입니다.');
     }
 
-    const { email, password, name, hpId, careUnitCategory } = createUserDto;
+    const {
+      email,
+      password,
+      name,
+      careUnitCategory,
+      careUnitAddress,
+      careUnitName,
+      latitude,
+      longitude,
+    } = createUserDto;
 
     const queryRunner =
       this.userRepository.manager.connection.createQueryRunner();
@@ -86,13 +95,16 @@ export class UsersService {
       });
       const savedUser = await queryRunner.manager.save(newUser);
 
-      const careUnit = await this.careUnitService.getCareUnitDetailByHpid(
-        hpId,
+      const careUnit = await this.careUnitService.findCareUnitByFilters(
+        latitude,
+        longitude,
+        careUnitAddress,
+        careUnitName,
         careUnitCategory,
       );
 
       if (!careUnit) {
-        throw new NotFoundException('존재하지 않는 기관입니다.');
+        throw new NotFoundException('존재하지 않는 의료기관입니다.');
       }
 
       const newUserProfile = this.userProfileRepository.create({
