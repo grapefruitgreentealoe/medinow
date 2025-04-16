@@ -91,7 +91,6 @@ export default function SignupForm() {
       {errors.age && (
         <p className="text-sm text-red-500">{errors.age.message}</p>
       )}
-
       <Button type="submit" disabled={checking || loading}>
         {checking ? '이메일 확인 중...' : '회원가입'}
       </Button>
