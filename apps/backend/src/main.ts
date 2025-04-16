@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   // Create App
@@ -17,6 +18,8 @@ async function bootstrap() {
     origin: 'http://localhost:3000',
     credentials: true,
   };
+
+  app.use(cookieParser());
 
   // Use Global Pipes
   app.useGlobalPipes(new ValidationPipe({ transform: true }));

@@ -2,6 +2,7 @@ import { Column, Entity, Index, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { CareUnitCategory } from '../../../common/enums/careUnits.enum';
 import { UserProfile } from 'src/modules/users/entities/user-profile.entity';
+import { Image } from 'src/modules/images/entities/image.entity';
 
 @Entity()
 @Index(['hpid', 'category'], { unique: true })
@@ -89,4 +90,10 @@ export class CareUnit extends BaseEntity {
     onDelete: 'SET NULL',
   })
   user: UserProfile | null;
+
+  @OneToOne(() => Image, (image) => image.careUnit, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  images: Image | null;
 }
