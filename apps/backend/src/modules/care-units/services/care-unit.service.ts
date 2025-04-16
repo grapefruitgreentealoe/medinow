@@ -166,6 +166,7 @@ export class CareUnitService {
   async getCareUnitDetail(id: string) {
     return this.careUnitRepository.findOne({ where: { id } });
   }
+  
   //🏥 상세 정보 조회 by hpId & category
   async getCareUnitDetailByHpid(hpId: string, category?: string) {
     if (category) {
