@@ -5,28 +5,29 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import { Redis } from 'ioredis';
 import { AppConfigService } from 'src/config/app/config.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import {
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { CareUnitService } from './care-unit.service';
 
 export class CareUnitCongestionService {
   private readonly CACHE_TTL = 600;
-  private readonly EMERGENCY_CONGESTION_API_URL =
-    process.env.EMERGENCY_CONGESTION_API_URL;
 
   constructor(
     @InjectRepository(CareUnit)
     private readonly careUnitRepository: Repository<CareUnit>,
     @InjectRedis() private readonly redis: Redis,
     private readonly appConfigService: AppConfigService,
-  ) {
-    this.EMERGENCY_CONGESTION_API_URL =
-      this.appConfigService.emergencyCongestionApiUrl;
-  }
+    private readonly careUnitService: CareUnitService,
+  ) {}
 
   //10분마다 실행되는 크론 작업
   @Cron(CronExpression.EVERY_10_MINUTES)
   async updateCongestion() {
     try {
       const response = await fetch(
-        `${this.EMERGENCY_CONGESTION_API_URL}?serviceKey=${this.appConfigService.serviceKey}`,
+        `${this.appConfigService.emergencyCongestionApiUrl}?serviceKey=${this.appConfigService.serviceKey}`,
         {
           headers: {
             Accept: 'application/json',
@@ -39,10 +40,62 @@ export class CareUnitCongestionService {
       //Redis에 데이터 저장
       for (const item of congestionData) {
         const key = `congestion:${item.careUnitId}`;
-        await this.redis.set(key, item.congestion, 'EX', this.CACHE_TTL);
+        await this.redis.set(
+          key,
+          JSON.stringify({
+            hvec: item.hvec,
+            updatedAt: new Date().toISOString(),
+          }),
+          'EX',
+          this.CACHE_TTL,
+        );
       }
     } catch (error) {
       console.error(error);
+    }
+  }
+
+  async getCongestion(careUnitId: string) {
+    try {
+      // 먼저 CareUnit 조회
+      const careUnit = await this.careUnitService.getCareUnitDetail(careUnitId);
+      if (!careUnit) {
+        throw new NotFoundException('CareUnit not found');
+      }
+      // Redis에서 캐시된 혼잡도 데이터 조회
+      const cacheKey = `congestion:${careUnit.id}`;
+      const cachedData = await this.redis.get(cacheKey);
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+      // 캐시된 데이터가 없으면 API 호출하여 새로운 데이터 가져오기. fetch 키 확인필요요
+      const response = await fetch(
+        `${this.appConfigService.emergencyCongestionApiUrl}?serviceKey=${this.appConfigService.serviceKey}&HPID=${careUnit.hpId}`,
+        {
+          headers: {
+            Accept: 'application/json',
+          },
+        },
+      );
+      const data = await response.json();
+      const congestionData = data.response.body.items.item;
+      // Redis에 새로운 데이터 저장
+      await this.redis.set(
+        cacheKey,
+        JSON.stringify({
+          hvec: congestionData.hvec,
+          updatedAt: new Date().toISOString(),
+        }),
+        'EX',
+        this.CACHE_TTL,
+      );
+      return {
+        hvec: congestionData.hvec,
+        updatedAt: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('혼잡도 조회 실패:', error);
+      throw new InternalServerErrorException('혼잡도 조회 실패');
     }
   }
 }
