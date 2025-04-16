@@ -92,26 +92,6 @@ export default function SignupForm() {
         <p className="text-sm text-red-500">{errors.age.message}</p>
       )}
 
-      <Controller
-        name="terms"
-        control={control}
-        render={({ field }) => (
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="terms"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-            <label htmlFor="terms" className="text-sm">
-              약관에 동의합니다
-            </label>
-          </div>
-        )}
-      />
-      {errors.terms && (
-        <p className="text-sm text-red-500">{errors.terms.message}</p>
-      )}
-
       <Button type="submit" disabled={checking || loading}>
         {checking ? '이메일 확인 중...' : '회원가입'}
       </Button>
