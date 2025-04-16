@@ -1,15 +1,34 @@
-export type SignupData = {
+export interface SignupData {
   email: string;
   password: string;
-  managerName: string;
-  contact: string;
+  name: string;
+  nickname: string;
   address: string;
-  businessHourStart: string;
-  businessHourEnd: string;
-  medicalLicenseNumber: string;
-  terms: boolean;
-  businessLicense?: File;
-};
+  age: number;
+}
+
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+export interface AdminSignupData {
+  email: string;
+  password: string;
+  name: string;
+  nickname: string;
+  address?: string;
+  age?: number;
+}
+
+export interface SignupData {
+  email: string;
+  password: string;
+  name: string;
+  nickname: string;
+  address: string;
+  age: number;
+}
 
 export interface CareUnitData {
   name: string;
