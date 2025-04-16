@@ -4,7 +4,3 @@ node_modules
 .gitignore
 .env.local
 dist
-coverage
-.vscode
-.DS_Store
-*.log

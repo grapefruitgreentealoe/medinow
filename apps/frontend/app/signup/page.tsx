@@ -1,10 +1,5 @@
-import SignupForm from '@/features/auth/ui/SignupForm';
+import SignupPage from '@/features/auth/page/SignupPage';
 
-export default function SignupPage() {
-  return (
-    <div className="py-10">
-      <h1 className="text-2xl font-bold text-center mb-6">회원가입</h1>
-      <SignupForm />
-    </div>
-  );
+export default function Page() {
+  return <SignupPage />;
 }

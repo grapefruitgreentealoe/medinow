@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { CareUnit } from '../entities/care-unit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, Raw, Like } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { ResponseCareUnitDto } from '../dto/response-care-unit.dto';
 import { AppConfigService } from 'src/config/app/config.service';
 
@@ -96,7 +96,7 @@ export class CareUnitService {
           name: emergency.dutyName,
           address: emergency.dutyAddr,
           tel: emergency.dutyTel1,
-          hpId: emergency.hpId,
+          hpid: emergency.hpid,
           lat: parseFloat(emergency.wgs84Lat),
           lng: parseFloat(emergency.wgs84Lon),
           monday: { open: emergency.dutyTime1s, close: emergency.dutyTime1c },
@@ -117,7 +117,7 @@ export class CareUnitService {
           name: hospital.dutyName,
           address: hospital.dutyAddr,
           tel: hospital.dutyTel1,
-          hpId: hospital.hpId,
+          hpid: hospital.hpid,
           lat: parseFloat(hospital.wgs84Lat),
           lng: parseFloat(hospital.wgs84Lon),
           monday: { open: hospital.dutyTime1s, close: hospital.dutyTime1c },
@@ -135,7 +135,7 @@ export class CareUnitService {
           name: pharmacy.dutyName,
           address: pharmacy.dutyAddr,
           tel: pharmacy.dutyTel1,
-          hpId: pharmacy.hpId,
+          hpid: pharmacy.hpid,
           lat: parseFloat(pharmacy.wgs84Lat),
           lng: parseFloat(pharmacy.wgs84Lon),
           monday: { open: pharmacy.dutyTime1s, close: pharmacy.dutyTime1c },
@@ -166,79 +166,9 @@ export class CareUnitService {
   async getCareUnitDetail(id: string) {
     return this.careUnitRepository.findOne({ where: { id } });
   }
-
-  //🏥 상세 정보 조회 by hpId & category
-  async getCareUnitDetailByHpid(hpId: string, category?: string) {
-    if (category) {
-      return this.careUnitRepository.findOne({ where: { hpId, category } });
-    } else {
-      return this.careUnitRepository.find({ where: { hpId } });
-    }
-  }
-
-  //🏥 위치, 주소, 이름 필터 조회
-  async findCareUnitByFilters(
-    lat: number,
-    lng: number,
-    address: string,
-    name: string,
-    category: string,
-  ) {
-    if (!lat || !lng || !address || !name || !category) {
-      throw new BadRequestException('입력값이 올바르지 않습니다');
-    }
-
-    const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
-
-    if (lat) {
-      const latPrefix = Math.floor(lat * 100) / 100;
-      queryBuilder.andWhere(`CAST(careUnit.lat AS TEXT) LIKE :lat`, {
-        lat: `${latPrefix}%`,
-      });
-    } else {
-      throw new BadRequestException('위도 값이 없습니다');
-    }
-
-    if (lng) {
-      const lngPrefix = Math.floor(lng * 100) / 100;
-      queryBuilder.andWhere(`CAST(careUnit.lng AS TEXT) LIKE :lng`, {
-        lng: `${lngPrefix}%`,
-      });
-    } else {
-      throw new BadRequestException('경도 값이 없습니다');
-    }
-
-    if (address) {
-      const addressParts = address.split(' ');
-      if (addressParts.length > 1) {
-        const remainingAddress = addressParts.slice(1).join(' ');
-        queryBuilder.andWhere('careUnit.address LIKE :address', {
-          address: `%${remainingAddress}%`,
-        });
-      } else {
-        queryBuilder.andWhere('careUnit.address LIKE :address', {
-          address: `%${address}%`,
-        });
-      }
-    } else {
-      throw new BadRequestException('주소 값이 없습니다');
-    }
-
-    if (name) {
-      queryBuilder.andWhere('careUnit.name LIKE :name', {
-        name: `%${name}%`,
-      });
-    } else {
-      throw new BadRequestException('이름 값이 없습니다');
-    }
-
-    if (category) {
-      queryBuilder.andWhere('careUnit.category = :category', { category });
-    } else {
-      throw new BadRequestException('카테고리 값이 없습니다');
-    }
-
-    return await queryBuilder.getMany();
+  //🏥 상세 정보 조회 by hpid
+  async getCareUnitDetailByHpid(hpid: string) {
+    return this.careUnitRepository.find({ where: { hpid } });
   }
 
   //🏥 상세 정보 조회 by 위치
@@ -248,16 +178,12 @@ export class CareUnitService {
         lat,
         lng,
       },
-      order: {
-        category: 'ASC',
-        name: 'ASC',
-      },
     });
   }
 
   //🏥 응급실, 병의원, 약국 카테고리별 조회  (로딩 김 주의)
   async getCareUnitByCategory(category: string) {
-    return await this.careUnitRepository.find({
+    return this.careUnitRepository.find({
       where: {
         category,
       },
@@ -271,19 +197,17 @@ export class CareUnitService {
   async getCareUnitByCategoryAndLocation(
     lat: number,
     lng: number,
-    level: number = 1,
     category?: string,
-  ): Promise<CareUnit[]> {
-    const maxLevel = 5;
+  ) {
     const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
     queryBuilder
       .where('careUnit.lat BETWEEN :minLat AND :maxLat', {
-        minLat: lat - 0.005 * level, // 0.005도 즉 0.5km 즉 500m
-        maxLat: lat + 0.005 * level,
+        minLat: lat - 0.005, // 0.005도 즉 0.5km 즉 500m
+        maxLat: lat + 0.005,
       })
       .andWhere('careUnit.lng BETWEEN :minLng AND :maxLng', {
-        minLng: lng - 0.005 * level,
-        maxLng: lng + 0.005 * level,
+        minLng: lng - 0.005,
+        maxLng: lng + 0.005,
       });
     // 카테고리 필터
     if (category) {
@@ -291,21 +215,12 @@ export class CareUnitService {
       // 특정 카테고리 조회시 이름 오름차순
       queryBuilder.orderBy('careUnit.name', 'ASC');
     } else {
-      // 전체 조회시 카테고리별 정렬 후 이름 오름차순
+      // 전체 조회시 카테고리별 정렬 후 생성일자 내림차순
       queryBuilder
         .orderBy('careUnit.category', 'ASC')
-        .addOrderBy('careUnit.name', 'ASC');
+        .addOrderBy('careUnit.createdAt', 'DESC');
     }
-    const careUnits = await queryBuilder.getMany();
-    // 결과가 없으면 level을 증가시켜 재검색
-    if (careUnits.length === 0 && level <= maxLevel) {
-      level += 1;
-      return this.getCareUnitByCategoryAndLocation(lat, lng, level, category);
-    } else if (careUnits.length === 0 && level > maxLevel) {
-      console.log('🚫 해당 반경 내 조회 결과가 없습니다. 위치를 이동해주세요.');
-      return [];
-    }
-    return careUnits;
+    return queryBuilder.getMany();
   }
 
   // 💫배지 추가
@@ -327,46 +242,23 @@ export class CareUnitService {
     if (!careUnit) {
       throw new NotFoundException('Care unit not found');
     }
-    let open;
-    let close;
     const date = new Date();
-    const day = date.getDay();
-    if (day === 0) {
-      open = careUnit.sundayOpen;
-      close = careUnit.sundayClose;
-    } else if (day === 1) {
-      open = careUnit.mondayOpen;
-      close = careUnit.mondayClose;
-    } else if (day === 2) {
-      open = careUnit.tuesdayOpen;
-      close = careUnit.tuesdayClose;
-    } else if (day === 3) {
-      open = careUnit.wednesdayOpen;
-      close = careUnit.wednesdayClose;
-    } else if (day === 4) {
-      open = careUnit.thursdayOpen;
-      close = careUnit.thursdayClose;
-    } else if (day === 5) {
-      open = careUnit.fridayOpen;
-      close = careUnit.fridayClose;
-    } else if (day === 6) {
-      open = careUnit.saturdayOpen;
-      close = careUnit.saturdayClose;
-    } else {
-      open = careUnit.holidayOpen;
-      close = careUnit.holidayClose;
-    }
     const now = date.getHours() * 100 + date.getMinutes(); // 1430 형식 (14:30)
     console.log('date', date, 'now', now);
-    if (open <= now && close >= now) {
+    if (
+      (careUnit.mondayOpen <= now && careUnit.mondayClose >= now) ||
+      (careUnit.tuesdayOpen <= now && careUnit.tuesdayClose >= now) ||
+      (careUnit.wednesdayOpen <= now && careUnit.wednesdayClose >= now) ||
+      (careUnit.thursdayOpen <= now && careUnit.thursdayClose >= now) ||
+      (careUnit.fridayOpen <= now && careUnit.fridayClose >= now) ||
+      (careUnit.saturdayOpen <= now && careUnit.saturdayClose >= now) ||
+      (careUnit.sundayOpen <= now && careUnit.sundayClose >= now) ||
+      (careUnit.holidayOpen <= now && careUnit.holidayClose >= now)
+    ) {
       console.log('⏱️지금 운영 중입니다');
-      careUnit.now_open = true;
-      await this.careUnitRepository.save(careUnit);
-      return { message: '지금 운영 중입니다' };
+      return true;
     }
     console.log('❌지금 운영 중이 아닙니다');
-    careUnit.now_open = false;
-    await this.careUnitRepository.save(careUnit);
-    return { message: '지금 운영 중이 아닙니다' };
+    return false;
   }
 }

@@ -1,10 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { AwsConfigService } from '../../config/aws/config.service';
-import {
-  PutObjectCommand,
-  S3Client,
-  DeleteObjectCommand,
-} from '@aws-sdk/client-s3';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Express } from 'express';
 import { Buffer } from 'buffer';
 
@@ -21,7 +17,6 @@ export class S3Service {
       },
     });
   }
-
   async uploadFile(file: Express.Multer.File, dirPath: string) {
     if (!file) {
       throw new BadRequestException('파일이 없습니다.');
@@ -38,31 +33,5 @@ export class S3Service {
     };
     await this.s3.send(new PutObjectCommand(uploadParams));
     return `https://${this.awsConfigService.awsBucketName}.s3.${this.awsConfigService.awsRegion}.amazonaws.com/${fileName}`;
-  }
-
-  async deleteFile(filePath: string) {
-    try {
-      // filePath가 전체 URL인 경우 키 추출
-      let key = filePath;
-      if (filePath.startsWith('https://')) {
-        // URL에서 키 부분만 추출
-        // 예: https://bucket-name.s3.region.amazonaws.com/path/to/file.jpg -> path/to/file.jpg
-        const urlParts = filePath.split('.com/');
-        if (urlParts.length > 1) {
-          key = urlParts[1];
-        }
-      }
-
-      const deleteParams = {
-        Bucket: this.awsConfigService.awsBucketName,
-        Key: key,
-      };
-
-      await this.s3.send(new DeleteObjectCommand(deleteParams));
-      return true;
-    } catch (error: any) {
-      console.error('S3 파일 삭제 중 오류 발생:', error);
-      throw new BadRequestException('파일 삭제 실패: ' + error.message);
-    }
   }
 }

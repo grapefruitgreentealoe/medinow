@@ -17,6 +17,4 @@ export default registerAs('app', () => ({
   emergencyApiUrl: process.env.EMERGENCY_API_URL,
   hospitalApiUrl: process.env.HOSPITAL_API_URL,
   pharmacyApiUrl: process.env.PHARMACY_API_URL,
-  hospitalBasicApiUrl: process.env.HOSPITAL_BASIC_API_URL,
-  emergencyCongestionApiUrl: process.env.EMERGENCY_CONGESTION_API_URL,
 }));

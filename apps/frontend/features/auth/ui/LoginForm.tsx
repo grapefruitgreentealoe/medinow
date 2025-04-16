@@ -4,10 +4,11 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '../schema/loginSchema';
+import { useLogin } from '../model/useLogin';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { login } from '../api';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -21,15 +22,17 @@ export default function LoginForm() {
     defaultValues: {
       email: 'test@example.com',
       password: 'password123',
+      isAdmin: true,
     },
   });
 
+  const { mutateAsync } = useLogin();
   const router = useRouter();
 
   const onSubmit = async (data: FormData) => {
     try {
-      const result = await login(data);
-      localStorage.setItem('isAdmin', result.isAdmin);
+      const result = await mutateAsync(data);
+      localStorage.setItem('accessToken', result.accessToken);
       router.push('/');
     } catch (e) {
       alert((e as Error).message);
@@ -50,6 +53,12 @@ export default function LoginForm() {
       {errors.password && (
         <p className="text-sm text-red-500">{errors.password.message}</p>
       )}
+      <div className="flex items-center gap-2">
+        <Checkbox id="terms" {...register('isAdmin')} />
+        <label htmlFor="terms" className="text-sm">
+          관리자 로그인
+        </label>
+      </div>
       <Button type="submit" className="w-full">
         로그인
       </Button>

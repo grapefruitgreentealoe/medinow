@@ -9,7 +9,4 @@ export class LoginResponseDto {
 
   @ApiProperty({ description: '리프레시 토큰' })
   refreshToken: string;
-
-  @ApiProperty({ description: '관리자 여부' })
-  isAdmin: boolean;
 }

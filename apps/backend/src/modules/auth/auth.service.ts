@@ -1,14 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { CreateAdminDto } from '../users/dto/create-admin.dto';
 import { LoginDto } from './dto/login.dto';
 import { comparePassword } from '../../common/utils/password.util';
 import { CookieOptions } from 'express';
 import { AppConfigService } from '../../config/app/config.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
-import { UserRole } from '../../common/enums/roles.enum';
 
 @Injectable()
 export class AuthService {
@@ -19,34 +17,25 @@ export class AuthService {
   ) {}
 
   async signup(createUserDto: CreateUserDto) {
-    await this.usersService.createUser(createUserDto);
+    const user = await this.usersService.createUser(createUserDto);
     return {
       message: '회원가입 성공',
     };
   }
 
-  async signupAdmin(
-    createUserDto: CreateAdminDto,
-    businessLicense?: Express.Multer.File,
-  ) {
-    await this.usersService.createAdminUser(createUserDto, businessLicense);
-    return {
-      message: '관리자 회원가입 성공',
-    };
-  }
-
   async login(loginDto: LoginDto, requestOrigin: string) {
-    const { email, password } = loginDto;
-    const user = await this.usersService.findUserByEmail(email);
+    const user = await this.usersService.findUserByEmail(loginDto.email);
     if (!user) {
       throw new UnauthorizedException('이메일과 비밀번호가 일치하지 않습니다.');
     }
 
-    const isPasswordValid = await comparePassword(password, user.password!);
+    const isPasswordValid = await comparePassword(
+      loginDto.password,
+      user.password!,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('이메일과 비밀번호가 일치하지 않습니다.');
     }
-
     return this.setJwtTokenBuilder(user, requestOrigin);
   }
 
@@ -106,12 +95,8 @@ export class AuthService {
       requestOrigin,
     );
 
-    const isAdmin = user.role === UserRole.ADMIN ? true : false;
-
     await this.usersService.updateUserRefreshToken(user.id, refreshToken);
     return {
-      message: '로그인 성공',
-      isAdmin,
       accessToken,
       refreshToken,
       accessOptions,

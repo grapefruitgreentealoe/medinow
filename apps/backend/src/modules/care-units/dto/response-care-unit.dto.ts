@@ -19,7 +19,7 @@ export class ResponseCareUnitDto {
   tel: string;
 
   @ApiProperty({ description: '기관ID' })
-  hpId: string;
+  hpid: string;
 
   @ApiProperty({ description: '위도' })
   lat: number;

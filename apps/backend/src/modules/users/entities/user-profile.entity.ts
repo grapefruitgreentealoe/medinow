@@ -2,7 +2,7 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { CareUnit } from 'src/modules/care-units/entities/care-unit.entity';
 import { User } from './user.entity';
-import { Image } from 'src/modules/images/entities/image.entity';
+
 @Entity()
 export class UserProfile extends BaseEntity {
   @Column({ type: 'text' })
@@ -17,6 +17,9 @@ export class UserProfile extends BaseEntity {
   @Column({ type: 'integer', nullable: true })
   age: number | null;
 
+  @Column({ type: 'text', nullable: true, default: null })
+  imgUrl: string | null;
+
   @OneToOne(() => CareUnit, (careUnit) => careUnit.user, {
     nullable: true,
     cascade: true,
@@ -29,10 +32,4 @@ export class UserProfile extends BaseEntity {
   })
   @JoinColumn()
   user: User;
-
-  @OneToOne(() => Image, (image) => image.userProfile, {
-    cascade: true,
-    nullable: true,
-  })
-  image: Image | null;
 }
