@@ -22,34 +22,57 @@ export default function HospitalSearchModal({
 }: HospitalSearchModalProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState(false);
-  const [map, setMap] = useState<any>(null);
-  const [places, setPlaces] = useState<any[]>([]);
+  const setMap = useState<kakao.maps.Map | null>(null)[1];
+  const [places, setPlaces] = useState<
+    {
+      place_name: string;
+      road_address_name?: string;
+      address_name: string;
+      x: string;
+      y: string;
+    }[]
+  >([]);
   const [keyword, setKeyword] = useState('');
 
   useEffect(() => {
     if (!loaded || !mapRef.current) return;
 
     window.kakao.maps.load(() => {
-      const mapInstance = new window.kakao.maps.Map(mapRef.current, {
-        center: new window.kakao.maps.LatLng(37.5665, 126.978),
-        level: 3,
-      });
+      const mapInstance = new window.kakao.maps.Map(
+        mapRef.current as HTMLElement,
+        {
+          center: new window.kakao.maps.LatLng(37.5665, 126.978),
+          level: 3,
+        }
+      );
       setMap(mapInstance);
     });
-  }, [loaded]);
+  }, [loaded, setMap]);
 
   const search = () => {
     if (!window.kakao?.maps?.services) return;
     const ps = new window.kakao.maps.services.Places();
 
-    ps.keywordSearch(keyword, function (data: any[], status: any) {
-      if (status === window.kakao.maps.services.Status.OK) {
-        setPlaces(data);
+    ps.keywordSearch(
+      keyword,
+      (
+        result: kakao.maps.services.PlacesSearchResult,
+        status: kakao.maps.services.Status,
+      ) => {
+        if (status === window.kakao.maps.services.Status.OK) {
+          setPlaces(result);
+        }
       }
-    });
+    );
   };
 
-  const handleSelect = (place: any) => {
+  const handleSelect = (place: {
+    place_name: string;
+    road_address_name?: string;
+    address_name: string;
+    x: string;
+    y: string;
+  }) => {
     onSelect({
       name: place.place_name,
       address: place.road_address_name || place.address_name,
