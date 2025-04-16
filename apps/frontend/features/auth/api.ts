@@ -1,11 +1,16 @@
 import axiosInstance from '@/lib/axios';
 
-export const login = async (data) => {
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+export const login = async (data: LoginData) => {
   const res = await axiosInstance.post('/auth/login', data);
   return res.data;
 };
 
 export const logout = async () => {
-  const res = await axiosInstance.post('/auth/logout', data);
+  const res = await axiosInstance.post('/auth/logout');
   return res.data;
 };
