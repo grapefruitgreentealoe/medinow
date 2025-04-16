@@ -101,6 +101,7 @@ export class AuthController {
       this.authService.expireJwtToken(requestOrigin);
     response.clearCookie('accessToken', accessOptions);
     response.clearCookie('refreshToken', refreshOptions);
+    response.clearCookie('Refresh');
     return {
       message: '로그아웃 성공',
     };
