@@ -60,34 +60,14 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: '관리자 회원가입' })
-  @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: '관리자 회원가입 성공',
   })
-  @UseInterceptors(
-    FileInterceptor('businessLicense', {
-      fileFilter: (req, file, callback) => {
-        if (!file.originalname.match(/\.(jpg|jpeg|png|pdf)$/)) {
-          return callback(
-            new Error('이미지 또는 PDF 파일만 업로드 가능합니다.'),
-            false,
-          );
-        }
-        callback(null, true);
-      },
-      limits: {
-        fileSize: 1024 * 1024 * 5, // 5MB
-      },
-    }),
-  )
   @Post('admin-signup')
-  async adminSignup(
-    @Body() createAdminDto: CreateAdminDto,
-    @UploadedFile() file?: Express.Multer.File,
-  ) {
-    await this.authService.signupAdmin(createAdminDto, file);
+  async adminSignup(@Body() createAdminDto: CreateAdminDto) {
+    await this.authService.signupAdmin(createAdminDto);
 
     return {
       message: '관리자 회원가입 성공',
