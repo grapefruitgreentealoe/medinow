@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { CareUnitCategory } from '../../../common/enums/careUnits.enum';
 
-export class CreateAdminDto extends CreateUserDto {
+export class CreateAdminDto {
   @ApiProperty({
     type: String,
     description: '관리자 이메일',
@@ -61,9 +61,9 @@ export class CreateAdminDto extends CreateUserDto {
   readonly latitude: number;
 
   @ApiProperty({
-    type: String,
+    type: Number,
     description: '경도',
-    example: '126.915261',
+    example: 126.915261,
     required: true,
   })
   @IsNumber()
