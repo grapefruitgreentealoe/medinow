@@ -1,10 +1,4 @@
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CareUnit } from '../../care-units/entities/care-unit.entity';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import { Redis } from 'ioredis';
 import { AppConfigService } from 'src/config/app/config.service';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   NotFoundException,
   InternalServerErrorException,

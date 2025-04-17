@@ -1,16 +1,6 @@
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CareUnit } from '../../care-units/entities/care-unit.entity';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import { Redis } from 'ioredis';
 import { AppConfigService } from 'src/config/app/config.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import {
-  NotFoundException,
-  InternalServerErrorException,
-  Injectable,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { CareUnitService } from '../../care-units/services/care-unit.service';
 import { RedisService } from 'src/modules/redis/redis.service';
 import { CongestionLevel } from 'src/common/enums/congestion.enum';
@@ -30,7 +20,7 @@ export class CongestionTotalService implements OnModuleInit {
   }
 
   //1️⃣ 전체 응급실 혼잡도 저장
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async updateCongestion() {
     try {
       console.log('🔄 혼잡도 업데이트 시작');

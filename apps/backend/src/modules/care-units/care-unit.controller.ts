@@ -342,7 +342,7 @@ export class CareUnitController {
     description: '성공',
     type: String,
   })
-  async checkNowOpen(@Param('id') id: string): Promise<{ message: string }> {
+  async checkNowOpen(@Param('id') id: string): Promise<boolean> {
     return this.careUnitService.checkNowOpen(id);
   }
 

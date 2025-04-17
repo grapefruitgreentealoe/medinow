@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, Raw, Like } from 'typeorm';
 import { ResponseCareUnitDto } from '../dto/response-care-unit.dto';
 import { AppConfigService } from 'src/config/app/config.service';
-
+import { UsersService } from 'src/modules/users/users.service';
 @Injectable()
 export class CareUnitService {
   private readonly EMERGENCY_API_URL = this.appConfigService.emergencyApiUrl;
@@ -20,6 +20,7 @@ export class CareUnitService {
     @InjectRepository(CareUnit)
     private readonly careUnitRepository: Repository<CareUnit>,
     private readonly appConfigService: AppConfigService,
+    private readonly usersService: UsersService,
   ) {}
 
   //🏥응급실, 병의원, 약국 FullData 조회 - Api 통한
@@ -278,38 +279,83 @@ export class CareUnitService {
     level: number = 1,
     category?: string,
   ): Promise<CareUnit[]> {
-    const maxLevel = 5;
-    const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
-    queryBuilder
-      .where('careUnit.lat BETWEEN :minLat AND :maxLat', {
-        minLat: lat - 0.005 * level, // 0.005도 즉 0.5km 즉 500m
-        maxLat: lat + 0.005 * level,
-      })
-      .andWhere('careUnit.lng BETWEEN :minLng AND :maxLng', {
-        minLng: lng - 0.005 * level,
-        maxLng: lng + 0.005 * level,
-      });
-    // 카테고리 필터
-    if (category) {
-      queryBuilder.andWhere('careUnit.category = :category', { category });
-      // 특정 카테고리 조회시 이름 오름차순
-      queryBuilder.orderBy('careUnit.name', 'ASC');
-    } else {
-      // 전체 조회시 카테고리별 정렬 후 이름 오름차순
+    const MAX_LEVEL = 5; // 최대 검색 반경 제한
+
+    for (let currentLevel = level; currentLevel <= MAX_LEVEL; currentLevel++) {
+      const queryBuilder =
+        this.careUnitRepository.createQueryBuilder('careUnit');
+
+      // 거리 계산 (필요시 Haversine 공식 등 더 정확한 계산 방식 고려)
       queryBuilder
-        .orderBy('careUnit.category', 'ASC')
-        .addOrderBy('careUnit.name', 'ASC');
+        .where('careUnit.lat BETWEEN :minLat AND :maxLat', {
+          minLat: lat - 0.005 * currentLevel,
+          maxLat: lat + 0.005 * currentLevel,
+        })
+        .andWhere('careUnit.lng BETWEEN :minLng AND :maxLng', {
+          minLng: lng - 0.005 * currentLevel,
+          maxLng: lng + 0.005 * currentLevel,
+        });
+
+      if (category) {
+        queryBuilder.andWhere('careUnit.category = :category', { category });
+        queryBuilder.orderBy('careUnit.name', 'ASC');
+      } else {
+        queryBuilder
+          .orderBy('careUnit.category', 'ASC')
+          .addOrderBy('careUnit.name', 'ASC');
+      }
+
+      const careUnits = await queryBuilder.getMany();
+
+      // 성능 개선: 병렬로 처리하되 에러 처리 강화
+      try {
+        const careUnitsWithStatus = await Promise.all(
+          careUnits.map(async (careUnit) => {
+            const isOpen = await this.checkNowOpen(careUnit.id);
+            const user = await this.usersService
+              .getUserByCareUnitId(careUnit.id)
+              .catch(() => null);
+
+            return {
+              ...careUnit,
+              now_open: isOpen,
+              is_chat_available: !!user,
+            };
+          }),
+        );
+
+        // 운영 중인 곳만 필터링
+        const openCareUnits = careUnitsWithStatus.filter(
+          (unit) => unit.now_open,
+        );
+
+        if (openCareUnits.length > 0) {
+          return openCareUnits;
+        }
+
+        // 현재 반경에서 결과가 없으면 다음 반경으로 계속
+      } catch (error) {
+        console.error('의료기관 상태 확인 중 오류 발생:', error);
+        throw new Error('의료기관 정보를 처리하는 중 오류가 발생했습니다.');
+      }
     }
-    const careUnits = await queryBuilder.getMany();
-    // 결과가 없으면 level을 증가시켜 재검색
-    if (careUnits.length === 0 && level <= maxLevel) {
-      level += 1;
-      return this.getCareUnitByCategoryAndLocation(lat, lng, level, category);
-    } else if (careUnits.length === 0 && level > maxLevel) {
-      console.log('🚫 해당 반경 내 조회 결과가 없습니다. 위치를 이동해주세요.');
-      return [];
+
+    // 최대 반경까지 검색해도 결과가 없는 경우
+    console.log('해당 반경 내 운영 중인 기관이 없습니다. 위치를 이동해주세요.');
+    return [];
+  }
+
+  //🏥 실시간 채팅 가능 여부 조회
+  async getCareUnitIsOpen(id: string) {
+    const careUnit = await this.careUnitRepository.findOne({ where: { id } });
+    if (!careUnit || !careUnit.now_open) {
+      throw new NotFoundException('실시간 채팅이 불가능한 기관입니다');
     }
-    return careUnits;
+    const user = await this.usersService.getUserByCareUnitId(careUnit.id);
+    if (!user) {
+      throw new NotFoundException('실시간 채팅이 불가능한 기관입니다');
+    }
+    return careUnit.now_open;
   }
 
   // 💫배지 추가
@@ -366,11 +412,11 @@ export class CareUnitService {
       console.log('⏱️지금 운영 중입니다');
       careUnit.now_open = true;
       await this.careUnitRepository.save(careUnit);
-      return { message: '지금 운영 중입니다' };
+      return true;
     }
     console.log('❌지금 운영 중이 아닙니다');
     careUnit.now_open = false;
     await this.careUnitRepository.save(careUnit);
-    return { message: '지금 운영 중이 아닙니다' };
+    return false;
   }
 }

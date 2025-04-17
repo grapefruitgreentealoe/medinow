@@ -163,6 +163,13 @@ export class UsersService {
     return false;
   }
 
+  async getUserByCareUnitId(careUnitId: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { userProfile: { careUnit: { id: careUnitId } } },
+      relations: ['userProfile'],
+    });
+  }
+
   async updateUser(
     userId: string,
     updateUserDto: UpdateUserDto,
