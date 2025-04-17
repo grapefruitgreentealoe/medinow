@@ -95,7 +95,7 @@ export default function NearbyCareUnits() {
         const imageSrc = '/pin-png.png';
         const markerImage = new kakao.maps.MarkerImage(
           imageSrc,
-          new kakao.maps.Size(36, 36)
+          new kakao.maps.Size(10, 10)
         );
 
         const marker = new kakao.maps.Marker({
