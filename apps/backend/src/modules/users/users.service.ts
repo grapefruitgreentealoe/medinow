@@ -109,6 +109,7 @@ export class UsersService {
       const newUserProfile = this.userProfileRepository.create({
         name,
         address: careUnit[0].address,
+        nickname: careUnit[0].name,
         user: savedUser,
       });
 
