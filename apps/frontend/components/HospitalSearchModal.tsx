@@ -49,7 +49,7 @@ export default function HospitalSearchModal({
     });
   }, [loaded, setMap]);
 
-  const search = (e) => {
+  const search = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     if (!window.kakao?.maps?.services) return;
     const ps = new window.kakao.maps.services.Places();
