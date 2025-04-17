@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { login } from '../api';
+import { useAuthStore } from '@/store/useAuthStore';
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -20,7 +21,7 @@ export default function LoginForm() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: 'test@example.com',
-      password: 'password123',
+      password: 'Abcd1234!',
     },
   });
 
@@ -29,7 +30,13 @@ export default function LoginForm() {
   const onSubmit = async (data: FormData) => {
     try {
       const result = await login(data);
+      // 로그인 성공 후
+      useAuthStore.getState().setAuth({
+        isLoggedIn: true,
+        isAdmin: true, // 또는 false
+      });
       localStorage.setItem('isAdmin', result.isAdmin);
+      localStorage.setItem('isLogin', 'true');
       router.push('/');
     } catch (e) {
       alert((e as Error).message);
