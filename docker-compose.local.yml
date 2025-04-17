@@ -40,18 +40,6 @@ services:
       - postgres
       - redis
 
-  frontend:
-    build:
-      context: .
-      dockerfile: apps/frontend/Dockerfile
-    container_name: frontend-dev
-    ports:
-      - '3000:3000'
-    env_file:
-      - apps/frontend/.env
-    depends_on:
-      - backend
-
 volumes:
   postgres_data:
   redis_data:
