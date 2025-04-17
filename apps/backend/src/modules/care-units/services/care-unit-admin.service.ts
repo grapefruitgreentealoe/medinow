@@ -195,75 +195,46 @@ export class CareUnitAdminService {
   async saveHospitalDepartments() {
     try {
       console.log('1️⃣ 병원 진료과목 API 호출 시작');
-      const url = `${this.HOSPITAL_BASIC_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
+      const url = `${this.HOSPITAL_BASIC_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100&_type=json`;
       console.log('2️⃣ API URL:', url);
-
       const response = await fetch(url, {
         headers: {
           Accept: 'application/json',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
         },
       });
-
       console.log('3️⃣ API 응답 상태:', response.status);
       const text = await response.text();
-      console.log('4️⃣ API 응답 첫 300자:', text.slice(0, 300));
-
       if (text.startsWith('<')) {
         console.error('❌ XML/HTML 응답 감지');
         throw new BadRequestException('API가 XML/HTML을 반환했습니다.');
       }
-
       const data = JSON.parse(text);
-      console.log('5️⃣ 파싱된 데이터 구조:', {
-        hasResponse: !!data.response,
-        hasBody: !!data.response?.body,
-        hasItems: !!data.response?.body?.items,
-        hasItem: !!data.response?.body?.items?.item,
-      });
-
       const items = Array.isArray(data.response?.body?.items?.item)
         ? data.response.body.items.item
         : [data.response.body.items.item];
 
-      console.log('6️⃣ 전체 아이템 수:', items.length);
-      console.log('7️⃣ 첫 번째 아이템 샘플:', items[0]);
-
       // 1. category에서 hospital 데이터만 추출
-      const hospitalItems = items.filter(
-        (item) => item.category === 'hospital',
-      );
-      console.log('8️⃣ 병원 데이터 수:', hospitalItems.length);
-      console.log('9️⃣ 첫 번째 병원 샘플:', hospitalItems[0]);
-
+      const hospitalItems = items.filter((item) => item.dgidIdName);
       // 2. 각 병원별 진료과목 데이터 저장
       for (const hospital of hospitalItems) {
-        console.log(`🔟 병원 처리 시작: ${hospital.hpid}`);
-
         const HospitalCareUnit = await this.careUnitRepository.findOne({
           where: { hpId: hospital.hpid, category: hospital.category },
         });
-
         if (!HospitalCareUnit) {
           console.error('❌ 병원을 찾을 수 없음:', hospital.hpid);
           throw new NotFoundException('Care unit not found');
         }
-
-        console.log('1️⃣1️⃣ 진료과목 데이터:', hospital.dgidIdName);
         const departments = hospital.dgidIdName.split(',').map((dgIdName) => {
-          console.log(`1️⃣2️⃣ 진료과목 생성: ${dgIdName}`);
           return this.departmentRepository.create({
             name: dgIdName,
             careUnitId: HospitalCareUnit.id,
           });
         });
-
-        console.log(`1️⃣3️⃣ ${departments.length}개의 진료과목 저장 시도`);
         await this.departmentRepository.save(departments);
-        console.log('✅ 진료과목 저장 완료');
-
-        return { status: 'success', message: '병원 진료과목 저장 완료' };
       }
+      console.log('🎉 병원 진료과목 저장 완료');
+      return { status: 'success', message: '병원 진료과목 저장 완료' };
     } catch (error) {
       const err = error as Error;
       console.error('❌ 에러 발생:', {

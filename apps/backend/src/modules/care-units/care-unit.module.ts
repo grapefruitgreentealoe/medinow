@@ -8,7 +8,8 @@ import { AppConfigModule } from 'src/config/app/config.module';
 import { Department } from 'src/modules/departments/entities/department.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RedisModule } from '../redis/redis.module';
-import { CareUnitCongestionService } from './services/care-unit-congestion.service';
+import { CongestionTotalService } from '../congestion/services/congestion-total.service';
+import { CongestionOneService } from '../congestion/services/congestion-one.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([CareUnit, Department]),
@@ -16,7 +17,12 @@ import { CareUnitCongestionService } from './services/care-unit-congestion.servi
     RedisModule,
   ],
   controllers: [CareUnitController],
-  providers: [CareUnitService, CareUnitAdminService, CareUnitCongestionService],
-  exports: [CareUnitService, CareUnitAdminService, CareUnitCongestionService],
+  providers: [
+    CareUnitService,
+    CareUnitAdminService,
+    CongestionTotalService,
+    CongestionOneService,
+  ],
+  exports: [CareUnitService, CareUnitAdminService, CongestionTotalService],
 })
 export class CareUnitModule {}
