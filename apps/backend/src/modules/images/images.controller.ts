@@ -19,6 +19,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
+  /* 클라이언트에서 파일 처리로 변경되어 주석처리함
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -37,6 +38,7 @@ export class ImagesController {
     }
     return this.imagesService.uploadImage(file);
   }
+  */
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {
