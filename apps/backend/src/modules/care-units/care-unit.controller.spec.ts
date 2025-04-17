@@ -6,6 +6,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { CareUnit } from './entities/care-unit.entity';
 import { Department } from '../departments/entities/department.entity';
 import { AppConfigService } from 'src/config/app/config.service';
+import { CongestionOneService } from '../congestion/services/congestion-one.service';
+import { RedisService } from '../redis/redis.service';
+import { CongestionTotalService } from '../congestion/services/congestion-total.service';
 
 describe('CareUnitController', () => {
   let controller: CareUnitController;
@@ -39,12 +42,19 @@ describe('CareUnitController', () => {
     serviceKey: 'test-key',
   };
 
+  const mockRedisService = {
+    get: jest.fn(),
+    set: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CareUnitController],
       providers: [
         CareUnitService,
         CareUnitAdminService,
+        CongestionOneService,
+        CongestionTotalService,
         {
           provide: getRepositoryToken(CareUnit),
           useValue: mockCareUnitRepository,
@@ -56,6 +66,10 @@ describe('CareUnitController', () => {
         {
           provide: AppConfigService,
           useValue: mockConfigService,
+        },
+        {
+          provide: RedisService,
+          useValue: mockRedisService,
         },
       ],
     }).compile();
