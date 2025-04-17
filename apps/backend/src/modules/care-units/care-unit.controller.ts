@@ -12,12 +12,15 @@ import {
 } from '@nestjs/swagger';
 import { CareUnitAdminService } from './services/care-unit-admin.service';
 import { CareUnit } from './entities/care-unit.entity';
+import { CongestionOneService } from '../congestion/services/congestion-one.service';
+import { ResponseCongestionDto } from './dto/response-congestion.dto';
 @ApiTags('Care Unit')
 @Controller('care-units')
 export class CareUnitController {
   constructor(
     private readonly careUnitService: CareUnitService,
     private readonly careUnitAdminService: CareUnitAdminService,
+    private readonly congestionService: CongestionOneService,
   ) {}
 
   @Get()
@@ -332,5 +335,23 @@ export class CareUnitController {
   })
   async checkNowOpen(@Param('id') id: string): Promise<{ message: string }> {
     return this.careUnitService.checkNowOpen(id);
+  }
+
+  @Get('congestion/:id')
+  @ApiOperation({ summary: '사용자 :  특정 기관 혼잡도 조회' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    type: String,
+    description: '기관 고유 아이디',
+    example: 'a5388b7a-cd05-40a6-b9b2-af406c65ddb7',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공',
+    type: ResponseCongestionDto,
+  })
+  async getCongestion(@Param('id') id: string) {
+    return this.congestionService.getCongestion(id);
   }
 }
