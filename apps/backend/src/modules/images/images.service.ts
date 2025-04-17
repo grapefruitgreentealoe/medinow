@@ -2,23 +2,62 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Image } from './entities/image.entity';
 import { ImageType } from '../../common/enums/imageType.enum';
 import { User } from '../users/entities/user.entity';
-import { UserProfile } from '../users/entities/user-profile.entity';
 import { CareUnit } from '../care-units/entities/care-unit.entity';
 import { S3Service } from '../s3/s3.service';
 
 @Injectable()
 export class ImagesService {
+  // 허용되는 이미지 MIME 타입
+  private readonly ALLOWED_MIME_TYPES = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'image/svg+xml',
+    'application/pdf',
+  ];
+
+  // 최대 파일 크기 (10MB)
+  private readonly MAX_FILE_SIZE = 10 * 1024 * 1024;
+
   constructor(
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
     private readonly s3Service: S3Service,
   ) {}
+
+  /**
+   * 파일 형식 및 크기 검증
+   * @param file 업로드할 파일
+   */
+  private validateFile(file: Express.Multer.File): void {
+    // 파일 존재 여부 확인
+    if (!file) {
+      throw new BadRequestException('파일이 없습니다.');
+    }
+
+    // MIME 타입 검증
+    if (!this.ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      throw new UnsupportedMediaTypeException(
+        `지원하지 않는 파일 형식입니다. 허용된 형식: ${this.ALLOWED_MIME_TYPES.join(', ')}`,
+      );
+    }
+
+    // 파일 크기 검증
+    if (file.size > this.MAX_FILE_SIZE) {
+      throw new BadRequestException(
+        `파일 크기가 너무 큽니다. 최대 ${this.MAX_FILE_SIZE / (1024 * 1024)}MB까지 허용됩니다.`,
+      );
+    }
+  }
 
   /**
    * 파일을 S3에 업로드하고 URL 반환
@@ -30,13 +69,13 @@ export class ImagesService {
     file: Express.Multer.File,
     type: ImageType,
   ): Promise<string> {
-    if (!file) {
-      throw new BadRequestException('파일이 없습니다.');
-    }
+    // 파일 형식 및 크기 검증
+    this.validateFile(file);
 
     try {
       // 이미지 타입에 따라 디렉토리 설정
-      const dirPath = `images/${type}`;
+      const typeDir = type;
+      const dirPath = `images/${typeDir}`;
 
       // S3에 파일 업로드하고 URL 반환
       return await this.s3Service.uploadFile(file, dirPath);
