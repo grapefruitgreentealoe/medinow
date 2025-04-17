@@ -28,5 +28,5 @@ export const adminSignupSchema = z.object({
   careUnitAddress: z.string().min(1, '기관 주소를 입력해주세요'),
   careUnitCategory: z.string().min(1, '기관 유형을 선택해주세요'),
 
-  imageUrl: z.string().url('올바른 이미지 URL 형식이 아닙니다').optional(),
+  imageUrl: z.string().optional(),
 });
