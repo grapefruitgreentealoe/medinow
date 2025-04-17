@@ -40,7 +40,7 @@ export default function AdminSignupForm() {
       careUnitName: '테스트병원',
       careUnitAddress: '서울특별시 종로구 세종대로 110',
       careUnitCategory: '병원',
-      imageUrl: 'https://via.placeholder.com/150',
+      imageUrl: '',
     },
   });
 
