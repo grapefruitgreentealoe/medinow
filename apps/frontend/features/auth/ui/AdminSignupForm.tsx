@@ -62,7 +62,7 @@ export default function AdminSignupForm() {
 
     try {
       setUploading(true);
-      const res = await axiosInstance.post('/images', {
+      const res = await axiosInstance.post('/images/business-license/upload', {
         method: 'POST',
         body: formData,
       });
