@@ -157,7 +157,10 @@ export class UsersService {
 
   async isExistEmail(email: string): Promise<boolean> {
     const user = await this.findUserByEmail(email);
-    return !!user;
+    if (user) {
+      return true;
+    }
+    return false;
   }
 
   async updateUser(
