@@ -17,6 +17,7 @@ async function bootstrap() {
     allowedHeaders: ['content-type', 'Authorization'],
   };
 
+  // Use Cookie Parser
   app.use(cookieParser());
 
   // Use Global Pipes
