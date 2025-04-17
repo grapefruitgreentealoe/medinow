@@ -1,9 +1,8 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
+  Get,
   Param,
   Delete,
   UseInterceptors,
@@ -11,47 +10,254 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ImagesService } from './images.service';
-import { ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiConsumes,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageType } from '../../common/enums/imageType.enum';
 
-@ApiTags('images')
+@ApiTags('이미지')
 @Controller('images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
-  /* 클라이언트에서 파일 처리로 변경되어 주석처리함
-  @UseInterceptors(FileInterceptor('file'))
+  // 사업자등록증 이미지 업로드
+  @ApiOperation({ summary: '사업자등록증 이미지 업로드' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description: '이미지 업로드',
+    description: '사업자등록증 이미지 업로드',
     schema: {
       type: 'object',
       properties: {
-        file: { type: 'string', format: 'binary' },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: '업로드할 사업자등록증 이미지',
+        },
       },
     },
   })
-  @Post()
-  uploadImage(@UploadedFile() file: Express.Multer.File) {
+  @ApiResponse({
+    status: 201,
+    description: '이미지 업로드 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        url: {
+          type: 'string',
+          example:
+            'https://bucket-name.s3.region.amazonaws.com/path/to/file.jpg',
+        },
+      },
+    },
+  })
+  @Post('business-license/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadBusinessLicense(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('이미지 파일이 없습니다.');
     }
-    return this.imagesService.uploadImage(file);
+
+    try {
+      // 비즈니스 로직은 서비스에서 처리
+      const imgUrl = await this.imagesService.uploadBusinessLicenseImage(file);
+      return { url: imgUrl };
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : '알 수 없는 오류';
+      throw new BadRequestException(`이미지 업로드 실패: ${errorMessage}`);
+    }
   }
-  */
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.imagesService.findOne(+id);
+  // 사용자 프로필 이미지 업로드
+  // @ApiOperation({ summary: '사용자 프로필 이미지 업로드' })
+  // @ApiConsumes('multipart/form-data')
+  // @ApiBody({
+  //   description: '사용자 프로필 이미지 업로드',
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       file: {
+  //         type: 'string',
+  //         format: 'binary',
+  //         description: '업로드할 프로필 이미지',
+  //       },
+  //     },
+  //   },
+  // })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: '이미지 업로드 성공',
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       url: {
+  //         type: 'string',
+  //         example:
+  //           'https://bucket-name.s3.region.amazonaws.com/path/to/file.jpg',
+  //       },
+  //     },
+  //   },
+  // })
+  // @Post('user-profile/upload')
+  // @UseInterceptors(FileInterceptor('file'))
+  // async uploadUserProfile(@UploadedFile() file: Express.Multer.File) {
+  //   if (!file) {
+  //     throw new BadRequestException('이미지 파일이 없습니다.');
+  //   }
+
+  //   try {
+  //     // 비즈니스 로직은 서비스에서 처리
+  //     const imgUrl = await this.imagesService.uploadUserProfileImage(file);
+  //     return { url: imgUrl };
+  //   } catch (error: unknown) {
+  //     const errorMessage =
+  //       error instanceof Error ? error.message : '알 수 없는 오류';
+  //     throw new BadRequestException(`이미지 업로드 실패: ${errorMessage}`);
+  //   }
   // }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateImageDto: UpdateImageDto) {
-  //   return this.imagesService.update(+id, updateImageDto);
+  // 의료기관 이미지 업로드
+  // @ApiOperation({ summary: '의료기관 이미지 업로드' })
+  // @ApiConsumes('multipart/form-data')
+  // @ApiBody({
+  //   description: '의료기관 이미지 업로드',
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       file: {
+  //         type: 'string',
+  //         format: 'binary',
+  //         description: '업로드할 의료기관 이미지',
+  //       },
+  //     },
+  //   },
+  // })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: '이미지 업로드 성공',
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       url: {
+  //         type: 'string',
+  //         example:
+  //           'https://bucket-name.s3.region.amazonaws.com/path/to/file.jpg',
+  //       },
+  //     },
+  //   },
+  // })
+  // @Post('care-unit/upload')
+  // @UseInterceptors(FileInterceptor('file'))
+  // async uploadCareUnit(@UploadedFile() file: Express.Multer.File) {
+  //   if (!file) {
+  //     throw new BadRequestException('이미지 파일이 없습니다.');
+  //   }
+
+  //   try {
+  //     // 비즈니스 로직은 서비스에서 처리
+  //     const imgUrl = await this.imagesService.uploadCareUnitImage(file);
+  //     return { url: imgUrl };
+  //   } catch (error: unknown) {
+  //     const errorMessage =
+  //       error instanceof Error ? error.message : '알 수 없는 오류';
+  //     throw new BadRequestException(`이미지 업로드 실패: ${errorMessage}`);
+  //   }
   // }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.imagesService.remove(+id);
+  // URL로 사업자등록증 이미지 생성
+  // @ApiOperation({ summary: '사업자등록증 이미지 엔티티 생성' })
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       imageUrl: {
+  //         type: 'string',
+  //         description: '이미지 URL',
+  //         example:
+  //           'https://bucket-name.s3.region.amazonaws.com/path/to/file.jpg',
+  //       },
+  //     },
+  //     required: ['imageUrl'],
+  //   },
+  // })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: '이미지 엔티티 생성 성공',
+  // })
+  // @Post('business-license')
+  // async createBusinessLicenseImage(@Body() data: { imageUrl: string }) {
+  //   const { imageUrl } = data;
+  //   return this.imagesService.createBusinessLicenseImage(imageUrl);
   // }
+
+  // URL로 사용자 프로필 이미지 생성
+  // @ApiOperation({ summary: '사용자 프로필 이미지 엔티티 생성' })
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       imageUrl: {
+  //         type: 'string',
+  //         description: '이미지 URL',
+  //         example:
+  //           'https://bucket-name.s3.region.amazonaws.com/path/to/file.jpg',
+  //       },
+  //     },
+  //     required: ['imageUrl'],
+  //   },
+  // })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: '이미지 엔티티 생성 성공',
+  // })
+  // @Post('user-profile')
+  // async createUserProfileImage(@Body() data: { imageUrl: string }) {
+  //   const { imageUrl } = data;
+  //   return this.imagesService.createUserProfileImage(imageUrl);
+  // }
+
+  // URL로 의료기관 이미지 생성
+  // @ApiOperation({ summary: '의료기관 이미지 엔티티 생성' })
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       imageUrl: {
+  //         type: 'string',
+  //         description: '이미지 URL',
+  //         example:
+  //           'https://bucket-name.s3.region.amazonaws.com/path/to/file.jpg',
+  //       },
+  //     },
+  //     required: ['imageUrl'],
+  //   },
+  // })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: '이미지 엔티티 생성 성공',
+  // })
+  // @Post('care-unit')
+  // async createCareUnitImage(@Body() data: { imageUrl: string }) {
+  //   const { imageUrl } = data;
+  //   return this.imagesService.createCareUnitImage(imageUrl);
+  // }
+
+  // 이미지 조회
+  @ApiOperation({ summary: '이미지 상세 조회' })
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.imagesService.findById(id);
+  }
+
+  // 이미지 삭제 (관계 해제)
+  @ApiOperation({ summary: '이미지 관계 해제' })
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.imagesService.unlinkFromEntities(id);
+  }
 }
