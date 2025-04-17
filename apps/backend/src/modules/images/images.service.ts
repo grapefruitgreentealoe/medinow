@@ -36,8 +36,7 @@ export class ImagesService {
 
     try {
       // 이미지 타입에 따라 디렉토리 설정
-      const typeDir = ImageType[type].toLowerCase();
-      const dirPath = `images/${typeDir}`;
+      const dirPath = `images/${type}`;
 
       // S3에 파일 업로드하고 URL 반환
       return await this.s3Service.uploadFile(file, dirPath);

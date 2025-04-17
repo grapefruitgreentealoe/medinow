@@ -18,7 +18,6 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ImageType } from '../../common/enums/imageType.enum';
 
 @ApiTags('이미지')
 @Controller('images')
