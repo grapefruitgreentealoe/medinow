@@ -13,7 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - app-network
+      - backend-network
 
   redis:
     image: redis:latest
@@ -23,7 +23,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - app-network
+      - backend-network
 
   backend:
     build:
