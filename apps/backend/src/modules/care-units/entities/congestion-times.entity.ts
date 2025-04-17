@@ -1,11 +1,6 @@
 import { BaseEntity } from 'src/common/entities/base.entity';
+import { CongestionLevel } from 'src/common/enums/congestion.enum';
 import { Column, Entity } from 'typeorm';
-
-export enum CongestionLevel {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-}
 
 @Entity()
 export class CongestionTime extends BaseEntity {
