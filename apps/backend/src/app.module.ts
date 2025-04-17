@@ -11,6 +11,7 @@ import { RedisModule } from './modules/redis/redis.module';
 import { ImagesModule } from './modules/images/images.module';
 import { S3Module } from './modules/s3/s3.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
+import { NoticesModule } from './modules/notices/notices.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -26,6 +27,7 @@ import { DepartmentsModule } from './modules/departments/departments.module';
     S3Module,
     ImagesModule,
     DepartmentsModule,
+    NoticesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
