@@ -12,6 +12,7 @@ import { ImagesModule } from './modules/images/images.module';
 import { S3Module } from './modules/s3/s3.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { NoticesModule } from './modules/notices/notices.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -28,6 +29,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ImagesModule,
     DepartmentsModule,
     ScheduleModule.forRoot(),
+    NoticesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

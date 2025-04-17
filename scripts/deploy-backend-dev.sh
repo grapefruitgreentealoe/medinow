@@ -9,7 +9,7 @@ echo "🚀 [DEV] 백엔드 배포 시작"
 docker-compose -f $COMPOSE_FILE down
 
 # 최신 이미지 pull
-# docker pull grapefruitgreentealoe/medinow-backend:dev
+docker pull grapefruitgreentealoe/medinow-backend:dev
 
 # ✅ 새로 빌드 및 실행
 docker-compose -f $COMPOSE_FILE up -d --build

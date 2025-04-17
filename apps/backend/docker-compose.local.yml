@@ -13,7 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - app-network
+      - backend-network
 
   redis:
     image: redis:latest
@@ -23,36 +23,22 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - app-network
+      - backend-network
 
   backend:
     build:
       context: .
-      dockerfile: apps/backend/Dockerfile
+      dockerfile: Dockerfile
     container_name: backend-dev
-    ports:
-      - "4001:4000"
-    env_file:
-      - apps/backend/.env
-    networks:
-      - app-network
     depends_on:
       - postgres
       - redis
-
-  frontend:
-    build:
-      context: .
-      dockerfile: apps/frontend/Dockerfile
-    container_name: frontend-dev
     ports:
-      - "3000:3000"
+      - "4001:4000"
     env_file:
-      - apps/frontend/.env
+      - .env
     networks:
-      - app-network
-    depends_on:
-      - backend
+      - backend-network
 
 volumes:
   postgres_data:

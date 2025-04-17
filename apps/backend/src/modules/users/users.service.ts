@@ -13,6 +13,7 @@ import { UserProfile } from './entities/user-profile.entity';
 import { ImagesService } from '../images/images.service';
 import { UserRole } from '../../common/enums/roles.enum';
 import { CareUnitService } from '../care-units/services/care-unit.service';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -62,12 +63,8 @@ export class UsersService {
     }
   }
 
-  async createAdminUser(
-    createUserDto: CreateAdminDto,
-    // 클라이언트에서 처리하도록 변경되어 주석처리함
-    // businessLicense?: Express.Multer.File,
-  ): Promise<User> {
-    const user = await this.findUserByEmail(createUserDto.email);
+  async createAdminUser(createAdminDto: CreateAdminDto): Promise<User> {
+    const user = await this.findUserByEmail(createAdminDto.email);
     if (user) {
       throw new ConflictException('이미 존재하는 이메일입니다.');
     }
@@ -81,7 +78,8 @@ export class UsersService {
       careUnitName,
       latitude,
       longitude,
-    } = createUserDto;
+      imageUrl,
+    } = createAdminDto;
 
     const queryRunner =
       this.userRepository.manager.connection.createQueryRunner();
@@ -114,16 +112,14 @@ export class UsersService {
         user: savedUser,
       });
 
-      /* 클라이언트에서 처리하도록 변경되어 주석처리함
-      if (businessLicense) {
-        const image = await this.imagesService.uploadBusinessLicense(
-          businessLicense,
+      if (imageUrl) {
+        const image = await this.imagesService.createBusinessLicenseImage(
+          imageUrl,
           savedUser,
           careUnit[0],
         );
         newUserProfile.image = image;
       }
-      */
 
       await queryRunner.manager.save(newUserProfile);
 

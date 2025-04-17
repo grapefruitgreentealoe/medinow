@@ -6,7 +6,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Image } from './entities/image.entity';
-import { S3Service } from '../s3/s3.service';
 import { ImageType } from '../../common/enums/imageType.enum';
 import { User } from '../users/entities/user.entity';
 import { UserProfile } from '../users/entities/user-profile.entity';
@@ -17,104 +16,73 @@ export class ImagesService {
   constructor(
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
-    private readonly s3Service: S3Service,
   ) {}
 
   /**
-   * 기본 이미지 업로드 메서드
-   * @param file 업로드할 파일
+   * URL을 기반으로 이미지 엔티티 생성
+   * @param imageUrl 이미지 URL
    * @param type 이미지 타입
+   * @param user 이미지 소유자
+   * @param careUnit 이미지 관련 의료기관 (선택적)
    * @returns 생성된 이미지 엔티티
    */
-  async uploadImage(file: Express.Multer.File, type?: ImageType) {
-    if (!file) {
-      throw new BadRequestException('업로드할 파일이 없습니다.');
+  async createImageFromUrl(
+    imageUrl: string,
+    type: ImageType = ImageType.BUSINESS_LICENSE,
+    user?: User,
+    careUnit?: CareUnit,
+  ) {
+    if (!imageUrl) {
+      throw new BadRequestException('이미지 URL이 없습니다.');
     }
 
     try {
-      // 이미지 타입에 따라 디렉토리 설정
-      const typeDir = type ? ImageType[type].toLowerCase() : 'general';
-      const dirPath = `images/${typeDir}`;
-
-      // S3에 파일 업로드
-      const imgUrl = await this.s3Service.uploadFile(file, dirPath);
-
-      // 이미지 엔티티 생성 및 저장
+      // 이미지 엔티티 생성
       const image = this.imageRepository.create({
-        imgUrl,
-        filePath: dirPath, // 나중에 삭제할 때 사용하기 위해 경로 저장
-        type: type || null,
+        imgUrl: imageUrl,
+        type: type,
+        user: user || null,
+        careUnit: careUnit || null,
       });
 
       return await this.imageRepository.save(image);
     } catch (error: any) {
-      throw new BadRequestException(`이미지 업로드 실패: ${error.message}`);
+      throw new BadRequestException(`이미지 생성 실패: ${error.message}`);
     }
   }
 
   /**
-   * 사업자등록증 이미지 업로드 (회원가입용)
-   * @param file 업로드할 파일
-   * @param user 이미지를 소유할 사용자
+   * 사업자등록증 이미지 생성
+   * @param imageUrl 이미지 URL
+   * @param user 사용자
+   * @param careUnit 의료기관
    * @returns 생성된 이미지 엔티티
    */
-  async uploadBusinessLicense(
-    file: Express.Multer.File,
-    user: User,
-    careUnit: CareUnit,
+  async createBusinessLicenseImage(
+    imageUrl: string,
+    user?: User,
+    careUnit?: CareUnit,
   ) {
-    if (!file) {
-      throw new BadRequestException('사업자등록증 파일이 없습니다.');
-    }
-
-    try {
-      // 사업자등록증 이미지 업로드
-      const image = await this.uploadImage(file, ImageType.BUSINESS_LICENSE);
-
-      // 사용자와 연결
-      image.user = user;
-      image.careUnit = careUnit;
-
-      // 저장 및 반환
-      return await this.imageRepository.save(image);
-    } catch (error: any) {
-      throw new BadRequestException(
-        `사업자등록증 업로드 실패: ${error.message}`,
-      );
-    }
+    return await this.createImageFromUrl(
+      imageUrl,
+      ImageType.BUSINESS_LICENSE,
+      user,
+      careUnit,
+    );
   }
 
   /**
-   * 사용자 프로필 이미지 업로드
-   * @param file 업로드할 파일
-   * @param userId 이미지를 소유할 사용자 ID
-   * @param userProfile 이미지를 연결할 사용자 프로필
+   * 사용자 프로필 이미지 생성
+   * @param imageUrl 이미지 URL
+   * @param user 사용자
    * @returns 생성된 이미지 엔티티
    */
-  async uploadProfileImage(
-    file: Express.Multer.File,
-    userId: string,
-    userProfile: UserProfile,
-  ) {
-    if (!file) {
-      throw new BadRequestException('프로필 이미지 파일이 없습니다.');
-    }
-
-    try {
-      // 프로필 이미지 업로드
-      const image = await this.uploadImage(file, ImageType.USER_PROFILE);
-
-      // 사용자 및 프로필과 연결
-      image.user = { id: userId } as User;
-      image.userProfile = userProfile;
-
-      // 저장 및 반환
-      return await this.imageRepository.save(image);
-    } catch (error: any) {
-      throw new BadRequestException(
-        `프로필 이미지 업로드 실패: ${error.message}`,
-      );
-    }
+  async createUserProfileImage(imageUrl: string, user?: User) {
+    return await this.createImageFromUrl(
+      imageUrl,
+      ImageType.USER_PROFILE,
+      user,
+    );
   }
 
   /**
@@ -163,30 +131,6 @@ export class ImagesService {
     }
 
     return image;
-  }
-
-  /**
-   * 이미지 삭제
-   * @param id 삭제할 이미지 ID
-   * @returns 삭제 결과
-   */
-  async deleteImage(id: string) {
-    const image = await this.findById(id);
-
-    // S3에서 파일 삭제
-    if (image.imgUrl) {
-      await this.s3Service.deleteFile(image.imgUrl);
-    }
-
-    // DB에서 이미지 삭제
-    return await this.imageRepository.remove(image);
-  }
-
-  // 4. 의료기관 이미지 업로드
-  async uploadCareUnitImage(file: Express.Multer.File, careUnit: CareUnit) {
-    const image = await this.uploadImage(file, ImageType.CARE_UNIT);
-    image.careUnit = careUnit;
-    return await this.imageRepository.save(image);
   }
 
   // 5. 특정 타입의 이미지 조회
