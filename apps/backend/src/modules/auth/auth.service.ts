@@ -25,12 +25,7 @@ export class AuthService {
     };
   }
 
-  async signupAdmin(
-    createUserDto: CreateAdminDto,
-    // 클라이언트에서 처리하도록 변경되어 주석처리함
-    // businessLicense?: Express.Multer.File,
-  ) {
-    // await this.usersService.createAdminUser(createUserDto, businessLicense);
+  async signupAdmin(createUserDto: CreateAdminDto) {
     await this.usersService.createAdminUser(createUserDto);
     return {
       message: '관리자 회원가입 성공',
