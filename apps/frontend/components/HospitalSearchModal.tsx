@@ -49,7 +49,8 @@ export default function HospitalSearchModal({
     });
   }, [loaded, setMap]);
 
-  const search = () => {
+  const search = (e) => {
+    e.preventDefault();
     if (!window.kakao?.maps?.services) return;
     const ps = new window.kakao.maps.services.Places();
 
@@ -57,7 +58,7 @@ export default function HospitalSearchModal({
       keyword,
       (
         result: kakao.maps.services.PlacesSearchResult,
-        status: kakao.maps.services.Status,
+        status: kakao.maps.services.Status
       ) => {
         if (status === window.kakao.maps.services.Status.OK) {
           setPlaces(result);
