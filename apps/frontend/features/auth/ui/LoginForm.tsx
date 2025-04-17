@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { login } from '../api';
 import { useAuthStore } from '@/store/useAuthStore';
+import { user } from '@/features/user/api';
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -37,6 +38,7 @@ export default function LoginForm() {
       });
       localStorage.setItem('isAdmin', result.isAdmin);
       localStorage.setItem('isLogin', 'true');
+      await user();
       router.push('/');
     } catch (e) {
       alert((e as Error).message);

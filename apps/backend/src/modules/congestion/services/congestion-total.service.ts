@@ -59,7 +59,7 @@ export class CongestionTotalService implements OnModuleInit {
           {
             hvec: Number(item.hvec),
             congestionLevel: congestionLevel,
-            updatedAt: new Date().toISOString(),
+            updatedAt: new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString(),
             hpid: item.hpid,
             name: item.dutyName,
           },

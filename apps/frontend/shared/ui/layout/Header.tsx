@@ -12,22 +12,23 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
-      await axiosInstance.post('/auth/logout', null, {
+      const res = await axiosInstance.post('/auth/logout', null, {
         withCredentials: true,
       });
+      if (res.status == 200) {
+        logout();
+        localStorage.removeItem('isLogin');
+        localStorage.removeItem('isAdmin');
+        router.push('/');
+      }
     } catch (e) {
       console.error('Logout failed', e);
     }
-
-    logout();
-    localStorage.removeItem('isLogin');
-    localStorage.removeItem('isAdmin');
-    router.push('/');
   };
   return (
     <header className="w-full px-6 py-4 border-b flex justify-between items-center bg-white">
-      <Link href="/" className="text-xl font-bold text-primary">
-        🏥 Medinow
+      <Link href="/" className="text-xl font-bold ">
+        <span className="text-black">🏥 Medinow</span>
       </Link>
       <nav className="flex gap-4">
         {isLoggedIn ? (
