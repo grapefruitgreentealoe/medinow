@@ -1,12 +1,11 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signupSchema } from '../schema/signupSchema';
 import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useState } from 'react';
 import { checkEmail, signup } from '../api';
 
@@ -91,6 +90,7 @@ export default function SignupForm() {
       {errors.age && (
         <p className="text-sm text-red-500">{errors.age.message}</p>
       )}
+
       <Button type="submit" disabled={checking || loading}>
         {checking ? '이메일 확인 중...' : '회원가입'}
       </Button>

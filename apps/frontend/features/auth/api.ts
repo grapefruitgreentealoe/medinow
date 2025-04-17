@@ -23,5 +23,5 @@ export const adminSignup = async (data: AdminSignupData) => {
 
 export const checkEmail = async (email: string) => {
   const res = await axiosInstance.get(`/users/check-email?email=${email}`);
-  return res.data;
+  return res.data.idDuplicate;
 };
