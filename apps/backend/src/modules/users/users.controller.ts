@@ -69,10 +69,15 @@ export class UsersController {
   })
   async checkEmail(@Query('email') email: string) {
     const isExist = await this.usersService.isExistEmail(email);
+    if (isExist) {
+      return {
+        message: '이미 존재하는 이메일입니다.',
+        isDuplicate: true,
+      };
+    }
     return {
-      message: '이메일 중복 확인 성공',
-      email,
-      isDuplicate: isExist,
+      message: '사용 가능한 이메일입니다.',
+      isDuplicate: false,
     };
   }
 
