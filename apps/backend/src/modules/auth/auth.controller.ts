@@ -60,7 +60,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: '관리자 회원가입' })
-  @ApiBody({ type: CreateUserDto })
+  @ApiBody({ type: CreateAdminDto })
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: '관리자 회원가입 성공',

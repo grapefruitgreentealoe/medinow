@@ -63,8 +63,8 @@ export class UsersService {
     }
   }
 
-  async createAdminUser(createUserDto: CreateAdminDto): Promise<User> {
-    const user = await this.findUserByEmail(createUserDto.email);
+  async createAdminUser(createAdminDto: CreateAdminDto): Promise<User> {
+    const user = await this.findUserByEmail(createAdminDto.email);
     if (user) {
       throw new ConflictException('이미 존재하는 이메일입니다.');
     }
@@ -79,7 +79,7 @@ export class UsersService {
       latitude,
       longitude,
       imageUrl,
-    } = createUserDto;
+    } = createAdminDto;
 
     const queryRunner =
       this.userRepository.manager.connection.createQueryRunner();

@@ -195,6 +195,7 @@ export class CareUnitService {
       queryBuilder.andWhere(`CAST(careUnit.lat AS TEXT) LIKE :lat`, {
         lat: `${latPrefix}%`,
       });
+      console.log('위도 값:', latPrefix);
     } else {
       throw new BadRequestException('위도 값이 없습니다');
     }
@@ -204,6 +205,7 @@ export class CareUnitService {
       queryBuilder.andWhere(`CAST(careUnit.lng AS TEXT) LIKE :lng`, {
         lng: `${lngPrefix}%`,
       });
+      console.log('경도 값:', lngPrefix);
     } else {
       throw new BadRequestException('경도 값이 없습니다');
     }
@@ -215,10 +217,12 @@ export class CareUnitService {
         queryBuilder.andWhere('careUnit.address LIKE :address', {
           address: `%${remainingAddress}%`,
         });
+        console.log('주소 값:', remainingAddress);
       } else {
         queryBuilder.andWhere('careUnit.address LIKE :address', {
           address: `%${address}%`,
         });
+        console.log('주소 값:', address);
       }
     } else {
       throw new BadRequestException('주소 값이 없습니다');
@@ -228,17 +232,21 @@ export class CareUnitService {
       queryBuilder.andWhere('careUnit.name LIKE :name', {
         name: `%${name}%`,
       });
+      console.log('이름 값:', name);
     } else {
       throw new BadRequestException('이름 값이 없습니다');
     }
 
     if (category) {
       queryBuilder.andWhere('careUnit.category = :category', { category });
+      console.log('카테고리 값:', category);
     } else {
       throw new BadRequestException('카테고리 값이 없습니다');
     }
 
-    return await queryBuilder.getMany();
+    const careUnits = await queryBuilder.getMany();
+    console.log('조회된 의료기관 수:', careUnits.length);
+    return careUnits;
   }
 
   //🏥 상세 정보 조회 by 위치
