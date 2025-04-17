@@ -19,7 +19,6 @@ export class CareUnitCongestionService {
   private readonly CACHE_TTL = 600;
 
   constructor(
-    @InjectRepository(CareUnit)
     private readonly redisService: RedisService,
     private readonly appConfigService: AppConfigService,
     private readonly careUnitService: CareUnitService,
