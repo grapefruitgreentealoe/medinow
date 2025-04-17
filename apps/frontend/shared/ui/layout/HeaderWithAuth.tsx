@@ -1,10 +1,10 @@
-import { AdminStateProvider } from '@/providers/AdminStateProvider';
+import { AuthStateProvider } from '@/providers/AuthStateProvider';
 import Header from './Header';
 
 export default function HeaderWithAuth() {
   return (
-    <AdminStateProvider>
+    <AuthStateProvider>
       <Header />
-    </AdminStateProvider>
+    </AuthStateProvider>
   );
 }
