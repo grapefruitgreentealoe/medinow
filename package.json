@@ -20,7 +20,13 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "setup:env": "cp .env.frontend.template .env.frontend && cp .env.backend.template .env.backend",
-    "prepare": "cross-env-shell \"[ \\\"$HUSKY\\\" != \\\"0\\\" ] && husky install || echo 'Skip husky'\""
+    "prepare": "cross-env-shell \"[ \\\"$HUSKY\\\" != \\\"0\\\" ] && husky install || echo 'Skip husky'\"",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend start:dev",
+    "docker:build": "docker-compose -f docker-compose.local.yml up -d --build",
+    "docker:detach": "docker-compose -f docker-compose.local.yml up -d --build -d",
+    "docker:dev:rebuild": "docker-compose -f docker-compose.local.yml up -d --build --force-recreate",
+    "docker:dev:down": "docker-compose down"
   },
   "engines": {
     "node": ">=20"
