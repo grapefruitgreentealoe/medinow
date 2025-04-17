@@ -191,7 +191,7 @@ export class CareUnitService {
     const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
 
     if (lat) {
-      const latPrefix = Math.floor(lat * 100) / 100;
+      const latPrefix = Math.floor(lat * 10) / 10;
       queryBuilder.andWhere(`CAST(careUnit.lat AS TEXT) LIKE :lat`, {
         lat: `${latPrefix}%`,
       });
@@ -200,7 +200,7 @@ export class CareUnitService {
     }
 
     if (lng) {
-      const lngPrefix = Math.floor(lng * 100) / 100;
+      const lngPrefix = Math.floor(lng * 10) / 10;
       queryBuilder.andWhere(`CAST(careUnit.lng AS TEXT) LIKE :lng`, {
         lng: `${lngPrefix}%`,
       });
