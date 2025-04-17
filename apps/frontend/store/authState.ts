@@ -1,7 +1,7 @@
-// store/authState.ts
+// recoil/authState.ts
 import { atom } from 'recoil';
 
-export const authTokenState = atom<string | null>({
-  key: 'authTokenState',
-  default: null,
+export const isAdminState = atom<boolean>({
+  key: 'isAdminState',
+  default: false,
 });

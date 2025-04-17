@@ -64,7 +64,8 @@ export class UsersService {
 
   async createAdminUser(
     createUserDto: CreateAdminDto,
-    businessLicense?: Express.Multer.File,
+    // 클라이언트에서 처리하도록 변경되어 주석처리함
+    // businessLicense?: Express.Multer.File,
   ): Promise<User> {
     const user = await this.findUserByEmail(createUserDto.email);
     if (user) {
@@ -113,6 +114,7 @@ export class UsersService {
         user: savedUser,
       });
 
+      /* 클라이언트에서 처리하도록 변경되어 주석처리함
       if (businessLicense) {
         const image = await this.imagesService.uploadBusinessLicense(
           businessLicense,
@@ -121,6 +123,7 @@ export class UsersService {
         );
         newUserProfile.image = image;
       }
+      */
 
       await queryRunner.manager.save(newUserProfile);
 

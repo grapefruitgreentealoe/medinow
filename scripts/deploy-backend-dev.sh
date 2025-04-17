@@ -8,6 +8,9 @@ echo "🚀 [DEV] 백엔드 배포 시작"
 # ✅ 기존 컨테이너 및 네트워크 정리
 docker-compose -f $COMPOSE_FILE down
 
+# 최신 이미지 pull
+# docker pull grapefruitgreentealoe/medinow-backend:dev
+
 # ✅ 새로 빌드 및 실행
 docker-compose -f $COMPOSE_FILE up -d --build
 

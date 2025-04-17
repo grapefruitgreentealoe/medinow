@@ -10,12 +10,13 @@ export const adminSignupSchema = z.object({
       '대/소문자, 숫자, 특수문자를 포함해야 합니다'
     ),
   managerName: z.string().min(1, '담당자 이름을 입력해주세요'),
-  institutionName: z.string().min(1, '기관명을 입력해주세요'),
   contact: z.string().min(1, '연락처를 입력해주세요'),
+  lat: z.string().min(1, '연락처를 입력해주세요'),
+  lng: z.string().min(1, '연락처를 입력해주세요'),
+  medicalCenterName: z.string(),
   address: z.string().min(1, '주소를 입력해주세요'),
   businessHourStart: z.string().min(1, '운영 시작 시간을 입력해주세요'),
   businessHourEnd: z.string().min(1, '운영 종료 시간을 입력해주세요'),
-  medicalLicenseNumber: z.string().min(1, '허가번호를 입력해주세요'),
   institutionType: z.enum(['응급실', '병원', '약국'], {
     errorMap: () => ({ message: '기관 유형을 선택해주세요' }),
   }),
