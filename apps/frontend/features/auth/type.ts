@@ -16,9 +16,12 @@ export interface AdminSignupData {
   email: string;
   password: string;
   name: string;
-  nickname: string;
-  address?: string;
-  age?: number;
+  latitude: number;
+  longitude: number;
+  careUnitName: string;
+  careUnitAddress: string;
+  careUnitCategory: string;
+  imageUrl?: string;
 }
 
 export interface SignupData {
