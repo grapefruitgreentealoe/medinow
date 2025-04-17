@@ -9,18 +9,23 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
+  ApiExcludeEndpoint,
 } from '@nestjs/swagger';
 import { CareUnitAdminService } from './services/care-unit-admin.service';
 import { CareUnit } from './entities/care-unit.entity';
+import { CongestionOneService } from '../congestion/services/congestion-one.service';
+import { ResponseCongestionDto } from './dto/response-congestion.dto';
 @ApiTags('Care Unit')
 @Controller('care-units')
 export class CareUnitController {
   constructor(
     private readonly careUnitService: CareUnitService,
     private readonly careUnitAdminService: CareUnitAdminService,
+    private readonly congestionService: CongestionOneService,
   ) {}
 
   @Get()
+  @ApiExcludeEndpoint()
   @ApiOperation({
     summary: 'Admin : Api로 응급실, 병의원, 약국 Full Data 조회',
   })
@@ -51,6 +56,7 @@ export class CareUnitController {
   }
 
   @Post('full')
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin: 초기세팅 / 병원, 약국, 응급실 데이터 저장' })
   @ApiResponse({
     status: 200,
@@ -62,6 +68,7 @@ export class CareUnitController {
   }
 
   @Post('hospital-departments')
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin: 병원 진료과목 저장' })
   @ApiResponse({
     status: 200,
@@ -73,6 +80,7 @@ export class CareUnitController {
   }
 
   @Get('category')
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin : 카테고리별 조회 (전체 DB대상)' })
   @ApiQuery({
     name: 'category',
@@ -90,6 +98,7 @@ export class CareUnitController {
   }
 
   @Post('badge')
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin : 배지 추가' })
   @ApiBody({
     schema: {
@@ -109,6 +118,7 @@ export class CareUnitController {
   }
 
   @Get('hpId')
+  @ApiExcludeEndpoint()
   @ApiOperation({
     summary: '사용자, 기관관리자 : hpId와 category로 상세 정보 조회',
   })
@@ -138,6 +148,7 @@ export class CareUnitController {
   }
 
   @Get('location')
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: '사용자 : 위치로 특정 기관 조회' })
   @ApiQuery({ name: 'lat', required: true, type: Number })
   @ApiQuery({ name: 'lng', required: true, type: Number })
@@ -188,6 +199,7 @@ export class CareUnitController {
 
   // 위치로 조회하나, name, category, hpId 반환하기
   @Get('location-signup')
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: '사용자 : 위치로 기관 조회 (가입 페이지)' })
   @ApiQuery({ name: 'lat', required: true, type: Number })
   @ApiQuery({ name: 'lng', required: true, type: Number })
@@ -332,5 +344,23 @@ export class CareUnitController {
   })
   async checkNowOpen(@Param('id') id: string): Promise<{ message: string }> {
     return this.careUnitService.checkNowOpen(id);
+  }
+
+  @Get('congestion/:id')
+  @ApiOperation({ summary: '사용자 :  특정 기관 혼잡도 조회' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    type: String,
+    description: '기관 고유 아이디',
+    example: 'a5388b7a-cd05-40a6-b9b2-af406c65ddb7',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공',
+    type: ResponseCongestionDto,
+  })
+  async getCongestion(@Param('id') id: string) {
+    return this.congestionService.getCongestion(id);
   }
 }

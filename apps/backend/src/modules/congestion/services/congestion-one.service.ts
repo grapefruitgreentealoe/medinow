@@ -34,14 +34,15 @@ export class CongestionOneService {
         throw new NotFoundException('CareUnit not found');
       }
       // Redis에서 캐시된 혼잡도 데이터 조회
-      const cacheKey = `congestion:${careUnit.id}`;
+      const cacheKey = `congestion:${careUnit.hpId}`;
       const cachedData = await this.redisService.get(cacheKey);
       if (cachedData) {
+        console.log('캐시된 데이터:', cachedData);
         return JSON.parse(cachedData);
       }
       // 캐시된 데이터가 없으면 API 호출하여 새로운 데이터 가져오기
       const response = await fetch(
-        `${this.appConfigService.emergencyCongestionApiUrl}?serviceKey=${this.appConfigService.serviceKey}&pageNo=1&numOfRows=600&_type=json`,
+        `${this.appConfigService.emergencyCongestionApiUrl}?serviceKey=${this.appConfigService.serviceKey}&hpid=${careUnit.hpId}&pageNo=1&numOfRows=1&_type=json`,
         {
           headers: {
             Accept: 'application/json',
@@ -53,26 +54,20 @@ export class CongestionOneService {
       const congestionLevel = this.congestionTotalService.getCongestionLevel(
         congestionData.hvec,
       );
-      // Redis에 새로운 데이터 저장
-      await this.redisService.set(
-        cacheKey,
-        {
-          hvec: Number(congestionData.hvec),
-          congestionLevel: congestionLevel,
-          updatedAt: new Date().toISOString(),
-          hpid: congestionData.hpid,
-          name: congestionData.dutyName,
-        },
-
-        this.CACHE_TTL,
-      );
-      return {
+      const congestionDataObj = {
         hvec: Number(congestionData.hvec),
         congestionLevel: congestionLevel,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString(),
         hpid: congestionData.hpid,
         name: congestionData.dutyName,
       };
+
+      // Redis에 저장
+      await this.redisService.set(cacheKey, congestionDataObj, this.CACHE_TTL);
+
+      // 동일한 데이터 리턴
+      console.log(congestionDataObj);
+      return congestionDataObj;
     } catch (error) {
       console.error('혼잡도 조회 실패:', error);
       throw new InternalServerErrorException('혼잡도 조회 실패');
