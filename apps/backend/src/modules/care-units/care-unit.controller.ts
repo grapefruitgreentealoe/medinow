@@ -9,6 +9,7 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
+  ApiExcludeEndpoint,
 } from '@nestjs/swagger';
 import { CareUnitAdminService } from './services/care-unit-admin.service';
 import { CareUnit } from './entities/care-unit.entity';
@@ -24,6 +25,7 @@ export class CareUnitController {
   ) {}
 
   @Get()
+  @ApiExcludeEndpoint()
   @ApiOperation({
     summary: 'Admin : Api로 응급실, 병의원, 약국 Full Data 조회',
   })
@@ -54,6 +56,7 @@ export class CareUnitController {
   }
 
   @Post('full')
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin: 초기세팅 / 병원, 약국, 응급실 데이터 저장' })
   @ApiResponse({
     status: 200,
@@ -65,6 +68,7 @@ export class CareUnitController {
   }
 
   @Post('hospital-departments')
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin: 병원 진료과목 저장' })
   @ApiResponse({
     status: 200,
@@ -76,6 +80,7 @@ export class CareUnitController {
   }
 
   @Get('category')
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin : 카테고리별 조회 (전체 DB대상)' })
   @ApiQuery({
     name: 'category',
@@ -93,6 +98,7 @@ export class CareUnitController {
   }
 
   @Post('badge')
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin : 배지 추가' })
   @ApiBody({
     schema: {
@@ -112,6 +118,7 @@ export class CareUnitController {
   }
 
   @Get('hpId')
+  @ApiExcludeEndpoint()
   @ApiOperation({
     summary: '사용자, 기관관리자 : hpId와 category로 상세 정보 조회',
   })
@@ -141,6 +148,7 @@ export class CareUnitController {
   }
 
   @Get('location')
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: '사용자 : 위치로 특정 기관 조회' })
   @ApiQuery({ name: 'lat', required: true, type: Number })
   @ApiQuery({ name: 'lng', required: true, type: Number })
@@ -191,6 +199,7 @@ export class CareUnitController {
 
   // 위치로 조회하나, name, category, hpId 반환하기
   @Get('location-signup')
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: '사용자 : 위치로 기관 조회 (가입 페이지)' })
   @ApiQuery({ name: 'lat', required: true, type: Number })
   @ApiQuery({ name: 'lng', required: true, type: Number })
