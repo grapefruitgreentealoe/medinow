@@ -100,4 +100,13 @@ export class CreateAdminDto extends CreateUserDto {
   })
   @IsEnum(CareUnitCategory)
   readonly careUnitCategory: CareUnitCategory;
+
+  @ApiProperty({
+    type: String,
+    description: '관리자 소속 기관 사업자 번호 이미지 URL',
+    example: 'https://example.com/image.jpg',
+    required: false,
+  })
+  @IsOptional()
+  readonly imageUrl: string;
 }
