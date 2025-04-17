@@ -8,21 +8,24 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   NotFoundException,
   InternalServerErrorException,
+  Injectable,
 } from '@nestjs/common';
 import { CareUnitService } from './care-unit.service';
+import { RedisService } from 'src/modules/redis/redis.service';
+import { CongestionLevel } from 'src/common/enums/congestion.enum';
 
+@Injectable()
 export class CareUnitCongestionService {
   private readonly CACHE_TTL = 600;
 
   constructor(
     @InjectRepository(CareUnit)
-    private readonly careUnitRepository: Repository<CareUnit>,
-    @InjectRedis() private readonly redis: Redis,
+    private readonly redisService: RedisService,
     private readonly appConfigService: AppConfigService,
     private readonly careUnitService: CareUnitService,
   ) {}
 
-  //10분마다 실행되는 크론 작업
+  //1️⃣ 전체 응급실 혼잡도 저장
   @Cron(CronExpression.EVERY_10_MINUTES)
   async updateCongestion() {
     try {
@@ -35,18 +38,21 @@ export class CareUnitCongestionService {
         },
       );
       const data = await response.json();
-      const congestionData = data.response.body.items.item;
+      const congestionData = Array.isArray(data.response.body.items.item)
+        ? data.response.body.items.item
+        : [data.response.body.items.item];
 
       //Redis에 데이터 저장
       for (const item of congestionData) {
         const key = `congestion:${item.careUnitId}`;
-        await this.redis.set(
+        const congestionLevel = await this.getCongestionLevel(item.hvec);
+        await this.redisService.set(
           key,
-          JSON.stringify({
-            hvec: item.hvec,
+          {
+            hvec: Number(item.hvec),
+            congestionLevel: congestionLevel,
             updatedAt: new Date().toISOString(),
-          }),
-          'EX',
+          },
           this.CACHE_TTL,
         );
       }
@@ -55,6 +61,7 @@ export class CareUnitCongestionService {
     }
   }
 
+  //2️⃣ 특정 응급실 혼잡도 조회 (careUnit의 uuid)
   async getCongestion(careUnitId: string) {
     try {
       // 먼저 CareUnit 조회
@@ -64,7 +71,7 @@ export class CareUnitCongestionService {
       }
       // Redis에서 캐시된 혼잡도 데이터 조회
       const cacheKey = `congestion:${careUnit.id}`;
-      const cachedData = await this.redis.get(cacheKey);
+      const cachedData = await this.redisService.get(cacheKey);
       if (cachedData) {
         return JSON.parse(cachedData);
       }
@@ -79,14 +86,18 @@ export class CareUnitCongestionService {
       );
       const data = await response.json();
       const congestionData = data.response.body.items.item;
+      const congestionLevel = await this.getCongestionLevel(
+        congestionData.hvec,
+      );
       // Redis에 새로운 데이터 저장
-      await this.redis.set(
+      await this.redisService.set(
         cacheKey,
-        JSON.stringify({
-          hvec: congestionData.hvec,
+        {
+          hvec: Number(congestionData.hvec),
+          congestionLevel: congestionLevel,
           updatedAt: new Date().toISOString(),
-        }),
-        'EX',
+        },
+
         this.CACHE_TTL,
       );
       return {
@@ -96,6 +107,17 @@ export class CareUnitCongestionService {
     } catch (error) {
       console.error('혼잡도 조회 실패:', error);
       throw new InternalServerErrorException('혼잡도 조회 실패');
+    }
+  }
+
+  //3️⃣ hvec 값에 따른 혼잡도 레벨 조회
+  async getCongestionLevel(hvec: number) {
+    if (hvec >= 10) {
+      return CongestionLevel.LOW;
+    } else if (hvec >= 1 && hvec <= 9) {
+      return CongestionLevel.MEDIUM;
+    } else {
+      return CongestionLevel.HIGH;
     }
   }
 }
