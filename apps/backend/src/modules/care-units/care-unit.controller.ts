@@ -84,6 +84,13 @@ export class CareUnitController {
     status: 200,
     description: '성공',
     type: [CareUnit],
+    example: [
+      {
+        id: 'uuid-example',
+        name: '서울대학교병원',
+        address: '서울특별시 종로구 대학로 101',
+      },
+    ],
   })
   async getCareUnitByCategory(@Query('category') category: string) {
     return this.careUnitService.getCareUnitByCategory(category);

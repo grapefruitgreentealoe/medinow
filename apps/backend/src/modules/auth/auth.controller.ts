@@ -28,8 +28,8 @@ import { RequestOrigin } from '../../common/decorators/request-origin.decorator'
 import { RequestUserId } from '../../common/decorators/request-userId.decorator';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ImagesService } from '../images/images.service';
+import { Public } from './decorators/public.decorator';
 
 @ApiTags('인증')
 @Controller('auth')
@@ -39,6 +39,7 @@ export class AuthController {
     private readonly imagesService: ImagesService,
   ) {}
 
+  @Public()
   @ApiOperation({ summary: '회원가입' })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({
@@ -59,6 +60,7 @@ export class AuthController {
     };
   }
 
+  @Public()
   @ApiOperation({ summary: '관리자 회원가입' })
   @ApiBody({ type: CreateAdminDto })
   @ApiResponse({
@@ -74,6 +76,7 @@ export class AuthController {
     };
   }
 
+  @Public()
   @ApiOperation({ summary: '로그인' })
   @ApiBody({ type: LoginDto })
   @ApiResponse({
