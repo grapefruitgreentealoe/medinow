@@ -109,6 +109,7 @@ export class UsersService {
       const newUserProfile = this.userProfileRepository.create({
         name,
         address: careUnit[0].address,
+        nickname: careUnit[0].name,
         user: savedUser,
       });
 
@@ -156,7 +157,10 @@ export class UsersService {
 
   async isExistEmail(email: string): Promise<boolean> {
     const user = await this.findUserByEmail(email);
-    return !!user;
+    if (user) {
+      return true;
+    }
+    return false;
   }
 
   async updateUser(
