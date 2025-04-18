@@ -34,6 +34,7 @@ export class FavoritesService {
   async getUserFavorites(userId: string) {
     const favorites = await this.favoriteRepository.find({
       where: { user: { id: userId } },
+      relations: ['careUnit'],
     });
 
     if (favorites.length === 0) {
@@ -42,7 +43,6 @@ export class FavoritesService {
 
     const careUnits = favorites.map((favorite) => {
       return {
-        id: favorite.careUnit.id,
         name: favorite.careUnit.name,
         address: favorite.careUnit.address,
         favorite: true,
