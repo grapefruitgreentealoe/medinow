@@ -15,7 +15,9 @@ import { CareUnitAdminService } from './services/care-unit-admin.service';
 import { CareUnit } from './entities/care-unit.entity';
 import { CongestionOneService } from '../congestion/services/congestion-one.service';
 import { ResponseCongestionDto } from './dto/response-congestion.dto';
+import { Public } from '../auth/decorators/public.decorator';
 @ApiTags('Care Unit')
+@Public()
 @Controller('care-units')
 export class CareUnitController {
   constructor(
