@@ -14,6 +14,9 @@ import { DepartmentsModule } from './modules/departments/departments.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NoticesModule } from './modules/notices/notices.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -34,6 +37,12 @@ import { FavoritesModule } from './modules/favorites/favorites.module';
     FavoritesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
