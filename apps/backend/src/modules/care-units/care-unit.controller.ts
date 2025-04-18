@@ -54,7 +54,7 @@ export class CareUnitController {
     @Query('pageNo') pageNo: number = 1,
     @Query('numOfRows') numOfRows: number = 10,
   ): Promise<ResponseCareUnitDto[]> {
-    return this.careUnitService.getAllCareUnit(pageNo, numOfRows);
+    return this.careUnitAdminService.getAllCareUnit(pageNo, numOfRows);
   }
 
   @Post('full')
@@ -103,7 +103,7 @@ export class CareUnitController {
     ],
   })
   async getCareUnitByCategory(@Query('category') category: string) {
-    return this.careUnitService.getCareUnitByCategory(category);
+    return this.careUnitAdminService.getCareUnitByCategory(category);
   }
 
   @Post('badge')
@@ -326,7 +326,7 @@ export class CareUnitController {
     required: true,
     type: String,
     description: '기관 고유 아이디',
-    example: 'A2108916',
+    example: '46dcef6e-b986-4688-adea-04dd39fe8323',
   })
   @ApiResponse({
     status: 200,
