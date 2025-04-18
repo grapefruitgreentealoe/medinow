@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FavoritesService } from './favorites.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Favorite } from './entities/favorite.entity';
+import { CareUnitService } from '../care-units/services/care-unit.service';
+import { UsersService } from '../users/users.service';
 
 describe('FavoritesService', () => {
   let service: FavoritesService;
@@ -16,6 +18,16 @@ describe('FavoritesService', () => {
     count: jest.fn(),
   };
 
+  // CareUnitService 모킹
+  const mockCareUnitService = {
+    getCareUnitDetail: jest.fn(),
+  };
+
+  // UsersService 모킹
+  const mockUsersService = {
+    findOne: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -23,6 +35,14 @@ describe('FavoritesService', () => {
         {
           provide: getRepositoryToken(Favorite),
           useValue: mockFavoriteRepository,
+        },
+        {
+          provide: CareUnitService,
+          useValue: mockCareUnitService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
         },
       ],
     }).compile();

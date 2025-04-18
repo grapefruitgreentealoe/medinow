@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CareUnitService } from './services/care-unit.service';
 import { ResponseCareUnitDto } from './dto/response-care-unit.dto';
 import {
@@ -19,8 +27,8 @@ import { Public } from '../auth/decorators/public.decorator';
 import { RequestUser } from 'src/common/decorators/request-user.decorator';
 
 import { User } from '../users/entities/user.entity';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @ApiTags('의료기관')
-@Public()
 @Controller('care-units')
 export class CareUnitController {
   constructor(
@@ -30,6 +38,7 @@ export class CareUnitController {
   ) {}
 
   @Get()
+  @Public()
   @ApiExcludeEndpoint()
   @ApiOperation({
     summary: 'Admin : Api로 응급실, 병의원, 약국 Full Data 조회',
@@ -61,6 +70,7 @@ export class CareUnitController {
   }
 
   @Post('full')
+  @Public()
   @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin: 초기세팅 / 병원, 약국, 응급실 데이터 저장' })
   @ApiResponse({
@@ -73,6 +83,7 @@ export class CareUnitController {
   }
 
   @Post('hospital-departments')
+  @Public()
   @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin: 병원 진료과목 저장' })
   @ApiResponse({
@@ -85,6 +96,7 @@ export class CareUnitController {
   }
 
   @Get('category')
+  @Public()
   @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin : 카테고리별 조회 (전체 DB대상)' })
   @ApiQuery({
@@ -110,6 +122,7 @@ export class CareUnitController {
   }
 
   @Post('badge')
+  @UseGuards(JwtAuthGuard)
   @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin : 배지 추가' })
   @ApiBody({
@@ -130,6 +143,7 @@ export class CareUnitController {
   }
 
   @Get('hpId')
+  @Public()
   @ApiExcludeEndpoint()
   @ApiOperation({
     summary: '사용자, 기관관리자 : hpId와 category로 상세 정보 조회',
@@ -160,6 +174,7 @@ export class CareUnitController {
   }
 
   @Get('location')
+  @Public()
   @ApiExcludeEndpoint()
   @ApiOperation({ summary: '사용자 : 위치로 특정 기관 조회' })
   @ApiQuery({ name: 'lat', required: true, type: Number })
@@ -211,6 +226,7 @@ export class CareUnitController {
 
   // 위치로 조회하나, name, category, hpId 반환하기
   @Get('location-signup')
+  @Public()
   @ApiExcludeEndpoint()
   @ApiOperation({ summary: '사용자 : 위치로 기관 조회 (가입 페이지)' })
   @ApiQuery({ name: 'lat', required: true, type: Number })
@@ -244,6 +260,7 @@ export class CareUnitController {
   }
 
   @Get('location-by-category')
+  @Public()
   @ApiOperation({ summary: '사용자 : 위치와 카테고리로 반경 조회' })
   @ApiQuery({
     name: 'category',
@@ -313,6 +330,89 @@ export class CareUnitController {
     @Query('lng') lng: number,
     @Query('level') level: number = 1,
     @Query('category') category?: string,
+  ) {
+    return this.careUnitService.getCareUnitByCategoryAndLocation(
+      lat,
+      lng,
+      level,
+      category,
+    );
+  }
+
+  //로그인 후 지도 조회
+  @UseGuards(JwtAuthGuard)
+  @Get('location-by-category-login')
+  @ApiOperation({ summary: '사용자 : 위치와 카테고리로 반경 조회' })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    type: String,
+    enum: ['emergency', 'hospital', 'pharmacy'],
+  })
+  @ApiQuery({
+    name: 'level',
+    required: true,
+    type: Number,
+    description: '반경 레벨 (예시: 1)',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'lat',
+    required: true,
+    type: Number,
+    description: '동 위도 (예시: 37.5417253860377)',
+    example: 35.19994528957531,
+  })
+  @ApiQuery({
+    name: 'lng',
+    required: true,
+    type: Number,
+    description: '동 경도 (예시: 127.043351028535)',
+    example: 128.56710886511746,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공',
+    type: [CareUnit],
+    schema: {
+      example: [
+        {
+          id: 'uuid-example',
+          name: '서울대학교병원',
+          address: '서울특별시 종로구 대학로 101',
+          tel: '02-2072-2114',
+          category: 'hospital',
+          hpId: 'A1100027',
+          mondayOpen: 900,
+          mondayClose: 1700,
+          tuesdayOpen: 900,
+          tuesdayClose: 1700,
+          wednesdayOpen: 900,
+          wednesdayClose: 1700,
+          thursdayOpen: 900,
+          thursdayClose: 1700,
+          fridayOpen: 900,
+          fridayClose: 1700,
+          saturdayOpen: 900,
+          saturdayClose: 1300,
+          sundayOpen: null,
+          sundayClose: null,
+          holidayOpen: null,
+          holidayClose: null,
+          lat: 37.5417253860377,
+          lng: 127.043351028535,
+          is_badged: false,
+          now_open: true,
+          kakao_url: 'https://place.map.kakao.com/...',
+        },
+      ],
+    },
+  })
+  async getCareUnitByCategoryAndLocationLogin(
+    @Query('lat') lat: number,
+    @Query('lng') lng: number,
+    @Query('level') level: number = 1,
+    @Query('category') category?: string,
     @RequestUser() user?: User,
   ) {
     return this.careUnitService.getCareUnitByCategoryAndLocation(
@@ -325,6 +425,7 @@ export class CareUnitController {
   }
 
   @Get(':id')
+  @Public()
   @ApiOperation({ summary: '사용자, 기관관리자 : Care Unit 상세 정보 조회' })
   @ApiParam({
     name: 'id',
@@ -343,6 +444,7 @@ export class CareUnitController {
   }
 
   @Post('check-now-open')
+  @Public()
   @ApiOperation({ summary: '기관관리자 : 실시간 운영 여부 확인' })
   @ApiParam({
     name: 'id',
@@ -361,6 +463,7 @@ export class CareUnitController {
   }
 
   @Get('congestion/:id')
+  @Public()
   @ApiOperation({ summary: '사용자 :  특정 기관 혼잡도 조회' })
   @ApiParam({
     name: 'id',
