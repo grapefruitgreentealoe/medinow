@@ -28,7 +28,6 @@ async function bootstrap() {
     .setTitle('MediNow API')
     .setDescription('MediNow API 문서입니다.')
     .setVersion('0.0.1')
-    .addCookieAuth('accessToken')
     .addServer('api/v1')
     .build();
 
