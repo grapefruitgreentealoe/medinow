@@ -10,13 +10,17 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { RedisModule } from '../redis/redis.module';
 import { CongestionModule } from '../congestion/congestion.module';
 import { UsersModule } from '../users/users.module';
+import { FavoritesModule } from '../favorites/favorites.module';
+
 @Module({
   imports: [
-    forwardRef(() => UsersModule),
     TypeOrmModule.forFeature([CareUnit, Department]),
     AppConfigModule,
     RedisModule,
+    ScheduleModule.forRoot(),
+    forwardRef(() => UsersModule),
     forwardRef(() => CongestionModule),
+    forwardRef(() => FavoritesModule),
   ],
   controllers: [CareUnitController],
   providers: [CareUnitService, CareUnitAdminService],

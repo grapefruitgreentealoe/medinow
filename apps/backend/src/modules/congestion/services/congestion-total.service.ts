@@ -17,7 +17,9 @@ export class CongestionTotalService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.updateCongestion(); // 서버 시작 시 즉시 실행
+    setTimeout(async () => {
+      await this.updateCongestion(); // 서버 시작 시 즉시 실행
+    }, 5000);
   }
 
   //1️⃣ 전체 응급실 혼잡도 저장
@@ -34,6 +36,15 @@ export class CongestionTotalService implements OnModuleInit {
         },
       );
       const data = await response.json();
+
+      // API 응답 구조 확인을 위한 로깅
+      console.log('API 응답 구조:', {
+        response: !!data.response,
+        body: !!data.response?.body,
+        items: !!data.response?.body?.items,
+        item: !!data.response?.body?.items?.item,
+        fullResponse: data,
+      });
 
       const congestionData = Array.isArray(data.response.body.items.item)
         ? data.response.body.items.item
