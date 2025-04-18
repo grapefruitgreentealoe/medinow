@@ -27,42 +27,33 @@ async function bootstrap() {
 
   app.use(
     helmet({
-      // 기본 보안 헤더 설정
       contentSecurityPolicy: isTestEnv
         ? false
         : {
             directives: {
-              defaultSrc: ["'self'"],
-              scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-              styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
-              imgSrc: ["'self'", 'data:', 'https:'],
-              connectSrc: ["'self'", 'https:'],
-              fontSrc: ["'self'", 'https:'],
-              objectSrc: ["'none'"],
-              mediaSrc: ["'self'"],
-              frameSrc: ["'self'"],
+              defaultSrc: ["'self'"], // 기본 소스 제한
+              scriptSrc: ["'self'"], // 스크립트 소스 제한
+              styleSrc: ["'self'", 'https:'], // 스타일 소스 제한
+              imgSrc: ["'self'", 'data:', 'https:'], // 이미지 소스 제한
+              connectSrc: ["'self'", 'https:'], // 연결 소스 제한
+              fontSrc: ["'self'", 'https:'], // 폰트 소스 제한
+              objectSrc: ["'none'"], // 객체 소스 제한
+              mediaSrc: ["'self'"], // 미디어 소스 제한
+              frameSrc: ["'self'"], // 프레임 소스 제한
             },
           },
-      // Cross-Site-Scripting 공격 방지
-      xssFilter: true,
-      // MIME 스니핑 방지
-      noSniff: true,
-      // iframe 내 표시 제한
-      frameguard: {
-        action: 'sameorigin',
-      },
-      // HSTS 설정 (테스트 환경에서는 비활성화)
+      noSniff: true, // MIME 스니핑 방지
+      frameguard: { action: 'sameorigin' }, // 프레임 보호
       hsts: isTestEnv
         ? false
         : {
             maxAge: 31536000, // 1년
-            includeSubDomains: true,
-            preload: true,
+            includeSubDomains: true, // 서브 도메인 포함
+            preload: true, // 사전 로드 활성화
           },
-      // 클릭재킹 방지
-      // referrerPolicy: { policy: 'same-origin' },
-      // DNS prefetch 제어 (테스트 환경에서는 비활성화)
-      dnsPrefetchControl: isTestEnv ? false : { allow: false },
+      dnsPrefetchControl: isTestEnv ? false : { allow: false }, // DNS 프리페치 제어
+      referrerPolicy: { policy: 'strict-origin-when-cross-origin' }, // 참조 정책
+      crossOriginResourcePolicy: { policy: 'same-origin' }, // 교차 출처 리소스 정책
     }),
   );
 
