@@ -21,7 +21,6 @@ export default function AdminSignupForm() {
   const inputFileRef = useRef<HTMLInputElement | null>(null);
 
   const [checking, setChecking] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -67,7 +66,7 @@ export default function AdminSignupForm() {
         body: formData,
       });
 
-      // setValue('imageUrl', res.url, { shouldDirty: true });
+      setValue('imageUrl', res.data.url, { shouldDirty: true });
     } catch (error) {
       alert('이미지 업로드에 실패했습니다.');
       console.error(error);
@@ -92,7 +91,6 @@ export default function AdminSignupForm() {
     };
     console.log(signupData);
     await adminSignup(signupData);
-    setLoading(false);
     router.push('/');
   };
 
@@ -183,8 +181,8 @@ export default function AdminSignupForm() {
       <input type="hidden" {...register('longitude')} />
       <input type="hidden" {...register('imageUrl')} />
 
-      <Button type="submit" disabled={uploading || loading} className="w-full">
-        {uploading ? '업로드 중...' : loading ? '이메일 체크중' : '회원가입'}
+      <Button type="submit" disabled={uploading || checking} className="w-full">
+        {uploading ? '업로드 중...' : checking ? '이메일 체크중' : '회원가입'}
       </Button>
     </form>
   );
