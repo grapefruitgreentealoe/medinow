@@ -8,6 +8,8 @@ import { AwsConfigService } from '../../config/aws/config.service';
 import { ConfigService } from '@nestjs/config';
 import { AppConfigService } from '../../config/app/config.service';
 import { Department } from '../departments/entities/department.entity';
+import { UsersService } from '../users/users.service';
+import { CongestionOneService } from '../congestion/services/congestion-one.service';
 
 describe('CareUnitService', () => {
   let service: CareUnitService;
@@ -37,6 +39,14 @@ describe('CareUnitService', () => {
     hospitalApiUrl: 'test-url',
     pharmacyApiUrl: 'test-url',
     serviceKey: 'test-key',
+  };
+
+  const mockUsersService = {
+    getUserByCareUnitId: jest.fn().mockResolvedValue(null),
+  };
+
+  const mockCongestionOneService = {
+    getCongestion: jest.fn().mockResolvedValue(null),
   };
 
   beforeEach(async () => {
@@ -69,6 +79,14 @@ describe('CareUnitService', () => {
         {
           provide: AppConfigService,
           useValue: mockConfigService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: CongestionOneService,
+          useValue: mockCongestionOneService,
         },
       ],
     }).compile();
