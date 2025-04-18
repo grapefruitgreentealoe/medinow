@@ -13,6 +13,7 @@ import { S3Module } from './modules/s3/s3.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NoticesModule } from './modules/notices/notices.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -30,6 +31,7 @@ import { NoticesModule } from './modules/notices/notices.module';
     DepartmentsModule,
     ScheduleModule.forRoot(),
     NoticesModule,
+    FavoritesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
