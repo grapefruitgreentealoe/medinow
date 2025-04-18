@@ -16,13 +16,15 @@ export class CongestionTotalService implements OnModuleInit {
     private readonly careUnitService: CareUnitService,
   ) {}
 
-  async onModuleInit() {
-    await this.updateCongestion(); // 서버 시작 시 즉시 실행
+  onModuleInit() {
+    setTimeout(() => {
+      this.updateCongestion(); // 서버 시작 시 5초 후 실행
+    }, 5000);
   }
 
   //1️⃣ 전체 응급실 혼잡도 저장
   @Cron(CronExpression.EVERY_10_MINUTES)
-  async updateCongestion() {
+  async updateCongestion(): Promise<void> {
     try {
       console.log('🔄 혼잡도 업데이트 시작');
       const response = await fetch(
@@ -34,6 +36,15 @@ export class CongestionTotalService implements OnModuleInit {
         },
       );
       const data = await response.json();
+
+      // API 응답 구조 확인을 위한 로깅
+      console.log('API 응답 구조:', {
+        response: !!data.response,
+        body: !!data.response?.body,
+        items: !!data.response?.body?.items,
+        item: !!data.response?.body?.items?.item,
+        fullResponse: data,
+      });
 
       const congestionData = Array.isArray(data.response.body.items.item)
         ? data.response.body.items.item
