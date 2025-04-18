@@ -1,8 +1,9 @@
 import { BaseEntity } from '../../../common/entities/base.entity';
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, OneToMany } from 'typeorm';
 import { CareUnit } from 'src/modules/care-units/entities/care-unit.entity';
 import { User } from './user.entity';
 import { Image } from 'src/modules/images/entities/image.entity';
+
 @Entity()
 export class UserProfile extends BaseEntity {
   @Column({ type: 'text' })

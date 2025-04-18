@@ -16,7 +16,8 @@ import { CareUnit } from './entities/care-unit.entity';
 import { CongestionOneService } from '../congestion/services/congestion-one.service';
 import { ResponseCongestionDto } from './dto/response-congestion.dto';
 import { Public } from '../auth/decorators/public.decorator';
-@ApiTags('Care Unit')
+
+@ApiTags('의료기관')
 @Public()
 @Controller('care-units')
 export class CareUnitController {
@@ -58,7 +59,7 @@ export class CareUnitController {
   }
 
   @Post('full')
-  @ApiExcludeEndpoint()
+  // @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin: 초기세팅 / 병원, 약국, 응급실 데이터 저장' })
   @ApiResponse({
     status: 200,

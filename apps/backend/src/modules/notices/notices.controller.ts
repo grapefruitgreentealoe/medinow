@@ -10,7 +10,10 @@ import {
 import { NoticesService } from './notices.service';
 import { CreateNoticeDto } from './dto/create-notice.dto';
 import { UpdateNoticeDto } from './dto/update-notice.dto';
+import { ApiExcludeController, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('공지사항')
+@ApiExcludeController()
 @Controller('notices')
 export class NoticesController {
   constructor(private readonly noticesService: NoticesService) {}
