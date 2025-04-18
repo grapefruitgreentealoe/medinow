@@ -9,6 +9,7 @@ import { AppConfigService } from 'src/config/app/config.service';
 import { CongestionOneService } from '../congestion/services/congestion-one.service';
 import { RedisService } from '../redis/redis.service';
 import { CongestionTotalService } from '../congestion/services/congestion-total.service';
+import { UsersService } from '../users/users.service';
 
 describe('CareUnitController', () => {
   let controller: CareUnitController;
@@ -47,6 +48,10 @@ describe('CareUnitController', () => {
     set: jest.fn(),
   };
 
+  const mockUsersService = {
+    getUserByCareUnitId: jest.fn().mockResolvedValue(null),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CareUnitController],
@@ -70,6 +75,10 @@ describe('CareUnitController', () => {
         {
           provide: RedisService,
           useValue: mockRedisService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
         },
       ],
     }).compile();
