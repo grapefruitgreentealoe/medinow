@@ -2,6 +2,8 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateAdminDto } from './dto/create-admin.dto';
@@ -22,6 +24,7 @@ export class UsersService {
     @InjectRepository(UserProfile)
     private readonly userProfileRepository: Repository<UserProfile>,
     private readonly imagesService: ImagesService,
+    @Inject(forwardRef(() => CareUnitService))
     private readonly careUnitService: CareUnitService,
   ) {}
 
@@ -161,6 +164,13 @@ export class UsersService {
       return true;
     }
     return false;
+  }
+
+  async getUserByCareUnitId(careUnitId: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { userProfile: { careUnit: { id: careUnitId } } },
+      relations: ['userProfile'],
+    });
   }
 
   async updateUser(
