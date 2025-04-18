@@ -4,6 +4,7 @@ import { CareUnitCategory } from '../../../common/enums/careUnits.enum';
 import { UserProfile } from 'src/modules/users/entities/user-profile.entity';
 import { Department } from 'src/modules/departments/entities/department.entity';
 import { Image } from 'src/modules/images/entities/image.entity';
+import { Favorite } from 'src/modules/favorites/entities/favorite.entity';
 
 @Entity()
 @Index(['hpId', 'category'], { unique: true })
@@ -102,4 +103,10 @@ export class CareUnit extends BaseEntity {
     onDelete: 'SET NULL',
   })
   images: Image | null;
+
+  @OneToMany(() => Favorite, (favorite) => favorite.careUnit, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  favorites: Favorite[];
 }

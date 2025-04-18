@@ -16,7 +16,8 @@ import { CareUnit } from './entities/care-unit.entity';
 import { CongestionOneService } from '../congestion/services/congestion-one.service';
 import { ResponseCongestionDto } from './dto/response-congestion.dto';
 import { Public } from '../auth/decorators/public.decorator';
-@ApiTags('Care Unit')
+
+@ApiTags('의료기관')
 @Public()
 @Controller('care-units')
 export class CareUnitController {

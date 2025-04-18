@@ -13,6 +13,7 @@ import { S3Module } from './modules/s3/s3.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NoticesModule } from './modules/notices/notices.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 
@@ -33,6 +34,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     DepartmentsModule,
     ScheduleModule.forRoot(),
     NoticesModule,
+    FavoritesModule,
   ],
   controllers: [AppController],
   providers: [
