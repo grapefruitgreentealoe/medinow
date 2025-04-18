@@ -26,9 +26,7 @@ services:
       - backend-network
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: grapefruitgreentealoe/medinow-backend:dev
     container_name: backend-dev
     depends_on:
       - postgres
