@@ -208,7 +208,7 @@ export class CareUnitService {
         const openCareUnits = careUnitsWithStatus.filter(
           (unit) => unit.now_open,
         );
-        
+
         if (openCareUnits.length > 0) {
           return openCareUnits;
         }
