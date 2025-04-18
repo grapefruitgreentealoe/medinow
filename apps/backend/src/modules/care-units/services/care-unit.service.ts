@@ -197,10 +197,24 @@ export class CareUnitService {
 
             // 사용자가 제공된 경우 즐겨찾기 정보 추가
             let isFavorite = false;
-            if (user) {
-              isFavorite = await this.favoritesService
-                .checkIsFavorite(user.id, careUnit.id)
-                .catch(() => false);
+            if (user && user.id) {
+              console.log(
+                `즐겨찾기 확인 시작 - 사용자: ${user.id}, 병원: ${careUnit.id} (${careUnit.name})`,
+              );
+              try {
+                isFavorite = await this.favoritesService.checkIsFavorite(
+                  user.id,
+                  careUnit.id,
+                );
+                console.log(
+                  `즐겨찾기 상태: ${isFavorite ? '등록됨' : '미등록'}`,
+                );
+              } catch (error) {
+                console.error(`즐겨찾기 확인 중 오류:`, error);
+                isFavorite = false;
+              }
+            } else {
+              console.log('사용자 정보 없음 - 즐겨찾기 확인 건너뜀');
             }
 
             return {

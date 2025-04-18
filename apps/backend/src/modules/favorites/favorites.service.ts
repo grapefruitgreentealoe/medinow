@@ -1,13 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, forwardRef, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Favorite } from './entities/favorite.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-
+import { CareUnitService } from '../care-units/services/care-unit.service';
+import { UsersService } from '../users/users.service';
 @Injectable()
 export class FavoritesService {
   constructor(
     @InjectRepository(Favorite)
     private readonly favoriteRepository: Repository<Favorite>,
+    @Inject(forwardRef(() => CareUnitService))
+    private readonly careUnitService: CareUnitService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService,
   ) {}
 
   // 즐겨찾기 추가 및 해제
