@@ -10,6 +10,9 @@ import { AppConfigService } from '../../config/app/config.service';
 import { Department } from '../departments/entities/department.entity';
 import { UsersService } from '../users/users.service';
 import { CongestionOneService } from '../congestion/services/congestion-one.service';
+import { RedisService } from '../redis/redis.service';
+import { CongestionTotalService } from '../congestion/services/congestion-total.service';
+import { FavoritesService } from '../favorites/favorites.service';
 
 describe('CareUnitService', () => {
   let service: CareUnitService;
@@ -41,12 +44,21 @@ describe('CareUnitService', () => {
     serviceKey: 'test-key',
   };
 
+  const mockRedisService = {
+    get: jest.fn(),
+    set: jest.fn(),
+  };
+
   const mockUsersService = {
     getUserByCareUnitId: jest.fn().mockResolvedValue(null),
   };
 
   const mockCongestionOneService = {
     getCongestion: jest.fn().mockResolvedValue(null),
+  };
+
+  const mockFavoritesService = {
+    // 필요한 메서드들을 여기에 추가
   };
 
   beforeEach(async () => {
@@ -81,12 +93,24 @@ describe('CareUnitService', () => {
           useValue: mockConfigService,
         },
         {
+          provide: RedisService,
+          useValue: mockRedisService,
+        },
+        {
           provide: UsersService,
           useValue: mockUsersService,
         },
         {
           provide: CongestionOneService,
           useValue: mockCongestionOneService,
+        },
+        {
+          provide: CongestionTotalService,
+          useValue: mockCongestionOneService,
+        },
+        {
+          provide: FavoritesService,
+          useValue: mockFavoritesService,
         },
       ],
     }).compile();
