@@ -24,9 +24,9 @@ import { CongestionOneService } from '../congestion/services/congestion-one.serv
 import { ResponseCongestionDto } from './dto/response-congestion.dto';
 import { Public } from '../auth/decorators/public.decorator';
 import { RequestUser } from 'src/common/decorators/request-user.decorator';
-
 import { User } from '../users/entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
 @ApiTags('의료기관')
 @Controller('care-units')
 export class CareUnitController {
