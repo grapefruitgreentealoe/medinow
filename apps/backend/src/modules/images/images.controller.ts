@@ -16,11 +16,15 @@ import {
   ApiBody,
   ApiOperation,
   ApiResponse,
+  ApiCookieAuth,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { RequestUser } from '../../common/decorators/request-user.decorator';
+import { User } from '../users/entities/user.entity';
 
 @ApiTags('이미지')
 @Controller('images')
+@ApiCookieAuth()
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
@@ -56,7 +60,10 @@ export class ImagesController {
   })
   @Post('business-license/upload')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadBusinessLicense(@UploadedFile() file: Express.Multer.File) {
+  async uploadBusinessLicense(
+    @UploadedFile() file: Express.Multer.File,
+    @RequestUser() user: User,
+  ) {
     if (!file) {
       throw new BadRequestException('이미지 파일이 없습니다.');
     }
@@ -64,6 +71,14 @@ export class ImagesController {
     try {
       // 비즈니스 로직은 서비스에서 처리
       const imgUrl = await this.imagesService.uploadBusinessLicenseImage(file);
+
+      if (!imgUrl) {
+        throw new BadRequestException('이미지 업로드 실패');
+      }
+
+      // 이미지 업로드 후 사용자와 연결
+      await this.imagesService.createBusinessLicenseImage(imgUrl, user);
+
       return { url: imgUrl };
     } catch (error: unknown) {
       const errorMessage =
