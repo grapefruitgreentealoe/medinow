@@ -171,7 +171,7 @@ export class CareUnitService {
         const careUnitsWithStatus = await Promise.all(
           careUnits.map(async (careUnit) => {
             const isOpen = await this.checkNowOpen(careUnit.id);
-            const user = await this.usersService
+            const adminUser = await this.usersService
               .getUserByCareUnitId(careUnit.id)
               .catch(() => null);
 
@@ -195,11 +195,20 @@ export class CareUnitService {
               }
             }
 
+            // 사용자가 제공된 경우 즐겨찾기 정보 추가
+            let isFavorite = false;
+            if (user) {
+              isFavorite = await this.favoritesService
+                .checkIsFavorite(user.id, careUnit.id)
+                .catch(() => false);
+            }
+
             return {
               ...careUnit,
               now_open: isOpen,
-              is_chat_available: !!user,
+              is_chat_available: !!adminUser,
               congestion: congestionData,
+              is_favorite: isFavorite,
             };
           }),
         );

@@ -57,11 +57,11 @@ export class CareUnitController {
     @Query('pageNo') pageNo: number = 1,
     @Query('numOfRows') numOfRows: number = 10,
   ): Promise<ResponseCareUnitDto[]> {
-    return this.careUnitAdminService.getAllCareUnit(pageNo, numOfRows);
+    return await this.careUnitAdminService.getAllCareUnit(pageNo, numOfRows);
   }
 
   @Post('full')
-  // @ApiExcludeEndpoint()
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin: 초기세팅 / 병원, 약국, 응급실 데이터 저장' })
   @ApiResponse({
     status: 200,
