@@ -9,6 +9,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('즐겨찾기')
 @UseGuards(JwtAuthGuard)
@@ -83,7 +84,9 @@ export class FavoritesController {
     return this.favoritesService.getUserFavorites(userId);
   }
 
+  @Public()
   @Get(':careUnitId/check')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({ summary: '즐겨찾기 여부 확인' })
   @ApiResponse({

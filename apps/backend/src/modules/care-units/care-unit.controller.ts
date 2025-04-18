@@ -5,7 +5,6 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
-  ApiProperty,
   ApiQuery,
   ApiResponse,
   ApiTags,
