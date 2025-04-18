@@ -16,7 +16,9 @@ import { CareUnit } from './entities/care-unit.entity';
 import { CongestionOneService } from '../congestion/services/congestion-one.service';
 import { ResponseCongestionDto } from './dto/response-congestion.dto';
 import { Public } from '../auth/decorators/public.decorator';
+import { RequestUser } from 'src/common/decorators/request-user.decorator';
 
+import { User } from '../users/entities/user.entity';
 @ApiTags('의료기관')
 @Public()
 @Controller('care-units')
@@ -311,12 +313,14 @@ export class CareUnitController {
     @Query('lng') lng: number,
     @Query('level') level: number = 1,
     @Query('category') category?: string,
+    @RequestUser() user?: User,
   ) {
     return this.careUnitService.getCareUnitByCategoryAndLocation(
       lat,
       lng,
       level,
       category,
+      user,
     );
   }
 

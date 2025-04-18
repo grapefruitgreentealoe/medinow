@@ -12,7 +12,8 @@ import { ResponseCareUnitDto } from '../dto/response-care-unit.dto';
 import { AppConfigService } from 'src/config/app/config.service';
 import { UsersService } from 'src/modules/users/users.service';
 import { CongestionOneService } from 'src/modules/congestion/services/congestion-one.service';
-
+import { User } from 'src/modules/users/entities/user.entity';
+import { FavoritesService } from 'src/modules/favorites/favorites.service';
 @Injectable()
 export class CareUnitService {
   private readonly EMERGENCY_API_URL = this.appConfigService.emergencyApiUrl;
@@ -28,9 +29,9 @@ export class CareUnitService {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => CongestionOneService))
     private readonly congestionOneService: CongestionOneService,
+    @Inject(forwardRef(() => FavoritesService))
+    private readonly favoritesService: FavoritesService,
   ) {}
-
-  
 
   //🏥 상세 정보 조회 by id
   async getCareUnitDetail(id: string) {
@@ -129,14 +130,13 @@ export class CareUnitService {
     });
   }
 
-  
-
   //🏥 응급실, 병의원, 약국 반경 별 카테고리 조회  (읍,면,동 단위) -> 반환값 없으면 더 넓은 값(버튼클릭)
   async getCareUnitByCategoryAndLocation(
     lat: number,
     lng: number,
     level: number = 1,
     category?: string,
+    user?: User,
   ): Promise<CareUnit[]> {
     const MAX_LEVEL = 5; // 최대 검색 반경 제한
 
@@ -208,7 +208,7 @@ export class CareUnitService {
         const openCareUnits = careUnitsWithStatus.filter(
           (unit) => unit.now_open,
         );
-
+        
         if (openCareUnits.length > 0) {
           return openCareUnits;
         }
