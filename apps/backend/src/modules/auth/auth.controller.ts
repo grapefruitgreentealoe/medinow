@@ -7,21 +7,13 @@ import {
   ClassSerializerInterceptor,
   Res,
   UseGuards,
-  UploadedFile,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { CreateAdminDto } from '../users/dto/create-admin.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
-import {
-  ApiOperation,
-  ApiBody,
-  ApiResponse,
-  ApiTags,
-  ApiConsumes,
-  ApiCookieAuth,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignupResponseDto } from './dto/signup-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { RequestOrigin } from '../../common/decorators/request-origin.decorator';
@@ -104,7 +96,6 @@ export class AuthController {
     });
   }
 
-  @ApiCookieAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '로그아웃' })
   @ApiResponse({
