@@ -23,7 +23,7 @@ async function bootstrap() {
 
   // Helmet 보안 설정 적용
   // 테스트 환경인 경우 일부 옵션 비활성화
-  const isTestEnv = process.env.NODE_ENV === 'test';
+  const isTestEnv = process.env.NODE_ENV === 'development';
 
   app.use(
     helmet({
