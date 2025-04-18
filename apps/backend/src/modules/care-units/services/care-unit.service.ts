@@ -2,6 +2,8 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { CareUnit } from '../entities/care-unit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +11,8 @@ import { Repository, Between, Raw, Like } from 'typeorm';
 import { ResponseCareUnitDto } from '../dto/response-care-unit.dto';
 import { AppConfigService } from 'src/config/app/config.service';
 import { UsersService } from 'src/modules/users/users.service';
+import { CongestionOneService } from 'src/modules/congestion/services/congestion-one.service';
+
 @Injectable()
 export class CareUnitService {
   private readonly EMERGENCY_API_URL = this.appConfigService.emergencyApiUrl;
@@ -20,7 +24,10 @@ export class CareUnitService {
     @InjectRepository(CareUnit)
     private readonly careUnitRepository: Repository<CareUnit>,
     private readonly appConfigService: AppConfigService,
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
+    @Inject(forwardRef(() => CongestionOneService))
+    private readonly congestionOneService: CongestionOneService,
   ) {}
 
   //🏥응급실, 병의원, 약국 FullData 조회 - Api 통한
@@ -316,10 +323,31 @@ export class CareUnitService {
               .getUserByCareUnitId(careUnit.id)
               .catch(() => null);
 
+            // 응급실인 경우 혼잡도 데이터도 함께 반환
+            let congestionData = null;
+            if (category === 'emergency' || careUnit.category === 'emergency') {
+              try {
+                congestionData = await this.congestionOneService
+                  .getCongestion(careUnit.id)
+                  .catch((error) => {
+                    console.log(
+                      `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
+                    );
+                    return null;
+                  });
+              } catch (error) {
+                const err = error as Error;
+                console.log(
+                  `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
+                );
+              }
+            }
+
             return {
               ...careUnit,
               now_open: isOpen,
               is_chat_available: !!user,
+              congestion: congestionData,
             };
           }),
         );
@@ -409,7 +437,7 @@ export class CareUnitService {
     const now = date.getHours() * 100 + date.getMinutes(); // 1430 형식 (14:30)
     console.log('date', date, 'now', now);
     if (open <= now && close >= now) {
-      console.log('⏱️지금 운영 중입니다');
+      console.log('⏱️ 지금 운영 중입니다');
       careUnit.now_open = true;
       await this.careUnitRepository.save(careUnit);
       return true;

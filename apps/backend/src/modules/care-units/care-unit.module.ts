@@ -12,10 +12,10 @@ import { CongestionModule } from '../congestion/congestion.module';
 import { UsersModule } from '../users/users.module';
 @Module({
   imports: [
+    forwardRef(() => UsersModule),
     TypeOrmModule.forFeature([CareUnit, Department]),
     AppConfigModule,
     RedisModule,
-    forwardRef(() => UsersModule ),
     forwardRef(() => CongestionModule),
   ],
   controllers: [CareUnitController],

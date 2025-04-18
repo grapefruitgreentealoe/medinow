@@ -1,6 +1,6 @@
 import { AppConfigService } from 'src/config/app/config.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, Inject, forwardRef } from '@nestjs/common';
 import { CareUnitService } from '../../care-units/services/care-unit.service';
 import { RedisService } from 'src/modules/redis/redis.service';
 import { CongestionLevel } from 'src/common/enums/congestion.enum';
@@ -12,6 +12,7 @@ export class CongestionTotalService implements OnModuleInit {
   constructor(
     private readonly redisService: RedisService,
     private readonly appConfigService: AppConfigService,
+    @Inject(forwardRef(() => CareUnitService))
     private readonly careUnitService: CareUnitService,
   ) {}
 
