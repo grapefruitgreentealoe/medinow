@@ -1,14 +1,10 @@
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CareUnit } from '../../care-units/entities/care-unit.entity';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import { Redis } from 'ioredis';
 import { AppConfigService } from 'src/config/app/config.service';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   NotFoundException,
   InternalServerErrorException,
   Injectable,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { CareUnitService } from '../../care-units/services/care-unit.service';
 import { RedisService } from 'src/modules/redis/redis.service';
@@ -21,6 +17,7 @@ export class CongestionOneService {
   constructor(
     private readonly redisService: RedisService,
     private readonly appConfigService: AppConfigService,
+    @Inject(forwardRef(() => CareUnitService))
     private readonly careUnitService: CareUnitService,
     private readonly congestionTotalService: CongestionTotalService,
   ) {}
