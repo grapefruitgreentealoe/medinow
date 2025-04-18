@@ -22,6 +22,8 @@ import { AppConfigService } from './config.service';
         EMERGENCY_API_URL: Joi.string().required(),
         HOSPITAL_API_URL: Joi.string().required(),
         PHARMACY_API_URL: Joi.string().required(),
+        HOSPITAL_BASIC_API_URL: Joi.string().required(),
+        EMERGENCY_CONGESTION_API_URL: Joi.string().required(),
       }),
     }),
   ],

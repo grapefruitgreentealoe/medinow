@@ -1,10 +1,13 @@
-import { Column, Entity, Index, OneToOne } from 'typeorm';
+import { Column, Entity, Index, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { CareUnitCategory } from '../../../common/enums/careUnits.enum';
 import { UserProfile } from 'src/modules/users/entities/user-profile.entity';
+import { Department } from 'src/modules/departments/entities/department.entity';
+import { Image } from 'src/modules/images/entities/image.entity';
+import { Favorite } from 'src/modules/favorites/entities/favorite.entity';
 
 @Entity()
-@Index(['hpid', 'category'], { unique: true })
+@Index(['hpId', 'category'], { unique: true })
 export class CareUnit extends BaseEntity {
   @Column({ nullable: true })
   name: string;
@@ -19,7 +22,7 @@ export class CareUnit extends BaseEntity {
   category: string;
 
   @Column()
-  hpid: string;
+  hpId: string;
 
   @Column({ type: 'float8', nullable: true })
   mondayOpen: number;
@@ -89,4 +92,21 @@ export class CareUnit extends BaseEntity {
     onDelete: 'SET NULL',
   })
   user: UserProfile | null;
+
+  @OneToMany(() => Department, (department) => department.careUnit, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  departments: Department[];
+  @OneToOne(() => Image, (image) => image.careUnit, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  images: Image | null;
+
+  @OneToMany(() => Favorite, (favorite) => favorite.careUnit, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  favorites: Favorite[];
 }
