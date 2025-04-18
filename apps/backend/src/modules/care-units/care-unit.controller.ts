@@ -16,7 +16,9 @@ import { CareUnit } from './entities/care-unit.entity';
 import { CongestionOneService } from '../congestion/services/congestion-one.service';
 import { ResponseCongestionDto } from './dto/response-congestion.dto';
 import { Public } from '../auth/decorators/public.decorator';
+import { RequestUser } from 'src/common/decorators/request-user.decorator';
 
+import { User } from '../users/entities/user.entity';
 @ApiTags('의료기관')
 @Public()
 @Controller('care-units')
@@ -55,7 +57,7 @@ export class CareUnitController {
     @Query('pageNo') pageNo: number = 1,
     @Query('numOfRows') numOfRows: number = 10,
   ): Promise<ResponseCareUnitDto[]> {
-    return this.careUnitService.getAllCareUnit(pageNo, numOfRows);
+    return this.careUnitAdminService.getAllCareUnit(pageNo, numOfRows);
   }
 
   @Post('full')
@@ -104,7 +106,7 @@ export class CareUnitController {
     ],
   })
   async getCareUnitByCategory(@Query('category') category: string) {
-    return this.careUnitService.getCareUnitByCategory(category);
+    return this.careUnitAdminService.getCareUnitByCategory(category);
   }
 
   @Post('badge')
@@ -311,12 +313,14 @@ export class CareUnitController {
     @Query('lng') lng: number,
     @Query('level') level: number = 1,
     @Query('category') category?: string,
+    @RequestUser() user?: User,
   ) {
     return this.careUnitService.getCareUnitByCategoryAndLocation(
       lat,
       lng,
       level,
       category,
+      user,
     );
   }
 
@@ -327,7 +331,7 @@ export class CareUnitController {
     required: true,
     type: String,
     description: '기관 고유 아이디',
-    example: 'A2108916',
+    example: '46dcef6e-b986-4688-adea-04dd39fe8323',
   })
   @ApiResponse({
     status: 200,

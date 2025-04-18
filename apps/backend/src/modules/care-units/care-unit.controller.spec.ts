@@ -10,6 +10,7 @@ import { CongestionOneService } from '../congestion/services/congestion-one.serv
 import { RedisService } from '../redis/redis.service';
 import { CongestionTotalService } from '../congestion/services/congestion-total.service';
 import { UsersService } from '../users/users.service';
+import { FavoritesService } from 'src/modules/favorites/favorites.service';
 
 describe('CareUnitController', () => {
   let controller: CareUnitController;
@@ -52,6 +53,14 @@ describe('CareUnitController', () => {
     getUserByCareUnitId: jest.fn().mockResolvedValue(null),
   };
 
+  const mockCongestionOneService = {
+    getCongestion: jest.fn().mockResolvedValue(null),
+  };
+
+  const mockFavoritesService = {
+    // 필요한 메서드들을 여기에 추가
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CareUnitController],
@@ -79,6 +88,14 @@ describe('CareUnitController', () => {
         {
           provide: UsersService,
           useValue: mockUsersService,
+        },
+        {
+          provide: CongestionOneService,
+          useValue: mockCongestionOneService,
+        },
+        {
+          provide: FavoritesService,
+          useValue: mockFavoritesService,
         },
       ],
     }).compile();
