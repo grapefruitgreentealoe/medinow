@@ -25,8 +25,8 @@ export class AuthService {
     };
   }
 
-  async signupAdmin(createUserDto: CreateAdminDto) {
-    await this.usersService.createAdminUser(createUserDto);
+  async signupAdmin(createAdminDto: CreateAdminDto) {
+    await this.usersService.createAdminUser(createAdminDto);
     return {
       message: '관리자 회원가입 성공',
     };
