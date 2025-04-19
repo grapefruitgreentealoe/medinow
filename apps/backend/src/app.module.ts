@@ -16,6 +16,8 @@ import { NoticesModule } from './modules/notices/notices.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { LoggerModule } from './shared/logger/logger.module';
+import { CustomLoggerService } from './shared/logger/logger.service';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
         process.env.NODE_ENV === 'production' ? '/app/.env' : '.env.local',
     }),
     TypeOrmModule.forRoot(typeOrmConfig.options),
+    LoggerModule,
     UsersModule,
     CareUnitModule,
     AuthModule,
@@ -43,6 +46,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    CustomLoggerService,
   ],
 })
 export class AppModule {}
