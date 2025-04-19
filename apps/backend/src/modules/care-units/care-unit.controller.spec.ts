@@ -11,6 +11,7 @@ import { RedisService } from '../redis/redis.service';
 import { CongestionTotalService } from '../congestion/services/congestion-total.service';
 import { UsersService } from '../users/users.service';
 import { FavoritesService } from 'src/modules/favorites/favorites.service';
+import { CustomLoggerService } from 'src/shared/logger/logger.service';
 
 describe('CareUnitController', () => {
   let controller: CareUnitController;
@@ -61,6 +62,15 @@ describe('CareUnitController', () => {
     // 필요한 메서드들을 여기에 추가
   };
 
+  const mockLoggerService = {
+    setContext: jest.fn().mockReturnThis(),
+    log: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+    verbose: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CareUnitController],
@@ -96,6 +106,10 @@ describe('CareUnitController', () => {
         {
           provide: FavoritesService,
           useValue: mockFavoritesService,
+        },
+        {
+          provide: CustomLoggerService,
+          useValue: mockLoggerService,
         },
       ],
     }).compile();

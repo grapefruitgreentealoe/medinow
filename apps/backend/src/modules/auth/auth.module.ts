@@ -9,6 +9,7 @@ import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { ImagesModule } from '../images/images.module';
+
 @Module({
   imports: [
     AppConfigModule,

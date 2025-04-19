@@ -13,6 +13,7 @@ import { CongestionOneService } from '../congestion/services/congestion-one.serv
 import { RedisService } from '../redis/redis.service';
 import { CongestionTotalService } from '../congestion/services/congestion-total.service';
 import { FavoritesService } from '../favorites/favorites.service';
+import { CustomLoggerService } from '../../shared/logger/logger.service';
 
 describe('CareUnitService', () => {
   let service: CareUnitService;
@@ -59,6 +60,15 @@ describe('CareUnitService', () => {
 
   const mockFavoritesService = {
     // 필요한 메서드들을 여기에 추가
+  };
+
+  const mockLoggerService = {
+    setContext: jest.fn().mockReturnThis(),
+    log: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+    verbose: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -111,6 +121,10 @@ describe('CareUnitService', () => {
         {
           provide: FavoritesService,
           useValue: mockFavoritesService,
+        },
+        {
+          provide: CustomLoggerService,
+          useValue: mockLoggerService,
         },
       ],
     }).compile();
