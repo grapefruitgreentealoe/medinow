@@ -71,7 +71,7 @@ export class CareUnitController {
 
   @Post('full')
   @Public()
-  @ApiExcludeEndpoint()
+  // @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin: 초기세팅 / 병원, 약국, 응급실 데이터 저장' })
   @ApiResponse({
     status: 200,

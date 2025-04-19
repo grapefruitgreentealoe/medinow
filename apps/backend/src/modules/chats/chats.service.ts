@@ -1,26 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { CreateChatDto } from './dto/create-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
+import { Server, Socket } from 'socket.io';
+import { CustomLoggerService } from '../../shared/logger/logger.service';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class ChatsService {
-  create(createChatDto: CreateChatDto) {
-    return 'This action adds a new chat';
-  }
+  // private readonly connectedClients = new Map<string, Socket>();
 
-  findAll() {
-    return `This action returns all chats`;
-  }
+  // constructor(
+  //   @InjectRepository(ChatRoom)
+  //   private readonly chatRoomRepository: Repository<ChatRoom>,
+  //   private readonly logger: CustomLoggerService,
+  //   private readonly userService: UsersService,
+  // ) {}
 
-  findOne(id: number) {
-    return `This action returns a #${id} chat`;
-  }
-
-  update(id: number, updateChatDto: UpdateChatDto) {
-    return `This action updates a #${id} chat`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} chat`;
-  }
+  // handleDisconnect(clientId: string) {
+  //   this.logger.log(`Client ${clientId} disconnected`);
+  //   this.connectedClients.delete(clientId);
+  // }
 }
