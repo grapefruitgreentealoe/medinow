@@ -27,12 +27,13 @@ export class AuthService {
   async signup(createUserDto: CreateUserDto) {
     try {
       await this.usersService.createUser(createUserDto);
-      this.logger.log('회원가입 성공', createUserDto.email);
+      this.logger.log(`회원가입 성공: ${createUserDto.email}`);
       return {
         message: '회원가입 성공',
       };
     } catch (error: any) {
-      this.logger.error('회원가입 실패', error);
+      const err = error as Error;
+      this.logger.error(`회원가입 실패: ${err.message}`);
       throw new BadRequestException('회원가입 실패');
     }
   }
@@ -40,12 +41,13 @@ export class AuthService {
   async signupAdmin(createAdminDto: CreateAdminDto) {
     try {
       await this.usersService.createAdminUser(createAdminDto);
-      this.logger.log('관리자 회원가입 성공', createAdminDto.email);
+      this.logger.log(`관리자 회원가입 성공: ${createAdminDto.email}`);
       return {
         message: '관리자 회원가입 성공',
       };
     } catch (error: any) {
-      this.logger.error('관리자 회원가입 실패', error);
+      const err = error as Error;
+      this.logger.error(`관리자 회원가입 실패: ${err.message}`);
       throw new BadRequestException('관리자 회원가입 실패');
     }
   }
@@ -54,7 +56,7 @@ export class AuthService {
     try {
       const { email, password } = loginDto;
       const user = await this.usersService.findUserByEmail(email);
-      this.logger.log('로그인 시도', email);
+      this.logger.log(`로그인 시도: ${user ? user.email + ' 성공' : '실패'}`);
       if (!user) {
         throw new UnauthorizedException(
           '이메일과 비밀번호가 일치하지 않습니다.',
@@ -62,7 +64,7 @@ export class AuthService {
       }
 
       const isPasswordValid = await comparePassword(password, user.password!);
-      this.logger.log('비밀번호 검증', isPasswordValid ? '성공' : '실패');
+      this.logger.log(`비밀번호 검증: ${isPasswordValid ? '성공' : '실패'}`);
       if (!isPasswordValid) {
         throw new UnauthorizedException(
           '이메일과 비밀번호가 일치하지 않습니다.',
@@ -71,7 +73,8 @@ export class AuthService {
 
       return this.setJwtTokenBuilder(user, requestOrigin);
     } catch (error: any) {
-      this.logger.error('로그인 실패', error);
+      const err = error as Error;
+      this.logger.error(`로그인 실패: ${err.message}`);
       throw new UnauthorizedException('이메일과 비밀번호가 일치하지 않습니다.');
     }
   }
@@ -182,10 +185,11 @@ export class AuthService {
   async logout(userId: string, requestOrigin: string) {
     try {
       await this.usersService.deleteUserRefreshToken(userId);
-      this.logger.log('로그아웃 완료', userId);
+      this.logger.log(`로그아웃 완료: ${userId}`);
       return this.expireJwtToken(requestOrigin);
     } catch (error: any) {
-      this.logger.error('로그아웃 실패', error);
+      const err = error as Error;
+      this.logger.error(`로그아웃 실패: ${err.message}`);
       throw new BadRequestException('로그아웃 실패');
     }
   }

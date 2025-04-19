@@ -151,6 +151,10 @@ export class CareUnitService {
     const { page, limit } = paginationDto;
     const skip = (page ? page - 1 : 0) * (limit ? limit : 10);
 
+    this.logger.log(
+      `getCareUnitByCategoryAndLocation 호출 - 페이지: ${page}, 제한: ${limit}, 위도: ${lat}, 경도: ${lng}, 레벨: ${level}, 카테고리: ${category}`,
+    );
+
     for (let currentLevel = level; currentLevel <= MAX_LEVEL; currentLevel++) {
       const queryBuilder =
         this.careUnitRepository.createQueryBuilder('careUnit');
@@ -180,6 +184,10 @@ export class CareUnitService {
 
       const [careUnits, total] = await queryBuilder.getManyAndCount();
 
+      this.logger.log(
+        `getCareUnitByCategoryAndLocation 결과 - 총 기관 수: ${total}, 검색된 기관 수: ${careUnits.length}`,
+      );
+
       // 성능 개선: 병렬로 처리하되 에러 처리 강화
       try {
         const careUnitsWithStatus = await Promise.all(
@@ -196,14 +204,14 @@ export class CareUnitService {
                 congestionData = await this.congestionOneService
                   .getCongestion(careUnit.id)
                   .catch((error) => {
-                    console.log(
+                    this.logger.error(
                       `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
                     );
                     return null;
                   });
               } catch (error) {
                 const err = error as Error;
-                console.log(
+                this.logger.error(
                   `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
                 );
               }
@@ -212,7 +220,7 @@ export class CareUnitService {
             // 사용자가 제공된 경우 즐겨찾기 정보 추가
             let isFavorite = false;
             if (user && user.id) {
-              console.log(
+              this.logger.log(
                 `즐겨찾기 확인 시작 - 사용자: ${user.id}, 병원: ${careUnit.id} (${careUnit.name})`,
               );
               try {
@@ -220,15 +228,16 @@ export class CareUnitService {
                   user.id,
                   careUnit.id,
                 );
-                console.log(
+                this.logger.log(
                   `즐겨찾기 상태: ${isFavorite ? '등록됨' : '미등록'}`,
                 );
               } catch (error) {
-                console.error(`즐겨찾기 확인 중 오류:`, error);
+                const err = error as Error;
+                this.logger.error(`즐겨찾기 확인 중 오류: ${err.message}`);
                 isFavorite = false;
               }
             } else {
-              console.log('사용자 정보 없음 - 즐겨찾기 확인 건너뜀');
+              this.logger.log('사용자 정보 없음 - 즐겨찾기 확인 건너뜀');
             }
 
             return {
@@ -257,13 +266,16 @@ export class CareUnitService {
 
         // 현재 반경에서 결과가 없으면 다음 반경으로 계속
       } catch (error) {
-        console.error('의료기관 상태 확인 중 오류 발생:', error);
+        const err = error as Error;
+        this.logger.error(`의료기관 상태 확인 중 오류 발생: ${err.message}`);
         throw new Error('의료기관 정보를 처리하는 중 오류가 발생했습니다.');
       }
     }
 
     // 최대 반경까지 검색해도 결과가 없는 경우
-    console.log('해당 반경 내 운영 중인 기관이 없습니다. 위치를 이동해주세요.');
+    this.logger.log(
+      '해당 반경 내 운영 중인 기관이 없습니다. 위치를 이동해주세요.',
+    );
     return createPaginatedResponse([], 0, page ? page : 1, limit ? limit : 10);
   }
 
