@@ -104,7 +104,6 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
-      isAdmin: user.role === UserRole.ADMIN,
     };
     const expiresIn = this.appConfigService.jwtAccessExpirationTime!;
     const maxAge = expiresIn * 1000;
@@ -123,7 +122,6 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
-      isAdmin: user.role === UserRole.ADMIN,
     };
     const expiresIn = this.appConfigService.jwtRefreshExpirationTime!;
     const maxAge = expiresIn * 1000;
@@ -146,13 +144,11 @@ export class AuthService {
       requestOrigin,
     );
 
-    const isAdmin = user.role === UserRole.ADMIN ? true : false;
     this.logger.log('JWT 토큰 생성 완료');
     await this.usersService.updateUserRefreshToken(user.id, refreshToken);
     this.logger.log('JWT 리프레시 토큰 업데이트 완료');
     return {
       message: '로그인 성공',
-      isAdmin,
       accessToken,
       refreshToken,
       accessOptions,
