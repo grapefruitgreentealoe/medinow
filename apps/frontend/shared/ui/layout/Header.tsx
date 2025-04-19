@@ -42,12 +42,10 @@ export default function Header() {
       const res = await axiosInstance.post('/auth/logout', null, {
         withCredentials: true,
       });
-      if (res.status === 200) {
-        authStore.getState().logout();
-        localStorage.removeItem('isLogin');
-        localStorage.removeItem('isAdmin');
-        router.push('/');
-      }
+      authStore.getState().logout();
+      localStorage.removeItem('isLogin');
+      localStorage.removeItem('isAdmin');
+      router.refresh();
     } catch (e) {
       console.error('Logout failed', e);
     }
