@@ -37,7 +37,9 @@ async function bootstrap() {
             directives: {
               defaultSrc: ["'self'"], // 기본 소스 제한
               scriptSrc: ["'self'"], // 스크립트 소스 제한
-              styleSrc: ["'self'", 'https:'], // 스타일 소스 제한
+              styleSrc: isTestEnv
+                ? ["'self'", 'https:', "'unsafe-inline'"]
+                : ["'self'", 'https:'], // 스타일 소스 제한
               imgSrc: ["'self'", 'data:', 'https:'], // 이미지 소스 제한
               connectSrc: ["'self'", 'https:'], // 연결 소스 제한
               fontSrc: ["'self'", 'https:'], // 폰트 소스 제한
