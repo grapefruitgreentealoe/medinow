@@ -85,14 +85,15 @@ export class AuthController {
     @RequestOrigin() requestOrigin: string,
     @Res({ passthrough: true }) response: Response,
   ): Promise<LoginResponseDto> {
-    const { accessToken, accessOptions, isAdmin } =
-      await this.authService.login(loginDto, requestOrigin);
+    const { accessToken, accessOptions } = await this.authService.login(
+      loginDto,
+      requestOrigin,
+    );
 
     response.cookie('accessToken', accessToken, accessOptions);
 
     return plainToInstance(LoginResponseDto, {
       message: '로그인 성공',
-      isAdmin,
     });
   }
 
