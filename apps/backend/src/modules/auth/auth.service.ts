@@ -91,11 +91,11 @@ export class AuthService {
 
     return {
       httpOnly: true,
-      secure: !isLocalhost,
+      secure: true,
       maxAge,
       path: '/',
       domain,
-      sameSite: 'lax',
+      sameSite: 'none',
     };
   }
 
