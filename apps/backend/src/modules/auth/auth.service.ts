@@ -100,7 +100,12 @@ export class AuthService {
   }
 
   async setJwtAccessToken(user: User, requestOrigin: string) {
-    const payload = { sub: user.id };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      isAdmin: user.role === UserRole.ADMIN,
+    };
     const expiresIn = this.appConfigService.jwtAccessExpirationTime!;
     const maxAge = expiresIn * 1000;
     const accessOptions = this.setCookieOptions(maxAge, requestOrigin);
@@ -114,7 +119,12 @@ export class AuthService {
   }
 
   async setJwtRefreshToken(user: User, requestOrigin: string) {
-    const payload = { sub: user.id };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      isAdmin: user.role === UserRole.ADMIN,
+    };
     const expiresIn = this.appConfigService.jwtRefreshExpirationTime!;
     const maxAge = expiresIn * 1000;
     const refreshOptions = this.setCookieOptions(maxAge, requestOrigin);
