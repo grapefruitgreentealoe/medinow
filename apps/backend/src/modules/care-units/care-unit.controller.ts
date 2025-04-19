@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { CareUnitService } from './services/care-unit.service';
 import { ResponseCareUnitDto } from './dto/response-care-unit.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import {
   ApiBody,
   ApiOperation,
@@ -329,8 +330,12 @@ export class CareUnitController {
     @Query('lng') lng: number,
     @Query('level') level: number = 1,
     @Query('category') category?: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
   ) {
+    const paginationDto = { page, limit };
     return this.careUnitService.getCareUnitByCategoryAndLocation(
+      paginationDto,
       lat,
       lng,
       level,
@@ -412,9 +417,13 @@ export class CareUnitController {
     @Query('lng') lng: number,
     @Query('level') level: number = 1,
     @Query('category') category?: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
     @RequestUser() user?: User,
   ) {
+    const paginationDto = { page, limit };
     return this.careUnitService.getCareUnitByCategoryAndLocation(
+      paginationDto,
       lat,
       lng,
       level,

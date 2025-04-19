@@ -9,11 +9,18 @@ import { CareUnit } from '../entities/care-unit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, Raw, Like } from 'typeorm';
 import { ResponseCareUnitDto } from '../dto/response-care-unit.dto';
+import { PaginationDto } from '../../../common/dto/pagination.dto';
+import {
+  PaginatedResponse,
+  createPaginatedResponse,
+} from '../../../common/interfaces/pagination.interface';
 import { AppConfigService } from 'src/config/app/config.service';
 import { UsersService } from 'src/modules/users/users.service';
 import { CongestionOneService } from 'src/modules/congestion/services/congestion-one.service';
 import { User } from 'src/modules/users/entities/user.entity';
 import { FavoritesService } from 'src/modules/favorites/favorites.service';
+import { CustomLoggerService } from 'src/shared/logger/logger.service';
+
 @Injectable()
 export class CareUnitService {
   private readonly EMERGENCY_API_URL = this.appConfigService.emergencyApiUrl;
@@ -31,6 +38,7 @@ export class CareUnitService {
     private readonly congestionOneService: CongestionOneService,
     @Inject(forwardRef(() => FavoritesService))
     private readonly favoritesService: FavoritesService,
+    private readonly logger: CustomLoggerService,
   ) {}
 
   //🏥 상세 정보 조회 by id
@@ -132,13 +140,16 @@ export class CareUnitService {
 
   //🏥 응급실, 병의원, 약국 반경 별 카테고리 조회  (읍,면,동 단위) -> 반환값 없으면 더 넓은 값(버튼클릭)
   async getCareUnitByCategoryAndLocation(
+    paginationDto: PaginationDto,
     lat: number,
     lng: number,
     level: number = 1,
     category?: string,
     user?: User,
-  ): Promise<CareUnit[]> {
+  ): Promise<PaginatedResponse<CareUnit>> {
     const MAX_LEVEL = 5; // 최대 검색 반경 제한
+    const { page, limit } = paginationDto;
+    const skip = (page ? page - 1 : 0) * (limit ? limit : 10);
 
     for (let currentLevel = level; currentLevel <= MAX_LEVEL; currentLevel++) {
       const queryBuilder =
@@ -158,13 +169,16 @@ export class CareUnitService {
       if (category) {
         queryBuilder.andWhere('careUnit.category = :category', { category });
         queryBuilder.orderBy('careUnit.name', 'ASC');
+        queryBuilder.skip(skip).take(limit);
       } else {
         queryBuilder
           .orderBy('careUnit.category', 'ASC')
-          .addOrderBy('careUnit.name', 'ASC');
+          .addOrderBy('careUnit.name', 'ASC')
+          .skip(skip)
+          .take(limit);
       }
 
-      const careUnits = await queryBuilder.getMany();
+      const [careUnits, total] = await queryBuilder.getManyAndCount();
 
       // 성능 개선: 병렬로 처리하되 에러 처리 강화
       try {
@@ -233,7 +247,12 @@ export class CareUnitService {
         );
 
         if (openCareUnits.length > 0) {
-          return openCareUnits;
+          return createPaginatedResponse(
+            openCareUnits,
+            total,
+            page ? page : 1,
+            limit ? limit : 10,
+          );
         }
 
         // 현재 반경에서 결과가 없으면 다음 반경으로 계속
@@ -245,7 +264,7 @@ export class CareUnitService {
 
     // 최대 반경까지 검색해도 결과가 없는 경우
     console.log('해당 반경 내 운영 중인 기관이 없습니다. 위치를 이동해주세요.');
-    return [];
+    return createPaginatedResponse([], 0, page ? page : 1, limit ? limit : 10);
   }
 
   //🏥 실시간 채팅 가능 여부 조회

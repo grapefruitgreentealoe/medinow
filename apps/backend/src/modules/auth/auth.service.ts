@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { CreateAdminDto } from '../users/dto/create-admin.dto';
@@ -9,6 +13,7 @@ import { AppConfigService } from '../../config/app/config.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../../common/enums/roles.enum';
+import { CustomLoggerService } from '../../shared/logger/logger.service';
 
 @Injectable()
 export class AuthService {
@@ -16,35 +21,59 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly appConfigService: AppConfigService,
     private readonly jwtService: JwtService,
+    private readonly logger: CustomLoggerService,
   ) {}
 
   async signup(createUserDto: CreateUserDto) {
-    await this.usersService.createUser(createUserDto);
-    return {
-      message: '회원가입 성공',
-    };
+    try {
+      await this.usersService.createUser(createUserDto);
+      this.logger.log('회원가입 성공', createUserDto.email);
+      return {
+        message: '회원가입 성공',
+      };
+    } catch (error: any) {
+      this.logger.error('회원가입 실패', error);
+      throw new BadRequestException('회원가입 실패');
+    }
   }
 
   async signupAdmin(createAdminDto: CreateAdminDto) {
-    await this.usersService.createAdminUser(createAdminDto);
-    return {
-      message: '관리자 회원가입 성공',
-    };
+    try {
+      await this.usersService.createAdminUser(createAdminDto);
+      this.logger.log('관리자 회원가입 성공', createAdminDto.email);
+      return {
+        message: '관리자 회원가입 성공',
+      };
+    } catch (error: any) {
+      this.logger.error('관리자 회원가입 실패', error);
+      throw new BadRequestException('관리자 회원가입 실패');
+    }
   }
 
   async login(loginDto: LoginDto, requestOrigin: string) {
-    const { email, password } = loginDto;
-    const user = await this.usersService.findUserByEmail(email);
-    if (!user) {
+    try {
+      const { email, password } = loginDto;
+      const user = await this.usersService.findUserByEmail(email);
+      this.logger.log('로그인 시도', email);
+      if (!user) {
+        throw new UnauthorizedException(
+          '이메일과 비밀번호가 일치하지 않습니다.',
+        );
+      }
+
+      const isPasswordValid = await comparePassword(password, user.password!);
+      this.logger.log('비밀번호 검증', isPasswordValid ? '성공' : '실패');
+      if (!isPasswordValid) {
+        throw new UnauthorizedException(
+          '이메일과 비밀번호가 일치하지 않습니다.',
+        );
+      }
+
+      return this.setJwtTokenBuilder(user, requestOrigin);
+    } catch (error: any) {
+      this.logger.error('로그인 실패', error);
       throw new UnauthorizedException('이메일과 비밀번호가 일치하지 않습니다.');
     }
-
-    const isPasswordValid = await comparePassword(password, user.password!);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('이메일과 비밀번호가 일치하지 않습니다.');
-    }
-
-    return this.setJwtTokenBuilder(user, requestOrigin);
   }
 
   setCookieOptions(maxAge: number, requestOrigin: string): CookieOptions {
@@ -94,6 +123,7 @@ export class AuthService {
   }
 
   async setJwtTokenBuilder(user: User, requestOrigin: string) {
+    this.logger.log('JWT 토큰 생성 시작');
     const { accessToken, accessOptions } = await this.setJwtAccessToken(
       user,
       requestOrigin,
@@ -104,8 +134,9 @@ export class AuthService {
     );
 
     const isAdmin = user.role === UserRole.ADMIN ? true : false;
-
+    this.logger.log('JWT 토큰 생성 완료');
     await this.usersService.updateUserRefreshToken(user.id, refreshToken);
+    this.logger.log('JWT 리프레시 토큰 업데이트 완료');
     return {
       message: '로그인 성공',
       isAdmin,
@@ -139,14 +170,23 @@ export class AuthService {
   }
 
   expireJwtToken(requestOrigin: string) {
+    const accessOptions = this.setCookieOptions(0, requestOrigin);
+    const refreshOptions = this.setCookieOptions(0, requestOrigin);
+    this.logger.log('JWT 토큰 만료 완료');
     return {
-      accessOptions: this.setCookieOptions(0, requestOrigin),
-      refreshOptions: this.setCookieOptions(0, requestOrigin),
+      accessOptions,
+      refreshOptions,
     };
   }
 
   async logout(userId: string, requestOrigin: string) {
-    await this.usersService.deleteUserRefreshToken(userId);
-    return this.expireJwtToken(requestOrigin);
+    try {
+      await this.usersService.deleteUserRefreshToken(userId);
+      this.logger.log('로그아웃 완료', userId);
+      return this.expireJwtToken(requestOrigin);
+    } catch (error: any) {
+      this.logger.error('로그아웃 실패', error);
+      throw new BadRequestException('로그아웃 실패');
+    }
   }
 }
