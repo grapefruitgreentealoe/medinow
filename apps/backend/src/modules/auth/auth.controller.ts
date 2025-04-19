@@ -7,29 +7,21 @@ import {
   ClassSerializerInterceptor,
   Res,
   UseGuards,
-  UploadedFile,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { CreateAdminDto } from '../users/dto/create-admin.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
-import {
-  ApiOperation,
-  ApiBody,
-  ApiResponse,
-  ApiTags,
-  ApiConsumes,
-  ApiCookieAuth,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignupResponseDto } from './dto/signup-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { RequestOrigin } from '../../common/decorators/request-origin.decorator';
 import { RequestUserId } from '../../common/decorators/request-userId.decorator';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ImagesService } from '../images/images.service';
+import { Public } from './decorators/public.decorator';
 
 @ApiTags('인증')
 @Controller('auth')
@@ -39,6 +31,7 @@ export class AuthController {
     private readonly imagesService: ImagesService,
   ) {}
 
+  @Public()
   @ApiOperation({ summary: '회원가입' })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({
@@ -59,6 +52,7 @@ export class AuthController {
     };
   }
 
+  @Public()
   @ApiOperation({ summary: '관리자 회원가입' })
   @ApiBody({ type: CreateAdminDto })
   @ApiResponse({
@@ -74,6 +68,7 @@ export class AuthController {
     };
   }
 
+  @Public()
   @ApiOperation({ summary: '로그인' })
   @ApiBody({ type: LoginDto })
   @ApiResponse({
@@ -90,18 +85,18 @@ export class AuthController {
     @RequestOrigin() requestOrigin: string,
     @Res({ passthrough: true }) response: Response,
   ): Promise<LoginResponseDto> {
-    const { accessToken, accessOptions, isAdmin } =
-      await this.authService.login(loginDto, requestOrigin);
+    const { accessToken, accessOptions } = await this.authService.login(
+      loginDto,
+      requestOrigin,
+    );
 
     response.cookie('accessToken', accessToken, accessOptions);
 
     return plainToInstance(LoginResponseDto, {
       message: '로그인 성공',
-      isAdmin,
     });
   }
 
-  @ApiCookieAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '로그아웃' })
   @ApiResponse({

@@ -4,6 +4,7 @@ import { UserRole } from '../../../common/enums/roles.enum';
 import { Exclude } from 'class-transformer';
 import { UserProfile } from './user-profile.entity';
 import { Image } from 'src/modules/images/entities/image.entity';
+import { Favorite } from 'src/modules/favorites/entities/favorite.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -32,4 +33,9 @@ export class User extends BaseEntity {
     cascade: true,
   })
   images: Image[];
+
+  @OneToMany(() => Favorite, (favorite) => favorite.user, {
+    cascade: true,
+  })
+  favorites: Favorite[];
 }

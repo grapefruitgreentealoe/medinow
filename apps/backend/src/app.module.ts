@@ -13,6 +13,13 @@ import { S3Module } from './modules/s3/s3.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NoticesModule } from './modules/notices/notices.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { LoggerModule } from './shared/logger/logger.module';
+import { CustomLoggerService } from './shared/logger/logger.service';
+import { ChatsModule } from './modules/chats/chats.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,6 +28,7 @@ import { NoticesModule } from './modules/notices/notices.module';
         process.env.NODE_ENV === 'production' ? '/app/.env' : '.env.local',
     }),
     TypeOrmModule.forRoot(typeOrmConfig.options),
+    LoggerModule,
     UsersModule,
     CareUnitModule,
     AuthModule,
@@ -30,8 +38,17 @@ import { NoticesModule } from './modules/notices/notices.module';
     DepartmentsModule,
     ScheduleModule.forRoot(),
     NoticesModule,
+    FavoritesModule,
+    ChatsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    CustomLoggerService,
+  ],
 })
 export class AppModule {}

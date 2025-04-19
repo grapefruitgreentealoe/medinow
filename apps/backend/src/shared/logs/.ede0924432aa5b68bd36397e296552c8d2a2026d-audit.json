@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/yoon-yongseol/WorkSpace/medinow/apps/backend/src/shared/logs/.ede0924432aa5b68bd36397e296552c8d2a2026d-audit.json",
+    "files": [
+        {
+            "date": 1745029602367,
+            "name": "/Users/yoon-yongseol/WorkSpace/medinow/apps/backend/src/shared/logs/application-2025-04-19.log",
+            "hash": "493ab051ec52677b709ba5c19a18b5ffa290e7ebab2617d57992c2ef12232702"
+        }
+    ],
+    "hashType": "sha256"
+}
