@@ -16,6 +16,8 @@ async function bootstrap() {
   const corsOptions = {
     origin: [
       'http://localhost:3000',
+      'https://localhost:3001',
+      'http://localhost:3001',
       'https://kdt-node-2-team02.elicecoding.com',
     ],
     credentials: true,
