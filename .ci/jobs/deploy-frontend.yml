@@ -7,7 +7,6 @@
 .deploy-frontend-template:
   stage: deploy
   image: node:20
-  before_script:
   script:
     - set -xe
     - echo "📦 배포 스크립트 실행 시작"
