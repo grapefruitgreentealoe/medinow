@@ -18,6 +18,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { LoggerModule } from './shared/logger/logger.module';
 import { CustomLoggerService } from './shared/logger/logger.service';
+import { ChatsModule } from './modules/chats/chats.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { CustomLoggerService } from './shared/logger/logger.service';
     ScheduleModule.forRoot(),
     NoticesModule,
     FavoritesModule,
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [

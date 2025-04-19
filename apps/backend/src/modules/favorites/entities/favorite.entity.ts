@@ -7,10 +7,10 @@ import { User } from '../../users/entities/user.entity';
 @Index(['user', 'careUnit'], { unique: true })
 export class Favorite extends BaseEntity {
   @ManyToOne(() => User, (user) => user.favorites)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @ManyToOne(() => CareUnit, (careUnit) => careUnit.favorites)
-  @JoinColumn({ name: 'care_unit_id' })
+  @JoinColumn({ name: 'careUnitId' })
   careUnit: CareUnit;
 }
