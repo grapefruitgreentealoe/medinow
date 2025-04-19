@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
-import { locationByCategoryMock } from '../api';
+import { locationByCategory, locationByCategoryMock } from '../api';
 import {
   Select,
   SelectContent,
@@ -40,7 +40,7 @@ export default function NearbyCareUnitsMap() {
           lng: lng!,
           level,
           page: pageParam,
-          limit: 10, // Add a default limit value
+          limit: 10,
           category:
             selectedCategory === '응급실'
               ? 'emergency'
@@ -127,7 +127,7 @@ export default function NearbyCareUnitsMap() {
       const imageSrc = '/pin-png.png';
       const markerImage = new kakao.maps.MarkerImage(
         imageSrc,
-        new kakao.maps.Size(10, 10)
+        new kakao.maps.Size(20, 20)
       );
 
       const marker = new kakao.maps.Marker({
@@ -158,13 +158,6 @@ export default function NearbyCareUnitsMap() {
     if (!map) return;
     const latlng = new kakao.maps.LatLng(unit.lat, unit.lng);
     map.panTo(latlng);
-    // const target = markersRef.current.find(
-    //   (m) =>
-    //     m.getPosition().getLat() === unit.lat &&
-    //     m.getPosition().getLng() === unit.lng
-    // );
-    // if (target) target.setAnimation(kakao.maps.Animation.BOUNCE);
-    // setTimeout(() => target?.setAnimation(null), 1400);
     setSelectedMarker(unit);
   };
 
