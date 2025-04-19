@@ -79,13 +79,13 @@ export class CareUnit extends BaseEntity {
   lng: number;
 
   @Column({ default: false })
-  is_badged: boolean;
+  isBadged: boolean;
 
   @Column({ default: true })
-  now_open: boolean;
+  nowOpen: boolean;
 
   @Column({ nullable: true })
-  kakao_url: string;
+  kakaoUrl: string;
 
   @OneToOne(() => UserProfile, (userProfile) => userProfile.careUnit, {
     nullable: true,

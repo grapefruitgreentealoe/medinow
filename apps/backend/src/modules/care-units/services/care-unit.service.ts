@@ -242,17 +242,17 @@ export class CareUnitService {
 
             return {
               ...careUnit,
-              now_open: isOpen,
-              is_chat_available: !!adminUser,
+              nowOpen: isOpen,
+              isChatAvailable: !!adminUser,
               congestion: congestionData,
-              is_favorite: isFavorite,
+              isFavorite: isFavorite,
             };
           }),
         );
 
         // 운영 중인 곳만 필터링
         const openCareUnits = careUnitsWithStatus.filter(
-          (unit) => unit.now_open,
+          (unit) => unit.nowOpen,
         );
 
         if (openCareUnits.length > 0) {
@@ -282,14 +282,14 @@ export class CareUnitService {
   //🏥 실시간 채팅 가능 여부 조회
   async getCareUnitIsOpen(id: string) {
     const careUnit = await this.careUnitRepository.findOne({ where: { id } });
-    if (!careUnit || !careUnit.now_open) {
+    if (!careUnit || !careUnit.nowOpen) {
       throw new NotFoundException('실시간 채팅이 불가능한 기관입니다');
     }
     const user = await this.usersService.getUserByCareUnitId(careUnit.id);
     if (!user) {
       throw new NotFoundException('실시간 채팅이 불가능한 기관입니다');
     }
-    return careUnit.now_open;
+    return careUnit.nowOpen;
   }
 
   // 💫배지 추가
@@ -299,7 +299,7 @@ export class CareUnitService {
     if (!careUnit) {
       throw new NotFoundException('Care unit not found');
     }
-    careUnit.is_badged = true;
+    careUnit.isBadged = true;
     await this.careUnitRepository.save(careUnit);
     console.log('💫배지 추가 완료');
     return careUnit;
@@ -344,12 +344,12 @@ export class CareUnitService {
     console.log('date', date, 'now', now);
     if (open <= now && close >= now) {
       console.log('⏱️ 지금 운영 중입니다');
-      careUnit.now_open = true;
+      careUnit.nowOpen = true;
       await this.careUnitRepository.save(careUnit);
       return true;
     }
     console.log('❌지금 운영 중이 아닙니다');
-    careUnit.now_open = false;
+    careUnit.nowOpen = false;
     await this.careUnitRepository.save(careUnit);
     return false;
   }
