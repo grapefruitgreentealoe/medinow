@@ -1,19 +1,18 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAuthStore } from '@/store/useAuthStore';
+import { authStore } from '@/store/auth-store';
 
 export function AuthStateProvider({ children }: { children: React.ReactNode }) {
-  const setAuth = useAuthStore((state) => state.setAuth);
   useEffect(() => {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
-    const isLogin = localStorage.getItem('isLogin');
+    const isLogin = localStorage.getItem('isLogin') === 'true';
 
-    setAuth({
+    authStore.setState({
       isAdmin,
-      isLoggedIn: !!isLogin,
+      isLoggedIn: isLogin,
     });
-  }, [setAuth]);
+  }, []);
 
   return <>{children}</>;
 }

@@ -8,8 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { login } from '../api';
-import { useAuthStore } from '@/store/useAuthStore';
-import { user } from '@/features/user/api';
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -32,13 +30,9 @@ export default function LoginForm() {
     try {
       const result = await login(data);
       // 로그인 성공 후
-      useAuthStore.getState().setAuth({
-        isLoggedIn: true,
-        isAdmin: true, // 또는 false
-      });
       localStorage.setItem('isAdmin', result.isAdmin);
       localStorage.setItem('isLogin', 'true');
-      await user();
+      // 로그인 후
       router.push('/');
     } catch (e) {
       alert((e as Error).message);
