@@ -18,11 +18,7 @@
     - docker push $DOCKER_IMAGE_FRONTEND:$TAG-$CI_COMMIT_SHORT_SHA
     - |
       echo "🧹 Docker 이미지 정리 시작"
-      docker images "$DOCKER_IMAGE_FRONTEND" --format '{{.Repository}}:{{.Tag}} {{.CreatedAt}} {{.ID}}' | \
-      sort -r -k2 | \
-      awk 'NR>3 {print $1}' | \
-      xargs -r docker rmi || echo "정리할 이미지 없음"
-
+      docker image prune -af --filter "until=24h" || echo "정리할 이미지 없음"
 docker-build-frontend-dev:
   extends: .docker-build-frontend-template
   variables:
