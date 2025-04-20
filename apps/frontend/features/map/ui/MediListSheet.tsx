@@ -12,6 +12,8 @@ import {
   SheetDescription,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { getTMCoordFromLatLng } from '@/lib/kakao-utils';
+import { Button } from '@/components/ui/button';
 
 interface MediListSheetProps {
   children: ReactNode;
@@ -50,8 +52,29 @@ export function MediListSheet({
     onSelect(unit); // 기존 onSelect 처리
     setOpen(false); // 시트 닫기
   };
+
+  const handleOpenKakaoMap = async (unit: CareUnit) => {
+    //목업
+    const lng = 126.753;
+    const lat = 37.5052;
+    const name = '서울아산이비인후과의원';
+    const road_address_name = '서울특별시 강동구 고덕로 353';
+    // const { lng, lat,name,road_address_name } = unit;
+    const result = await getTMCoordFromLatLng(lng, lat);
+    if (!result) {
+      alert('카카오 지도 이동에 실패했습니다.');
+      return;
+    }
+
+    const kakaoUrl = `https://map.kakao.com/?q=${encodeURIComponent(
+      name
+    )}&urlX=${Math.round(result.x)}&urlY=${Math.round(result.y)}&road_address_name=${road_address_name}&urlLevel=2`;
+
+    window.open(kakaoUrl, '_blank');
+  };
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild onClick={() => setOpen(true)}>
         {children}
       </SheetTrigger>
@@ -73,10 +96,12 @@ export function MediListSheet({
               .map((unit: CareUnit) => (
                 <Card
                   key={unit.id}
-                  onClick={() => handleSelect(unit)}
                   className="mb-2 cursor-pointer hover:bg-gray-50"
                 >
-                  <CardContent className="p-3 space-y-1">
+                  <CardContent
+                    className="p-3 space-y-1"
+                    onClick={() => handleSelect(unit)}
+                  >
                     <h3 className="text-base font-semibold">{unit.name}</h3>
                     <p className="text-sm text-muted-foreground">
                       {unit.address}
@@ -88,6 +113,13 @@ export function MediListSheet({
                         {unit.isChatAvailable ? '💬 채팅 가능' : '❌ 채팅 불가'}
                       </span>
                     </div>
+                    <Button
+                      variant="link"
+                      className="text-xs text-blue-500 underline"
+                      onClick={() => handleOpenKakaoMap(unit)}
+                    >
+                      카카오지도에서 보기
+                    </Button>
                   </CardContent>
                 </Card>
               ))
