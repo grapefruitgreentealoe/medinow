@@ -7,7 +7,7 @@ import { CongestionLevel } from 'src/common/enums/congestion.enum';
 
 @Injectable()
 export class CongestionTotalService implements OnModuleInit {
-  private readonly CACHE_TTL = 600;
+  private readonly CACHE_TTL = 3600; // 1시간 (초 단위)
 
   constructor(
     private readonly redisService: RedisService,
@@ -22,8 +22,8 @@ export class CongestionTotalService implements OnModuleInit {
     }, 5000);
   }
 
-  //1️⃣ 전체 응급실 혼잡도 저장
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  //1️⃣ 전체 응급실 혼잡도 저장 (1시간마다 갱신)
+  @Cron(CronExpression.EVERY_HOUR)
   async updateCongestion(): Promise<void> {
     try {
       console.log('🔄 혼잡도 업데이트 시작');
