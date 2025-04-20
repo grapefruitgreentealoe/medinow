@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -30,12 +30,17 @@ export default function NearbyCareUnitsMap() {
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [level, setLevel] = useState<number>(1);
+
+  /**과도한 패칭 방지 */
+  const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
+  const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
+
   const { data, fetchNextPage, hasNextPage, isFetching, isLoading } =
     useInfiniteQuery({
-      queryKey: ['careUnits', lat, lng, selectedCategory],
+      queryKey: ['careUnits', roundedLat, roundedLng, selectedCategory],
       queryFn: async ({ pageParam = 1 }) => {
-        const items = await locationByCategory({
-          // const items = await locationByCategoryMock({
+        // const items = await locationByCategory({
+        const items = await locationByCategoryMock({
           lat: lat!,
           lng: lng!,
           level,
@@ -57,7 +62,9 @@ export default function NearbyCareUnitsMap() {
           nextPage: undefined,
         };
       },
-      getNextPageParam: () => undefined,
+      getNextPageParam: (lastPage, pages) => {
+        return lastPage.hasNext ? pages.length + 1 : undefined;
+      },
       initialPageParam: 1,
       enabled: lat !== null && lng !== null,
     });
@@ -87,9 +94,11 @@ export default function NearbyCareUnitsMap() {
   useEffect(() => {
     const io = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && hasNextPage) {
+        console.log('📌 observe 트리거됨');
         fetchNextPage();
       }
     });
+
     if (observerRef.current) io.observe(observerRef.current);
     return () => io.disconnect();
   }, [hasNextPage, fetchNextPage]);
@@ -183,11 +192,21 @@ export default function NearbyCareUnitsMap() {
         </Select>
       </div>
 
-      <div className="z-100">
-        <div ref={mapRef} className="w-full h-[400px] rounded-xl bg-gray-100" />
+      <div className="relative z-100">
+        <div
+          ref={mapRef}
+          className="w-full h-[400px] rounded-xl bg-gray-100 z-0"
+        />
         <div className="absolute top-4 right-4 flex flex-col gap-1">
-          <Button onClick={() => handleZoom('in')}>+</Button>
-          <Button onClick={() => handleZoom('out')}>−</Button>
+          <Button
+            className="w-10 text-2xl cursor-pointer"
+            onClick={() => handleZoom('in')}
+          >
+            +
+          </Button>
+          <Button className="w-10 text-2xl" onClick={() => handleZoom('out')}>
+            −
+          </Button>
         </div>
       </div>
 
@@ -229,15 +248,17 @@ export default function NearbyCareUnitsMap() {
               );
             })
         )}
-        <div ref={observerRef} className="h-6" />
+        <div ref={observerRef} className="h-20 bg-transparent" />
         {isFetching && <Skeleton className="h-12 w-full mt-2" />}
       </div>
 
       <Dialog
+        modal
         open={!!selectedMarker}
         onOpenChange={() => setSelectedMarker(null)}
       >
-        <DialogContent className="max-w-md">
+        <DialogTitle></DialogTitle>
+        <DialogContent className="max-w-md z-100">
           {selectedMarker && (
             <Card>
               <CardContent className="space-y-1 p-4">
