@@ -100,7 +100,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { roomId: string; careUnitId: string },
     @WsUser() user: User,
   ) {
-    this.logger.log(`사용자 ${user.id}가 채팅방 ${data.roomId} 참여 요청`);
+    this.logger.log(`사용자 ${user.id}가 채팅방 ${data.roomId} 참여 요청!`);
 
     try {
       let roomId = data.roomId;
