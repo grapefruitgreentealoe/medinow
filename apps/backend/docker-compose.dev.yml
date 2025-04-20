@@ -37,7 +37,7 @@ services:
       - .env
     networks:
       - backend-network
-    # extra_hosts:
+    # extra_hosts: 사용하지 마세요. dns설정에 영향을 줍니다
     #   - "registry-1.docker.io:98.85.153.80"
 
 volumes:
