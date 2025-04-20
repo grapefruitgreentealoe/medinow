@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
   );
   const isUserRoute = pathname.startsWith('/user');
   const isAdminRoute = pathname.startsWith('/admin');
-  console.log(isUserRoute || isAdminRoute, !role);
+
   if ((isUserRoute || isAdminRoute) && !role) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
