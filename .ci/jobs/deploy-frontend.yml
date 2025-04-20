@@ -10,6 +10,7 @@
   stage: deploy
   image: node:20
   before_script:
+    - apt-get update && apt-get install -y docker.io # ✅ docker CLI 설치
     - corepack enable
     - corepack prepare pnpm@latest --activate
     - pnpm install
