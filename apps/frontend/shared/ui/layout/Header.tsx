@@ -1,30 +1,28 @@
 'use client';
-
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/useAuthStore';
+
 import axiosInstance from '@/lib/axios';
 
-export default function Header() {
+export default function Header({
+  isLoggedIn = false,
+}: {
+  isLoggedIn: boolean;
+}) {
   const router = useRouter();
-  const { isLoggedIn, logout } = useAuthStore();
 
   const handleLogout = async () => {
     try {
-      const res = await axiosInstance.post('/auth/logout', null, {
+      await axiosInstance.post('/auth/logout', null, {
         withCredentials: true,
       });
-      if (res.status == 200) {
-        logout();
-        localStorage.removeItem('isLogin');
-        localStorage.removeItem('isAdmin');
-        router.push('/');
-      }
+      router.refresh();
     } catch (e) {
       console.error('Logout failed', e);
     }
   };
+
   return (
     <header className="w-full px-6 py-4 border-b flex justify-between items-center bg-white">
       <Link href="/" className="text-xl font-bold ">
