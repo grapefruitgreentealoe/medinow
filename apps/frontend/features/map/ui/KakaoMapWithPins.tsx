@@ -5,6 +5,14 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
+
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { locationByCategory, locationByCategoryMock } from '../api';
@@ -16,11 +24,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { CareUnit } from '@/features/type';
+import { MediListSheet } from './MediListSheet';
 
 export default function NearbyCareUnitsMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const markersRef = useRef<kakao.maps.Marker[]>([]);
+  const overlayRef = useRef<kakao.maps.CustomOverlay | null>(null);
 
   const [location, setLocation] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<
@@ -37,6 +47,7 @@ export default function NearbyCareUnitsMap() {
 
   const { data, fetchNextPage, hasNextPage, isFetching, isLoading } =
     useInfiniteQuery({
+      staleTime: 5000,
       queryKey: ['careUnits', roundedLat, roundedLng, selectedCategory],
       queryFn: async ({ pageParam = 1 }) => {
         // const items = await locationByCategory({
@@ -70,6 +81,32 @@ export default function NearbyCareUnitsMap() {
     });
 
   const observerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const checkAndFetch = () => {
+      if (
+        observerRef.current &&
+        observerRef.current.getBoundingClientRect().top < window.innerHeight &&
+        hasNextPage
+      ) {
+        fetchNextPage();
+      }
+    };
+
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasNextPage) {
+        fetchNextPage();
+      }
+    });
+
+    if (observerRef.current) {
+      io.observe(observerRef.current);
+    }
+
+    // ✅ 최초 렌더링 직후 강제로 한번 호출
+    setTimeout(checkAndFetch, 100);
+
+    return () => io.disconnect();
+  }, [hasNextPage, fetchNextPage]);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -91,17 +128,17 @@ export default function NearbyCareUnitsMap() {
       }
     );
   }, []);
-  useEffect(() => {
-    const io = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasNextPage) {
-        console.log('📌 observe 트리거됨');
-        fetchNextPage();
-      }
-    });
+  // useEffect(() => {
+  //   const io = new IntersectionObserver((entries) => {
+  //     if (entries[0].isIntersecting && hasNextPage) {
+  //       console.log('📌 observe 트리거됨');
+  //       fetchNextPage();
+  //     }
+  //   });
 
-    if (observerRef.current) io.observe(observerRef.current);
-    return () => io.disconnect();
-  }, [hasNextPage, fetchNextPage]);
+  //   if (observerRef.current) io.observe(observerRef.current);
+  //   return () => io.disconnect();
+  // }, [hasNextPage, fetchNextPage]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.kakao?.maps) return;
@@ -145,9 +182,42 @@ export default function NearbyCareUnitsMap() {
         image: markerImage,
       });
 
-      kakao.maps.event.addListener(marker, 'click', () =>
-        setSelectedMarker(unit)
-      );
+      kakao.maps.event.addListener(marker, 'click', () => {
+        // 이전 오버레이 제거
+        if (overlayRef.current) {
+          overlayRef.current.setMap(null);
+        }
+
+        // 오버레이 content 생성 (HTML string)
+        const overlayContent = document.createElement('div');
+        overlayContent.innerHTML = `
+    <div class="marker-popover">
+      <strong>${unit.name}</strong><br/>
+      <button id="popover-${unit.id}" style="margin-top: 4px; padding: 2px 6px; font-size: 12px;">상세</button>
+    </div>
+  `;
+
+        const overlay = new kakao.maps.CustomOverlay({
+          content: overlayContent,
+          position: position,
+          yAnchor: 1,
+        });
+
+        overlay.setMap(map);
+        overlayRef.current = overlay;
+
+        // 팝오버 안에 있는 버튼 이벤트 연결 (이때 DOM이 삽입된 후여야 함)
+        setTimeout(() => {
+          const btn = document.getElementById(`popover-${unit.id}`);
+          if (btn) {
+            btn.onclick = () => {
+              setSelectedMarker(unit);
+              overlay.setMap(null); // 팝오버 닫기
+            };
+          }
+        }, 0);
+      });
+
       newMarkers.push(marker);
     });
 
@@ -191,11 +261,11 @@ export default function NearbyCareUnitsMap() {
           </SelectContent>
         </Select>
       </div>
-
-      <div className="relative z-100">
+      <div className="h-[20px]" />
+      <div className="relative">
         <div
           ref={mapRef}
-          className="w-full h-[400px] rounded-xl bg-gray-100 z-0"
+          className="w-full h-[90vh] rounded-xl bg-gray-100 z-0"
         />
         <div className="absolute top-4 right-4 flex flex-col gap-1">
           <Button
@@ -207,74 +277,18 @@ export default function NearbyCareUnitsMap() {
           <Button className="w-10 text-2xl" onClick={() => handleZoom('out')}>
             −
           </Button>
+          <MediListSheet
+            data={data}
+            isLoading={isLoading}
+            isFetching={isFetching}
+            hasNextPage={hasNextPage}
+            fetchNextPage={fetchNextPage}
+            onSelect={handleSelectFromList}
+          >
+            <Button className="w-10 text-xs">목록</Button>
+          </MediListSheet>
         </div>
       </div>
-
-      <div className="max-h-[300px] overflow-y-auto rounded-xl border p-2">
-        {isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full rounded-md" />
-            ))}
-          </div>
-        ) : (
-          data?.pages
-            .flatMap((p) => {
-              console.log(p);
-              return p.items;
-            })
-            .map((unit) => {
-              console.log(unit);
-              return (
-                <Card
-                  key={unit.id}
-                  onClick={() => handleSelectFromList(unit)}
-                  className="mb-2 cursor-pointer hover:bg-gray-50"
-                >
-                  <CardContent className="p-3 space-y-1">
-                    <h3 className="text-base font-semibold">{unit.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {unit.address}
-                    </p>
-                    <div className="text-xs flex justify-between">
-                      <span>📞 {unit.tel}</span>
-                      <span>{unit.isFavorite ? '⭐ 즐겨찾기' : ''}</span>
-                      <span>
-                        {unit.isChatAvailable ? '💬 채팅 가능' : '❌ 채팅 불가'}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })
-        )}
-        <div ref={observerRef} className="h-20 bg-transparent" />
-        {isFetching && <Skeleton className="h-12 w-full mt-2" />}
-      </div>
-
-      <Dialog
-        modal
-        open={!!selectedMarker}
-        onOpenChange={() => setSelectedMarker(null)}
-      >
-        <DialogTitle></DialogTitle>
-        <DialogContent className="max-w-md z-100">
-          {selectedMarker && (
-            <Card>
-              <CardContent className="space-y-1 p-4">
-                <h2 className="text-lg font-bold">{selectedMarker.name}</h2>
-                <p>{selectedMarker.address}</p>
-                <p>{selectedMarker.tel}</p>
-                {selectedMarker.category === 'emergency' && (
-                  <p className="text-sm text-destructive">
-                    가용 병상: {selectedMarker.congestion.hvec ?? '정보 없음'}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
