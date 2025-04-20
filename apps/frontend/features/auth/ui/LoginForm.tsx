@@ -28,11 +28,7 @@ export default function LoginForm() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const result = await login(data);
-      // 로그인 성공 후
-      localStorage.setItem('isAdmin', result.isAdmin);
-      localStorage.setItem('isLogin', 'true');
-      // 로그인 후
+      await login(data);
       router.push('/');
     } catch (e) {
       alert((e as Error).message);
