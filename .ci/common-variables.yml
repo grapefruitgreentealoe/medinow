@@ -2,7 +2,7 @@ variables:
   NODE_ENV: production
   PNPM_HOME: /root/.pnpm
   DOCKER_DRIVER: overlay2
-  DOCKER_HOST: unix:///var/run/docker.sock # ✅ 여기 추가
+  DOCKER_HOST: unix:///var/run/docker.sock
   DOCKER_TLS_CERTDIR: ''
   DOCKER_IMAGE_FRONTEND: grapefruitgreentealoe/medinow-frontend
   DOCKER_IMAGE_BACKEND: grapefruitgreentealoe/medinow-backend
@@ -10,7 +10,7 @@ variables:
 default:
   image: node:20
   before_script:
-    - apt-get update && apt-get install -y docker.io # ✅ docker CLI 설치
+    - apt-get update && apt-get install -y docker.io
     - corepack enable
     - corepack prepare pnpm@8.15.5 --activate
     - pnpm --version
