@@ -10,8 +10,7 @@
   stage: deploy
   image: node:20
   before_script:
-    - apt-get update && apt-get install -y docker.io
-    - docker --version
+    - apt-get update && apt-get install -y docker.io docker-compose
   script:
     - set -xe
     - echo "📦 배포 스크립트 실행 시작"
