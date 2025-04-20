@@ -1,6 +1,6 @@
 .frontend_changes: &frontend_changes
   - apps/frontend/**/*
-  - .ci/**/*
+  - .ci/jobs/docker-build-frontend.yml
   - package.json
   - pnpm-workspace.yaml
 
