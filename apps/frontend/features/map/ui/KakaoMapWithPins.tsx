@@ -34,8 +34,8 @@ export default function NearbyCareUnitsMap() {
     useInfiniteQuery({
       queryKey: ['careUnits', lat, lng, selectedCategory],
       queryFn: async ({ pageParam = 1 }) => {
-        // const items = await locationByCategory({
-        const items = await locationByCategoryMock({
+        const items = await locationByCategory({
+          // const items = await locationByCategoryMock({
           lat: lat!,
           lng: lng!,
           level,
