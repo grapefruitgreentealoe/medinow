@@ -18,7 +18,12 @@ import { UserRole } from '../../common/enums/roles.enum';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: [
+      'http://localhost:3000',
+      'https://localhost:3001',
+      'http://localhost:3001',
+      'https://kdt-node-2-team02.elicecoding.com',
+    ],
   },
   namespace: 'chat',
 })
@@ -122,27 +127,24 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // 해당 사용자가 채팅방에 접근 권한이 있는지 확인
       const hasAccess = await this.chatsService.checkRoomAccess(
         user.id,
-        data.roomId,
+        roomId,
       );
 
       if (!hasAccess) {
-        this.logger.warn(`채팅방 접근 권한 없음: ${user.id}, ${data.roomId}`);
+        this.logger.warn(`채팅방 접근 권한 없음: ${user.id}, ${roomId}`);
         return { success: false, message: '채팅방 접근 권한이 없습니다.' };
       }
 
       // 채팅방 참여
-      client.join(data.roomId);
+      client.join(roomId);
 
       // 읽지 않은 메시지 읽음 처리
       if (user.role !== UserRole.ADMIN) {
-        await this.chatsService.markMessagesAsRead(data.roomId, user.id);
+        await this.chatsService.markMessagesAsRead(roomId, user.id);
       }
 
       // 채팅 내역 가져오기
-      const messages = await this.chatsService.getRoomMessages(
-        data.roomId,
-        user.id,
-      );
+      const messages = await this.chatsService.getRoomMessages(roomId, user.id);
 
       return {
         success: true,
@@ -176,7 +178,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(data.roomId).emit('newMessage', {
         id: message.id,
         content: message.content,
-        senderId: message.sender.id,
+        senderId: message.senderId,
         senderName: user.name,
         isAdmin: user.role === UserRole.ADMIN,
         timestamp: message.createdAt,
@@ -196,6 +198,17 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       if (!isRecipientInRoom) {
         // 푸시 알림 또는 인앱 알림 처리 (별도 구현 필요)
+        // 알림 서비스 구현 예시
+        // 만약 NotificationService가 있다면:
+        // this.notificationService.sendPushNotification({
+        //   userId: recipientId,
+        //   title: '새 메시지 알림',
+        //   body: `${user.name}님이 새 메시지를 보냈습니다: ${data.content.substring(0, 30)}...`,
+        //   data: { roomId: data.roomId, messageId: message.id }
+        // });
+
+        // 위와 같은 알림 서비스를 구현하거나, 아직 구현이 안 되었다면 TODO 주석으로 명확히 표시
+        // TODO: 알림 서비스 구현 후 여기에 푸시 알림 전송 코드 추가
         this.logger.log(`상대방 ${recipientId}에게 알림 전송 필요`);
       }
 
