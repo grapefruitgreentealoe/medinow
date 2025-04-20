@@ -1,50 +1,22 @@
 'use client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useRouter, usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { authStore } from '@/store/auth-store';
+import { useRouter } from 'next/navigation';
+
 import axiosInstance from '@/lib/axios';
 
-export default function Header() {
+export default function Header({
+  isLoggedIn = false,
+}: {
+  isLoggedIn: boolean;
+}) {
   const router = useRouter();
-  const pathname = usePathname();
-
-  // 상태를 로컬 state로 반영
-  const [isLoggedIn, setIsLoggedIn] = useState(authStore.getState().isLoggedIn);
-  const [isAdmin, setIsAdmin] = useState(authStore.getState().isAdmin);
-
-  // store subscribe
-  useEffect(() => {
-    const unsubscribe = authStore.subscribe((state) => {
-      setIsLoggedIn(state.isLoggedIn);
-      setIsAdmin(state.isAdmin);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // pathname 바뀔 때마다 localStorage → store로 싱크
-  useEffect(() => {
-    const isLogin = localStorage.getItem('isLogin') === 'true';
-    const admin = localStorage.getItem('isAdmin') === 'true';
-
-    const state = authStore.getState();
-    if (isLogin && (!state.isLoggedIn || state.isAdmin !== admin)) {
-      authStore.setState({ isLoggedIn: true, isAdmin: admin });
-    }
-    if (!isLogin && state.isLoggedIn) {
-      authStore.getState().logout();
-    }
-  }, [pathname]);
 
   const handleLogout = async () => {
     try {
-      const res = await axiosInstance.post('/auth/logout', null, {
+      await axiosInstance.post('/auth/logout', null, {
         withCredentials: true,
       });
-      authStore.getState().logout();
-      localStorage.removeItem('isLogin');
-      localStorage.removeItem('isAdmin');
       router.refresh();
     } catch (e) {
       console.error('Logout failed', e);
