@@ -2,6 +2,7 @@
   - apps/frontend/**/*
   - .ci/jobs/deploy-frontend.yml
   - .ci/jobs/docker-build-frontend.yml
+  - .ci/common-variables.yml
   - package.json
   - pnpm-workspace.yaml
 
