@@ -7,7 +7,8 @@ variables:
 
 default:
   image: node:20
-
 before_script:
-  - pnpm --version # 확인용
+  - corepack enable
+  - corepack prepare pnpm@8.15.5 --activate
+  - pnpm --version
   - HUSKY=0 pnpm install
