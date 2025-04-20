@@ -1,22 +1,46 @@
-// middleware.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const role = request.cookies.get('role')?.value;
+  const token = request.cookies.get('accessToken')?.value;
+
+  let role: string | null = null;
+
+  if (token) {
+    try {
+      const payload = token.split('.')[1]; // header.payload.signature
+      const decoded = JSON.parse(atob(payload));
+      role = decoded.role;
+    } catch (e) {
+      console.error('❌ JWT 파싱 오류:', e);
+    }
+  }
+
   const pathname = request.nextUrl.pathname;
 
-  // 🔒 어드민 전용 경로
-  if (pathname.startsWith('/admin') && role !== 'admin') {
+  const isPublic = ['/', '/login', '/signup', '/admin-signup'].includes(
+    pathname
+  );
+  const isUserRoute = pathname.startsWith('/user');
+  const isAdminRoute = pathname.startsWith('/admin');
+  console.log(isUserRoute || isAdminRoute, !role);
+  if ((isUserRoute || isAdminRoute) && !role) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  if (isAdminRoute && role !== 'admin') {
     return NextResponse.rewrite(new URL('/404', request.url));
   }
 
-  // 🔒 유저 전용 경로
-  if (pathname.startsWith('/user') && role !== 'user') {
+  if (isUserRoute && role !== 'user') {
     return NextResponse.rewrite(new URL('/404', request.url));
   }
 
-  // 로그인한 사용자가 /login 가면 리디렉션
-  if (pathname === '/login' && role) {
+  if (
+    (pathname === '/login' ||
+      pathname === '/signup' ||
+      pathname === '/admin-signup') &&
+    role
+  ) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
@@ -24,5 +48,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/user/:path*', '/login'],
+  matcher: ['/admin/:path*', '/user/:path*', '/login', '/admin', '/user'],
 };
