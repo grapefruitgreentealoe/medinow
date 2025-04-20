@@ -37,6 +37,8 @@ services:
       - .env
     networks:
       - backend-network
+    # extra_hosts:
+    #   - "registry-1.docker.io:98.85.153.80"
 
 volumes:
   postgres_data:
@@ -45,3 +47,4 @@ volumes:
 networks:
   backend-network:
     driver: bridge
+    internal: false

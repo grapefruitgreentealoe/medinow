@@ -1,37 +1,49 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ChatsGateway } from './chats.gateway';
 import { ChatsService } from './chats.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { ChatRoom } from './entities/chat-room.entity';
+import { ChatMessage } from './entities/chat-message.entity';
+import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
 import { CustomLoggerService } from '../../shared/logger/logger.service';
 
-describe('ChatsGateway', () => {
-  let gateway: ChatsGateway;
+describe('ChatsService', () => {
+  let service: ChatsService;
 
-  // 모의 로거 생성
-  const mockLoggerService = {
-    setContext: jest.fn().mockReturnThis(),
-    log: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn(),
-    verbose: jest.fn(),
+  // 모킹 리포지토리 생성
+  const mockRepository = {
+    findOne: jest.fn(),
+    find: jest.fn(),
+    create: jest.fn().mockReturnValue({}),
+    save: jest.fn().mockReturnValue({}),
+    update: jest.fn(),
+    count: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ChatsGateway,
         ChatsService,
+        { provide: getRepositoryToken(ChatRoom), useValue: mockRepository },
+        { provide: getRepositoryToken(ChatMessage), useValue: mockRepository },
+        { provide: JwtService, useValue: { verify: jest.fn() } },
+        { provide: UsersService, useValue: { findUserById: jest.fn() } },
         {
           provide: CustomLoggerService,
-          useValue: mockLoggerService,
+          useValue: {
+            setContext: jest.fn().mockReturnThis(),
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+          },
         },
       ],
     }).compile();
 
-    gateway = module.get<ChatsGateway>(ChatsGateway);
+    service = module.get<ChatsService>(ChatsService);
   });
 
   it('should be defined', () => {
-    expect(gateway).toBeDefined();
+    expect(service).toBeDefined();
   });
 });
