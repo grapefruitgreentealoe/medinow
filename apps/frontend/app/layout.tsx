@@ -30,7 +30,6 @@ export default async function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <Header />
-
         <main>{children}</main>
       </body>
     </html>

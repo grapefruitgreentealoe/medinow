@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '../schema/loginSchema';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
 import { login } from '../api';
 
 type FormData = z.infer<typeof loginSchema>;
@@ -24,12 +23,20 @@ export default function LoginForm() {
     },
   });
 
-  const router = useRouter();
-
   const onSubmit = async (data: FormData) => {
     try {
       await login(data);
-      router.push('/');
+
+      // SSR에 반영되기 전이라도 클라이언트에서 isLoggedIn 즉시 반영
+      if (typeof window !== 'undefined') {
+        window.__INITIAL_IS_LOGGED_IN__ = true;
+      }
+
+      // SSR 새로고침 유도
+      // 쿠키 저장이 완료될 시간 주기 (200~500ms 사이)
+      setTimeout(() => {
+        location.href = '/';
+      }, 1000);
     } catch (e) {
       alert((e as Error).message);
     }
