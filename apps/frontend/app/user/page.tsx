@@ -1,6 +1,11 @@
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 
+interface DecodedToken {
+  role: string;
+  email: string;
+}
+
 export default async function UserPage() {
   const cookieStore = await cookies();
   const token = Array.from(cookieStore)[0][1].value;
@@ -8,7 +13,7 @@ export default async function UserPage() {
   let role = null;
   let email = null;
 
-  const decoded = jwt.decode(token) as any;
+  const decoded = jwt.decode(token) as DecodedToken;
   role = decoded.role;
   email = decoded.email;
 
