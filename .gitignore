@@ -30,3 +30,7 @@ Thumbs.db
 
 *.log
 *.log.*
+
+**/*.audit.json
+
+
