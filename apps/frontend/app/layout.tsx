@@ -29,7 +29,7 @@ export default async function RootLayout({
         </>
       </head>
       <body suppressHydrationWarning>
-        <Header isLoggedIn={!!token} />
+        <Header />
 
         <main>{children}</main>
       </body>
