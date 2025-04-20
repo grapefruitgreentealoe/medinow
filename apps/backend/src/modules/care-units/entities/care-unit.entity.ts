@@ -5,6 +5,7 @@ import { UserProfile } from 'src/modules/users/entities/user-profile.entity';
 import { Department } from 'src/modules/departments/entities/department.entity';
 import { Image } from 'src/modules/images/entities/image.entity';
 import { Favorite } from 'src/modules/favorites/entities/favorite.entity';
+import { ChatRoom } from 'src/modules/chats/entities/chat-room.entity';
 
 @Entity()
 @Index(['hpId', 'category'], { unique: true })
@@ -109,4 +110,10 @@ export class CareUnit extends BaseEntity {
     onDelete: 'CASCADE',
   })
   favorites: Favorite[];
+
+  @OneToMany(() => ChatRoom, (chatRoom) => chatRoom.careUnit, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  chatRooms: ChatRoom[];
 }
