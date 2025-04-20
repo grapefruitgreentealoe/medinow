@@ -8,8 +8,6 @@
   stage: deploy
   image: node:20
   before_script:
-    - export NVM_DIR="$HOME/.nvm"
-    - source "$NVM_DIR/nvm.sh"
     - nvm use 20
     - corepack enable
     - corepack prepare pnpm@latest --activate
