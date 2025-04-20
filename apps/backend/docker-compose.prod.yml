@@ -33,7 +33,7 @@ services:
     ports:
       - "4000:4000"
     env_file:
-      - ./apps/backend/.env
+      - .env
     networks:
       - backend-network
 
