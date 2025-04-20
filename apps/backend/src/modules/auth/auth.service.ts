@@ -87,15 +87,12 @@ export class AuthService {
     const isLocalhost =
       url.hostname.includes('localhost') || url.hostname.includes('127.0.0.1');
 
-    const domain = isLocalhost ? 'localhost' : url.hostname;
-
     return {
       httpOnly: true,
-      secure: !isLocalhost,
+      secure: true,
       maxAge,
       path: '/',
-      domain,
-      sameSite: 'lax',
+      sameSite: 'none',
     };
   }
 

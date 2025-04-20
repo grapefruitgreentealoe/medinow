@@ -8,10 +8,8 @@
   stage: deploy
   image: node:20
   before_script:
-    - apt-get update && apt-get install -y docker.io
-    - curl -L "https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    - chmod +x /usr/local/bin/docker-compose
-    - ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+    - docker --version
+    - docker-compose --version
   script:
     - set -xe
     - echo "📦 배포 스크립트 실행 시작"
