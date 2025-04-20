@@ -3,11 +3,21 @@ import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { AppConfigService } from 'src/config/app/config.service';
 import { JwtService } from '@nestjs/jwt';
+import { CustomLoggerService } from 'src/shared/logger/logger.service';
 
 // UsersService 모킹
 const mockUsersService = {
   createUser: jest.fn(),
   findUserByEmail: jest.fn(),
+};
+
+const mockLoggerService = {
+  setContext: jest.fn().mockReturnThis(),
+  log: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  verbose: jest.fn(),
 };
 
 describe('AuthService', () => {
@@ -35,6 +45,10 @@ describe('AuthService', () => {
           useValue: {
             signAsync: jest.fn().mockResolvedValue('mock-token'),
           },
+        },
+        {
+          provide: CustomLoggerService,
+          useValue: mockLoggerService,
         },
       ],
     }).compile();

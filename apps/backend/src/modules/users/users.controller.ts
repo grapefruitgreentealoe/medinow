@@ -18,19 +18,19 @@ import {
   ApiBody,
   ApiResponse,
   ApiTags,
-  ApiCookieAuth,
+  ApiExcludeEndpoint,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
-
+import { Public } from '../auth/decorators/public.decorator';
 @ApiTags('사용자 / 관리자')
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiCookieAuth()
-  @UseGuards(JwtAuthGuard)
+  @ApiExcludeEndpoint()
   @Post()
   @ApiOperation({ summary: '사용자 등록' })
   @ApiBody({ type: CreateUserDto })
@@ -50,6 +50,7 @@ export class UsersController {
     };
   }
 
+  @Public()
   @Get('check-email')
   @ApiOperation({ summary: '이메일 중복 확인' })
   @ApiQuery({
@@ -82,8 +83,7 @@ export class UsersController {
   }
 
   @Get()
-  @ApiCookieAuth()
-  @UseGuards(JwtAuthGuard)
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: '사용자 목록 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -102,8 +102,6 @@ export class UsersController {
   }
 
   @Get(':userId')
-  @ApiCookieAuth()
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '사용자 상세 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -122,8 +120,6 @@ export class UsersController {
   }
 
   @Patch(':userId')
-  @ApiCookieAuth()
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '사용자 수정' })
   async updateUser(
     @Param('userId') userId: string,
@@ -136,8 +132,6 @@ export class UsersController {
   }
 
   @Delete(':userId')
-  @ApiCookieAuth()
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '사용자 삭제' })
   @ApiResponse({
     status: HttpStatus.OK,

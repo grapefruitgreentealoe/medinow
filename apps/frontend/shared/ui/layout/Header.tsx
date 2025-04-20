@@ -1,30 +1,37 @@
 'use client';
-
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/useAuthStore';
+
 import axiosInstance from '@/lib/axios';
+import { useEffect, useState } from 'react';
+
+declare global {
+  interface Window {
+    __INITIAL_IS_LOGGED_IN__?: boolean;
+  }
+}
 
 export default function Header() {
   const router = useRouter();
-  const { isLoggedIn, logout } = useAuthStore();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // SSR에서 주입한 값 사용
+    setIsLoggedIn(window.__INITIAL_IS_LOGGED_IN__ ?? false);
+  }, []);
 
   const handleLogout = async () => {
     try {
-      const res = await axiosInstance.post('/auth/logout', null, {
+      await axiosInstance.post('/auth/logout', null, {
         withCredentials: true,
       });
-      if (res.status == 200) {
-        logout();
-        localStorage.removeItem('isLogin');
-        localStorage.removeItem('isAdmin');
-        router.push('/');
-      }
+      router.refresh();
     } catch (e) {
       console.error('Logout failed', e);
     }
   };
+
   return (
     <header className="w-full px-6 py-4 border-b flex justify-between items-center bg-white">
       <Link href="/" className="text-xl font-bold ">
