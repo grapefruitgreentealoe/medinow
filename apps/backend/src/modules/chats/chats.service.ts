@@ -184,6 +184,11 @@ export class ChatsService {
 
     // 채팅방 최종 업데이트 시간 갱신
     room.updatedAt = new Date();
+    room.lastMessageAt = new Date();
+
+    // 상대방의 읽지 않은 메시지 카운트 증가
+    room.unreadCount = (room.unreadCount || 0) + 1;
+
     await this.chatRoomRepository.save(room);
 
     return this.chatMessageRepository.save(message);
@@ -196,10 +201,9 @@ export class ChatsService {
     limit: number = 50,
   ): Promise<ChatMessage[]> {
     const room = await this.getRoomById(roomId);
-    const senderToMark = room.userId === userId ? room.careUnitId : room.userId;
 
     return this.chatMessageRepository.find({
-      where: { roomId, senderId: senderToMark },
+      where: { roomId },
       order: { createdAt: 'DESC' },
       take: limit,
     });
@@ -226,6 +230,11 @@ export class ChatsService {
       },
       { isRead: true },
     );
+
+    room.lastReadAt = new Date(); // 마지막 읽은 시간 업데이트
+    room.unreadCount = 0; // 읽지 않은 메시지 수 초기화
+
+    await this.chatRoomRepository.save(room);
   }
 
   // 사용자 온라인 상태 업데이트
@@ -245,10 +254,12 @@ export class ChatsService {
 
     const result = await Promise.all(
       rooms.map(async (room) => {
+        const senderToMark =
+          room.userId === userId ? room.careUnitId : room.userId;
         const count = await this.chatMessageRepository.count({
           where: {
             roomId: room.id,
-            senderId: userId,
+            senderId: senderToMark,
             isRead: false,
           },
         });
