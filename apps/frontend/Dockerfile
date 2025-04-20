@@ -2,18 +2,20 @@ FROM node:20
 
 WORKDIR /app
 
-# 전체 루트 복사 (모노레포니까 루트 package.json + pnpm-workspace.yaml 있어야 함)
+# 모노레포 전체 복사
 COPY . .
 
-# pnpm 준비
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# ✅ corepack 제거하고 pnpm 직접 설치 
+RUN curl -fsSL https://get.pnpm.io/install.sh | sh - && \
+    export PATH="$HOME/.local/share/pnpm:$PATH"
 
-# 전체 워크스페이스 의존성 설치
+# ✅ 의존성 설치
 RUN pnpm install
 
-# frontend만 빌드
+# ✅ 프론트엔드 빌드
 RUN pnpm --filter ./apps/frontend build
 
-# 실행 경로 설정
+# 실행 경로
 WORKDIR /app/apps/frontend
+
 CMD ["pnpm", "start"]
