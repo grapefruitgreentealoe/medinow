@@ -4,13 +4,22 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 
 import axiosInstance from '@/lib/axios';
+import { useEffect, useState } from 'react';
 
-export default function Header({
-  isLoggedIn = false,
-}: {
-  isLoggedIn: boolean;
-}) {
+declare global {
+  interface Window {
+    __INITIAL_IS_LOGGED_IN__?: boolean;
+  }
+}
+
+export default function Header() {
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // SSR에서 주입한 값 사용
+    setIsLoggedIn(window.__INITIAL_IS_LOGGED_IN__ ?? false);
+  }, []);
 
   const handleLogout = async () => {
     try {
