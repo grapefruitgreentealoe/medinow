@@ -1,4 +1,3 @@
-// app/user/page.tsx (SSR 그대로 가능)
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 
