@@ -34,7 +34,7 @@ services:
     ports:
       - "4001:4000"
     env_file:
-      - ./apps/backend/.env
+      - .env
     networks:
       - backend-network
     # extra_hosts: 사용하지 마세요. dns설정에 영향을 줍니다
