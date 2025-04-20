@@ -5,6 +5,8 @@ import { Exclude } from 'class-transformer';
 import { UserProfile } from './user-profile.entity';
 import { Image } from 'src/modules/images/entities/image.entity';
 import { Favorite } from 'src/modules/favorites/entities/favorite.entity';
+import { ChatMessage } from 'src/modules/chats/entities/chat-message.entity';
+import { ChatRoom } from 'src/modules/chats/entities/chat-room.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -38,4 +40,14 @@ export class User extends BaseEntity {
     cascade: true,
   })
   favorites: Favorite[];
+
+  @OneToMany(() => ChatMessage, (message) => message.sender, {
+    cascade: true,
+  })
+  chatMessages: ChatMessage[];
+
+  @OneToMany(() => ChatRoom, (room) => room.user, {
+    cascade: true,
+  })
+  chatRooms: ChatRoom[];
 }

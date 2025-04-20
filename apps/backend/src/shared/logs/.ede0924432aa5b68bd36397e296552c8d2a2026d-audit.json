@@ -9,6 +9,11 @@
             "date": 1745029602367,
             "name": "/Users/yoon-yongseol/WorkSpace/medinow/apps/backend/src/shared/logs/application-2025-04-19.log",
             "hash": "493ab051ec52677b709ba5c19a18b5ffa290e7ebab2617d57992c2ef12232702"
+        },
+        {
+            "date": 1745079769052,
+            "name": "/Users/yoon-yongseol/WorkSpace/medinow/apps/backend/src/shared/logs/application-2025-04-20.log",
+            "hash": "fa16169210230d43badd0e51f211186eab6af02a5caa04e0bf3594c8f75719ec"
         }
     ],
     "hashType": "sha256"
