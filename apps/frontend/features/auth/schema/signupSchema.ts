@@ -1,4 +1,3 @@
-// features/auth/schema/signupSchema.ts
 import { z } from 'zod';
 
 export const signupSchema = z.object({
