@@ -15,7 +15,6 @@
     - docker tag $DOCKER_IMAGE_FRONTEND:$TAG $DOCKER_IMAGE_FRONTEND:$TAG-$CI_COMMIT_SHORT_SHA
     - docker push $DOCKER_IMAGE_FRONTEND:$TAG
     - docker push $DOCKER_IMAGE_FRONTEND:$TAG-$CI_COMMIT_SHORT_SHA
-    # ✅ 빌드 후: dev 포함 최근 3개만 남기고 나머지 이미지 태그 삭제
     - |
       echo "🧹 Docker 이미지 정리 시작"
       docker images "$DOCKER_IMAGE_FRONTEND" --format '{{.Repository}}:{{.Tag}} {{.CreatedAt}} {{.ID}}' | \
