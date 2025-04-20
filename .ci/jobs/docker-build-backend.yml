@@ -1,6 +1,7 @@
 .backend_changes: &backend_changes
   - apps/backend/**/*
   - .ci/jobs/docker-build-backend.yml
+  - .ci/common-variables.yml
   - package.json
   - pnpm-workspace.yaml
 
@@ -18,10 +19,7 @@
     # ✅ 빌드 후: dev 포함 최근 3개만 남기고 나머지 이미지 태그 삭제
     - |
       echo "🧹 Docker 이미지 정리 시작"
-      docker images "$DOCKER_IMAGE_BACKEND" --format '{{.Repository}}:{{.Tag}} {{.CreatedAt}} {{.ID}}' | \
-      sort -r -k2 | \
-      awk 'NR>3 {print $1}' | \
-      xargs -r docker rmi || echo "정리할 이미지 없음"
+      docker image prune -af --filter "until=24h" || echo "정리할 이미지 없음"
 docker-build-backend-dev:
   extends: .docker-build-backend-template
   variables:

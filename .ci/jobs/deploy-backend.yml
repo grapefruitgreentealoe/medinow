@@ -2,6 +2,7 @@
   - apps/backend/**/*
   - .ci/jobs/deploy-backend.yml
   - .ci/jobs/docker-build-backend.yml
+  - .ci/common-variables.yml
   - package.json
   - pnpm-workspace.yaml
 
@@ -9,8 +10,7 @@
   stage: deploy
   image: node:20
   before_script:
-    - docker --version
-    - docker-compose --version
+    - apt-get update && apt-get install -y docker.io docker-compose
   script:
     - set -xe
     - echo "📦 배포 스크립트 실행 시작"
