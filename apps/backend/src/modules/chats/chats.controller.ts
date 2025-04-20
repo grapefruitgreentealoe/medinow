@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ChatsService } from './chats.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -39,7 +47,7 @@ export class ChatsController {
     // 접근 권한 확인
     const hasAccess = await this.chatsService.checkRoomAccess(user.id, roomId);
     if (!hasAccess) {
-      throw new Error('해당 채팅방에 접근할 권한이 없습니다');
+      throw new UnauthorizedException('해당 채팅방에 접근할 권한이 없습니다');
     }
 
     return this.chatsService.getRoomMessages(roomId, user.id);
