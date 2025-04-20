@@ -33,6 +33,6 @@ export async function locationByCategoryMock(
   if (data.category) {
     return all.filter((unit) => unit.category === data.category);
   }
-
+  console.log('isFetching');
   return all;
 }
