@@ -9,11 +9,9 @@ variables:
 
 default:
   image: node:20
-  services:
-    - docker:dind
-
-before_script:
-  - corepack enable
-  - corepack prepare pnpm@8.15.5 --activate
-  - pnpm --version
-  - HUSKY=0 pnpm install
+  before_script:
+    - apt-get update && apt-get install -y docker.io # ✅ docker CLI 설치
+    - corepack enable
+    - corepack prepare pnpm@8.15.5 --activate
+    - pnpm --version
+    - HUSKY=0 pnpm install
