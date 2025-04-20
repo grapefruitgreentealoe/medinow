@@ -1,6 +1,7 @@
 .backend_changes: &backend_changes
   - apps/backend/**/*
   - .ci/jobs/docker-build-backend.yml
+  - .ci/common-variables.yml
   - package.json
   - pnpm-workspace.yaml
 
