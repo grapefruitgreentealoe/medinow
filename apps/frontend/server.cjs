@@ -40,8 +40,6 @@ app.prepare().then(() => {
         .join('; ');
       req.headers.cookie = filtered;
 
-      console.log('🍪 [HTTPS] 쿠키:', req.headers.cookie); // <- 그리고 여기!
-      console.log('🧪 [HTTPS]', req.url);
       handle(req, res, parsedUrl);
     })
     .listen(PORT + 1, (err) => {
