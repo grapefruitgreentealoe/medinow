@@ -41,7 +41,7 @@ export class ChatsService {
       return await this.usersService.findUserById(payload.sub);
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`토큰 검증 실패: ${err.message}`);
+      this.logger.error(`토큰 검증 실패: ${err.message}!`);
       return null;
     }
   }
