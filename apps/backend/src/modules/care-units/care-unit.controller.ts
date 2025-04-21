@@ -37,7 +37,6 @@ export class CareUnitController {
     private readonly departmentsService: DepartmentsService,
   ) {}
 
-
   @Post('full')
   @Public()
   // @ApiExcludeEndpoint()
@@ -63,7 +62,6 @@ export class CareUnitController {
   async saveHospitalDepartments() {
     return await this.departmentsService.saveHospitalDepartments();
   }
-
 
   @Post('badge')
   @UseGuards(JwtAuthGuard)
