@@ -20,7 +20,6 @@ import { LoggerModule } from './shared/logger/logger.module';
 import { CustomLoggerService } from './shared/logger/logger.service';
 import { ChatsModule } from './modules/chats/chats.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
-
 @Module({
   imports: [
     ConfigModule.forRoot({
