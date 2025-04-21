@@ -19,6 +19,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { LoggerModule } from './shared/logger/logger.module';
 import { CustomLoggerService } from './shared/logger/logger.service';
 import { ChatsModule } from './modules/chats/chats.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ChatsModule } from './modules/chats/chats.module';
     NoticesModule,
     FavoritesModule,
     ChatsModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [
