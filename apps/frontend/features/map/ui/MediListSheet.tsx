@@ -36,17 +36,35 @@ export function MediListSheet({
 }: MediListSheetProps) {
   const observerRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const io = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasNextPage) {
-        fetchNextPage();
-      }
-    });
+    if (!open) return;
 
-    if (observerRef.current) io.observe(observerRef.current);
-    return () => io.disconnect();
-  }, [hasNextPage, fetchNextPage]);
+    const timer = setTimeout(() => {
+      const root = scrollRef.current;
+      const target = observerRef.current;
+
+      if (!root || !target) return;
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasNextPage) {
+            console.log('🔥 Triggered!');
+            fetchNextPage();
+          }
+        },
+        {
+          root,
+          threshold: 0.2,
+        }
+      );
+
+      io.observe(target);
+    }, 300); // ✅ Sheet transition 끝날 때까지 대기
+
+    return () => clearTimeout(timer);
+  }, [open, hasNextPage, fetchNextPage]);
 
   const handleSelect = (unit: CareUnit) => {
     onSelect(unit); // 기존 onSelect 처리
@@ -83,7 +101,7 @@ export function MediListSheet({
           <SheetTitle>의료기관 목록</SheetTitle>
           <SheetDescription>채팅, 즐겨찾기 설정을 해보세요</SheetDescription>
         </SheetHeader>
-        <div className="max-h-screen overflow-y-auto p-4">
+        <div className="max-h-screen overflow-y-auto p-4" ref={scrollRef}>
           {isLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -124,8 +142,8 @@ export function MediListSheet({
                 </Card>
               ))
           )}
-          <div ref={observerRef} className="h-6" />
-          {isFetching && <Skeleton className="h-12 w-full mt-2" />}
+          <div ref={observerRef} className="h-12 bg-yellow-300" />
+          {/* {isFetching && <Skeleton className="h-12 w-full mt-2" />} */}
         </div>
       </SheetContent>
     </Sheet>

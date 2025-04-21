@@ -1,17 +1,7 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
@@ -80,34 +70,6 @@ export default function NearbyCareUnitsMap() {
       enabled: lat !== null && lng !== null,
     });
 
-  const observerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const checkAndFetch = () => {
-      if (
-        observerRef.current &&
-        observerRef.current.getBoundingClientRect().top < window.innerHeight &&
-        hasNextPage
-      ) {
-        fetchNextPage();
-      }
-    };
-
-    const io = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasNextPage) {
-        fetchNextPage();
-      }
-    });
-
-    if (observerRef.current) {
-      io.observe(observerRef.current);
-    }
-
-    // ✅ 최초 렌더링 직후 강제로 한번 호출
-    setTimeout(checkAndFetch, 100);
-
-    return () => io.disconnect();
-  }, [hasNextPage, fetchNextPage]);
-
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -128,17 +90,6 @@ export default function NearbyCareUnitsMap() {
       }
     );
   }, []);
-  // useEffect(() => {
-  //   const io = new IntersectionObserver((entries) => {
-  //     if (entries[0].isIntersecting && hasNextPage) {
-  //       console.log('📌 observe 트리거됨');
-  //       fetchNextPage();
-  //     }
-  //   });
-
-  //   if (observerRef.current) io.observe(observerRef.current);
-  //   return () => io.disconnect();
-  // }, [hasNextPage, fetchNextPage]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.kakao?.maps) return;
