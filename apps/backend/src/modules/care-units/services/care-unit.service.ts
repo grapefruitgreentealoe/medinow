@@ -20,6 +20,7 @@ import { CongestionOneService } from 'src/modules/congestion/services/congestion
 import { User } from 'src/modules/users/entities/user.entity';
 import { FavoritesService } from 'src/modules/favorites/favorites.service';
 import { CustomLoggerService } from 'src/shared/logger/logger.service';
+import { CareUnitCategory } from 'src/common/enums/careUnits.enum';
 
 @Injectable()
 export class CareUnitService {
@@ -352,5 +353,12 @@ export class CareUnitService {
     careUnit.nowOpen = false;
     await this.careUnitRepository.save(careUnit);
     return false;
+  }
+
+  // careUnit을 hpId와 카테고리로 조회하여 가져오기 (department 조회 시 사용)
+  async getHospitalCareUnit(hpId: string, category: string) {
+    return this.careUnitRepository.findOne({
+      where: { hpId: hpId, category },
+    });
   }
 }

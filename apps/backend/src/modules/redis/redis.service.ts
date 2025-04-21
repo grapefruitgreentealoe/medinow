@@ -30,4 +30,23 @@ export class RedisService {
   async close() {
     await this.redis.quit();
   }
+
+  async scan(pattern: string, count: number = 1000): Promise<string[]> {
+    const keys: string[] = [];
+    let cursor = '0';
+
+    do {
+      const [nextCursor, results] = await this.redis.scan(
+        cursor,
+        'MATCH',
+        pattern,
+        'COUNT',
+        count,
+      );
+      cursor = nextCursor;
+      keys.push(...results);
+    } while (cursor !== '0');
+
+    return keys;
+  }
 }
