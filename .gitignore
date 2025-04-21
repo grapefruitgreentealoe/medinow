@@ -7,6 +7,10 @@ node_modules/
 !.env.*.template
 !.env.*.example
 
+**/logs/
+**/*.log
+**/*-audit.json
+
 
 # 빌드 결과물
 dist/

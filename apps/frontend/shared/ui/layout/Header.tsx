@@ -1,23 +1,30 @@
 'use client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
 
 import axiosInstance from '@/lib/axios';
+import { useEffect, useState } from 'react';
 
-export default function Header({
-  isLoggedIn = false,
-}: {
-  isLoggedIn: boolean;
-}) {
-  const router = useRouter();
+declare global {
+  interface Window {
+    __INITIAL_IS_LOGGED_IN__?: boolean;
+  }
+}
+
+export default function Header() {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // SSR에서 주입한 값 사용
+    setIsLoggedIn(window.__INITIAL_IS_LOGGED_IN__ ?? false);
+  }, []);
 
   const handleLogout = async () => {
     try {
       await axiosInstance.post('/auth/logout', null, {
         withCredentials: true,
       });
-      router.refresh();
+      location.reload(); // SSR로 상태 재반영
     } catch (e) {
       console.error('Logout failed', e);
     }
