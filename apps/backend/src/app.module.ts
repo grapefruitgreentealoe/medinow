@@ -20,6 +20,7 @@ import { LoggerModule } from './shared/logger/logger.module';
 import { CustomLoggerService } from './shared/logger/logger.service';
 import { ChatsModule } from './modules/chats/chats.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { DataSyncModule } from './modules/data-sync/data-sync.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     FavoritesModule,
     ChatsModule,
     ReviewsModule,
+    DataSyncModule,
   ],
   controllers: [AppController],
   providers: [
