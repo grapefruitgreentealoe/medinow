@@ -39,7 +39,7 @@ export class ScheduleService {
     return this.scheduleRepository.save(schedule);
   }
 
-  async failLog(
+  async failSchedule(
     scheduleId: string,
     error: Error,
     metadata?: Record<string, any>,
