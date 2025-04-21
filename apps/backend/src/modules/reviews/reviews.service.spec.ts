@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Review } from './entities/review.entity';
 import { UsersService } from '../users/users.service';
 import { DepartmentsService } from '../departments/departments.service';
-
+import { CareUnitService } from '../care-units/services/care-unit.service';
 describe('ReviewsService', () => {
   let service: ReviewsService;
 
@@ -28,9 +28,15 @@ describe('ReviewsService', () => {
           }),
         },
         {
+          provide: CareUnitService, // 누락된 의존성 추가
+          useFactory: () => ({
+            getCareUnitDetail: jest.fn(),
+          }),
+        },
+        {
           provide: DepartmentsService,
           useFactory: () => ({
-            findOne: jest.fn(),
+            getDepartmentById: jest.fn(),
           }),
         },
       ],
