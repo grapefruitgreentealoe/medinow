@@ -12,6 +12,7 @@ import { CongestionTotalService } from '../congestion/services/congestion-total.
 import { UsersService } from '../users/users.service';
 import { FavoritesService } from 'src/modules/favorites/favorites.service';
 import { CustomLoggerService } from 'src/shared/logger/logger.service';
+import { DepartmentsService } from '../departments/departments.service';
 
 describe('CareUnitController', () => {
   let controller: CareUnitController;
@@ -75,10 +76,22 @@ describe('CareUnitController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CareUnitController],
       providers: [
-        CareUnitService,
-        CareUnitAdminService,
-        CongestionOneService,
-        CongestionTotalService,
+        {
+          provide: CareUnitService,
+          useValue: {},
+        },
+        {
+          provide: CareUnitAdminService,
+          useValue: {},
+        },
+        {
+          provide: CongestionOneService,
+          useValue: {},
+        },
+        {
+          provide: DepartmentsService,
+          useValue: {},
+        },
         {
           provide: getRepositoryToken(CareUnit),
           useValue: mockCareUnitRepository,
@@ -100,8 +113,8 @@ describe('CareUnitController', () => {
           useValue: mockUsersService,
         },
         {
-          provide: CongestionOneService,
-          useValue: mockCongestionOneService,
+          provide: CongestionTotalService,
+          useValue: {},
         },
         {
           provide: FavoritesService,

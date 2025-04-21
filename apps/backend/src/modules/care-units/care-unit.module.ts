@@ -11,6 +11,7 @@ import { RedisModule } from '../redis/redis.module';
 import { CongestionModule } from '../congestion/congestion.module';
 import { UsersModule } from '../users/users.module';
 import { FavoritesModule } from '../favorites/favorites.module';
+import { DepartmentsModule } from '../departments/departments.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { FavoritesModule } from '../favorites/favorites.module';
     forwardRef(() => UsersModule),
     forwardRef(() => CongestionModule),
     forwardRef(() => FavoritesModule),
+    forwardRef(() => DepartmentsModule),
   ],
   controllers: [CareUnitController],
   providers: [CareUnitService, CareUnitAdminService],
