@@ -1,3 +1,5 @@
+import { useInfiniteQuery } from '@tanstack/react-query';
+
 export interface CareUnit {
   id: string;
   createdAt: string;
@@ -44,3 +46,12 @@ export interface CareUnit {
 }
 
 export type CareUnitCategory = 'hospital' | 'pharmacy' | 'emergency';
+
+export interface UseCareUnitsQueryResult {
+  data: CareUnit[];
+  fetchNextPage: () => void;
+  hasNextPage?: boolean;
+  isFetching: boolean;
+  isLoading: boolean;
+  raw: ReturnType<typeof useInfiniteQuery>;
+}

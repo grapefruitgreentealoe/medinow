@@ -57,14 +57,19 @@ export default function AdminSignupForm() {
 
   const handleImageUpload = async (file: File) => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', file); // file이라는 키로 업로드
 
     try {
       setUploading(true);
-      const res = await axiosInstance.post('/images/business-license/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const res = await axiosInstance.post(
+        '/images/business-license/upload',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data', // 이건 사실 생략해도 axios가 자동 처리
+          },
+        }
+      );
 
       setValue('imageUrl', res.data.url, { shouldDirty: true });
     } catch (error) {

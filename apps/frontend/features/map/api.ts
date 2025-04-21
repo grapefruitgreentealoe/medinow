@@ -1,5 +1,5 @@
 import axiosInstance from '@/lib/axios';
-import { CareUnit } from '../type';
+import { CareUnit } from './type';
 import { generateMockCareUnits } from '@/lib/mockCareUnits';
 
 interface LocationByCategoryData {
@@ -33,6 +33,6 @@ export async function locationByCategoryMock(
   if (data.category) {
     return all.filter((unit) => unit.category === data.category);
   }
-
+  console.log('isFetching');
   return all;
 }
