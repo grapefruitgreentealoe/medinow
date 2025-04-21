@@ -16,7 +16,7 @@ RUN pnpm install
 RUN pnpm --filter ./apps/backend run build
 
 # 환경 변수 설정
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 
 ENV PORT=4000
 
