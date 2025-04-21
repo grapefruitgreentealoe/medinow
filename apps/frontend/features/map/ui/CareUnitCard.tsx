@@ -111,7 +111,11 @@ export function CareUnitCard({
               className="w-8 h-8"
             >
               {localFavorite ? (
-                <Star className="text-yellow-500" size={18} />
+                <Star
+                  className="text-yellow-500 fill-yellow-500"
+                  size={18}
+                  color="text-yellow-500"
+                />
               ) : (
                 <StarOff size={18} />
               )}
