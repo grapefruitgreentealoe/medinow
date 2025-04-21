@@ -27,7 +27,7 @@ import { Public } from '../auth/decorators/public.decorator';
 import { RequestUser } from 'src/common/decorators/request-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-
+import { DepartmentsService } from '../departments/departments.service';
 @ApiTags('의료기관')
 @Controller('care-units')
 export class CareUnitController {
@@ -35,6 +35,7 @@ export class CareUnitController {
     private readonly careUnitService: CareUnitService,
     private readonly careUnitAdminService: CareUnitAdminService,
     private readonly congestionService: CongestionOneService,
+    private readonly departmentsService: DepartmentsService,
   ) {}
 
   @Get()
@@ -92,7 +93,7 @@ export class CareUnitController {
     type: String,
   })
   async saveHospitalDepartments() {
-    return await this.careUnitAdminService.saveHospitalDepartments();
+    return await this.departmentsService.saveHospitalDepartments();
   }
 
   @Get('category')
