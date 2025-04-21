@@ -5,7 +5,7 @@ services:
     image: postgres:17
     container_name: postgres-dev
     ports:
-      - "5433:5432"
+      - '5433:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -19,22 +19,20 @@ services:
     image: redis:latest
     container_name: redis-dev
     ports:
-      - "6380:6379"
+      - '6380:6379'
     volumes:
       - redis_data:/data
     networks:
       - backend-network
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: grapefruitgreentealoe/medinow-backend:dev
     container_name: backend-dev
     depends_on:
       - postgres
       - redis
     ports:
-      - "4001:4000"
+      - '4001:4000'
     env_file:
       - .env
     networks:
@@ -47,3 +45,4 @@ volumes:
 networks:
   backend-network:
     driver: bridge
+    internal: false #internal false 추가하여 외부 네트워크 접속허용

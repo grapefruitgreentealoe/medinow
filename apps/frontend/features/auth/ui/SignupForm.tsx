@@ -1,14 +1,13 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signupSchema } from '../schema/signupSchema';
 import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useEmailCheck } from '../model/useEmailCheck';
 import { useState } from 'react';
+import { checkEmail, signup } from '../api';
 
 type FormData = z.infer<typeof signupSchema>;
 
@@ -30,11 +29,9 @@ export default function SignupForm() {
       nickname: '테스트닉',
       address: '서울시 강남구',
       age: '29',
-      terms: true,
     },
   });
 
-  const { mutateAsync: checkEmail } = useEmailCheck();
   const [checking, setChecking] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -47,10 +44,10 @@ export default function SignupForm() {
       return;
     }
 
-    console.log('회원가입 성공', data);
-    setLoading(true);
-
-    await new Promise((r) => setTimeout(r, 700));
+    await signup({
+      ...data,
+      age: Number(data.age),
+    });
     console.log('회원가입 성공:', data);
 
     setLoading(false);
@@ -92,26 +89,6 @@ export default function SignupForm() {
       <Input placeholder="나이 (선택)" {...register('age')} />
       {errors.age && (
         <p className="text-sm text-red-500">{errors.age.message}</p>
-      )}
-
-      <Controller
-        name="terms"
-        control={control}
-        render={({ field }) => (
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="terms"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-            <label htmlFor="terms" className="text-sm">
-              약관에 동의합니다
-            </label>
-          </div>
-        )}
-      />
-      {errors.terms && (
-        <p className="text-sm text-red-500">{errors.terms.message}</p>
       )}
 
       <Button type="submit" disabled={checking || loading}>

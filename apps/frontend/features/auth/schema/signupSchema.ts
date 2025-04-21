@@ -1,4 +1,3 @@
-// features/auth/schema/signupSchema.ts
 import { z } from 'zod';
 
 export const signupSchema = z.object({
@@ -13,8 +12,5 @@ export const signupSchema = z.object({
   name: z.string().min(1, { message: '이름을 입력해주세요' }),
   nickname: z.string().min(1, { message: '닉네임을 입력해주세요' }),
   address: z.string().min(1, { message: '주소를 입력해주세요' }),
-  age: z.union([z.string().min(1), z.literal('')]).optional(),
-  terms: z.literal(true, {
-    errorMap: () => ({ message: '약관에 동의해주세요' }),
-  }),
+  age: z.union([z.string().min(1), z.literal('')]),
 });

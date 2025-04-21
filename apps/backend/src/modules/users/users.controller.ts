@@ -8,7 +8,7 @@ import {
   UseGuards,
   Delete,
   Param,
-  Put,
+  Patch,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,20 +18,19 @@ import {
   ApiBody,
   ApiResponse,
   ApiTags,
-  ApiBearerAuth,
-  ApiCookieAuth,
+  ApiExcludeEndpoint,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
-
+import { Public } from '../auth/decorators/public.decorator';
 @ApiTags('사용자 / 관리자')
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @ApiExcludeEndpoint()
   @Post()
   @ApiOperation({ summary: '사용자 등록' })
   @ApiBody({ type: CreateUserDto })
@@ -51,6 +50,7 @@ export class UsersController {
     };
   }
 
+  @Public()
   @Get('check-email')
   @ApiOperation({ summary: '이메일 중복 확인' })
   @ApiQuery({
@@ -70,16 +70,20 @@ export class UsersController {
   })
   async checkEmail(@Query('email') email: string) {
     const isExist = await this.usersService.isExistEmail(email);
+    if (isExist) {
+      return {
+        message: '이미 존재하는 이메일입니다.',
+        isDuplicate: true,
+      };
+    }
     return {
-      message: '이메일 중복 확인 성공',
-      email,
-      isDuplicate: isExist,
+      message: '사용 가능한 이메일입니다.',
+      isDuplicate: false,
     };
   }
 
   @Get()
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: '사용자 목록 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -98,8 +102,6 @@ export class UsersController {
   }
 
   @Get(':userId')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '사용자 상세 조회' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -117,9 +119,7 @@ export class UsersController {
     };
   }
 
-  @Put(':userId')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Patch(':userId')
   @ApiOperation({ summary: '사용자 수정' })
   async updateUser(
     @Param('userId') userId: string,
@@ -132,8 +132,6 @@ export class UsersController {
   }
 
   @Delete(':userId')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '사용자 삭제' })
   @ApiResponse({
     status: HttpStatus.OK,
