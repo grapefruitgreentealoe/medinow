@@ -15,8 +15,8 @@ import { CareUnitService } from '../care-units/services/care-unit.service';
 import { RedisService } from '../redis/redis.service';
 
 @Injectable()
-// export class DepartmentsService {
-export class DepartmentsService implements OnModuleInit {
+// export class DepartmentsService implements OnModuleInit {
+export class DepartmentsService {
   private readonly SERVICE_KEY = this.appConfigService.serviceKey;
   private readonly HOSPITAL_BASIC_API_URL =
     this.appConfigService.hospitalBasicApiUrl;
@@ -31,17 +31,17 @@ export class DepartmentsService implements OnModuleInit {
     private readonly redisService: RedisService,
   ) {}
 
-  onModuleInit() {
-    console.log('🚀 서버 시작 시 병원 진료과목 초기 데이터 저장 시작');
-    try {
-      setTimeout(() => {
-        this.saveHospitalDepartments();
-      }, 5000);
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error('❌ 초기 데이터 저장 실패:', err.message);
-    }
-  }
+  // onModuleInit() {
+  //   console.log('🚀 서버 시작 시 병원 진료과목 초기 데이터 저장 시작');
+  //   try {
+  //     setTimeout(() => {
+  //       this.saveHospitalDepartments();
+  //     }, 5000);
+  //   } catch (error) {
+  //     const err = error as Error;
+  //     this.logger.error('❌ 초기 데이터 저장 실패:', err.message);
+  //   }
+  // }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async syncHospitalDepartments() {
