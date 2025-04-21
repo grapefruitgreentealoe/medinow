@@ -13,6 +13,7 @@ import { Department } from 'src/modules/departments/entities/department.entity';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { CustomLoggerService } from 'src/shared/logger/logger.service';
 import { CareUnitService } from '../care-units/services/care-unit.service';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 // export class DepartmentsService {
@@ -20,6 +21,7 @@ export class DepartmentsService implements OnModuleInit {
   private readonly SERVICE_KEY = this.appConfigService.serviceKey;
   private readonly HOSPITAL_BASIC_API_URL =
     this.appConfigService.hospitalBasicApiUrl;
+  private readonly REDIS_DEPARTMENT_KEY = 'department:';
 
   constructor(
     @InjectRepository(Department)
@@ -27,13 +29,15 @@ export class DepartmentsService implements OnModuleInit {
     private readonly appConfigService: AppConfigService,
     private readonly logger: CustomLoggerService,
     private readonly careUnitService: CareUnitService,
+    private readonly redisService: RedisService,
   ) {}
 
   async onModuleInit() {
     console.log('🚀 서버 시작 시 병원 진료과목 초기 데이터 저장 시작');
     try {
-      await this.saveHospitalDepartments();
-      console.log('✅ 병원 진료과목 초기 데이터 저장 완료');
+      setTimeout(() => {
+        this.saveHospitalDepartments();
+      }, 5000);
     } catch (error) {
       const err = error as Error;
       this.logger.error('❌ 초기 데이터 저장 실패:', err.message);
@@ -86,10 +90,14 @@ export class DepartmentsService implements OnModuleInit {
             continue;
           }
 
-          // 4. 현재 저장된 진료과목 조회
-          const existingDepartments = await this.departmentRepository.find({
-            where: { careUnitId: hospitalCareUnit.id },
-          });
+          // 4. Redis에서 현재 저장된 진료과목 조회
+          const redisKey = `${this.REDIS_DEPARTMENT_KEY}${hospital.hpid}`;
+          const cachedDepartments = await this.redisService.get(redisKey);
+          const existingDepartments = cachedDepartments
+            ? JSON.parse(cachedDepartments)
+            : await this.departmentRepository.find({
+                where: { careUnitId: hospitalCareUnit.id },
+              });
 
           // 5. API에서 받은 진료과목 목록
           const newDepartments = hospital.dgidIdName
@@ -130,8 +138,15 @@ export class DepartmentsService implements OnModuleInit {
             addedCount += departmentsToAdd.length;
           }
 
-          // 10. 변경된 진료과목이 있는 경우 로깅
+          // 10. Redis 업데이트
           if (departmentsToDelete.length > 0 || departmentsToAdd.length > 0) {
+            const updatedDepartments = await this.departmentRepository.find({
+              where: { careUnitId: hospitalCareUnit.id },
+            });
+            await this.redisService.set(
+              redisKey,
+              JSON.stringify(updatedDepartments),
+            );
             updatedCount++;
             console.log(
               `🔄 ${hospital.dutyName} 진료과목 업데이트:`,
@@ -145,6 +160,19 @@ export class DepartmentsService implements OnModuleInit {
             `❌ 병원 진료과목 처리 실패 (${hospital.hpid}):`,
             err.message,
           );
+        }
+      }
+
+      // 11. 삭제된 병원의 Redis 데이터 정리
+      const allRedisKeys = await this.redisService.scan(
+        `${this.REDIS_DEPARTMENT_KEY}*`,
+        1000,
+      );
+      const currentHpIds = hospitalItems.map((h) => h.hpid);
+      for (const key of allRedisKeys) {
+        const hpId = key.replace(this.REDIS_DEPARTMENT_KEY, '');
+        if (!currentHpIds.includes(hpId)) {
+          await this.redisService.del(key);
         }
       }
 
@@ -290,5 +318,16 @@ export class DepartmentsService implements OnModuleInit {
       relations: ['careUnit'],
     });
     return departments;
+  }
+
+  async getDepartmentById(id: string) {
+    const department = await this.departmentRepository.findOne({
+      where: { id },
+      relations: ['careUnit'],
+    });
+    if (!department) {
+      throw new NotFoundException('Department not found');
+    }
+    return department;
   }
 }
