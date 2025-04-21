@@ -14,8 +14,8 @@ import { CareUnit } from '@/features/map/type';
 import { MediListSheet } from './MediListSheet';
 import { useCareUnitsQuery } from '../hooks/useCareUnitsQuery';
 import { ListIcon } from 'lucide-react';
-// import { useSetRecoilState } from 'recoil';
-// import { chatModalState } from '@/features/chat/store/chatAtom';
+import { useSetAtom } from 'jotai';
+import { chatModalAtom } from '@/features/chat/store/chatModalAtom';
 
 export default function NearbyCareUnitsMap() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -25,6 +25,8 @@ export default function NearbyCareUnitsMap() {
   const circleRef = useRef<kakao.maps.Circle | null>(null);
   const idleTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  const setChat = useSetAtom(chatModalAtom);
+
   const [location, setLocation] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<
     '전체' | '응급실' | '약국' | '병원'
@@ -33,7 +35,6 @@ export default function NearbyCareUnitsMap() {
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [level, setLevel] = useState<number>(5);
-  // const openChat = useSetRecoilState(chatModalState);
 
   const radius = 0.005 * level;
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
@@ -133,25 +134,24 @@ export default function NearbyCareUnitsMap() {
         overlayRef.current = overlay;
 
         setTimeout(() => {
-          // const detailBtn = document.getElementById(
-          //   `popover-detail-${unit.id}`
-          // );
-          // const chatBtn = document.getElementById(`popover-chat-${unit.id}`);
-          // if (detailBtn) {
-          //   detailBtn.onclick = () => {
-          //     setSelectedMarker(unit);
-          //     overlay.setMap(null);
-          //   };
-          // }
-          // if (chatBtn) {
-          //   chatBtn.onclick = () => {
-          //     openChat({
-          //       isOpen: true,
-          //       target: unit,
-          //     });
-          //     overlay.setMap(null);
-          //   };
-          // }
+          const detailBtn = document.getElementById(
+            `popover-detail-${unit.id}`
+          );
+          const chatBtn = document.getElementById(`popover-chat-${unit.id}`);
+
+          if (detailBtn) {
+            detailBtn.onclick = () => {
+              setSelectedMarker(unit);
+              overlay.setMap(null);
+            };
+          }
+
+          if (chatBtn) {
+            chatBtn.onclick = () => {
+              setChat({ isOpen: true, target: unit });
+              overlay.setMap(null);
+            };
+          }
         }, 0);
       });
 
@@ -165,8 +165,11 @@ export default function NearbyCareUnitsMap() {
       new kakao.maps.LatLng(lat + radius, lng + radius)
     );
     map.setBounds(bounds);
-  }, [data, lat, lng, level]);
+  }, [data, lat, lng, level, radius]);
 
+  useEffect(() => {
+    console.log(level);
+  }, [level]);
   const handleZoom = (dir: 'in' | 'out') => {
     const map = mapInstance.current;
     if (!map) return;
