@@ -1,69 +1,71 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ScheduleLog, ScheduleStatus } from '../entities/schedule-log.entity';
+import { Schedule, ScheduleStatus } from './entities/schedule.entity';
 
 @Injectable()
-export class ScheduleLogService {
+export class ScheduleService {
   constructor(
-    @InjectRepository(ScheduleLog)
-    private readonly scheduleLogRepository: Repository<ScheduleLog>,
+    @InjectRepository(Schedule)
+    private readonly scheduleRepository: Repository<Schedule>,
   ) {}
 
-  async createLog(scheduleName: string): Promise<ScheduleLog> {
-    const log = this.scheduleLogRepository.create({
+  async createSchedule(scheduleName: string): Promise<Schedule> {
+    const schedule = this.scheduleRepository.create({
       scheduleName,
       status: ScheduleStatus.STARTED,
       startedAt: new Date(),
     });
-    return this.scheduleLogRepository.save(log);
+    return this.scheduleRepository.save(schedule);
   }
 
-  async completeLog(
-    logId: string,
+  async completeSchedule(
+    scheduleId: string,
     metadata?: Record<string, any>,
-  ): Promise<ScheduleLog> {
-    const log = await this.scheduleLogRepository.findOne({
-      where: { id: logId },
+  ): Promise<Schedule> {
+    const schedule = await this.scheduleRepository.findOne({
+      where: { id: scheduleId },
     });
-    if (!log) {
-      throw new Error('Schedule log not found');
+    if (!schedule) {
+      throw new Error('Schedule not found');
     }
 
-    log.status = ScheduleStatus.COMPLETED;
-    log.completedAt = new Date();
-    log.durationMs = log.completedAt.getTime() - log.startedAt.getTime();
-    log.metadata = metadata;
+    schedule.status = ScheduleStatus.COMPLETED;
+    schedule.completedAt = new Date();
+    schedule.durationMs =
+      schedule.completedAt.getTime() - schedule.startedAt.getTime();
+    schedule.metadata = metadata || {};
 
-    return this.scheduleLogRepository.save(log);
+    return this.scheduleRepository.save(schedule);
   }
 
   async failLog(
-    logId: string,
+    scheduleId: string,
     error: Error,
     metadata?: Record<string, any>,
-  ): Promise<ScheduleLog> {
-    const log = await this.scheduleLogRepository.findOne({
-      where: { id: logId },
+  ): Promise<Schedule> {
+    const schedule = await this.scheduleRepository.findOne({
+      where: { id: scheduleId },
     });
-    if (!log) {
-      throw new Error('Schedule log not found');
+    if (!schedule) {
+      throw new Error('Schedule not found');
     }
 
-    log.status = ScheduleStatus.FAILED;
-    log.completedAt = new Date();
-    log.durationMs = log.completedAt.getTime() - log.startedAt.getTime();
-    log.errorMessage = error.message;
-    log.metadata = metadata;
+    schedule.status = ScheduleStatus.FAILED;
+    schedule.completedAt = new Date();
+    schedule.durationMs =
+      schedule.completedAt.getTime() - schedule.startedAt.getTime();
+    schedule.errorMessage = error.message;
+    schedule.metadata = metadata || {};
 
-    return this.scheduleLogRepository.save(log);
+    return this.scheduleRepository.save(schedule);
   }
 
   async getRecentLogs(
     scheduleName: string,
     limit: number = 10,
-  ): Promise<ScheduleLog[]> {
-    return this.scheduleLogRepository.find({
+  ): Promise<Schedule[]> {
+    return this.scheduleRepository.find({
       where: { scheduleName },
       order: { createdAt: 'DESC' },
       take: limit,

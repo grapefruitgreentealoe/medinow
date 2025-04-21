@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ScheduleLog } from './entities/schedule-log.entity';
-import { ScheduleLogService } from './services/schedule-log.service';
+import { Schedule } from './entities/schedule.entity';
+import { ScheduleService } from './schedule.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ScheduleLog])],
-  providers: [ScheduleLogService],
-  exports: [ScheduleLogService],
+  imports: [TypeOrmModule.forFeature([Schedule])],
+  providers: [ScheduleService],
+  exports: [ScheduleService],
 })
 export class SchedulesModule {}
