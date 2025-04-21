@@ -119,8 +119,8 @@ export class ChatsService {
 
     // 새 채팅방 생성
     const room = this.chatRoomRepository.create({
-      userId,
-      careUnitId,
+      user: { id: userId },
+      careUnit: { id: careUnitId },
       isActive: true,
     });
 
@@ -145,8 +145,8 @@ export class ChatsService {
     // 사용자가 속한 모든 채팅방 조회 (일반 사용자 또는 의료기관 관리자)
     return this.chatRoomRepository.find({
       where: [
-        { userId }, // 일반 사용자로서 참여중인 방
-        { careUnitId: userId }, // 의료기관 관리자로서 참여중인 방
+        { user: { id: userId } }, // 일반 사용자로서 참여중인 방
+        { careUnit: { id: userId } }, // 의료기관 관리자로서 참여중인 방
       ],
       order: { updatedAt: 'DESC' },
     });
@@ -155,7 +155,7 @@ export class ChatsService {
   // 채팅방 접근 권한 확인
   async checkRoomAccess(userId: string, roomId: string): Promise<boolean> {
     const room = await this.getRoomById(roomId);
-    return room.userId === userId || room.careUnitId === userId;
+    return room.user.id === userId || room.careUnit.id === userId;
   }
 
   // 메시지 생성
@@ -168,7 +168,7 @@ export class ChatsService {
     const room = await this.getRoomById(data.roomId);
 
     // 권한 확인
-    if (room.userId !== data.senderId && room.careUnitId !== data.senderId) {
+    if (room.user.id !== data.senderId && room.careUnit.id !== data.senderId) {
       throw new UnauthorizedException(
         '해당 채팅방에 메시지를 보낼 권한이 없습니다',
       );
@@ -177,8 +177,8 @@ export class ChatsService {
     // 메시지 생성
     const message = this.chatMessageRepository.create({
       content: data.content,
-      senderId: data.senderId,
-      roomId: data.roomId,
+      sender: { id: data.senderId },
+      room: { id: data.roomId },
       isRead: false,
     });
 
@@ -203,7 +203,7 @@ export class ChatsService {
     const room = await this.getRoomById(roomId);
 
     return this.chatMessageRepository.find({
-      where: { roomId },
+      where: { room: { id: roomId } },
       order: { createdAt: 'DESC' },
       take: limit,
     });
@@ -219,13 +219,14 @@ export class ChatsService {
 
     const room = await this.getRoomById(roomId);
 
-    const senderToMark = room.userId === userId ? room.careUnitId : room.userId;
+    const senderToMark =
+      room.user.id === userId ? room.careUnit.id : room.user.id;
 
     // 상대방이 보낸 메시지만 읽음 처리
     await this.chatMessageRepository.update(
       {
-        roomId,
-        senderId: senderToMark,
+        room: { id: roomId },
+        sender: { id: senderToMark },
         isRead: false,
       },
       { isRead: true },
@@ -255,11 +256,11 @@ export class ChatsService {
     const result = await Promise.all(
       rooms.map(async (room) => {
         const senderToMark =
-          room.userId === userId ? room.careUnitId : room.userId;
+          room.user.id === userId ? room.careUnit.id : room.user.id;
         const count = await this.chatMessageRepository.count({
           where: {
-            roomId: room.id,
-            senderId: senderToMark,
+            room: { id: room.id },
+            sender: { id: senderToMark },
             isRead: false,
           },
         });

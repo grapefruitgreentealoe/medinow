@@ -7,6 +7,7 @@ import { Image } from 'src/modules/images/entities/image.entity';
 import { Favorite } from 'src/modules/favorites/entities/favorite.entity';
 import { ChatMessage } from 'src/modules/chats/entities/chat-message.entity';
 import { ChatRoom } from 'src/modules/chats/entities/chat-room.entity';
+import { Review } from 'src/modules/reviews/entities/review.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -40,6 +41,11 @@ export class User extends BaseEntity {
     cascade: true,
   })
   favorites: Favorite[];
+
+  @OneToMany(() => Review, (review) => review.user, {
+    cascade: true,
+  })
+  reviews: Review[];
 
   @OneToMany(() => ChatMessage, (message) => message.sender, {
     cascade: true,
