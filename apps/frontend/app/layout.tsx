@@ -2,6 +2,7 @@ import Script from 'next/script';
 import { cookies } from 'next/headers';
 import './globals.css';
 import Header from '@/shared/ui/layout/Header';
+import { FloatingChatWidget } from '@/widgets/chat/FloatingChatWidget';
 
 export default async function RootLayout({
   children,
@@ -30,7 +31,8 @@ export default async function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <Header />
-        <main>{children}</main>
+          <main>{children}</main>
+          <FloatingChatWidget />
       </body>
     </html>
   );
