@@ -1,4 +1,4 @@
-import { CareUnit } from '@/features/type';
+import { CareUnit } from '@/features/map/type';
 
 export const categories = ['emergency', 'hospital', 'pharmacy'] as const;
 
