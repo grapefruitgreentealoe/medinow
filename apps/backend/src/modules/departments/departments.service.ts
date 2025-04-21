@@ -4,14 +4,13 @@ import {
   NotFoundException,
   OnModuleInit,
 } from '@nestjs/common';
-import { CareUnit } from '../care-units/entities/care-unit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CareUnitCategory } from 'src/common/enums/careUnits.enum';
 import { AppConfigService } from 'src/config/app/config.service';
-import { Department } from 'src/modules/departments/entities/department.entity';
+import { Department } from './entities/department.entity';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { CustomLoggerService } from 'src/shared/logger/logger.service';
+import { CustomLoggerService } from '../../shared/logger/logger.service';
 import { CareUnitService } from '../care-units/services/care-unit.service';
 import { RedisService } from '../redis/redis.service';
 

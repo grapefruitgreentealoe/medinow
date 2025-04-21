@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsBoolean,
   IsUUID,
+  IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -15,26 +16,26 @@ export class CreateReviewDto {
 
   @ApiProperty({ description: '감사 메시지' })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   thankMessage: string;
 
   @ApiProperty({ description: '평점' })
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   rating: number;
 
   @ApiProperty({ description: '공개 여부' })
   @IsBoolean()
-  @IsNotEmpty()
+  @IsOptional()
   isPublic: boolean;
 
   @ApiProperty({ description: '의료기관 ID' })
   @IsUUID()
-  @IsNotEmpty()
-  careUnitId: string;
+  @IsOptional()
+  careUnitId: string | null;
 
   @ApiProperty({ description: '부서 ID' })
   @IsUUID()
-  @IsNotEmpty()
-  departmentId: string;
+  @IsOptional()
+  departmentId: string | null;
 }
