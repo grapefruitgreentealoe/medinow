@@ -34,7 +34,7 @@ export default function NearbyCareUnitsMap() {
   const [selectedMarker, setSelectedMarker] = useState<CareUnit | null>(null);
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
-  const [level, setLevel] = useState<number>(5);
+  const [level, setLevel] = useState<number>(3);
 
   const radius = 0.005 * level;
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
@@ -55,7 +55,8 @@ export default function NearbyCareUnitsMap() {
       const center = new kakao.maps.LatLng(37.5665, 126.978);
       const map = new kakao.maps.Map(mapRef.current!, { center, level });
       mapInstance.current = map;
-
+      map.setMinLevel(3);
+      map.setMaxLevel(5);
       kakao.maps.event.addListener(map, 'idle', () => {
         if (idleTimeout.current) clearTimeout(idleTimeout.current);
         idleTimeout.current = setTimeout(() => {
@@ -164,19 +165,18 @@ export default function NearbyCareUnitsMap() {
       new kakao.maps.LatLng(lat - radius, lng - radius),
       new kakao.maps.LatLng(lat + radius, lng + radius)
     );
+    // 🔒 수동 줌 상태에서는 bounds 설정하지 않음
+
     map.setBounds(bounds);
   }, [data, lat, lng, level, radius]);
 
-  useEffect(() => {
-    console.log(level);
-  }, [level]);
   const handleZoom = (dir: 'in' | 'out') => {
     const map = mapInstance.current;
     if (!map) return;
     const mapLevel = map.getLevel();
     const newLevel = dir === 'in' ? mapLevel - 1 : mapLevel + 1;
-    map.setLevel(newLevel);
     setLevel(newLevel);
+    map.setLevel(newLevel);
   };
 
   const handleSelectFromList = (unit: CareUnit) => {
