@@ -21,18 +21,33 @@ export const locationByCategory = async (
   return res.data.items;
 };
 
-// ✨ mock pagination 함수
-export async function locationByCategoryMock(
-  data: LocationByCategoryData
-): Promise<CareUnit[]> {
-  await new Promise((res) => setTimeout(res, 300)); // 네트워크 딜레이
+export const toggleFavorite = async (careUnitId: string) => {
+  console.log(careUnitId);
+  const res = await axiosInstance.post('/favorites', {
+    careUnitId,
+  });
+  return res.data as boolean; // true
+};
 
-  const start = (data.page - 1) * data.limit;
-  const all = generateMockCareUnits(start, data.limit, data.lat, data.lng);
-
-  if (data.category) {
-    return all.filter((unit) => unit.category === data.category);
-  }
-  console.log('isFetching');
-  return all;
+export interface ChatRoom {
+  id: string;
+  target: CareUnit;
+  createdAt: string;
+  updatedAt: string;
 }
+
+// // ✨ mock pagination 함수
+// export async function locationByCategoryMock(
+//   data: LocationByCategoryData
+// ): Promise<CareUnit[]> {
+//   await new Promise((res) => setTimeout(res, 300)); // 네트워크 딜레이
+
+//   const start = (data.page - 1) * data.limit;
+//   const all = generateMockCareUnits(start, data.limit, data.lat, data.lng);
+
+//   if (data.category) {
+//     return all.filter((unit) => unit.category === data.category);
+//   }
+//   console.log('isFetching');
+//   return all;
+// }
