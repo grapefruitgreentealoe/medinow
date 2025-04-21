@@ -6,7 +6,10 @@ node_modules/
 .env.local
 !.env.*.template
 !.env.*.example
-**/*.audit.json
+
+**/logs/
+**/*.log
+**/*-audit.json
 
 
 # 빌드 결과물
