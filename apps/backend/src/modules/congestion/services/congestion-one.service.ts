@@ -31,12 +31,12 @@ export class CongestionOneService {
         throw new NotFoundException('CareUnit not found');
       }
       // Redis에서 캐시된 혼잡도 데이터 조회
-      const cacheKey = `congestion:${careUnit.hpId}`;
-      const cachedData = await this.redisService.get(cacheKey);
-      if (cachedData) {
-        console.log('캐시된 데이터:', cachedData);
-        return JSON.parse(cachedData);
-      }
+      // const cacheKey = `congestion:${careUnit.hpId}`;
+      // const cachedData = await this.redisService.get(cacheKey);
+      // if (cachedData) {
+      //   console.log('캐시된 데이터:', cachedData);
+      //   return JSON.parse(cachedData);
+      // }
       // 캐시된 데이터가 없으면 API 호출하여 새로운 데이터 가져오기
       const response = await fetch(
         `${this.appConfigService.emergencyCongestionApiUrl}?serviceKey=${this.appConfigService.serviceKey}&hpid=${careUnit.hpId}&pageNo=1&numOfRows=1&_type=json`,
@@ -60,7 +60,7 @@ export class CongestionOneService {
       };
 
       // Redis에 저장
-      await this.redisService.set(cacheKey, congestionDataObj, this.CACHE_TTL);
+      // await this.redisService.set(cacheKey, congestionDataObj, this.CACHE_TTL);
 
       // 동일한 데이터 리턴
       console.log(congestionDataObj);
