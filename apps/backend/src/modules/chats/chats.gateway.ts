@@ -178,7 +178,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(data.roomId).emit('newMessage', {
         id: message.id,
         content: message.content,
-        senderId: message.senderId,
+        senderId: message.sender.id,
         senderName: user.name,
         isAdmin: user.role === UserRole.ADMIN,
         timestamp: message.createdAt,
@@ -188,7 +188,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // 상대방에게 알림 전송 (방에 접속해있지 않을 경우)
       const room = await this.chatsService.getRoomById(data.roomId);
       const recipientId =
-        user.role === UserRole.ADMIN ? room.careUnit.id : room.userId;
+        user.role === UserRole.ADMIN ? room.careUnit.id : room.user.id;
 
       // 상대방이 현재 방에 접속해있는지 확인
       const isRecipientInRoom = await this.chatsService.isUserInRoom(
