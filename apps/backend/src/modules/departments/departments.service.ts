@@ -32,7 +32,7 @@ export class DepartmentsService implements OnModuleInit {
     private readonly redisService: RedisService,
   ) {}
 
-  async onModuleInit() {
+  onModuleInit() {
     console.log('🚀 서버 시작 시 병원 진료과목 초기 데이터 저장 시작');
     try {
       setTimeout(() => {
