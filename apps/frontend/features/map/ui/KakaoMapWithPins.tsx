@@ -182,7 +182,7 @@ export default function NearbyCareUnitsMap() {
     let newLevel = dir === 'in' ? mapLevel - 1 : mapLevel + 1;
 
     // 🔒 level 하한 / 상한 제한 추가 (예: 1~14)
-    newLevel = Math.max(1, Math.min(5, newLevel));
+    newLevel = Math.max(1, Math.min(14, newLevel));
     setIsManualZoom(true);
 
     map.setLevel(newLevel);
