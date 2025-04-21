@@ -1,11 +1,8 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
-import { locationByCategory, locationByCategoryMock } from '../api';
 import {
   Select,
   SelectContent,
@@ -16,12 +13,17 @@ import {
 import { CareUnit } from '@/features/map/type';
 import { MediListSheet } from './MediListSheet';
 import { useCareUnitsQuery } from '../hooks/useCareUnitsQuery';
+import { ListIcon } from 'lucide-react';
+// import { useSetRecoilState } from 'recoil';
+// import { chatModalState } from '@/features/chat/store/chatAtom';
 
 export default function NearbyCareUnitsMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const markersRef = useRef<kakao.maps.Marker[]>([]);
   const overlayRef = useRef<kakao.maps.CustomOverlay | null>(null);
+  const circleRef = useRef<kakao.maps.Circle | null>(null);
+  const idleTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const [location, setLocation] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<
@@ -30,9 +32,10 @@ export default function NearbyCareUnitsMap() {
   const [selectedMarker, setSelectedMarker] = useState<CareUnit | null>(null);
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
-  const [level, setLevel] = useState<number>(1);
+  const [level, setLevel] = useState<number>(5);
+  // const openChat = useSetRecoilState(chatModalState);
 
-  /**과도한 패칭 방지 */
+  const radius = 0.005 * level;
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
 
@@ -71,7 +74,6 @@ export default function NearbyCareUnitsMap() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        console.log(latitude, longitude);
         setLat(latitude);
         setLng(longitude);
         convertCoordsToDong(latitude, longitude).then((dong) =>
@@ -82,29 +84,9 @@ export default function NearbyCareUnitsMap() {
         console.error('❌ 위치 에러:', err);
         alert('위치 접근을 허용하지 않으셨습니다.');
       },
-      {
-        enableHighAccuracy: false, // ~84ms
-      }
+      { enableHighAccuracy: false }
     );
   }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.kakao?.maps) return;
-
-    window.kakao.maps.load(() => {
-      if (!mapRef.current) return;
-
-      const center = new kakao.maps.LatLng(lat ?? 32, lng ?? 127);
-      const map = new kakao.maps.Map(mapRef.current, { center, level });
-      mapInstance.current = map;
-
-      kakao.maps.event.addListener(map, 'idle', () => {
-        const c = map.getCenter();
-        setLat(c.getLat());
-        setLng(c.getLng());
-      });
-    });
-  }, [lat, lng, level]);
 
   useEffect(() => {
     const map = mapInstance.current;
@@ -128,51 +110,48 @@ export default function NearbyCareUnitsMap() {
 
     data.forEach((unit: CareUnit) => {
       const position = new kakao.maps.LatLng(unit.lat, unit.lng);
-      const imageSrc = '/pin-png.png';
-      const markerImage = new kakao.maps.MarkerImage(
-        imageSrc,
-        new kakao.maps.Size(20, 20)
-      );
-
-      const marker = new kakao.maps.Marker({
-        map,
-        position,
-        image: markerImage,
-      });
+      const marker = new kakao.maps.Marker({ map, position });
 
       kakao.maps.event.addListener(marker, 'click', () => {
-        // 이전 오버레이 제거
-        if (overlayRef.current) {
-          overlayRef.current.setMap(null);
-        }
+        if (overlayRef.current) overlayRef.current.setMap(null);
 
-        // 오버레이 content 생성 (HTML string)
         const overlayContent = document.createElement('div');
         overlayContent.innerHTML = `
-    <div class="marker-popover">
-      <strong>${unit.name}</strong><br/>
-      <button id="popover-${unit.id}" style="margin-top: 4px; padding: 2px 6px; font-size: 12px;">상세</button>
-    </div>
-  `;
+          <div class="marker-popover">
+            <strong>${unit.name}</strong><br/>
+            <button id="popover-detail-${unit.id}" style="margin-top: 4px; padding: 2px 6px; font-size: 12px;">상세</button>
+            <button id="popover-chat-${unit.id}" style="margin-top: 4px; padding: 2px 6px; font-size: 12px;">💬 채팅</button>
+          </div>`;
 
         const overlay = new kakao.maps.CustomOverlay({
           content: overlayContent,
-          position: position,
+          position,
           yAnchor: 1,
         });
 
         overlay.setMap(map);
         overlayRef.current = overlay;
 
-        // 팝오버 안에 있는 버튼 이벤트 연결 (이때 DOM이 삽입된 후여야 함)
         setTimeout(() => {
-          const btn = document.getElementById(`popover-${unit.id}`);
-          if (btn) {
-            btn.onclick = () => {
-              setSelectedMarker(unit);
-              overlay.setMap(null); // 팝오버 닫기
-            };
-          }
+          // const detailBtn = document.getElementById(
+          //   `popover-detail-${unit.id}`
+          // );
+          // const chatBtn = document.getElementById(`popover-chat-${unit.id}`);
+          // if (detailBtn) {
+          //   detailBtn.onclick = () => {
+          //     setSelectedMarker(unit);
+          //     overlay.setMap(null);
+          //   };
+          // }
+          // if (chatBtn) {
+          //   chatBtn.onclick = () => {
+          //     openChat({
+          //       isOpen: true,
+          //       target: unit,
+          //     });
+          //     overlay.setMap(null);
+          //   };
+          // }
         }, 0);
       });
 
@@ -180,14 +159,21 @@ export default function NearbyCareUnitsMap() {
     });
 
     markersRef.current = newMarkers;
-  }, [data, lat, lng]);
+
+    const bounds = new kakao.maps.LatLngBounds(
+      new kakao.maps.LatLng(lat - radius, lng - radius),
+      new kakao.maps.LatLng(lat + radius, lng + radius)
+    );
+    map.setBounds(bounds);
+  }, [data, lat, lng, level]);
 
   const handleZoom = (dir: 'in' | 'out') => {
     const map = mapInstance.current;
     if (!map) return;
     const mapLevel = map.getLevel();
-    map.setLevel(dir === 'in' ? level - 1 : level + 1);
-    setLevel(mapLevel);
+    const newLevel = dir === 'in' ? mapLevel - 1 : mapLevel + 1;
+    map.setLevel(newLevel);
+    setLevel(newLevel);
   };
 
   const handleSelectFromList = (unit: CareUnit) => {
@@ -195,6 +181,8 @@ export default function NearbyCareUnitsMap() {
     if (!map) return;
     const latlng = new kakao.maps.LatLng(unit.lat, unit.lng);
     map.panTo(latlng);
+    setLat(unit.lat);
+    setLng(unit.lng);
     setSelectedMarker(unit);
   };
 
@@ -204,9 +192,9 @@ export default function NearbyCareUnitsMap() {
         <Label>현재 위치: {location ?? '로딩 중...'}</Label>
         <Select
           value={selectedCategory}
-          onValueChange={(v: '전체' | '응급실' | '약국' | '병원') =>
-            setSelectedCategory(v)
-          }
+          onValueChange={(v: '전체' | '응급실' | '약국' | '병원') => {
+            setSelectedCategory(v);
+          }}
         >
           <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="종류 선택" />
@@ -236,26 +224,21 @@ export default function NearbyCareUnitsMap() {
             −
           </Button>
           <MediListSheet
-            data={data ?? { pages: [] }}
+            data={data ?? []}
             isLoading={isLoading}
             isFetching={isFetching}
             hasNextPage={hasNextPage}
             fetchNextPage={fetchNextPage}
             onSelect={handleSelectFromList}
           >
-            <Button className="w-10 text-xs">목록</Button>
+            <Button className="w-10 text-xs">
+              <ListIcon />
+            </Button>
           </MediListSheet>
         </div>
       </div>
     </div>
   );
-}
-
-function getEmergencyMarkerColor(beds?: number): string {
-  if (beds == null || beds < 0) return 'black';
-  if (beds === 0) return 'red';
-  if (beds <= 5) return 'yellow';
-  return 'green';
 }
 
 async function convertCoordsToDong(lat: number, lng: number): Promise<string> {
