@@ -4,6 +4,7 @@ import { Schedule } from './entities/schedule.entity';
 import { ScheduleService } from './schedule.service';
 import { CareUnitModule } from '../care-units/care-unit.module';
 import { DepartmentsModule } from '../departments/departments.module';
+import { ScheduleController } from './schedule.controller';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { DepartmentsModule } from '../departments/departments.module';
     DepartmentsModule,
   ],
   providers: [ScheduleService],
+  controllers: [ScheduleController],
   exports: [ScheduleService],
 })
 export class SchedulesModule {}

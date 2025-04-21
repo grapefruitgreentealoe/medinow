@@ -15,14 +15,76 @@ export class ScheduleService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    console.log('🚀 서버 시작 시 초기 데이터 저장 시작');
+    console.log('🚀🚀🚀 ScheduleService onModuleInit 호출됨');
+    console.log('현재 시간:', new Date().toISOString());
+    console.log('5초 후에 데이터 초기화 실행 예정');
+
+    setTimeout(async () => {
+      console.log('⏰ 타이머 실행됨 -', new Date().toISOString());
+      try {
+        // 1. 의료기관 데이터 저장
+        console.log('1️⃣ 의료기관 데이터 저장 시작');
+        const careUnitResult =
+          await this.careUnitAdminService.saveAllCareUnits();
+        console.log('✅ 의료기관 데이터 저장 완료:', careUnitResult);
+
+        // 2. 5초 대기 후 진료과목 데이터 저장
+        console.log('⏳ 5초 대기 후 진료과목 데이터 저장 시작');
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        console.log('2️⃣ 진료과목 데이터 저장 시작');
+        const departmentResult =
+          await this.departmentsService.saveHospitalDepartments();
+        console.log('✅ 진료과목 데이터 저장 완료:', departmentResult);
+
+        // 3. 스케줄 저장
+        await this.scheduleRepository.save({
+          scheduleName: 'INITIAL_DATA_LOAD',
+          status: ScheduleStatus.COMPLETED,
+          startedAt: new Date(),
+          completedAt: new Date(),
+          durationMs: 0,
+          metadata: {
+            careUnits: careUnitResult,
+            departments: departmentResult,
+          },
+        });
+
+        console.log('🎉 모든 초기 데이터 저장 완료');
+      } catch (error) {
+        const err = error as Error;
+        console.error('❌ 초기 데이터 저장 실패:', err);
+        await this.scheduleRepository.save({
+          scheduleName: 'INITIAL_DATA_LOAD',
+          status: ScheduleStatus.FAILED,
+          startedAt: new Date(),
+          completedAt: new Date(),
+          durationMs: 0,
+          errorMessage: err.message,
+          metadata: {
+            error: {
+              name: err.name,
+              message: err.message,
+              stack: err.stack,
+            },
+          },
+        });
+      }
+    }, 5000); // 서버 시작 후 5초 후에 실행
+  }
+
+  async initializeData() {
+    console.log('🚀 ScheduleService initialData 시작');
     try {
       // 1. 의료기관 데이터 저장
       console.log('1️⃣ 의료기관 데이터 저장 시작');
       const careUnitResult = await this.careUnitAdminService.saveAllCareUnits();
       console.log('✅ 의료기관 데이터 저장 완료:', careUnitResult);
 
-      // 2. 진료과목 데이터 저장
+      // 2. 5초 대기 후 진료과목 데이터 저장
+      console.log('⏳ 5초 대기 후 진료과목 데이터 저장 시작');
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
       console.log('2️⃣ 진료과목 데이터 저장 시작');
       const departmentResult =
         await this.departmentsService.saveHospitalDepartments();
@@ -30,22 +92,45 @@ export class ScheduleService implements OnModuleInit {
 
       // 3. 스케줄 저장
       await this.scheduleRepository.save({
-        type: 'INITIAL_DATA_LOAD',
-        status: 'COMPLETED',
-        result: {
+        scheduleName: 'INITIAL_DATA_LOAD',
+        status: ScheduleStatus.COMPLETED,
+        startedAt: new Date(),
+        completedAt: new Date(),
+        durationMs: 0,
+        metadata: {
           careUnits: careUnitResult,
           departments: departmentResult,
         },
       });
 
       console.log('🎉 모든 초기 데이터 저장 완료');
+      return {
+        status: 'success',
+        message: '초기 데이터 저장 완료',
+      };
     } catch (error) {
-      console.error('❌ 초기 데이터 저장 실패:', error);
+      const err = error as Error;
+      console.error('❌ 초기 데이터 저장 실패:', err);
       await this.scheduleRepository.save({
-        type: 'INITIAL_DATA_LOAD',
-        status: 'FAILED',
-        error: error.message,
+        scheduleName: 'INITIAL_DATA_LOAD',
+        status: ScheduleStatus.FAILED,
+        startedAt: new Date(),
+        completedAt: new Date(),
+        durationMs: 0,
+        errorMessage: err.message,
+        metadata: {
+          error: {
+            name: err.name,
+            message: err.message,
+            stack: err.stack,
+          },
+        },
       });
+      return {
+        status: 'error',
+        message: '초기 데이터 저장 실패',
+        error: err.message,
+      };
     }
   }
 

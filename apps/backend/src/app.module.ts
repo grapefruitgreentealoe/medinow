@@ -20,6 +20,8 @@ import { LoggerModule } from './shared/logger/logger.module';
 import { CustomLoggerService } from './shared/logger/logger.service';
 import { ChatsModule } from './modules/chats/chats.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { SchedulesModule } from './modules/schedules/schedule.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -41,6 +43,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     FavoritesModule,
     ChatsModule,
     ReviewsModule,
+    SchedulesModule,
   ],
   controllers: [AppController],
   providers: [
