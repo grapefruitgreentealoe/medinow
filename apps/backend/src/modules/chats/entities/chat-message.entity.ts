@@ -4,19 +4,13 @@ import { User } from '../../users/entities/user.entity';
 import { ChatRoom } from './chat-room.entity';
 
 @Entity('chat_messages')
-@Index(['roomId', 'createdAt'])
+@Index(['room'])
 export class ChatMessage extends BaseEntity {
   @Column({ type: 'text' })
   content: string;
 
   @Column({ default: false })
   isRead: boolean;
-
-  @Column({ name: 'sender_id' })
-  senderId: string;
-
-  @Column({ name: 'room_id' })
-  roomId: string;
 
   @ManyToOne(() => User, (user) => user.chatMessages)
   @JoinColumn({ name: 'sender_id' })

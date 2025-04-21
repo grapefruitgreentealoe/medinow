@@ -1,6 +1,7 @@
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { CareUnit } from 'src/modules/care-units/entities/care-unit.entity';
-import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Review } from 'src/modules/reviews/entities/review.entity';
 
 @Entity()
 export class Department extends BaseEntity {
@@ -13,4 +14,10 @@ export class Department extends BaseEntity {
   @ManyToOne(() => CareUnit, (careUnit) => careUnit.departments)
   @JoinColumn({ name: 'careUnitId' })
   careUnit: CareUnit;
+
+  @OneToMany(() => Review, (review) => review.department, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  reviews: Review[];
 }
