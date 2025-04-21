@@ -31,6 +31,7 @@ export function MediListSheet({
   isLoading,
   hasNextPage,
   fetchNextPage,
+  isFetching,
   onSelect,
 }: MediListSheetProps) {
   const observerRef = useRef<HTMLDivElement>(null);
@@ -112,8 +113,8 @@ export function MediListSheet({
               />
             ))
           )}
-          <div ref={observerRef} className="h-12 bg-yellow-300" />
-          {/* {isFetching && <Skeleton className="h-12 w-full mt-2" />} */}
+          <div ref={observerRef} className="h-12" />
+          {isFetching && <Skeleton className="h-12 w-full mt-2" />}
         </div>
       </SheetContent>
     </Sheet>
