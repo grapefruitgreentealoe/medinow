@@ -11,15 +11,9 @@ import { ChatMessage } from './chat-message.entity';
 import { CareUnit } from '../../care-units/entities/care-unit.entity';
 import { User } from '../../users/entities/user.entity';
 
-@Index(['userId', 'careUnitId'], { unique: true })
+@Index(['user', 'careUnit'], { unique: true })
 @Entity('chat_rooms')
 export class ChatRoom extends BaseEntity {
-  @Column({ name: 'user_id' })
-  userId: string;
-
-  @Column({ name: 'care_unit_id' })
-  careUnitId: string;
-
   @ManyToOne(() => User, (user) => user.chatRooms)
   @JoinColumn({ name: 'user_id' })
   user: User;
