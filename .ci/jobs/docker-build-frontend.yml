@@ -26,11 +26,3 @@ docker-build-frontend-dev:
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
       changes: *frontend_changes
-
-docker-build-frontend-prod:
-  extends: .docker-build-frontend-template
-  variables:
-    TAG: latest
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
-      changes: *frontend_changes

@@ -27,11 +27,3 @@ docker-build-backend-dev:
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
       changes: *backend_changes
-
-docker-build-backend-prod:
-  extends: .docker-build-backend-template
-  variables:
-    TAG: latest
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
-      changes: *backend_changes

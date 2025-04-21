@@ -14,7 +14,7 @@ export const winstonConfig = {
   transports: [
     // 콘솔 로깅
     new winston.transports.Console({
-      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+      level: 'info',
       format: winston.format.combine(
         winston.format.timestamp(),
         nestWinstonModuleUtilities.format.nestLike('MediNow', {
