@@ -1,12 +1,12 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { locationByCategory, locationByCategoryMock } from '../api'; // 또는 locationByCategoryMock
-import { CareUnit, UseCareUnitsQueryResult } from '@/features/map/type';
+import { locationByCategory } from '../api'; // 또는 locationByCategoryMock
+import { UseCareUnitsQueryResult } from '@/features/map/type';
 
 interface UseCareUnitsQueryProps {
   lat: number | null;
   lng: number | null;
   level: number;
-  selectedCategory: '전체' | '응급실' | '약국' | '병원';
+  selectedCategory: string;
 }
 
 export function useCareUnitsQuery({
@@ -17,14 +17,13 @@ export function useCareUnitsQuery({
 }: UseCareUnitsQueryProps): UseCareUnitsQueryResult {
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
-
   const query = useInfiniteQuery({
     staleTime: 5000,
     queryKey: ['careUnits', roundedLat, roundedLng, selectedCategory],
     queryFn: async ({ pageParam = 1 }) => {
       if (lat === null || lng === null) return { items: [], hasNext: false };
 
-      const items = await locationByCategoryMock({
+      const items = await locationByCategory({
         lat,
         lng,
         level,
