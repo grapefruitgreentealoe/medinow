@@ -198,24 +198,24 @@ export class CareUnitService {
               .catch(() => null);
 
             // 응급실인 경우 혼잡도 데이터도 함께 반환
-            let congestionData = null;
-            if (category === 'emergency' || careUnit.category === 'emergency') {
-              try {
-                congestionData = await this.congestionOneService
-                  .getCongestion(careUnit.id)
-                  .catch((error) => {
-                    this.logger.error(
-                      `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
-                    );
-                    return null;
-                  });
-              } catch (error) {
-                const err = error as Error;
-                this.logger.error(
-                  `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
-                );
-              }
-            }
+            // let congestionData = null;
+            // if (category === 'emergency' || careUnit.category === 'emergency') {
+            //   try {
+            //     congestionData = await this.congestionOneService
+            //       .getCongestion(careUnit.id)
+            //       .catch((error) => {
+            //         this.logger.error(
+            //           `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
+            //         );
+            //         return null;
+            //       });
+            //   } catch (error) {
+            //     const err = error as Error;
+            //     this.logger.error(
+            //       `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
+            //     );
+            //   }
+            // }
 
             // 사용자가 제공된 경우 즐겨찾기 정보 추가
             let isFavorite = false;
@@ -244,7 +244,7 @@ export class CareUnitService {
               ...careUnit,
               nowOpen: isOpen,
               isChatAvailable: !!adminUser,
-              congestion: congestionData,
+              // congestion: congestionData,
               isFavorite: isFavorite,
             };
           }),
