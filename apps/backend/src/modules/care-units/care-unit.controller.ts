@@ -332,6 +332,7 @@ export class CareUnitController {
     @Query('category') category?: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Query('OpenStatus') OpenStatus: boolean = true,
   ) {
     const paginationDto = { page, limit };
     return this.careUnitService.getCareUnitByCategoryAndLocation(
@@ -339,6 +340,7 @@ export class CareUnitController {
       lat,
       lng,
       level,
+      OpenStatus,
       category,
     );
   }
@@ -419,6 +421,7 @@ export class CareUnitController {
     @Query('category') category?: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Query('OpenStatus') OpenStatus: boolean = true,
     @RequestUser() user?: User,
   ) {
     const paginationDto = { page, limit };
@@ -427,6 +430,7 @@ export class CareUnitController {
       lat,
       lng,
       level,
+      OpenStatus,
       category,
       user,
     );
