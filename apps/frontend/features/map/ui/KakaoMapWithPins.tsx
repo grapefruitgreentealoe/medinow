@@ -43,6 +43,30 @@ export default function NearbyCareUnitsMap() {
       level,
       selectedCategory,
     });
+
+  useEffect(() => {
+    if (!window.kakao?.maps || !mapRef.current || mapInstance.current) return;
+
+    window.kakao.maps.load(() => {
+      const center = new kakao.maps.LatLng(37.5665, 126.978);
+      const map = new kakao.maps.Map(mapRef.current!, { center, level });
+      mapInstance.current = map;
+
+      kakao.maps.event.addListener(map, 'idle', () => {
+        if (idleTimeout.current) clearTimeout(idleTimeout.current);
+        idleTimeout.current = setTimeout(() => {
+          const c = map.getCenter();
+          setLat((prev) =>
+            Math.abs((prev ?? 0) - c.getLat()) > 0.0001 ? c.getLat() : prev
+          );
+          setLng((prev) =>
+            Math.abs((prev ?? 0) - c.getLng()) > 0.0001 ? c.getLng() : prev
+          );
+        }, 300);
+      });
+    });
+  }, []);
+
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
