@@ -25,9 +25,9 @@ export class ReviewsService {
     }
     let department: Department;
     if (createReviewDto.departmentId) {
-      const findDepartment = await this.departmentsService(
-        createReviewDto.departmentId,
-      );
+      // const findDepartment = await this.departmentsService(
+      //   createReviewDto.departmentId,
+      // );
     }
     const review = this.reviewRepository.create(createReviewDto);
     review.user = findUser;
