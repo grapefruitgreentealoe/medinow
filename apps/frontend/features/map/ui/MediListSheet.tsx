@@ -29,7 +29,6 @@ export function MediListSheet({
   children,
   data,
   isLoading,
-  isFetching,
   hasNextPage,
   fetchNextPage,
   onSelect,
@@ -50,7 +49,6 @@ export function MediListSheet({
       const io = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting && hasNextPage) {
-            console.log('🔥 Triggered!');
             fetchNextPage();
           }
         },
@@ -72,12 +70,7 @@ export function MediListSheet({
   };
 
   const handleOpenKakaoMap = async (unit: CareUnit) => {
-    //목업
-    const lng = 126.753;
-    const lat = 37.5052;
-    const name = '서울아산이비인후과의원';
-    const road_address_name = '서울특별시 강동구 고덕로 353';
-    // const { lng, lat,name,road_address_name } = unit;
+    const { lng, lat, name, address } = unit;
     const result = await getTMCoordFromLatLng(lng, lat);
     if (!result) {
       alert('카카오 지도 이동에 실패했습니다.');
@@ -86,7 +79,7 @@ export function MediListSheet({
 
     const kakaoUrl = `https://map.kakao.com/?q=${encodeURIComponent(
       name
-    )}&urlX=${Math.round(result.x)}&urlY=${Math.round(result.y)}&road_address_name=${road_address_name}&urlLevel=2`;
+    )}&urlX=${Math.round(result.x)}&urlY=${Math.round(result.y)}&road_address_name=${address}&urlLevel=2`;
 
     window.open(kakaoUrl, '_blank');
   };
