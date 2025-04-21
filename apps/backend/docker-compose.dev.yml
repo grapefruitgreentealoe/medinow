@@ -45,4 +45,4 @@ volumes:
 networks:
   backend-network:
     driver: bridge
-    internal: false #internal false 추가하여 네트워크 생성으로 인한 dns 영향 제거
+    internal: false #internal false 추가하여 외부 네트워크 접속허용
