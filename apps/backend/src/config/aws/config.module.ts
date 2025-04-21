@@ -8,7 +8,8 @@ import { AwsConfigService } from './config.service';
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
-      envFilePath: '.env',
+      envFilePath:
+        process.env.NODE_ENV === 'production' ? '/app/.env' : '.env.local',
       validationSchema: Joi.object({
         AWS_ACCESS_KEY_ID: Joi.string().required(),
         AWS_SECRET_ACCESS_KEY: Joi.string().required(),

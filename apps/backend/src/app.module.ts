@@ -25,7 +25,8 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath:
+        process.env.NODE_ENV === 'production' ? '/app/.env' : '.env.local',
     }),
     TypeOrmModule.forRoot(typeOrmConfig.options),
     LoggerModule,
