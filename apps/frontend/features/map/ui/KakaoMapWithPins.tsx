@@ -13,8 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CareUnit } from '@/features/type';
+import { CareUnit } from '@/features/map/type';
 import { MediListSheet } from './MediListSheet';
+import { useCareUnitsQuery } from '../hooks/useCareUnitsQuery';
 
 export default function NearbyCareUnitsMap() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -36,40 +37,12 @@ export default function NearbyCareUnitsMap() {
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
 
   const { data, fetchNextPage, hasNextPage, isFetching, isLoading } =
-    useInfiniteQuery({
-      staleTime: 5000,
-      queryKey: ['careUnits', roundedLat, roundedLng, selectedCategory],
-      queryFn: async ({ pageParam = 1 }) => {
-        // const items = await locationByCategory({
-        const items = await locationByCategoryMock({
-          lat: lat!,
-          lng: lng!,
-          level,
-          page: pageParam,
-          limit: 10,
-          category:
-            selectedCategory === '응급실'
-              ? 'emergency'
-              : selectedCategory === '병원'
-                ? 'hospital'
-                : selectedCategory === '약국'
-                  ? 'pharmacy'
-                  : undefined,
-        });
-
-        return {
-          items,
-          hasNext: items.length === 10, // 한 페이지가 다 찼으면 다음 페이지 있다고 판단
-          nextPage: undefined,
-        };
-      },
-      getNextPageParam: (lastPage, pages) => {
-        return lastPage.hasNext ? pages.length + 1 : undefined;
-      },
-      initialPageParam: 1,
-      enabled: lat !== null && lng !== null,
+    useCareUnitsQuery({
+      lat: roundedLat,
+      lng: roundedLng,
+      level,
+      selectedCategory,
     });
-
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -116,10 +89,7 @@ export default function NearbyCareUnitsMap() {
     markersRef.current.forEach((m) => m.setMap(null));
     const newMarkers: kakao.maps.Marker[] = [];
 
-    // 모든 페이지의 CareUnit을 평탄화(flatten)
-    const allUnits = data.pages.flatMap((page) => page.items);
-
-    allUnits.forEach((unit) => {
+    data.forEach((unit: CareUnit) => {
       const position = new kakao.maps.LatLng(unit.lat, unit.lng);
       const imageSrc = '/pin-png.png';
       const markerImage = new kakao.maps.MarkerImage(
@@ -229,7 +199,7 @@ export default function NearbyCareUnitsMap() {
             −
           </Button>
           <MediListSheet
-            data={data}
+            data={data ?? { pages: [] }}
             isLoading={isLoading}
             isFetching={isFetching}
             hasNextPage={hasNextPage}

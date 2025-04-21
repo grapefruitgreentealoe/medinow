@@ -1,5 +1,5 @@
 import axiosInstance from '@/lib/axios';
-import { CareUnit } from '../type';
+import { CareUnit } from './type';
 import { generateMockCareUnits } from '@/lib/mockCareUnits';
 
 interface LocationByCategoryData {

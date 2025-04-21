@@ -1,8 +1,8 @@
 'use client';
 
 import { useRef, useEffect, ReactNode, useState } from 'react';
-import { CareUnit } from '@/features/type';
-import { Card, CardContent } from '@/components/ui/card';
+import { CareUnit } from '@/features/map/type';
+
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Sheet,
@@ -13,14 +13,14 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { getTMCoordFromLatLng } from '@/lib/kakao-utils';
-import { Button } from '@/components/ui/button';
+import { CareUnitCard } from './CareUnitCard';
 
 interface MediListSheetProps {
   children: ReactNode;
-  data: any;
+  data: CareUnit[];
   isLoading: boolean;
   isFetching: boolean;
-  hasNextPage: boolean;
+  hasNextPage: boolean | undefined;
   fetchNextPage: () => void;
   onSelect: (unit: CareUnit) => void;
 }
@@ -109,38 +109,15 @@ export function MediListSheet({
               ))}
             </div>
           ) : (
-            data?.pages
-              .flatMap((p: any) => p.items)
-              .map((unit: CareUnit) => (
-                <Card
-                  key={unit.id}
-                  className="mb-2 cursor-pointer hover:bg-gray-50"
-                >
-                  <CardContent
-                    className="p-3 space-y-1"
-                    onClick={() => handleSelect(unit)}
-                  >
-                    <h3 className="text-base font-semibold">{unit.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {unit.address}
-                    </p>
-                    <div className="text-xs flex justify-between">
-                      <span>📞 {unit.tel}</span>
-                      <span>{unit.isFavorite ? '⭐ 즐겨찾기' : ''}</span>
-                      <span>
-                        {unit.isChatAvailable ? '💬 채팅 가능' : '❌ 채팅 불가'}
-                      </span>
-                    </div>
-                    <Button
-                      variant="link"
-                      className="text-xs text-blue-500 underline"
-                      onClick={() => handleOpenKakaoMap(unit)}
-                    >
-                      카카오지도에서 보기
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))
+            // 리스트 렌더링
+            data?.map((unit: CareUnit) => (
+              <CareUnitCard
+                key={unit.id}
+                unit={unit}
+                onSelect={handleSelect}
+                onOpenKakaoMap={handleOpenKakaoMap}
+              />
+            ))
           )}
           <div ref={observerRef} className="h-12 bg-yellow-300" />
           {/* {isFetching && <Skeleton className="h-12 w-full mt-2" />} */}
