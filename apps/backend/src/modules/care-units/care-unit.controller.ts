@@ -37,37 +37,6 @@ export class CareUnitController {
     private readonly departmentsService: DepartmentsService,
   ) {}
 
-  @Get()
-  @Public()
-  @ApiExcludeEndpoint()
-  @ApiOperation({
-    summary: 'Admin : Api로 응급실, 병의원, 약국 Full Data 조회',
-  })
-  @ApiQuery({
-    name: 'pageNo',
-    required: false,
-    type: Number,
-    description: '페이지 번호',
-    example: 1,
-  })
-  @ApiQuery({
-    name: 'numOfRows',
-    required: false,
-    type: Number,
-    description: '페이지 당 데이터 개수',
-    example: 10,
-  })
-  @ApiResponse({
-    status: 200,
-    description: '성공',
-    type: ResponseCareUnitDto,
-  })
-  async getAllCareUnit(
-    @Query('pageNo') pageNo: number = 1,
-    @Query('numOfRows') numOfRows: number = 10,
-  ): Promise<ResponseCareUnitDto[]> {
-    return await this.careUnitAdminService.getAllCareUnit(pageNo, numOfRows);
-  }
 
   @Post('full')
   @Public()
@@ -95,31 +64,6 @@ export class CareUnitController {
     return await this.departmentsService.saveHospitalDepartments();
   }
 
-  @Get('category')
-  @Public()
-  @ApiExcludeEndpoint()
-  @ApiOperation({ summary: 'Admin : 카테고리별 조회 (전체 DB대상)' })
-  @ApiQuery({
-    name: 'category',
-    required: true,
-    type: String,
-    enum: ['emergency', 'hospital', 'pharmacy'],
-  })
-  @ApiResponse({
-    status: 200,
-    description: '성공',
-    type: [CareUnit],
-    example: [
-      {
-        id: 'uuid-example',
-        name: '서울대학교병원',
-        address: '서울특별시 종로구 대학로 101',
-      },
-    ],
-  })
-  async getCareUnitByCategory(@Query('category') category: string) {
-    return this.careUnitAdminService.getCareUnitByCategory(category);
-  }
 
   @Post('badge')
   @UseGuards(JwtAuthGuard)

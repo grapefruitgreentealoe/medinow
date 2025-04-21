@@ -1,14 +1,53 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Schedule, ScheduleStatus } from './entities/schedule.entity';
+import { CareUnitAdminService } from '../care-units/services/care-unit-admin.service';
+import { DepartmentsService } from '../departments/departments.service';
 
 @Injectable()
-export class ScheduleService {
+export class ScheduleService implements OnModuleInit {
   constructor(
     @InjectRepository(Schedule)
     private readonly scheduleRepository: Repository<Schedule>,
+    private readonly careUnitAdminService: CareUnitAdminService,
+    private readonly departmentsService: DepartmentsService,
   ) {}
+
+  async onModuleInit() {
+    console.log('🚀 서버 시작 시 초기 데이터 저장 시작');
+    try {
+      // 1. 의료기관 데이터 저장
+      console.log('1️⃣ 의료기관 데이터 저장 시작');
+      const careUnitResult = await this.careUnitAdminService.saveAllCareUnits();
+      console.log('✅ 의료기관 데이터 저장 완료:', careUnitResult);
+
+      // 2. 진료과목 데이터 저장
+      console.log('2️⃣ 진료과목 데이터 저장 시작');
+      const departmentResult =
+        await this.departmentsService.saveHospitalDepartments();
+      console.log('✅ 진료과목 데이터 저장 완료:', departmentResult);
+
+      // 3. 스케줄 저장
+      await this.scheduleRepository.save({
+        type: 'INITIAL_DATA_LOAD',
+        status: 'COMPLETED',
+        result: {
+          careUnits: careUnitResult,
+          departments: departmentResult,
+        },
+      });
+
+      console.log('🎉 모든 초기 데이터 저장 완료');
+    } catch (error) {
+      console.error('❌ 초기 데이터 저장 실패:', error);
+      await this.scheduleRepository.save({
+        type: 'INITIAL_DATA_LOAD',
+        status: 'FAILED',
+        error: error.message,
+      });
+    }
+  }
 
   async createSchedule(scheduleName: string): Promise<Schedule> {
     const schedule = this.scheduleRepository.create({
