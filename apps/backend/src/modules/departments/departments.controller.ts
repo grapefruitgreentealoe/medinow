@@ -7,6 +7,6 @@ export class DepartmentsController {
 
   @Get('/:careUnitId')
   async getHospitalDepartments(@Param('careUnitId') careUnitId: string) {
-    return this.departmentsService.getHospitalDepartments(careUnitId);
+    return await this.departmentsService.getHospitalDepartments(careUnitId);
   }
 }
