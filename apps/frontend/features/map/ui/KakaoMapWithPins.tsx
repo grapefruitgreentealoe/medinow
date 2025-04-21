@@ -108,7 +108,20 @@ export default function NearbyCareUnitsMap() {
 
   useEffect(() => {
     const map = mapInstance.current;
-    if (!map || !data) return;
+    if (!map || !data || lat == null || lng == null) return;
+
+    if (circleRef.current) circleRef.current.setMap(null);
+    const circle = new kakao.maps.Circle({
+      center: new kakao.maps.LatLng(lat, lng),
+      radius: radius * 111000,
+      strokeWeight: 1,
+      strokeColor: '#6366F1',
+      strokeOpacity: 0.8,
+      fillColor: '#6366F140',
+      fillOpacity: 0.3,
+    });
+    circle.setMap(map);
+    circleRef.current = circle;
 
     markersRef.current.forEach((m) => m.setMap(null));
     const newMarkers: kakao.maps.Marker[] = [];
