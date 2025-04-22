@@ -1,6 +1,5 @@
 import axiosInstance from '@/lib/axios';
 import { CareUnit } from './type';
-import { generateMockCareUnits } from '@/lib/mockCareUnits';
 
 interface LocationByCategoryData {
   lat: number;
@@ -9,14 +8,15 @@ interface LocationByCategoryData {
   category?: 'emergency' | 'hospital' | 'pharmacy';
   page: number;
   limit: number;
+  OpenStatus: boolean;
 }
 
 export const locationByCategory = async (
   data: LocationByCategoryData
 ): Promise<CareUnit[]> => {
-  const { lat, lng, level, category, page, limit } = data;
+  const { lat, lng, level, category, page, limit, OpenStatus } = data;
   const res = await axiosInstance.get(
-    `/care-units/location-by-category?lat=${lat}&lng=${lng}&level=${level}${category ? `&category=${category}` : ''}&page=${page}&limit=${limit}`
+    `/care-units/location-by-category?lat=${lat}&lng=${lng}&level=${level}${category ? `&category=${category}` : ''}&page=${page}&limit=${limit}&OpenStatus=${OpenStatus}`
   );
   return res.data.items;
 };

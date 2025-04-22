@@ -42,13 +42,13 @@ export default function NearbyCareUnitsMap() {
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
 
-
   const { data, fetchNextPage, hasNextPage, isFetching, isLoading } =
     useCareUnitsQuery({
       lat: roundedLat,
       lng: roundedLng,
       level: level,
       selectedCategory,
+      OpenStatus: JSON.parse(openFilter) as boolean,
     });
 
   function drawRadiusCircle(
@@ -261,7 +261,7 @@ export default function NearbyCareUnitsMap() {
             }}
           >
             <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="종류 선택" />
+              <SelectValue placeholder="운영상태" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={'false'}>운영중</SelectItem>
