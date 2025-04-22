@@ -3,18 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { CareUnit } from '@/features/map/type';
 import { useCareUnitsQuery } from '../model/useCareUnitsQuery';
 import { ListIcon } from 'lucide-react';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { getDefaultStore } from 'jotai';
 import {
   detailSheetOpenAtom,
