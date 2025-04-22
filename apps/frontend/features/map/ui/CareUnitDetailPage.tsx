@@ -6,7 +6,7 @@ import { useToggleFavorite } from '../model/useOnToggleFavorite';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { useSetAtom } from 'jotai';
 import { cn } from '@/lib/utils';
-import { Star, StarOff, MessageSquare } from 'lucide-react';
+import { Star, StarOff, MessageSquare, PhoneCallIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
@@ -109,6 +109,20 @@ export default function CareUnitDetailPage() {
               onClick={handleChat}
             >
               <MessageSquare className="text-blue-500" size={18} />
+            </Button>
+          )}
+          {unit.tel && (
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              className="w-8 h-8"
+            >
+              <a href={`tel:${unit.tel}`}>
+                <PhoneCallIcon className="text-slate-500" size={18} />
+              </a>
             </Button>
           )}
         </div>
