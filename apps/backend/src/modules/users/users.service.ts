@@ -111,16 +111,17 @@ export class UsersService {
 
       const newUserProfile = this.userProfileRepository.create({
         name,
-        address: careUnit[0].address,
-        nickname: careUnit[0].name,
+        address: careUnit.address,
+        nickname: careUnit.name,
         user: savedUser,
+        careUnit: careUnit,
       });
 
       if (imageUrl) {
         const image = await this.imagesService.createBusinessLicenseImage(
           imageUrl,
           savedUser,
-          careUnit[0],
+          careUnit,
         );
         newUserProfile.image = image;
       }
