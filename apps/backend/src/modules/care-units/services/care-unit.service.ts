@@ -22,6 +22,7 @@ import { FavoritesService } from 'src/modules/favorites/favorites.service';
 import { CustomLoggerService } from 'src/shared/logger/logger.service';
 import { CareUnitCategory } from 'src/common/enums/careUnits.enum';
 import { ExtendedCareUnit } from 'src/common/interfaces/extended-care-unit.interface';
+
 @Injectable()
 export class CareUnitService {
   private readonly EMERGENCY_API_URL = this.appConfigService.emergencyApiUrl;
