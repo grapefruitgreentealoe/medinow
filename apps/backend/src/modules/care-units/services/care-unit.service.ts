@@ -118,11 +118,11 @@ export class CareUnitService {
       throw new BadRequestException('카테고리 값이 없습니다');
     }
 
-    const careUnits = await queryBuilder.getMany();
-    if (careUnits.length === 0) {
+    const careUnit = await queryBuilder.getOneOrFail();
+    if (!careUnit) {
       throw new NotFoundException('조회된 의료기관이 없습니다');
     }
-    return careUnits;
+    return careUnit;
   }
 
   //🏥 상세 정보 조회 by 위치
