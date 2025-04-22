@@ -5,7 +5,7 @@ import { selectedCareUnitAtom } from '@/features/map/atoms/detailSheetAtoms';
 import { useToggleFavorite } from '../model/useOnToggleFavorite';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { useSetAtom } from 'jotai';
-import { cn } from '@/shared/lib/utils';
+import { cn } from '@/lib/utils';
 import { Star, StarOff, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';

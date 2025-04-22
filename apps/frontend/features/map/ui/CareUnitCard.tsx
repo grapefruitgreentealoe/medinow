@@ -3,10 +3,16 @@
 import { CareUnit } from '@/features/map/type';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/shared/lib/utils';
+import { cn } from '@/lib/utils';
 import { useSetAtom } from 'jotai';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
-import { Star, StarOff, MessageSquare } from 'lucide-react';
+import {
+  Star,
+  StarOff,
+  MessageSquare,
+  TelescopeIcon,
+  PhoneCallIcon,
+} from 'lucide-react';
 import { useToggleFavorite } from '../model/useOnToggleFavorite';
 import { renderTodayTime } from '../utils';
 import { useState } from 'react';
@@ -136,6 +142,20 @@ export function CareUnitCard({
                 className="w-8 h-8"
               >
                 <MessageSquare className="text-blue-500" size={18} />
+              </Button>
+            )}
+            {unit.tel && (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                className="w-8 h-8"
+              >
+                <a href={`tel:${unit.tel}`}>
+                  <PhoneCallIcon className="text-slate-500" size={18} />
+                </a>
               </Button>
             )}
           </div>
