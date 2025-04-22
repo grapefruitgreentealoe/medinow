@@ -11,6 +11,7 @@ import { AppConfigModule } from '../../config/app/config.module';
 import { AppConfigService } from '../../config/app/config.service';
 import { ChatsController } from './chats.controller';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { WsJwtGuard } from './guards/ws-jwt.guard';
       inject: [AppConfigService],
     }),
     UsersModule,
+    RedisModule,
   ],
   controllers: [ChatsController],
   providers: [ChatsGateway, ChatsService, CustomLoggerService, WsJwtGuard],

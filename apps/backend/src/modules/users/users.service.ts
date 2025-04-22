@@ -155,7 +155,7 @@ export class UsersService {
   async findUserById(id: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
-      relations: ['userProfile'],
+      relations: ['userProfile', 'userProfile.careUnit'],
     });
   }
 
@@ -170,7 +170,7 @@ export class UsersService {
   async getUserByCareUnitId(careUnitId: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { userProfile: { careUnit: { id: careUnitId } } },
-      relations: ['userProfile'],
+      relations: ['userProfile', 'userProfile.careUnit'],
     });
   }
 
