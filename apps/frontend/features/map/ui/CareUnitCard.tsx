@@ -32,7 +32,6 @@ export function CareUnitCard({
 
   const handleFavoriteButton = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
-    console.log('yup', unit.id, unit.isFavorite);
     toggleFavoriteMutation(
       {
         unitId: unit.id,
