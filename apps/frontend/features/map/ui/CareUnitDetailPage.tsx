@@ -8,10 +8,13 @@ import { useSetAtom } from 'jotai';
 import { cn } from '@/shared/lib/utils';
 import { Star, StarOff, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
 export default function CareUnitDetailPage() {
   const [unit] = useAtom(selectedCareUnitAtom);
   const setChat = useSetAtom(chatModalAtom);
+  const [localFavorite, setLocalFavorite] = useState(unit?.isFavorite || false);
+
   const { mutate: toggleFavoriteMutation } = useToggleFavorite();
 
   if (!unit) return null;
@@ -37,10 +40,20 @@ export default function CareUnitDetailPage() {
   );
 
   const handleFavorite = () => {
-    toggleFavoriteMutation({
-      unitId: unit.id,
-      next: !unit.isFavorite,
-    });
+    toggleFavoriteMutation(
+      {
+        unitId: unit.id,
+        next: !unit.isFavorite,
+      },
+      {
+        onError: () => {
+          setLocalFavorite((o: boolean) => !o);
+        },
+        onSuccess: () => {
+          setLocalFavorite((o: boolean) => !o);
+        },
+      }
+    );
   };
 
   const handleChat = () => {
@@ -78,7 +91,7 @@ export default function CareUnitDetailPage() {
             className="w-8 h-8"
             onClick={handleFavorite}
           >
-            {unit.isFavorite ? (
+            {localFavorite ? (
               <Star className="text-yellow-500 fill-yellow-500" size={18} />
             ) : (
               <StarOff size={18} />
@@ -133,7 +146,7 @@ export default function CareUnitDetailPage() {
       )}
 
       {/* 운영시간 */}
-      <div className="!mt-5 max-w-[280px] ">
+      <div className="!mt-5 max-w-[280px]">
         <div className="text-md font-semibold !mb-2 text-left text-foreground">
           운영시간
         </div>
