@@ -302,7 +302,8 @@ export default function NearbyCareUnitsMap() {
           </Button>
         </div>
 
-        <div className="flex items-center gap-2 justify-end w-[50vw]">
+        <div className="flex items-center gap-2 justify-end w-[80vw]">
+          <Label>기관 종류</Label>
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-[120px] h-9 border-muted text-sm bg-white hover:bg-muted">
               <SelectValue placeholder="종류 선택" />
@@ -313,6 +314,9 @@ export default function NearbyCareUnitsMap() {
               <SelectItem value="약국">약국</SelectItem>
               <SelectItem value="병원">병원</SelectItem>
             </SelectContent>
+            <div className="w-[10px]" />
+
+            <Label>운영상태</Label>
           </Select>
           <Select value={openFilter} onValueChange={setOpenFilter}>
             <SelectTrigger className="w-[120px] h-9 border-muted text-sm bg-white hover:bg-muted">
