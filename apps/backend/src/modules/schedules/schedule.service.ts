@@ -6,9 +6,8 @@ import { CareUnitAdminService } from '../care-units/services/care-unit-admin.ser
 import { DepartmentsService } from '../departments/departments.service';
 
 @Injectable()
-export class ScheduleService {
-  // export class ScheduleService implements OnModuleInit {
-
+// export class ScheduleService {
+export class ScheduleService implements OnModuleInit {
   constructor(
     @InjectRepository(Schedule)
     private readonly scheduleRepository: Repository<Schedule>,
@@ -16,19 +15,20 @@ export class ScheduleService {
     private readonly departmentsService: DepartmentsService,
   ) {}
 
-  // onModuleInit() {
-  //   console.log('🚀🚀🚀 ScheduleService onModuleInit 호출됨');
-  //   console.log('현재 시간:', new Date().toISOString());
-  //   console.log('5초 후에 데이터 초기화 실행 예정');
+  onModuleInit() {
+    console.log('🚀🚀🚀 ScheduleService onModuleInit 호출됨');
+    console.log('현재 시간:', new Date().toISOString());
+    console.log('3초 후에 데이터 초기화 실행 예정');
 
-  //   setTimeout(() => {
-  //     console.log('⏰ 타이머 실행됨 -', new Date().toISOString());
-  //     this.initializeData().catch((error) => {
-  //       console.error('❌ 초기 데이터 저장 실패:', error);
-  //     });
-  //   }, 5000); // 서버 시작 후 5초 후에 실행
-  // }
+    setTimeout(() => {
+      console.log('⏰ 타이머 실행됨 -', new Date().toISOString());
+      this.initializeData().catch((error) => {
+        console.error('❌ 초기 데이터 저장 실패:', error);
+      });
+    }, 3000); // 서버 시작 후 3초 후에 실행
+  }
 
+  // 서버 시작 시 초기 데이터 저장
   async initializeData() {
     console.log('🚀 ScheduleService initialData 시작');
     try {
@@ -38,8 +38,8 @@ export class ScheduleService {
       console.log('✅ 의료기관 데이터 저장 완료:', careUnitResult);
 
       // 2. 5초 대기 후 진료과목 데이터 저장
-      console.log('⏳ 5초 대기 후 진료과목 데이터 저장 시작');
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      console.log('⏳ 3초 대기 후 진료과목 데이터 저장 시작');
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       console.log('2️⃣ 진료과목 데이터 저장 시작');
       const departmentResult =
