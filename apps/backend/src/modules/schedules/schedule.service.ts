@@ -1,14 +1,94 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Schedule, ScheduleStatus } from './entities/schedule.entity';
+import { CareUnitAdminService } from '../care-units/services/care-unit-admin.service';
+import { DepartmentsService } from '../departments/departments.service';
 
 @Injectable()
 export class ScheduleService {
+  // export class ScheduleService implements OnModuleInit {
+
   constructor(
     @InjectRepository(Schedule)
     private readonly scheduleRepository: Repository<Schedule>,
+    private readonly careUnitAdminService: CareUnitAdminService,
+    private readonly departmentsService: DepartmentsService,
   ) {}
+
+  // onModuleInit() {
+  //   console.log('🚀🚀🚀 ScheduleService onModuleInit 호출됨');
+  //   console.log('현재 시간:', new Date().toISOString());
+  //   console.log('5초 후에 데이터 초기화 실행 예정');
+
+  //   setTimeout(() => {
+  //     console.log('⏰ 타이머 실행됨 -', new Date().toISOString());
+  //     this.initializeData().catch((error) => {
+  //       console.error('❌ 초기 데이터 저장 실패:', error);
+  //     });
+  //   }, 5000); // 서버 시작 후 5초 후에 실행
+  // }
+
+  async initializeData() {
+    console.log('🚀 ScheduleService initialData 시작');
+    try {
+      // 1. 의료기관 데이터 저장
+      console.log('1️⃣ 의료기관 데이터 저장 시작');
+      const careUnitResult = await this.careUnitAdminService.saveAllCareUnits();
+      console.log('✅ 의료기관 데이터 저장 완료:', careUnitResult);
+
+      // 2. 5초 대기 후 진료과목 데이터 저장
+      console.log('⏳ 5초 대기 후 진료과목 데이터 저장 시작');
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      console.log('2️⃣ 진료과목 데이터 저장 시작');
+      const departmentResult =
+        await this.departmentsService.saveHospitalDepartments();
+      console.log('✅ 진료과목 데이터 저장 완료:', departmentResult);
+
+      // 3. 스케줄 저장
+      await this.scheduleRepository.save({
+        scheduleName: 'INITIAL_DATA_LOAD',
+        status: ScheduleStatus.COMPLETED,
+        startedAt: new Date(),
+        completedAt: new Date(),
+        durationMs: 0,
+        metadata: {
+          careUnits: careUnitResult,
+          departments: departmentResult,
+        },
+      });
+
+      console.log('🎉 모든 초기 데이터 저장 완료');
+      return {
+        status: 'success',
+        message: '초기 데이터 저장 완료',
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.error('❌ 초기 데이터 저장 실패:', err);
+      await this.scheduleRepository.save({
+        scheduleName: 'INITIAL_DATA_LOAD',
+        status: ScheduleStatus.FAILED,
+        startedAt: new Date(),
+        completedAt: new Date(),
+        durationMs: 0,
+        errorMessage: err.message,
+        metadata: {
+          error: {
+            name: err.name,
+            message: err.message,
+            stack: err.stack,
+          },
+        },
+      });
+      return {
+        status: 'error',
+        message: '초기 데이터 저장 실패',
+        error: err.message,
+      };
+    }
+  }
 
   async createSchedule(scheduleName: string): Promise<Schedule> {
     const schedule = this.scheduleRepository.create({

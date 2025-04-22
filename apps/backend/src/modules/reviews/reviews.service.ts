@@ -59,7 +59,17 @@ export class ReviewsService {
     if (findCareUnit) {
       review.careUnit = findCareUnit;
     }
-    return this.reviewRepository.save(review);
+    const savedReview = await this.reviewRepository.save(review);
+    if (findCareUnit) {
+      const reviewCount = await this.reviewRepository.count({
+        where: { careUnit: { id: findCareUnit.id } },
+      });
+      await this.careUnitService.updateBadgeByReviewCount(
+        findCareUnit.id,
+        reviewCount,
+      );
+    }
+    return savedReview;
   }
 
   async getReviews(careUnitId?: string, departmentId?: string) {
@@ -129,6 +139,16 @@ export class ReviewsService {
     if (review.user.id !== user.id) {
       throw new ForbiddenException('리뷰를 삭제할 권한이 없습니다.');
     }
-    return this.reviewRepository.delete(id);
+    const deletedReview = await this.reviewRepository.delete(id);
+    if (review.careUnit) {
+      const reviewCount = await this.reviewRepository.count({
+        where: { careUnit: { id: review.careUnit.id } },
+      });
+      await this.careUnitService.updateBadgeByReviewCount(
+        review.careUnit.id,
+        reviewCount,
+      );
+    }
+    return deletedReview;
   }
 }
