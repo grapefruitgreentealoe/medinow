@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-import axiosInstance from '@/lib/axios';
+import axiosInstance from '@/shared/lib/axios';
 import { useEffect, useState } from 'react';
 
 declare global {
