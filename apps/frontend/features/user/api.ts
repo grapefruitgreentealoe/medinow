@@ -1,4 +1,4 @@
-import axiosInstance from '@/lib/axios';
+import axiosInstance from '@/shared/lib/axios';
 
 export const user = async () => {
   const res = await axiosInstance.get(`/users`);
