@@ -21,6 +21,7 @@ import { User } from 'src/modules/users/entities/user.entity';
 import { FavoritesService } from 'src/modules/favorites/favorites.service';
 import { CustomLoggerService } from 'src/shared/logger/logger.service';
 import { CareUnitCategory } from 'src/common/enums/careUnits.enum';
+import { ExtendedCareUnit } from 'src/common/interfaces/extended-care-unit.interface';
 
 @Injectable()
 export class CareUnitService {
@@ -148,8 +149,8 @@ export class CareUnitService {
     OpenStatus: boolean = true,
     category?: string,
     user?: User,
-  ): Promise<PaginatedResponse<CareUnit>> {
-    const MAX_LEVEL = 10; // 최대 검색 반경 제한
+  ): Promise<PaginatedResponse<ExtendedCareUnit>> {
+    const MAX_LEVEL = 14; // 최대 검색 반경 제한
     const { page, limit } = paginationDto;
     const skip = (page ? page - 1 : 0) * (limit ? limit : 10);
 
@@ -184,7 +185,9 @@ export class CareUnitService {
           .take(limit);
       }
 
-      const [careUnits, total] = await queryBuilder.getManyAndCount();
+      const [careUnits, total] = await queryBuilder
+        .leftJoinAndSelect('careUnit.departments', 'departments')
+        .getManyAndCount();
 
       this.logger.log(
         `getCareUnitByCategoryAndLocation 결과 - 총 기관 수: ${total}, 검색된 기관 수: ${careUnits.length}`,
@@ -248,6 +251,7 @@ export class CareUnitService {
               isChatAvailable: !!adminUser,
               // congestion: congestionData,
               isFavorite: isFavorite,
+              departments: careUnit.departments || [],
             };
           }),
         );

@@ -12,10 +12,11 @@ import { CongestionModule } from '../congestion/congestion.module';
 import { UsersModule } from '../users/users.module';
 import { FavoritesModule } from '../favorites/favorites.module';
 import { DepartmentsModule } from '../departments/departments.module';
+import { Favorite } from '../favorites/entities/favorite.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CareUnit, Department]),
+    TypeOrmModule.forFeature([CareUnit, Department, Favorite]),
     AppConfigModule,
     RedisModule,
     ScheduleModule.forRoot(),
