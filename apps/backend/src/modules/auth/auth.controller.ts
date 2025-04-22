@@ -13,7 +13,15 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { CreateAdminDto } from '../users/dto/create-admin.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
-import { ApiOperation, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
+  ApiTags,
+  ApiCreatedResponse,
+  ApiBadRequestResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { SignupResponseDto } from './dto/signup-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { RequestOrigin } from '../../common/decorators/request-origin.decorator';
@@ -34,13 +42,11 @@ export class AuthController {
   @Public()
   @ApiOperation({ summary: '회원가입' })
   @ApiBody({ type: CreateUserDto })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
+  @ApiCreatedResponse({
     description: '회원가입 성공',
     type: SignupResponseDto,
   })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
+  @ApiBadRequestResponse({
     description: '회원가입 실패',
   })
   @UseInterceptors(ClassSerializerInterceptor)
@@ -55,8 +61,7 @@ export class AuthController {
   @Public()
   @ApiOperation({ summary: '관리자 회원가입' })
   @ApiBody({ type: CreateAdminDto })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
+  @ApiCreatedResponse({
     description: '관리자 회원가입 성공',
   })
   @Post('admin-signup')
@@ -71,12 +76,10 @@ export class AuthController {
   @Public()
   @ApiOperation({ summary: '로그인' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiOkResponse({
     description: '로그인 성공',
   })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
+  @ApiBadRequestResponse({
     description: '로그인 실패',
   })
   @Post('login')
@@ -99,12 +102,10 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '로그아웃' })
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiOkResponse({
     description: '로그아웃 성공',
   })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
+  @ApiBadRequestResponse({
     description: '로그아웃 실패',
   })
   @Post('logout')

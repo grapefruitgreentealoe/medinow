@@ -17,6 +17,8 @@ import {
   ApiResponse,
   ApiTags,
   ApiExcludeEndpoint,
+  ApiCreatedResponse,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 import { CareUnitAdminService } from './services/care-unit-admin.service';
 import { CareUnit } from './entities/care-unit.entity';
@@ -41,8 +43,7 @@ export class CareUnitController {
   @Public()
   // @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin: 초기세팅 / 병원, 약국, 응급실 데이터 저장' })
-  @ApiResponse({
-    status: 200,
+  @ApiCreatedResponse({
     description: '성공',
     type: String,
   })
@@ -54,8 +55,7 @@ export class CareUnitController {
   @Public()
   @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Admin: 병원 진료과목 저장' })
-  @ApiResponse({
-    status: 200,
+  @ApiCreatedResponse({
     description: '성공',
     type: String,
   })
@@ -103,8 +103,7 @@ export class CareUnitController {
     type: String,
     enum: ['emergency', 'hospital', 'pharmacy'],
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: '성공',
     type: CareUnit,
   })
@@ -121,8 +120,7 @@ export class CareUnitController {
   @ApiOperation({ summary: '사용자 : 위치로 특정 기관 조회' })
   @ApiQuery({ name: 'lat', required: true, type: Number })
   @ApiQuery({ name: 'lng', required: true, type: Number })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: '성공',
     type: [CareUnit],
     schema: {
@@ -173,8 +171,7 @@ export class CareUnitController {
   @ApiOperation({ summary: '사용자 : 위치로 기관 조회 (가입 페이지)' })
   @ApiQuery({ name: 'lat', required: true, type: Number })
   @ApiQuery({ name: 'lng', required: true, type: Number })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: '성공',
     schema: {
       example: [
@@ -229,8 +226,7 @@ export class CareUnitController {
     type: Number,
     description: '동 경도 (예시: 127.043351028535)',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: '성공',
     type: [CareUnit],
     schema: {
@@ -318,8 +314,7 @@ export class CareUnitController {
     description: '동 경도 (예시: 127.043351028535)',
     example: 128.56710886511746,
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: '성공',
     type: [CareUnit],
     schema: {
@@ -388,8 +383,7 @@ export class CareUnitController {
     description: '기관 고유 아이디',
     example: '46dcef6e-b986-4688-adea-04dd39fe8323',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: '성공',
     type: CareUnit,
   })
@@ -407,8 +401,7 @@ export class CareUnitController {
     description: '기관 고유 아이디',
     example: 'c81845c9-4008-4fd8-8f47-903dc73d9f61',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: '성공',
     type: String,
   })
@@ -426,8 +419,7 @@ export class CareUnitController {
     description: '기관 고유 아이디',
     example: 'a5388b7a-cd05-40a6-b9b2-af406c65ddb7',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: '성공',
     type: ResponseCongestionDto,
   })
