@@ -1,7 +1,6 @@
 'use client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-
 import axiosInstance from '@/shared/lib/axios';
 import { useEffect, useState } from 'react';
 
@@ -15,7 +14,6 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // SSR에서 주입한 값 사용
     setIsLoggedIn(window.__INITIAL_IS_LOGGED_IN__ ?? false);
   }, []);
 
@@ -24,42 +22,50 @@ export default function Header() {
       await axiosInstance.post('/auth/logout', null, {
         withCredentials: true,
       });
-      location.reload(); // SSR로 상태 재반영
+      location.reload();
     } catch (e) {
       console.error('Logout failed', e);
     }
   };
 
   return (
-    <header className="w-full px-6 py-4 border-b flex justify-between items-center bg-white">
-      <Link href="/" className="text-xl font-bold ">
-        <span className="text-black">🏥 Medinow</span>
+    <header className="w-full !px-6 !py-3 border-b border-border bg-background text-foreground flex justify-between items-center">
+      <Link href="/" className="text-lg font-semibold tracking-tight">
+        <span className="text-primary text-3xl">🏥 Medinow</span>
       </Link>
-      <nav className="flex gap-4">
+      <nav className="flex items-center gap-2">
         {isLoggedIn ? (
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={handleLogout}
-            className="text-black"
+            className="text-sm font-medium text-foreground hover:bg-muted"
           >
             로그아웃
           </Button>
         ) : (
-          <>
+          <div className="flex !gap-[20px]">
             <Link href="/signup/admin">
-              <Button variant="outline" className="text-black">
+              <Button
+                variant="ghost"
+                className="text-sm font-medium text-foreground hover:bg-muted"
+              >
                 관리자 회원가입
               </Button>
             </Link>
             <Link href="/signup">
-              <Button variant="outline" className="text-black">
+              <Button
+                variant="ghost"
+                className="text-sm font-medium text-foreground hover:bg-muted"
+              >
                 회원가입
               </Button>
             </Link>
             <Link href="/login">
-              <Button>로그인</Button>
+              <Button className="text-sm font-medium bg-primary text-white hover:bg-primary/90 !px-4">
+                로그인
+              </Button>
             </Link>
-          </>
+          </div>
         )}
       </nav>
     </header>
