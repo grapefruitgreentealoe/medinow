@@ -68,7 +68,7 @@ export default function CareUnitSheet({
                 className="absolute left-0 text-muted-foreground hover:text-foreground"
                 onClick={() => setPage('list')}
               >
-                <ArrowLeft className="inline-block mr-1" />
+                <ArrowLeft className="inline-block !mr-1 cursor-pointer" />
               </button>
             )}
             <SheetTitle className="text-base font-semibold">
@@ -76,7 +76,7 @@ export default function CareUnitSheet({
             </SheetTitle>
           </div>
 
-          <SheetDescription>
+          <SheetDescription asChild>
             <div className="relative flex justify-center items-center">
               {getDescription()}
             </div>
