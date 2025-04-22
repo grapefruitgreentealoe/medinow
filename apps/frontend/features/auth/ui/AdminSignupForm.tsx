@@ -8,11 +8,11 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { adminSignup, checkEmail } from '../api';
-import HospitalSearchModal from '@/components/HospitalSearchModal';
+import HospitalSearchModal from '@/shared/ui/HospitalSearchModal';
 import type { AdminSignupData } from '../type';
 import { UploadCloud } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import axiosInstance from '@/lib/axios';
+import axiosInstance from '@/shared/lib/axios';
 
 export default function AdminSignupForm() {
   const router = useRouter();

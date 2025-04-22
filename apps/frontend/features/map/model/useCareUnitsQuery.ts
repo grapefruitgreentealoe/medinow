@@ -7,6 +7,7 @@ interface UseCareUnitsQueryProps {
   lng: number | null;
   level: number;
   selectedCategory: string;
+  OpenStatus: boolean;
 }
 
 export function useCareUnitsQuery({
@@ -14,12 +15,20 @@ export function useCareUnitsQuery({
   lng,
   level,
   selectedCategory,
+  OpenStatus,
 }: UseCareUnitsQueryProps): UseCareUnitsQueryResult {
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
   const query = useInfiniteQuery({
     staleTime: 5000,
-    queryKey: ['careUnits', roundedLat, roundedLng, selectedCategory],
+    queryKey: [
+      'careUnits',
+      roundedLat,
+      roundedLng,
+      level,
+      selectedCategory,
+      OpenStatus,
+    ],
     queryFn: async ({ pageParam = 1 }) => {
       if (lat === null || lng === null) return { items: [], hasNext: false };
 
@@ -29,6 +38,7 @@ export function useCareUnitsQuery({
         level,
         page: pageParam,
         limit: 10,
+        OpenStatus,
         category:
           selectedCategory === '응급실'
             ? 'emergency'

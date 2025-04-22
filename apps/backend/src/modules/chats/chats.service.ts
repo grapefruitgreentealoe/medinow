@@ -2,20 +2,34 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, LessThan } from 'typeorm';
 import { ChatRoom } from './entities/chat-room.entity';
 import { ChatMessage } from './entities/chat-message.entity';
 import { Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { CustomLoggerService } from '../../shared/logger/logger.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { UserRole } from '../../common/enums/roles.enum';
+import { Redis } from 'ioredis';
+import { REDIS_CLIENT } from '../redis/redis.constants';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class ChatsService {
   // 온라인 사용자 소켓 매핑
   private readonly userSockets = new Map<string, Set<string>>();
+  // 채팅방 비활성화 시간 (30분 = 1800000 밀리초)
+  private readonly CHAT_INACTIVITY_TIMEOUT = 30 * 60 * 1000;
+  // Redis 채널 접두사
+  private readonly REDIS_ROOM_CHANNEL = 'chat:room:';
+  // Redis 사용자 상태 키 접두사
+  private readonly REDIS_USER_ONLINE = 'user:online:';
+  // Redis 채팅방 활성 상태 키 접두사
+  private readonly REDIS_ROOM_ACTIVE = 'room:active:';
 
   constructor(
     @InjectRepository(ChatRoom)
@@ -25,8 +39,314 @@ export class ChatsService {
     private jwtService: JwtService,
     private usersService: UsersService,
     private logger: CustomLoggerService,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
+    private readonly redisService: RedisService,
   ) {
     this.logger.setContext('ChatsService');
+    this.setupRedisSubscriber();
+  }
+
+  // Redis 구독 설정
+  private setupRedisSubscriber() {
+    // Redis 구독 클라이언트 생성 (별도의 연결 사용)
+    const subscriber = new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+    });
+
+    // 메시지 수신 시 처리
+    subscriber.on('message', (channel, message) => {
+      if (channel.startsWith(this.REDIS_ROOM_CHANNEL)) {
+        const roomId = channel.replace(this.REDIS_ROOM_CHANNEL, '');
+        this.handleRedisMessage(roomId, JSON.parse(message));
+      }
+    });
+
+    // 패턴 구독 설정 (모든 채팅방 메시지)
+    subscriber.psubscribe(`${this.REDIS_ROOM_CHANNEL}*`);
+
+    this.logger.log('Redis 구독 설정 완료');
+  }
+
+  // Redis 메시지 처리
+  private handleRedisMessage(roomId: string, data: any) {
+    // 여기서 Socket.io를 통해 연결된 클라이언트에게 메시지 전송
+    // 실제 구현은 Socket.io 게이트웨이에서 처리되어야 함
+    this.logger.debug(
+      `Redis로 메시지 수신: 방 ${roomId}, 메시지: ${JSON.stringify(data)}`,
+    );
+  }
+
+  // 채팅방에 메시지 발행 (Redis Pub/Sub 사용)
+  async publishMessage(roomId: string, message: any) {
+    const channel = `${this.REDIS_ROOM_CHANNEL}${roomId}`;
+    await this.redis.publish(channel, JSON.stringify(message));
+
+    // 채팅방 활성 시간 업데이트
+    await this.updateRoomActivity(roomId);
+  }
+
+  // 채팅방 활성 상태 업데이트
+  async updateRoomActivity(roomId: string) {
+    const key = `${this.REDIS_ROOM_ACTIVE}${roomId}`;
+    // 현재 시간을 Unix 타임스탬프로 문자열로 저장
+    await this.redisService.set(
+      key,
+      Date.now().toString(),
+      this.CHAT_INACTIVITY_TIMEOUT / 1000,
+    );
+  }
+
+  // 사용자 온라인 상태 설정
+  async setUserOnline(userId: string, isOnline: boolean) {
+    const key = `${this.REDIS_USER_ONLINE}${userId}`;
+
+    try {
+      if (isOnline) {
+        // 온라인 상태는 30분 자동 만료 (활동이 없으면 오프라인으로 간주)
+        await this.redisService.set(
+          key,
+          '1',
+          this.CHAT_INACTIVITY_TIMEOUT / 1000,
+        );
+        this.logger.log(`Redis 온라인 상태 저장 성공: ${userId}`);
+      } else {
+        // 오프라인 상태로 설정 (키 삭제)
+        await this.redisService.del(key);
+        this.logger.log(`Redis 온라인 상태 삭제 성공: ${userId}`);
+      }
+
+      // 기존 메서드 호출
+      this.updateUserStatus(userId, isOnline);
+
+      // 온라인 상태 확인
+      const isOnlineCheck = await this.isUserOnlineRedis(userId);
+      this.logger.log(
+        `사용자 ${userId}의 Redis 온라인 상태 확인: ${isOnlineCheck}`,
+      );
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`온라인 상태 설정 중 오류: ${err.message}`);
+    }
+  }
+
+  // 사용자 온라인 상태 확인
+  async isUserOnlineRedis(userId: string): Promise<boolean> {
+    try {
+      const key = `${this.REDIS_USER_ONLINE}${userId}`;
+      const result = await this.redisService.get(key);
+      const isOnline = result !== null;
+      this.logger.log(
+        `Redis 온라인 상태 확인: ${userId} - ${isOnline ? '온라인' : '오프라인'}`,
+      );
+      return isOnline;
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`Redis에서 온라인 상태 확인 중 오류: ${err.message}`);
+      return false;
+    }
+  }
+
+  // 사용자 온라인 상태 업데이트
+  updateUserStatus(userId: string, isOnline: boolean): void {
+    // 실제 데이터베이스에 온라인 상태 저장이 필요하면 여기에 구현
+    try {
+      // 메모리 상태 업데이트
+      if (isOnline) {
+        if (!this.userSockets.has(userId)) {
+          this.userSockets.set(userId, new Set());
+        }
+      }
+
+      this.logger.log(
+        `사용자 ${userId} 상태 변경: ${isOnline ? '온라인' : '오프라인'}`,
+      );
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`사용자 상태 업데이트 중 오류: ${err.message}`);
+    }
+  }
+
+  // 채팅방 메시지 생성 (Redis 활용)
+  async createMessageWithRedis(data: {
+    content: string;
+    senderId: string;
+    roomId: string;
+  }): Promise<ChatMessage> {
+    // DB에 메시지 저장
+    const message = await this.createMessage(data);
+
+    // Redis를 통해 메시지 발행
+    await this.publishMessage(data.roomId, {
+      id: message.id,
+      content: message.content,
+      senderId: data.senderId,
+      roomId: data.roomId,
+      createdAt: message.createdAt,
+      isRead: message.isRead,
+    });
+
+    // 채팅방 활성 상태 갱신
+    await this.updateRoomActivity(data.roomId);
+
+    return message;
+  }
+
+  // 읽음 표시 처리 (Redis 활용)
+  async markMessagesAsReadWithRedis(
+    roomId: string,
+    userId: string,
+  ): Promise<void> {
+    // 기존 메시지 읽음 처리
+    await this.markMessagesAsRead(roomId, userId);
+
+    // 채팅방 정보 조회
+    const room = await this.getRoomById(roomId);
+
+    // 상대방 ID 확인
+    const recipientId =
+      room.user.id === userId ? room.careUnit.id : room.user.id;
+
+    // Redis에 읽음 상태 저장 (최근 읽은 시간)
+    const redisKey = `chat:read:${roomId}:${userId}`;
+    await this.redisService.set(redisKey, new Date().toISOString());
+
+    // 읽음 상태 정보 반환
+    return;
+  }
+
+  // 메시지 전송 후 알림 처리 로직
+  async handleMessageNotification(
+    senderId: string,
+    roomId: string,
+    content: string,
+  ): Promise<{
+    recipientId: string;
+    isOnline: boolean;
+    isInRoom: boolean;
+    messagePreview: string;
+  }> {
+    // 채팅방 정보 조회
+    const room = await this.getRoomById(roomId);
+
+    // 수신자 ID 결정 (상대방)
+    const recipientId =
+      room.user.id === senderId ? room.careUnit.id : room.user.id;
+
+    // 상대방 온라인 상태 확인
+    const isOnline = await this.isUserOnlineRedis(recipientId);
+
+    // 상대방이 채팅방에 있는지 확인
+    const isInRoom = await this.isUserInRoom(recipientId, roomId);
+
+    // 메시지 미리보기 생성
+    const messagePreview =
+      content.length > 30 ? `${content.substring(0, 30)}...` : content;
+
+    return {
+      recipientId,
+      isOnline,
+      isInRoom,
+      messagePreview,
+    };
+  }
+
+  // 채팅방 나가기 + 알림 데이터 준비
+  async leaveRoomWithNotification(
+    userId: string,
+    roomId: string,
+  ): Promise<{
+    success: boolean;
+    roomId: string;
+    timestamp: Date;
+  }> {
+    // 채팅방 나가기 처리
+    await this.leaveRoom(userId, roomId);
+
+    // 알림 데이터 준비
+    return {
+      success: true,
+      roomId,
+      timestamp: new Date(),
+    };
+  }
+
+  // 타이핑 상태 알림 데이터 준비
+  async prepareTypingNotification(
+    userId: string,
+    roomId: string,
+    isTyping: boolean,
+  ): Promise<{
+    roomId: string;
+    userId: string;
+    userName: string;
+    isTyping: boolean;
+  }> {
+    // 사용자 정보 조회
+    const user = await this.usersService.findUserById(userId);
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    return {
+      roomId,
+      userId,
+      userName: user.userProfile?.name || 'Unknown',
+      isTyping,
+    };
+  }
+
+  // Redis를 이용한 비활성 채팅방 확인
+  async checkInactiveRoomsWithRedis() {
+    try {
+      // 활성 상태 키 패턴으로 모든 키 조회
+      const activeKeys = await this.redisService.scan(
+        `${this.REDIS_ROOM_ACTIVE}*`,
+      );
+      const activeKeySet = new Set(activeKeys);
+
+      // 모든 활성 채팅방 조회
+      const rooms = await this.chatRoomRepository.find({
+        where: { isActive: true },
+        select: ['id'],
+      });
+
+      // Redis에 키가 없는 활성 채팅방 찾기
+      const inactiveRoomIds: string[] = [];
+      for (const room of rooms) {
+        const key = `${this.REDIS_ROOM_ACTIVE}${room.id}`;
+        if (!activeKeySet.has(key)) {
+          inactiveRoomIds.push(room.id);
+        }
+      }
+
+      // 비활성 채팅방 처리
+      if (inactiveRoomIds.length > 0) {
+        for (const roomId of inactiveRoomIds) {
+          const room = await this.chatRoomRepository.findOne({
+            where: { id: roomId },
+          });
+
+          if (room) {
+            room.isActive = false;
+            await this.chatRoomRepository.save(room);
+          }
+        }
+
+        this.logger.log(
+          `Redis 확인: ${inactiveRoomIds.length}개의 비활성 채팅방 종료됨`,
+        );
+      }
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`비활성 채팅방 확인 중 오류: ${err.message}`);
+    }
+  }
+
+  // Redis 활용 비활성 채팅방 정리 작업 (30분마다 실행)
+  @Cron(CronExpression.EVERY_30_MINUTES)
+  async deactivateInactiveRoomsWithRedis() {
+    await this.checkInactiveRoomsWithRedis();
   }
 
   // 소켓에서 사용자 정보 추출
@@ -47,6 +367,14 @@ export class ChatsService {
   }
 
   private extractTokenFromSocket(socket: Socket): string | undefined {
+    // 쿼리 파라미터에서 토큰 확인
+    const queryToken = socket.handshake.query.token;
+    if (queryToken) {
+      this.logger.log('쿼리 파라미터에서 토큰을 찾았습니다.');
+      return Array.isArray(queryToken) ? queryToken[0] : queryToken;
+    }
+
+    // 쿠키에서 토큰 확인
     const cookies = socket.handshake.headers.cookie;
     if (!cookies) return undefined;
 
@@ -107,30 +435,65 @@ export class ChatsService {
 
   // 채팅방 생성
   async createRoom(userId: string, careUnitId: string): Promise<ChatRoom> {
-    // 이미 존재하는 채팅방 확인
-    const existingRoom = await this.chatRoomRepository.findOne({
-      where: { careUnit: { id: careUnitId }, user: { id: userId } },
-    });
+    this.logger.log(
+      `채팅방 생성 시도: 사용자 ${userId}, 의료기관 ${careUnitId}`,
+    );
 
-    if (existingRoom) {
-      existingRoom.isActive = true;
-      return this.chatRoomRepository.save(existingRoom);
+    try {
+      // 병원 관리자 사용자 조회
+      const adminUser = await this.usersService.getUserByCareUnitId(careUnitId);
+
+      if (!adminUser) {
+        this.logger.error(
+          `의료기관 ${careUnitId}의 관리자를 찾을 수 없습니다.`,
+        );
+        throw new NotFoundException('해당 병원의 관리자를 찾을 수 없습니다.');
+      }
+
+      this.logger.log(`관리자 찾음: ${adminUser.id}, 의료기관: ${careUnitId}`);
+
+      // 이미 존재하는 채팅방 확인
+      const existingRoom = await this.chatRoomRepository.findOne({
+        where: {
+          careUnit: { id: careUnitId },
+          user: { id: userId },
+        },
+        relations: ['user', 'careUnit'],
+      });
+
+      if (existingRoom) {
+        this.logger.log(`기존 채팅방 찾음: ${existingRoom.id}`);
+        existingRoom.isActive = true;
+        return this.chatRoomRepository.save(existingRoom);
+      }
+
+      // 새 채팅방 생성
+      const room = this.chatRoomRepository.create({
+        user: { id: userId },
+        careUnit: { id: careUnitId },
+        isActive: true,
+      });
+
+      this.logger.log(
+        `채팅방 생성: 사용자 ${userId}와 병원 ${careUnitId}(관리자: ${adminUser.id}) 간의 채팅방 생성 시작`,
+      );
+
+      const savedRoom = await this.chatRoomRepository.save(room);
+      this.logger.log(`채팅방 저장 완료: ${savedRoom.id}`);
+
+      return savedRoom;
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`채팅방 생성 중 오류 발생: ${err.message}`);
+      throw err;
     }
-
-    // 새 채팅방 생성
-    const room = this.chatRoomRepository.create({
-      user: { id: userId },
-      careUnit: { id: careUnitId },
-      isActive: true,
-    });
-
-    return await this.chatRoomRepository.save(room);
   }
 
   // 채팅방 상세 조회
   async getRoomById(roomId: string): Promise<ChatRoom> {
     const room = await this.chatRoomRepository.findOne({
       where: { id: roomId },
+      relations: ['user', 'careUnit'],
     });
 
     if (!room) {
@@ -142,20 +505,121 @@ export class ChatsService {
 
   // 사용자의 모든 채팅방 조회
   async getUserRooms(userId: string): Promise<ChatRoom[]> {
-    // 사용자가 속한 모든 채팅방 조회 (일반 사용자 또는 의료기관 관리자)
-    return this.chatRoomRepository.find({
-      where: [
-        { user: { id: userId } }, // 일반 사용자로서 참여중인 방
-        { careUnit: { id: userId } }, // 의료기관 관리자로서 참여중인 방
-      ],
-      order: { updatedAt: 'DESC' },
-    });
+    const user = await this.usersService.findUserById(userId);
+
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다');
+    }
+
+    if (user.role === UserRole.ADMIN) {
+      // 관리자인 경우: 해당 관리자가 관리하는 병원에 연결된 채팅방 조회
+      const careUnitId = await this.getCareUnitIdForAdmin(userId);
+
+      if (!careUnitId) {
+        this.logger.warn(`관리자 ${userId}에게 연결된 의료기관이 없습니다`);
+        return [];
+      }
+
+      return this.chatRoomRepository.find({
+        where: {
+          careUnit: { id: careUnitId },
+          isActive: true,
+        },
+        relations: ['user', 'careUnit'],
+        order: { updatedAt: 'DESC' },
+      });
+    } else {
+      // 일반 사용자인 경우: 해당 사용자가 속한 채팅방 조회
+      return this.chatRoomRepository.find({
+        where: {
+          user: { id: userId },
+          isActive: true,
+        },
+        relations: ['user', 'careUnit'],
+        order: { updatedAt: 'DESC' },
+      });
+    }
+  }
+
+  // 관리자 사용자의 CareUnit ID 조회
+  private async getCareUnitIdForAdmin(
+    adminUserId: string,
+  ): Promise<string | null> {
+    try {
+      const user = await this.usersService.findUserById(adminUserId);
+      if (!user || !user.userProfile) {
+        return null;
+      }
+
+      // userProfile.careUnitId가 있으면 그 값을 반환
+      if (user.userProfile.careUnit) {
+        this.logger.log(
+          `관리자 ${adminUserId}의 의료기관 ID: ${user.userProfile.careUnit.id}`,
+        );
+        return user.userProfile.careUnit.id;
+      }
+
+      // careUnit 객체가 로드된 경우
+      if (user.userProfile.careUnit) {
+        return user.userProfile.careUnit;
+      }
+
+      return null;
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`관리자의 의료기관 조회 실패: ${err.message}`);
+      return null;
+    }
   }
 
   // 채팅방 접근 권한 확인
   async checkRoomAccess(userId: string, roomId: string): Promise<boolean> {
-    const room = await this.getRoomById(roomId);
-    return room.user.id === userId || room.careUnit.id === userId;
+    try {
+      const room = await this.getRoomById(roomId);
+
+      // 1. 일반 사용자 권한 확인: 채팅방의 사용자인 경우
+      if (room.user.id === userId) {
+        this.logger.log(
+          `사용자 ${userId}는 채팅방 ${roomId}의 일반 사용자로 접근 권한 있음`,
+        );
+        return true;
+      }
+
+      // 2. 의료기관 ID가 직접 일치하는 경우 (일부 케이스에서 사용될 수 있음)
+      if (room.careUnit.id === userId) {
+        this.logger.log(
+          `사용자 ${userId}는 의료기관 ID와 일치하여 채팅방 ${roomId}에 접근 권한 있음`,
+        );
+        return true;
+      }
+
+      // 3. 관리자 권한 확인: 의료기관의 관리자인 경우
+      const user = await this.usersService.findUserById(userId);
+      if (
+        user &&
+        user.role === UserRole.ADMIN &&
+        user.userProfile &&
+        user.userProfile.careUnit
+      ) {
+        // 관리자가 관리하는 의료기관 ID
+        const adminCareUnitId = user.userProfile.careUnit.id;
+
+        // 채팅방의 의료기관과 관리자의 의료기관이 일치하는지 확인
+        if (adminCareUnitId === room.careUnit.id) {
+          this.logger.log(
+            `관리자 ${userId}는 의료기관 ${adminCareUnitId}의 관리자로 채팅방 ${roomId}에 접근 권한 있음`,
+          );
+          return true;
+        }
+      }
+
+      this.logger.warn(`사용자 ${userId}는 채팅방 ${roomId}에 접근 권한 없음`);
+      return false;
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`채팅방 접근 권한 확인 중 오류: ${err.message}`);
+      return false;
+    }
   }
 
   // 메시지 생성
@@ -167,8 +631,12 @@ export class ChatsService {
     // 채팅방 존재 확인
     const room = await this.getRoomById(data.roomId);
 
-    // 권한 확인
-    if (room.user.id !== data.senderId && room.careUnit.id !== data.senderId) {
+    // 권한 확인 - checkRoomAccess 함수 재사용
+    const hasAccess = await this.checkRoomAccess(data.senderId, data.roomId);
+    if (!hasAccess) {
+      this.logger.error(
+        `사용자 ${data.senderId}는 채팅방 ${data.roomId}에 메시지를 보낼 권한이 없습니다`,
+      );
       throw new UnauthorizedException(
         '해당 채팅방에 메시지를 보낼 권한이 없습니다',
       );
@@ -238,15 +706,6 @@ export class ChatsService {
     await this.chatRoomRepository.save(room);
   }
 
-  // 사용자 온라인 상태 업데이트
-  updateUserStatus(userId: string, isOnline: boolean): void {
-    // 실제 데이터베이스에 온라인 상태 저장이 필요하면 여기에 구현
-
-    this.logger.log(
-      `사용자 ${userId} 상태 변경: ${isOnline ? '온라인' : '오프라인'}`,
-    );
-  }
-
   // 읽지 않은 메시지 수 조회
   async getUnreadMessageCount(
     userId: string,
@@ -270,5 +729,21 @@ export class ChatsService {
     );
 
     return result.filter((item) => item.count > 0);
+  }
+
+  // 채팅방 나가기
+  async leaveRoom(userId: string, roomId: string): Promise<void> {
+    const room = await this.getRoomById(roomId);
+    const hasAccess = await this.checkRoomAccess(userId, roomId);
+
+    if (!hasAccess) {
+      throw new UnauthorizedException('해당 채팅방에 접근할 권한이 없습니다');
+    }
+
+    // 채팅방 비활성화 처리
+    room.isActive = false;
+    await this.chatRoomRepository.save(room);
+
+    this.logger.log(`사용자 ${userId}가 채팅방 ${roomId}에서 나갔습니다`);
   }
 }

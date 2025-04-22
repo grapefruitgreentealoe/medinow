@@ -3,7 +3,7 @@
 import { useAtom } from 'jotai';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ChatRoomUI } from './ChatRoomUI'; // 아래에서 만들 컴포넌트
-import { chatModalAtom } from '../store/chatModalAtom';
+import { chatModalAtom } from '../atoms/chatModalAtom';
 
 export function ChatModal() {
   const [chat, setChat] = useAtom(chatModalAtom);
