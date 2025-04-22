@@ -20,6 +20,7 @@ export default function CareUnitDetailPage() {
   if (!unit) return null;
 
   const timeToStr = (time: number | null) => {
+    if (time == 0) return '00:00';
     if (!time) return '휴무';
     const h = String(Math.floor(time / 100)).padStart(2, '0');
     const m = String(time % 100).padStart(2, '0');
@@ -71,11 +72,14 @@ export default function CareUnitDetailPage() {
     <div className="!p-6 !pt-7 !pb-8 space-y-6 bg-background text-foreground text-sm leading-relaxed">
       {/* 병원명, 뱃지, 즐겨찾기, 채팅 */}
       <div className="flex justify-between items-start gap-x-3 gap-y-3">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-primary">{unit.name}</h2>
+        <div className="flex flex-col items-start justify-start gap-2">
+          <div className="text-lg font-bold text-primary w-full">
+            {unit.name}
+          </div>
+
+          <div className="flex justify-start">
             <span className="bg-muted text-muted-foreground text-xs !px-2 !py-0.5 rounded-full">
-              🏷️ {categoryLabel}
+              {categoryLabel}
             </span>
             {unit.isBadged && (
               <span className="bg-yellow-100 text-yellow-700 text-xs !px-2 !py-0.5 rounded-full">
@@ -109,6 +113,7 @@ export default function CareUnitDetailPage() {
           )}
         </div>
       </div>
+      <div className="h-[1rem]" />
 
       {/* 기본 정보 */}
       <div className="grid grid-cols-[80px_1fr] gap-y-1 gap-x-4 text-sm">

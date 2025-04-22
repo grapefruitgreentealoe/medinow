@@ -51,52 +51,61 @@ export function CareUnitCard({
     <Card
       key={unit.id}
       className={cn(
-        'mb-3 cursor-pointer transition-shadow hover:shadow-md rounded-lg border'
+        'mb-4 cursor-pointer hover:shadow-md bg-background transition-shadow rounded-none border-t-0 border-l-0 bordeer-r-0 border-b-[1px] border-b-slate-300 border-solid'
       )}
       onClick={() => onSelect(unit)}
     >
-      <CardContent className="p-4 space-y-2">
-        {/* 제목, 주소 */}
-        <div className="space-y-0.5">
-          <h3 className="text-lg font-bold">{unit.name}</h3>
-          <p className="text-sm text-muted-foreground truncate">
+      <CardContent className="!p-5 space-y-4">
+        {/* 제목 + 주소 */}
+        <div className="space-y-1">
+          <h3 className="text-base font-bold text-primary">{unit.name}</h3>
+          <p className="text-sm text-muted-foreground leading-snug">
             {unit.address}
           </p>
         </div>
 
-        {/* 혼잡도, 운영 여부, 카테고리 */}
-        <div className="text-xs flex flex-wrap gap-2 mt-2">
-          <span className="bg-gray-100 px-2 py-0.5 rounded-full">
-            🏥 {unit.category}
+        {/* 태그들 */}
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="bg-muted text-muted-foreground !px-2 !py-0.5 rounded-full">
+            {unit.category === 'emergency'
+              ? '응급실'
+              : unit.category === 'pharmacy'
+                ? '약국'
+                : '병원'}
           </span>
-          {unit?.congestion ? (
+          {unit?.congestion && (
             <span
               className={cn(
-                'px-2 py-0.5 rounded-full',
-                unit.congestion.congestionLevel === 'HIGH'
+                '!px-2 !py-0.5 rounded-full',
+                unit?.congestion?.congestionLevel === 'HIGH'
                   ? 'bg-red-100 text-red-600'
-                  : unit.congestion.congestionLevel === 'MEDIUM'
+                  : unit?.congestion?.congestionLevel === 'MEDIUM'
                     ? 'bg-yellow-100 text-yellow-600'
                     : 'bg-green-100 text-green-600'
               )}
             >
-              혼잡도: {unit.congestion.congestionLevel}
+              혼잡도: {unit?.congestion?.congestionLevel}
             </span>
-          ) : null}
-          <span className="bg-gray-100 px-2 py-0.5 rounded-full">
+          )}
+          <span className="bg-muted text-muted-foreground !px-2 !py-0.5 rounded-full">
             {unit.nowOpen ? '🟢 운영 중' : '🔴 운영 종료'}
           </span>
-          <p className="text-xs text-muted-foreground">
-            ⏰ 오늘 운영시간: {renderTodayTime(unit)}
-          </p>
         </div>
 
-        {/* 기능 버튼들 */}
-        <div className="flex justify-between items-center pt-3">
+        {/* 운영시간 */}
+        <div className="text-sm text-muted-foreground">
+          ⏰ 오늘 운영시간:{' '}
+          <span className="text-foreground font-medium">
+            {renderTodayTime(unit)}
+          </span>
+        </div>
+
+        {/* 기능 버튼 */}
+        <div className="flex justify-between items-center pt-2">
           <Button
             variant="ghost"
             size="sm"
-            className="text-blue-500 text-xs underline px-0"
+            className="text-primary text-xs underline !px-0"
             onClick={handleUrlButton}
           >
             카카오지도에서 보기
@@ -110,27 +119,25 @@ export function CareUnitCard({
               className="w-8 h-8"
             >
               {localFavorite ? (
-                <Star
-                  className="text-yellow-500 fill-yellow-500"
-                  size={18}
-                  color="text-yellow-500"
-                />
+                <Star className="text-yellow-500 fill-yellow-500" size={18} />
               ) : (
                 <StarOff size={18} />
               )}
             </Button>
 
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                setChat({ isOpen: true, target: unit });
-              }}
-              className="w-8 h-8"
-            >
-              <MessageSquare className="text-blue-500" size={18} />
-            </Button>
+            {unit.isChatAvailable && (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setChat({ isOpen: true, target: unit });
+                }}
+                className="w-8 h-8"
+              >
+                <MessageSquare className="text-blue-500" size={18} />
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>

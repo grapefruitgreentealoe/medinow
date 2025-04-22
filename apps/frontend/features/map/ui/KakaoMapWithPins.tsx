@@ -42,7 +42,6 @@ export default function NearbyCareUnitsMap() {
   const [level, setLevel] = useState<number>(5);
   const [isManualZoom, setIsManualZoom] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false);
-
   const radius = 0.005 * level;
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
@@ -288,11 +287,11 @@ export default function NearbyCareUnitsMap() {
 
   return (
     <div className="p-4 space-y-2">
-      <div className="flex justify-between items-center gap-[10px] mb-2">
-        <Label className="text-sm text-muted-foreground">
-          현재 위치: {location ?? '엘리스'}
-        </Label>
-        <div className="flex items-center gap-2">
+      <div className="flex justify-between flex-wrap items-center gap-[10px] !m-2">
+        <div className="flex">
+          <Label className="text-sm text-muted-foreground">
+            현재 위치: {location ?? '엘리스'}
+          </Label>
           <Button
             variant="ghost"
             size="sm"
@@ -301,6 +300,9 @@ export default function NearbyCareUnitsMap() {
           >
             현재 위치로 돌아가기
           </Button>
+        </div>
+
+        <div className="flex items-center gap-2 justify-end w-[50vw]">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-[120px] h-9 border-muted text-sm bg-white hover:bg-muted">
               <SelectValue placeholder="종류 선택" />

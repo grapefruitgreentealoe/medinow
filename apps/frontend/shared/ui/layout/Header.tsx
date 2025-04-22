@@ -22,6 +22,7 @@ export default function Header() {
       await axiosInstance.post('/auth/logout', null, {
         withCredentials: true,
       });
+      window.__INITIAL_IS_LOGGED_IN__ = false;
       location.reload();
     } catch (e) {
       console.error('Logout failed', e);
@@ -31,7 +32,7 @@ export default function Header() {
   return (
     <header className="w-full !px-6 !py-3 border-b border-border bg-background text-foreground flex justify-between items-center">
       <Link href="/" className="text-lg font-semibold tracking-tight">
-        <span className="text-primary text-3xl">🏥 Medinow</span>
+        <span className="text-primary text-3xl">Medinow</span>
       </Link>
       <nav className="flex items-center gap-2">
         {isLoggedIn ? (

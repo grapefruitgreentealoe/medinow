@@ -76,7 +76,6 @@ export function MediListPage({
 
   return (
     <div className="max-h-screen overflow-y-auto p-4" ref={scrollRef}>
-      <h2 className="text-lg font-semibold mb-2">의료기관 목록</h2>
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
