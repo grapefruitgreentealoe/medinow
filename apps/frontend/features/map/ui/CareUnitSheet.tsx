@@ -18,6 +18,7 @@ import { MediListPage } from './MediListPage';
 import CareUnitDetailPage from './CareUnitDetailPage';
 import { useCareUnitsQuery } from '@/features/map/model/useCareUnitsQuery';
 import { CareUnit } from '@/features/map/type';
+import { ArrowLeft } from 'lucide-react';
 
 interface CareUnitSheetProps {
   lat: number | null;
@@ -52,32 +53,34 @@ export default function CareUnitSheet({
 
   if (!open) return null;
 
-  const getTitle = () =>
-    page === 'list' ? '의료기관 목록' : (selected?.name ?? '병원 상세');
+  const getTitle = () => (page === 'list' ? '의료기관 목록' : '상세 정보');
 
   const getDescription = () =>
-    page === 'list'
-      ? '채팅, 즐겨찾기 설정을 해보세요'
-      : (selected?.address ?? '');
+    page === 'list' ? '채팅, 즐겨찾기 설정을 해보세요' : null;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="right" className="w-[90vw] sm:w-[400px] p-0">
-        <SheetHeader className="p-4 border-b">
-          <div className="flex justify-between items-center">
+      <SheetContent side="right" className="w-[90vw] sm:w-[400px] !p-0">
+        <SheetHeader className="!p-4 border-b">
+          <div className="relative flex justify-center items-center">
             {page === 'detail' && (
               <button
-                className="text-sm text-muted-foreground hover:text-foreground"
+                className="absolute left-0 text-muted-foreground hover:text-foreground"
                 onClick={() => setPage('list')}
               >
-                ← 목록
+                <ArrowLeft className="inline-block mr-1" />
               </button>
             )}
             <SheetTitle className="text-base font-semibold">
               {getTitle()}
             </SheetTitle>
           </div>
-          <SheetDescription>{getDescription()}</SheetDescription>
+
+          <SheetDescription>
+            <div className="relative flex justify-center items-center">
+              {getDescription()}
+            </div>
+          </SheetDescription>
         </SheetHeader>
 
         {page === 'list' ? (
