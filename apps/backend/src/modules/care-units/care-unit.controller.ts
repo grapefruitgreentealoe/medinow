@@ -121,26 +121,27 @@ export class CareUnitController {
     return this.careUnitAdminService.getCareUnitByCategory(category);
   }
 
-  @Post('badge')
-  @UseGuards(JwtAuthGuard)
-  @ApiExcludeEndpoint()
-  @ApiOperation({ summary: 'Admin : 배지 추가' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: '성공',
-    type: CareUnit,
-  })
-  async addBadge(@Body('id') id: string) {
-    return this.careUnitService.addBadge(id);
-  }
+  // 수동 뱃지 기능 주석처리
+  // @Post('badge')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiExcludeEndpoint()
+  // @ApiOperation({ summary: 'Admin : 배지 추가' })
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       id: { type: 'string' },
+  //     },
+  //   },
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: '성공',
+  //   type: CareUnit,
+  // })
+  // async addBadge(@Body('id') id: string) {
+  //   return this.careUnitService.addBadge(id);
+  // }
 
   @Get('hpId')
   @Public()

@@ -294,7 +294,7 @@ export class CareUnitService {
     return careUnit.nowOpen;
   }
 
-  // 수동 뱃지 추가 기능 주석 처리
+  // 수동 뱃지 기능 주석처리
   // // 💫배지 추가
   // async addBadge(id: string) {
   //   // 감사 기능 구현 후 감사 수에 따른 자동 배치 추가 필요
