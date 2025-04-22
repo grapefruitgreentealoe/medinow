@@ -24,7 +24,7 @@ import {
 import CareUnitSheet from './CareUnitSheet';
 import FilterMenu from './FilterMenu';
 import { categoryAtom, openStatusAtom } from '../atoms/filterAtom';
-import { getCategoryIconSvg } from '../utils';
+import { convertCoordsToDong, getCategoryIconSvg } from '../utils';
 
 const store = getDefaultStore();
 
@@ -191,7 +191,7 @@ export default function NearbyCareUnitsMap() {
           }
           return prev;
         });
-        // ✅ 중심 좌표도 갱신
+        // 중심 좌표도 갱신
         const c = map.getCenter();
         setLat((prev) =>
           Math.abs((prev ?? 0) - c.getLat()) > 0.0001 ? c.getLat() : prev
@@ -326,18 +326,4 @@ export default function NearbyCareUnitsMap() {
       <CareUnitSheet {...{ lat, lng, level, selectedCategory, openFilter }} />
     </div>
   );
-}
-
-async function convertCoordsToDong(lat: number, lng: number): Promise<string> {
-  const res = await fetch(
-    `https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${lng}&y=${lat}`,
-    {
-      headers: {
-        Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY}`,
-      },
-    }
-  );
-  const data = await res.json();
-  const dong = data.documents?.[0]?.region_3depth_name;
-  return dong ?? '알 수 없음';
 }
