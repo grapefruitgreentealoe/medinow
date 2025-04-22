@@ -11,17 +11,24 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { CareUnit } from '@/features/map/type';
-import { MediListSheet } from './MediListSheet';
 import { useCareUnitsQuery } from '../hooks/useCareUnitsQuery';
 import { ListIcon } from 'lucide-react';
 import { useSetAtom } from 'jotai';
 import { chatModalAtom } from '@/features/chat/store/chatModalAtom';
+import { getDefaultStore } from 'jotai';
+import {
+  detailSheetOpenAtom,
+  detailSheetPageAtom,
+  selectedCareUnitAtom,
+} from '@/atoms/detailSheetAtoms';
+import CareUnitSheet from './CareUnitSheet';
+
+const store = getDefaultStore();
 
 export default function NearbyCareUnitsMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const markersRef = useRef<kakao.maps.Marker[]>([]);
-  const overlayRef = useRef<kakao.maps.CustomOverlay | null>(null);
   const circleRef = useRef<kakao.maps.Circle | null>(null);
 
   const setChat = useSetAtom(chatModalAtom);
@@ -70,63 +77,37 @@ export default function NearbyCareUnitsMap() {
     circle.setMap(map);
     circleRef.current = circle;
   }
+  function createMarkersWithOverlay({
+    map,
+    data,
+  }: {
+    map: kakao.maps.Map;
+    data: CareUnit[];
+  }) {
+    if (!map || !data) return;
 
-  function createMarkersWithOverlay(map: kakao.maps.Map, data: CareUnit[]) {
     markersRef.current.forEach((m) => m.setMap(null));
-    const newMarkers: kakao.maps.Marker[] = [];
+    markersRef.current = [];
 
     data.forEach((unit) => {
       const position = new kakao.maps.LatLng(unit.lat, unit.lng);
-      const marker = new kakao.maps.Marker({ map, position });
-      marker.setTitle(unit.name);
-
-      let currentOpenInfoWindow: kakao.maps.InfoWindow | null = null;
-
-      data.forEach((unit) => {
-        const position = new kakao.maps.LatLng(unit.lat, unit.lng);
-        const marker = new kakao.maps.Marker({
-          map,
-          position,
-          clickable: true,
-        });
-
-        const infowindow = new kakao.maps.InfoWindow({
-          content: `<div style="padding:6px 12px; font-size:14px;">${unit.name}</div>`,
-        });
-
-        // PC: 마우스 호버
-        kakao.maps.event.addListener(marker, 'mouseover', () => {
-          if (currentOpenInfoWindow) currentOpenInfoWindow.close();
-          infowindow.open(map, marker);
-          currentOpenInfoWindow = infowindow;
-        });
-
-        kakao.maps.event.addListener(marker, 'mouseout', () => {
-          infowindow.close();
-          currentOpenInfoWindow = null;
-        });
-
-        // 모바일: 클릭(탭)용 - 토글 동작
-        kakao.maps.event.addListener(marker, 'click', () => {
-          // PC hover에서 열린 경우 닫기
-          if (currentOpenInfoWindow === infowindow) {
-            infowindow.close();
-            currentOpenInfoWindow = null;
-          } else {
-            if (currentOpenInfoWindow) currentOpenInfoWindow.close();
-            infowindow.open(map, marker);
-            currentOpenInfoWindow = infowindow;
-          }
-        });
-
-        newMarkers.push(marker);
+      const marker = new kakao.maps.Marker({
+        map,
+        position,
+        clickable: true,
+        title: unit.name,
       });
 
-      newMarkers.push(marker);
-    });
+      kakao.maps.event.addListener(marker, 'click', () => {
+        store.set(selectedCareUnitAtom, unit);
+        store.set(detailSheetOpenAtom, true);
+        store.set(detailSheetPageAtom, 'detail');
+      });
 
-    markersRef.current = newMarkers;
+      markersRef.current.push(marker);
+    });
   }
+
   function fitMapToBounds(
     map: kakao.maps.Map,
     lat: number,
@@ -200,7 +181,7 @@ export default function NearbyCareUnitsMap() {
   useEffect(() => {
     const map = mapInstance.current;
     if (!isMapReady || !map || !data) return;
-    createMarkersWithOverlay(map, data);
+    createMarkersWithOverlay({ map, data });
   }, [isMapReady, data]);
 
   // 3. bounds 설정
@@ -223,14 +204,10 @@ export default function NearbyCareUnitsMap() {
     setLevel(newLevel);
   };
 
-  const handleSelectFromList = (unit: CareUnit) => {
-    const map = mapInstance.current;
-    if (!map) return;
-    const latlng = new kakao.maps.LatLng(unit.lat, unit.lng);
-    map.panTo(latlng);
-    setLat(unit.lat);
-    setLng(unit.lng);
-    setSelectedMarker(unit);
+  const handleListButton = () => {
+    store.set(detailSheetOpenAtom, true); // 시트 열기
+    store.set(selectedCareUnitAtom, null); // 선택 해제 (선택된 병원 없음)
+    store.set(detailSheetPageAtom, 'list'); // 목록 페이지로 진입
   };
 
   return (
@@ -286,20 +263,12 @@ export default function NearbyCareUnitsMap() {
           <Button className="w-10 text-2xl" onClick={() => handleZoom('out')}>
             −
           </Button>
-          <MediListSheet
-            data={data ?? []}
-            isLoading={isLoading}
-            isFetching={isFetching}
-            hasNextPage={hasNextPage}
-            fetchNextPage={fetchNextPage}
-            onSelect={handleSelectFromList}
-          >
-            <Button className="w-10 text-xs">
-              <ListIcon />
-            </Button>
-          </MediListSheet>
+          <Button className="w-10 text-xs" onClick={handleListButton}>
+            <ListIcon />
+          </Button>
         </div>
       </div>
+      <CareUnitSheet {...{ lat, lng, level, selectedCategory, openFilter }} />
     </div>
   );
 }
