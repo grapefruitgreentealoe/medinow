@@ -168,6 +168,15 @@ export class UsersService {
   }
 
   async getUserByCareUnitId(careUnitId: string): Promise<User | null> {
+    const userProfile = await this.userProfileRepository.findOne({
+      where: { careUnit: { id: careUnitId } },
+      relations: ['user'],
+    });
+
+    if (userProfile && userProfile.user) {
+      return userProfile.user;
+    }
+
     return this.userRepository.findOne({
       where: { userProfile: { careUnit: { id: careUnitId } } },
       relations: ['userProfile', 'userProfile.careUnit'],

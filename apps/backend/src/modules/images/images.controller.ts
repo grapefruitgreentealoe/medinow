@@ -15,9 +15,9 @@ import {
   ApiConsumes,
   ApiBody,
   ApiOperation,
-  ApiResponse,
   ApiCookieAuth,
   ApiExcludeEndpoint,
+  ApiCreatedResponse,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RequestUser } from '../../common/decorators/request-user.decorator';
@@ -47,8 +47,7 @@ export class ImagesController {
       },
     },
   })
-  @ApiResponse({
-    status: 201,
+  @ApiCreatedResponse({
     description: '이미지 업로드 성공',
     schema: {
       type: 'object',
@@ -107,8 +106,7 @@ export class ImagesController {
       },
     },
   })
-  @ApiResponse({
-    status: 201,
+  @ApiCreatedResponse({
     description: '이미지 업로드 성공',
     schema: {
       type: 'object',
@@ -156,8 +154,7 @@ export class ImagesController {
       },
     },
   })
-  @ApiResponse({
-    status: 201,
+  @ApiCreatedResponse({
     description: '이미지 업로드 성공',
     schema: {
       type: 'object',
@@ -205,8 +202,7 @@ export class ImagesController {
       required: ['imageUrl'],
     },
   })
-  @ApiResponse({
-    status: 201,
+  @ApiCreatedResponse({
     description: '이미지 엔티티 생성 성공',
   })
   @Post('business-license')
@@ -232,8 +228,7 @@ export class ImagesController {
       required: ['imageUrl'],
     },
   })
-  @ApiResponse({
-    status: 201,
+  @ApiCreatedResponse({
     description: '이미지 엔티티 생성 성공',
   })
   @Post('user-profile')
@@ -259,8 +254,7 @@ export class ImagesController {
       required: ['imageUrl'],
     },
   })
-  @ApiResponse({
-    status: 201,
+  @ApiCreatedResponse({
     description: '이미지 엔티티 생성 성공',
   })
   @Post('care-unit')
