@@ -7,12 +7,15 @@ import {
   Param,
   Delete,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { RequestUser } from 'src/common/decorators/request-user.decorator';
 import { User } from 'src/modules/users/entities/user.entity';
+import { ResponseReviewDto } from './dto/response-review.dto';
+
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
@@ -21,14 +24,20 @@ export class ReviewsController {
   async createReview(
     @Body() createReviewDto: CreateReviewDto,
     @RequestUser() user: User,
-  ) {
+  ): Promise<ResponseReviewDto> {
     const review = await this.reviewsService.createReview(
       createReviewDto,
       user,
     );
     return {
       message: '리뷰가 성공적으로 생성되었습니다.',
-      review,
+      reviewId: review.id,
+      content: review.content,
+      thankMessage: review.thankMessage,
+      rating: review.rating,
+      isPublic: review.isPublic,
+      careUnitId: review.careUnit.id,
+      departmentId: review.department ? review.department.id : null,
     };
   }
 
@@ -41,18 +50,32 @@ export class ReviewsController {
       careUnitId,
       departmentId,
     );
-    return {
-      message: '리뷰가 성공적으로 조회되었습니다.',
-      reviews,
-    };
+    return reviews.map((review) => ({
+      reviewId: review.id,
+      content: review.content,
+      thankMessage: review.thankMessage,
+      rating: review.rating,
+      isPublic: review.isPublic,
+      careUnitId: review.careUnit.id,
+      departmentId: review.department.id,
+    }));
   }
 
   @Get(':id')
-  async getReviewById(@Param('id') id: string) {
+  async getReviewById(@Param('id') id: string): Promise<ResponseReviewDto> {
     const review = await this.reviewsService.getReviewById(id);
+    if (!review) {
+      throw new NotFoundException('리뷰를 찾을 수 없습니다.');
+    }
     return {
       message: '리뷰가 성공적으로 조회되었습니다.',
-      review,
+      reviewId: review.id,
+      content: review.content,
+      thankMessage: review.thankMessage,
+      rating: review.rating,
+      isPublic: review.isPublic,
+      careUnitId: review.careUnit.id,
+      departmentId: review.department.id,
     };
   }
 
@@ -61,7 +84,15 @@ export class ReviewsController {
     const reviews = await this.reviewsService.getReviewsByUserId(userId);
     return {
       message: '리뷰가 성공적으로 조회되었습니다.',
-      reviews,
+      reviews: reviews.map((review) => ({
+        reviewId: review.id,
+        content: review.content,
+        thankMessage: review.thankMessage,
+        rating: review.rating,
+        isPublic: review.isPublic,
+        careUnitId: review.careUnit.id,
+        departmentId: review.department.id,
+      })),
     };
   }
 
@@ -70,15 +101,23 @@ export class ReviewsController {
     @Param('id') id: string,
     @Body() updateReviewDto: UpdateReviewDto,
     @RequestUser() user: User,
-  ) {
-    const review = await this.reviewsService.updateReview(
-      id,
-      updateReviewDto,
-      user,
-    );
+  ): Promise<ResponseReviewDto> {
+    const review = await this.reviewsService.getReviewById(id);
+
+    if (!review) {
+      throw new NotFoundException('리뷰를 찾을 수 없습니다.');
+    }
+
+    await this.reviewsService.updateReview(id, updateReviewDto, user);
     return {
       message: '리뷰가 성공적으로 수정되었습니다.',
-      review,
+      reviewId: review.id,
+      content: review.content,
+      thankMessage: review.thankMessage,
+      rating: review.rating,
+      isPublic: review.isPublic,
+      careUnitId: review.careUnit.id,
+      departmentId: review.department.id,
     };
   }
 

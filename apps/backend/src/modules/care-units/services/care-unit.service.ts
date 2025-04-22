@@ -294,16 +294,57 @@ export class CareUnitService {
     return careUnit.nowOpen;
   }
 
-  // 💫배지 추가
-  async addBadge(id: string) {
-    // 감사 기능 구현 후 감사 수에 따른 자동 배치 추가 필요
+  // 수동 뱃지 기능 주석처리
+  // // 💫배지 추가
+  // async addBadge(id: string) {
+  //   // 감사 기능 구현 후 감사 수에 따른 자동 배치 추가 필요
+  //   const careUnit = await this.careUnitRepository.findOne({ where: { id } });
+  //   if (!careUnit) {
+  //     throw new NotFoundException('Care unit not found');
+  //   }
+  //   careUnit.isBadged = true;
+  //   await this.careUnitRepository.save(careUnit);
+  //   console.log('💫배지 추가 완료');
+  //   return careUnit;
+  // }
+
+  // // 💫배지 제거
+  // async removeBadge(id: string) {
+  //   const careUnit = await this.careUnitRepository.findOne({ where: { id } });
+  //   if (!careUnit) {
+  //     throw new NotFoundException('Care unit not found');
+  //   }
+  //   careUnit.isBadged = false;
+  //   await this.careUnitRepository.save(careUnit);
+  //   console.log('💫배지 제거 완료');
+  //   return careUnit;
+  // }
+
+  // 💫리뷰 수에 따른 배지 상태 업데이트
+  async updateBadgeByReviewCount(id: string, reviewCount: number) {
     const careUnit = await this.careUnitRepository.findOne({ where: { id } });
     if (!careUnit) {
-      throw new NotFoundException('Care unit not found');
+      throw new NotFoundException('의료기관을 찾을 수 없습니다');
     }
-    careUnit.isBadged = true;
-    await this.careUnitRepository.save(careUnit);
-    console.log('💫배지 추가 완료');
+
+    const BADGE_THRESHOLD = 5; // 배지 부여 기준 리뷰 수
+
+    if (reviewCount >= BADGE_THRESHOLD && !careUnit.isBadged) {
+      // 리뷰 수가 기준 이상이고 배지가 없는 경우 배지 추가
+      careUnit.isBadged = true;
+      await this.careUnitRepository.save(careUnit);
+      this.logger.log(
+        `의료기관 ${careUnit.name}에 리뷰 ${reviewCount}개로 배지 추가 완료`,
+      );
+    } else if (reviewCount < BADGE_THRESHOLD && careUnit.isBadged) {
+      // 리뷰 수가 기준 미만이고 배지가 있는 경우 배지 제거
+      careUnit.isBadged = false;
+      await this.careUnitRepository.save(careUnit);
+      this.logger.log(
+        `의료기관 ${careUnit.name}의 리뷰 ${reviewCount}개로 배지 제거 완료`,
+      );
+    }
+
     return careUnit;
   }
 
