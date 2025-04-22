@@ -20,6 +20,7 @@ import { CongestionOneService } from 'src/modules/congestion/services/congestion
 import { User } from 'src/modules/users/entities/user.entity';
 import { FavoritesService } from 'src/modules/favorites/favorites.service';
 import { CustomLoggerService } from 'src/shared/logger/logger.service';
+import { CareUnitCategory } from 'src/common/enums/careUnits.enum';
 
 @Injectable()
 export class CareUnitService {
@@ -144,15 +145,16 @@ export class CareUnitService {
     lat: number,
     lng: number,
     level: number = 1,
+    OpenStatus: boolean = true,
     category?: string,
     user?: User,
   ): Promise<PaginatedResponse<CareUnit>> {
-    const MAX_LEVEL = 5; // 최대 검색 반경 제한
+    const MAX_LEVEL = 10; // 최대 검색 반경 제한
     const { page, limit } = paginationDto;
     const skip = (page ? page - 1 : 0) * (limit ? limit : 10);
 
     this.logger.log(
-      `getCareUnitByCategoryAndLocation 호출 - 페이지: ${page}, 제한: ${limit}, 위도: ${lat}, 경도: ${lng}, 레벨: ${level}, 카테고리: ${category}`,
+      `getCareUnitByCategoryAndLocation 호출 - 페이지: ${page}, 제한: ${limit}, 위도: ${lat}, 경도: ${lng}, 레벨: ${level}, 카테고리: ${category}, 운영 중 필터링: ${OpenStatus}`,
     );
 
     for (let currentLevel = level; currentLevel <= MAX_LEVEL; currentLevel++) {
@@ -250,14 +252,14 @@ export class CareUnitService {
           }),
         );
 
-        // 운영 중인 곳만 필터링
-        const openCareUnits = careUnitsWithStatus.filter(
-          (unit) => unit.nowOpen,
-        );
+        // 운영 여부에 따라 필터링 (선택적)
+        const filteredCareUnits = OpenStatus
+          ? careUnitsWithStatus.filter((unit) => unit.nowOpen)
+          : careUnitsWithStatus;
 
-        if (openCareUnits.length > 0) {
+        if (filteredCareUnits.length > 0) {
           return createPaginatedResponse(
-            openCareUnits,
+            filteredCareUnits,
             total,
             page ? page : 1,
             limit ? limit : 10,
@@ -352,5 +354,12 @@ export class CareUnitService {
     careUnit.nowOpen = false;
     await this.careUnitRepository.save(careUnit);
     return false;
+  }
+
+  // careUnit을 hpId와 카테고리로 조회하여 가져오기 (department 조회 시 사용)
+  async getHospitalCareUnit(hpId: string, category: string) {
+    return this.careUnitRepository.findOne({
+      where: { hpId: hpId, category },
+    });
   }
 }

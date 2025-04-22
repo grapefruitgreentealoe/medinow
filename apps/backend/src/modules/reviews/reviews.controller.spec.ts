@@ -1,44 +1,33 @@
+// reviews.controller.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReviewsController } from './reviews.controller';
 import { ReviewsService } from './reviews.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Review } from './entities/review.entity';
-import { UsersService } from '../users/users.service';
-import { DepartmentsService } from '../departments/departments.service';
 
 describe('ReviewsController', () => {
   let controller: ReviewsController;
+  let service: ReviewsService;
 
   beforeEach(async () => {
+    const mockReviewsService = {
+      createReview: jest.fn(),
+      getReviews: jest.fn(),
+      getReviewById: jest.fn(),
+      updateReview: jest.fn(),
+      deleteReview: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ReviewsController],
       providers: [
-        ReviewsService,
         {
-          provide: getRepositoryToken(Review),
-          useFactory: () => ({
-            create: jest.fn(),
-            save: jest.fn(),
-            find: jest.fn(),
-            findOne: jest.fn(),
-          }),
-        },
-        {
-          provide: UsersService,
-          useFactory: () => ({
-            findUserById: jest.fn(),
-          }),
-        },
-        {
-          provide: DepartmentsService,
-          useFactory: () => ({
-            findDepartmentById: jest.fn(),
-          }),
+          provide: ReviewsService,
+          useValue: mockReviewsService,
         },
       ],
     }).compile();
 
     controller = module.get<ReviewsController>(ReviewsController);
+    service = module.get<ReviewsService>(ReviewsService);
   });
 
   it('should be defined', () => {
