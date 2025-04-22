@@ -13,7 +13,7 @@ export class WsJwtGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const client = context.switchToWs().getClient<Socket>();
-    const token = this.extractTokenFromHeader(client);
+    const token = this.extractToken(client);
 
     if (!token) {
       throw new WsException('인증 토큰이 없습니다');
@@ -35,11 +35,35 @@ export class WsJwtGuard implements CanActivate {
     }
   }
 
-  private extractTokenFromHeader(client: Socket): string | undefined {
+  private extractToken(client: Socket): string | undefined {
+    // 1. 헤더에서 토큰 찾기
     const auth = client.handshake.headers.authorization;
-    if (!auth) return undefined;
+    if (auth) {
+      const [type, token] = auth.split(' ');
+      if (type === 'Bearer' && token) {
+        return token;
+      }
+    }
 
-    const [type, token] = auth.split(' ');
-    return type === 'Bearer' ? token : undefined;
+    // 2. 쿠키에서 토큰 찾기
+    const cookies = client.handshake.headers.cookie;
+    if (cookies) {
+      const cookieMap = {};
+      cookies.split(';').forEach((cookie) => {
+        const [key, value] = cookie.trim().split('=');
+        cookieMap[key] = value;
+      });
+
+      if (cookieMap['accessToken']) {
+        return cookieMap['accessToken'];
+      }
+    }
+
+    // 3. 핸드셰이크 쿼리에서 토큰 찾기
+    if (client.handshake.query && client.handshake.query.token) {
+      return client.handshake.query.token as string;
+    }
+
+    return undefined;
   }
 }
