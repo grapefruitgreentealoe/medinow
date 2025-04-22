@@ -5,7 +5,7 @@ import {
   selectedCareUnitAtom,
   detailSheetOpenAtom,
   detailSheetPageAtom,
-} from '@/atoms/detailSheetAtoms';
+} from '@/features/map/atoms/detailSheetAtoms';
 
 import {
   Sheet,

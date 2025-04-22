@@ -14,13 +14,13 @@ import { CareUnit } from '@/features/map/type';
 import { useCareUnitsQuery } from '../hooks/useCareUnitsQuery';
 import { ListIcon } from 'lucide-react';
 import { useSetAtom } from 'jotai';
-import { chatModalAtom } from '@/features/chat/store/chatModalAtom';
+import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { getDefaultStore } from 'jotai';
 import {
   detailSheetOpenAtom,
   detailSheetPageAtom,
   selectedCareUnitAtom,
-} from '@/atoms/detailSheetAtoms';
+} from '@/features/map/atoms/detailSheetAtoms';
 import CareUnitSheet from './CareUnitSheet';
 
 const store = getDefaultStore();

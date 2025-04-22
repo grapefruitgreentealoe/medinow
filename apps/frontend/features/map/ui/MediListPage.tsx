@@ -4,14 +4,14 @@ import { useRef, useEffect } from 'react';
 import { CareUnit } from '@/features/map/type';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { getTMCoordFromLatLng } from '@/lib/kakao-utils';
+import { getTMCoordFromLatLng } from '@/shared/lib/kakao-utils';
 import { CareUnitCard } from './CareUnitCard';
 
 import { useSetAtom } from 'jotai';
 import {
   selectedCareUnitAtom,
   detailSheetPageAtom,
-} from '@/atoms/detailSheetAtoms';
+} from '@/features/map/atoms/detailSheetAtoms';
 
 interface MediListPageProps {
   data: CareUnit[];

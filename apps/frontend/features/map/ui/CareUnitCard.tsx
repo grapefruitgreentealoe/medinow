@@ -3,9 +3,9 @@
 import { CareUnit } from '@/features/map/type';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import { useSetAtom } from 'jotai';
-import { chatModalAtom } from '@/features/chat/store/chatModalAtom';
+import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { Star, StarOff, MessageSquare } from 'lucide-react';
 import { useToggleFavorite } from '../hooks/useOnToggleFavorite';
 import { renderTodayTime } from '../utils';

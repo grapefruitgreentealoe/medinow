@@ -1,7 +1,7 @@
 'use client';
 
 import { useAtom } from 'jotai';
-import { selectedCareUnitAtom } from '@/atoms/detailSheetAtoms';
+import { selectedCareUnitAtom } from '@/features/map/atoms/detailSheetAtoms';
 
 export default function DetailPage() {
   const [unit] = useAtom(selectedCareUnitAtom);

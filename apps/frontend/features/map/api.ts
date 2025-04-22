@@ -1,4 +1,4 @@
-import axiosInstance from '@/lib/axios';
+import axiosInstance from '@/shared/lib/axios';
 import { CareUnit } from './type';
 
 interface LocationByCategoryData {
