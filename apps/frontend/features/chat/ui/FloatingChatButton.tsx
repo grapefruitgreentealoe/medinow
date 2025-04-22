@@ -1,7 +1,7 @@
 'use client';
 
 import { useSetAtom } from 'jotai';
-import { chatModalAtom } from '../store/chatModalAtom';
+import { chatModalAtom } from '../atoms/chatModalAtom';
 import { Button } from '@/components/ui/button';
 
 export function FloatingChatButton() {

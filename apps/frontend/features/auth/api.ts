@@ -1,4 +1,4 @@
-import axiosInstance from '@/lib/axios';
+import axiosInstance from '@/shared/lib/axios';
 import { AdminSignupData, LoginData, SignupData } from './type';
 
 export const login = async (data: LoginData) => {
