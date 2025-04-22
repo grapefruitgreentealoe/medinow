@@ -14,10 +14,9 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
-import { MediListPage } from './MediListPage';
+import { CareUnitListPage } from './CareUnitListPage';
 import CareUnitDetailPage from './CareUnitDetailPage';
 import { useCareUnitsQuery } from '@/features/map/model/useCareUnitsQuery';
-import { CareUnit } from '@/features/map/type';
 import { ArrowLeft } from 'lucide-react';
 
 interface CareUnitSheetProps {
@@ -84,7 +83,7 @@ export default function CareUnitSheet({
         </SheetHeader>
 
         {page === 'list' ? (
-          <MediListPage
+          <CareUnitListPage
             data={data ?? []}
             isLoading={isLoading}
             hasNextPage={hasNextPage}

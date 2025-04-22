@@ -12,19 +12,19 @@ import {
   detailSheetPageAtom,
 } from '@/features/map/atoms/detailSheetAtoms';
 
-interface MediListPageProps {
+interface CareUnitListPageProps {
   data: CareUnit[];
   isLoading: boolean;
   hasNextPage: boolean | undefined;
   fetchNextPage: () => void;
 }
 
-export function MediListPage({
+export function CareUnitListPage({
   data,
   isLoading,
   hasNextPage,
   fetchNextPage,
-}: MediListPageProps) {
+}: CareUnitListPageProps) {
   const observerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
