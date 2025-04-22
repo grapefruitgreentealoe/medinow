@@ -114,7 +114,6 @@ export function MediListSheet({
             ))
           )}
           <div ref={observerRef} className="h-12" />
-          {isFetching && <Skeleton className="h-12 w-full mt-2" />}
         </div>
       </SheetContent>
     </Sheet>

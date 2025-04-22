@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -23,7 +24,6 @@ export default function NearbyCareUnitsMap() {
   const markersRef = useRef<kakao.maps.Marker[]>([]);
   const overlayRef = useRef<kakao.maps.CustomOverlay | null>(null);
   const circleRef = useRef<kakao.maps.Circle | null>(null);
-  const idleTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const setChat = useSetAtom(chatModalAtom);
 
@@ -36,6 +36,7 @@ export default function NearbyCareUnitsMap() {
   const [lng, setLng] = useState<number | null>(null);
   const [level, setLevel] = useState<number>(5);
   const [isManualZoom, setIsManualZoom] = useState(false);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   const radius = 0.005 * level;
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
@@ -49,6 +50,88 @@ export default function NearbyCareUnitsMap() {
       selectedCategory,
     });
 
+  function drawRadiusCircle(
+    map: kakao.maps.Map,
+    lat: number,
+    lng: number,
+    radius: number
+  ) {
+    if (circleRef.current) circleRef.current.setMap(null);
+    const circle = new kakao.maps.Circle({
+      center: new kakao.maps.LatLng(lat, lng),
+      radius: radius * 111000,
+      strokeWeight: 1,
+      strokeColor: '#6366F1',
+      strokeOpacity: 0.8,
+      fillColor: '#6366F140',
+      fillOpacity: 0.3,
+    });
+    circle.setMap(map);
+    circleRef.current = circle;
+  }
+
+  function createMarkersWithOverlay(map: kakao.maps.Map, data: CareUnit[]) {
+    markersRef.current.forEach((m) => m.setMap(null));
+    const newMarkers: kakao.maps.Marker[] = [];
+
+    data.forEach((unit) => {
+      const position = new kakao.maps.LatLng(unit.lat, unit.lng);
+      const marker = new kakao.maps.Marker({ map, position });
+
+      kakao.maps.event.addListener(marker, 'click', () => {
+        if (overlayRef.current) overlayRef.current.setMap(null);
+
+        const overlayContent = document.createElement('div');
+        overlayContent.innerHTML = `
+        <div class="marker-popover">
+          <strong>${unit.name}</strong><br/>
+          <button id="popover-detail-${unit.id}">상세</button>
+          <button id="popover-chat-${unit.id}">💬 채팅</button>
+        </div>`;
+
+        const overlay = new kakao.maps.CustomOverlay({
+          content: overlayContent,
+          position,
+          yAnchor: 1,
+        });
+
+        overlay.setMap(map);
+        overlayRef.current = overlay;
+
+        setTimeout(() => {
+          document
+            .getElementById(`popover-detail-${unit.id}`)
+            ?.addEventListener('click', () => {
+              setSelectedMarker(unit);
+              overlay.setMap(null);
+            });
+          document
+            .getElementById(`popover-chat-${unit.id}`)
+            ?.addEventListener('click', () => {
+              setChat({ isOpen: true, target: unit });
+              overlay.setMap(null);
+            });
+        }, 0);
+      });
+
+      newMarkers.push(marker);
+    });
+
+    markersRef.current = newMarkers;
+  }
+  function fitMapToBounds(
+    map: kakao.maps.Map,
+    lat: number,
+    lng: number,
+    radius: number
+  ) {
+    const bounds = new kakao.maps.LatLngBounds(
+      new kakao.maps.LatLng(lat - radius, lng - radius),
+      new kakao.maps.LatLng(lat + radius, lng + radius)
+    );
+    map.setBounds(bounds);
+  }
+
   useEffect(() => {
     if (!window.kakao?.maps || !mapRef.current || mapInstance.current) return;
 
@@ -56,21 +139,29 @@ export default function NearbyCareUnitsMap() {
       const center = new kakao.maps.LatLng(37.5665, 126.978);
       const map = new kakao.maps.Map(mapRef.current!, { center, level });
       mapInstance.current = map;
+      setIsMapReady(true); // ✅ 맵 준비 완료!
 
       kakao.maps.event.addListener(map, 'idle', () => {
-        if (idleTimeout.current) clearTimeout(idleTimeout.current);
-        idleTimeout.current = setTimeout(() => {
-          const c = map.getCenter();
-          setLat((prev) =>
-            Math.abs((prev ?? 0) - c.getLat()) > 0.0001 ? c.getLat() : prev
-          );
-          setLng((prev) =>
-            Math.abs((prev ?? 0) - c.getLng()) > 0.0001 ? c.getLng() : prev
-          );
-        }, 300);
+        const currentLevel = map.getLevel();
+        //  사용자 조작으로 줌 레벨이 바뀐 경우 level 갱신
+        setLevel((prev) => {
+          if (prev !== currentLevel) {
+            setIsManualZoom(true); // 사용자가 줌했단 뜻
+            return Math.max(1, Math.min(5, currentLevel));
+          }
+          return prev;
+        });
+        // ✅ 중심 좌표도 갱신
+        const c = map.getCenter();
+        setLat((prev) =>
+          Math.abs((prev ?? 0) - c.getLat()) > 0.0001 ? c.getLat() : prev
+        );
+        setLng((prev) =>
+          Math.abs((prev ?? 0) - c.getLng()) > 0.0001 ? c.getLng() : prev
+        );
       });
     });
-  }, []);
+  }, [level]);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -90,90 +181,27 @@ export default function NearbyCareUnitsMap() {
     );
   }, []);
 
+  // 1. Circle 그리기
   useEffect(() => {
     const map = mapInstance.current;
-    if (!map || !data || lat == null || lng == null) return;
+    if (!isMapReady || !map || lat == null || lng == null) return;
+    drawRadiusCircle(map, lat, lng, radius);
+  }, [isMapReady, lat, lng, radius, data]);
 
-    if (circleRef.current) circleRef.current.setMap(null);
-    const circle = new kakao.maps.Circle({
-      center: new kakao.maps.LatLng(lat, lng),
-      radius: radius * 111000,
-      strokeWeight: 1,
-      strokeColor: '#6366F1',
-      strokeOpacity: 0.8,
-      fillColor: '#6366F140',
-      fillOpacity: 0.3,
-    });
-    circle.setMap(map);
-    circleRef.current = circle;
+  // 2. 마커 그리기
+  useEffect(() => {
+    const map = mapInstance.current;
+    if (!isMapReady || !map || !data) return;
+    createMarkersWithOverlay(map, data);
+  }, [isMapReady, data]);
 
-    markersRef.current.forEach((m) => m.setMap(null));
-    const newMarkers: kakao.maps.Marker[] = [];
-
-    data.forEach((unit: CareUnit) => {
-      const position = new kakao.maps.LatLng(unit.lat, unit.lng);
-      const marker = new kakao.maps.Marker({ map, position });
-
-      kakao.maps.event.addListener(marker, 'click', () => {
-        if (overlayRef.current) overlayRef.current.setMap(null);
-
-        const overlayContent = document.createElement('div');
-        overlayContent.innerHTML = `
-          <div class="marker-popover">
-            <strong>${unit.name}</strong><br/>
-            <button id="popover-detail-${unit.id}" style="margin-top: 4px; padding: 2px 6px; font-size: 12px;">상세</button>
-            <button id="popover-chat-${unit.id}" style="margin-top: 4px; padding: 2px 6px; font-size: 12px;">💬 채팅</button>
-          </div>`;
-
-        const overlay = new kakao.maps.CustomOverlay({
-          content: overlayContent,
-          position,
-          yAnchor: 1,
-        });
-
-        overlay.setMap(map);
-        overlayRef.current = overlay;
-
-        setTimeout(() => {
-          const detailBtn = document.getElementById(
-            `popover-detail-${unit.id}`
-          );
-          const chatBtn = document.getElementById(`popover-chat-${unit.id}`);
-
-          if (detailBtn) {
-            detailBtn.onclick = () => {
-              setSelectedMarker(unit);
-              overlay.setMap(null);
-            };
-          }
-
-          if (chatBtn) {
-            chatBtn.onclick = () => {
-              setChat({ isOpen: true, target: unit });
-              overlay.setMap(null);
-            };
-          }
-        }, 0);
-      });
-
-      newMarkers.push(marker);
-    });
-
-    markersRef.current = newMarkers;
-
-    const bounds = new kakao.maps.LatLngBounds(
-      new kakao.maps.LatLng(lat - radius, lng - radius),
-      new kakao.maps.LatLng(lat + radius, lng + radius)
-    );
-    // 🔒 수동 줌 상태에서는 bounds 설정하지 않음
-    if (!isManualZoom) {
-      const bounds = new kakao.maps.LatLngBounds(
-        new kakao.maps.LatLng(lat - radius, lng - radius),
-        new kakao.maps.LatLng(lat + radius, lng + radius)
-      );
-      map.setBounds(bounds);
-    }
-  }, [data, lat, lng, level, radius]);
+  // 3. bounds 설정
+  useEffect(() => {
+    const map = mapInstance.current;
+    if (!isMapReady || !map || lat == null || lng == null || isManualZoom)
+      return;
+    fitMapToBounds(map, lat, lng, radius);
+  }, [isMapReady, lat, lng, radius, isManualZoom]);
 
   const handleZoom = (dir: 'in' | 'out') => {
     const map = mapInstance.current;
@@ -182,7 +210,7 @@ export default function NearbyCareUnitsMap() {
     let newLevel = dir === 'in' ? mapLevel - 1 : mapLevel + 1;
 
     // 🔒 level 하한 / 상한 제한 추가 (예: 1~14)
-    newLevel = Math.max(1, Math.min(14, newLevel));
+    newLevel = Math.max(1, Math.min(5, newLevel));
     setIsManualZoom(true);
 
     map.setLevel(newLevel);
