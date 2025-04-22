@@ -31,7 +31,7 @@ export class DepartmentsService {
     private readonly redisService: RedisService,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_11AM)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async syncHospitalDepartments() {
     console.log('🔄 병원 진료과목 동기화 시작');
     try {
@@ -81,7 +81,9 @@ export class DepartmentsService {
           const redisKey = `${this.REDIS_DEPARTMENT_KEY}${hospital.hpid}`;
           const cachedDepartments = await this.redisService.get(redisKey);
           const existingDepartments = cachedDepartments
-            ? JSON.parse(cachedDepartments)
+            ? Array.isArray(JSON.parse(cachedDepartments))
+              ? JSON.parse(cachedDepartments)
+              : []
             : await this.departmentRepository.find({
                 where: { careUnitId: hospitalCareUnit.id },
               });
@@ -91,22 +93,28 @@ export class DepartmentsService {
             .split(',')
             .map((dgIdName) => dgIdName.trim())
             .filter((dgIdName) => dgIdName)
-            .map((dgIdName) => ({
-              name: dgIdName,
-              careUnitId: hospitalCareUnit.id,
-            }));
+            .map(
+              (dgIdName): Partial<Department> => ({
+                name: dgIdName,
+                careUnitId: hospitalCareUnit.id,
+              }),
+            );
 
-          // 6. 삭제된 진료과목 찾기
-          const departmentsToDelete = existingDepartments.filter(
-            (existing) =>
-              !newDepartments.some((newDept) => newDept.name === existing.name),
+          // 6. 중복 제거를 위해 Set 사용
+          const uniqueDepartments = Array.from(
+            new Set(newDepartments.map((dept) => dept.name)),
+          ).map(
+            (name): Partial<Department> => ({
+              name: name as string,
+              careUnitId: hospitalCareUnit.id,
+            }),
           );
 
-          // 7. 새로운 진료과목 찾기
-          const departmentsToAdd = newDepartments.filter(
-            (newDept) =>
-              !existingDepartments.some(
-                (existing) => existing.name === newDept.name,
+          // 7. 삭제된 진료과목 찾기
+          const departmentsToDelete = existingDepartments.filter(
+            (existing) =>
+              !uniqueDepartments.some(
+                (newDept) => newDept.name === existing.name,
               ),
           );
 
@@ -117,28 +125,29 @@ export class DepartmentsService {
           }
 
           // 9. 추가 실행
-          if (departmentsToAdd.length > 0) {
-            const newDeptEntities = departmentsToAdd.map((dept) =>
-              this.departmentRepository.create(dept),
+          if (uniqueDepartments.length > 0) {
+            await this.departmentRepository.upsert(
+              uniqueDepartments as Partial<Department>[],
+              ['careUnitId', 'name'],
             );
-            await this.departmentRepository.save(newDeptEntities);
-            addedCount += departmentsToAdd.length;
+            addedCount += uniqueDepartments.length;
           }
 
           // 10. Redis 업데이트
-          if (departmentsToDelete.length > 0 || departmentsToAdd.length > 0) {
+          if (departmentsToDelete.length > 0 || uniqueDepartments.length > 0) {
             const updatedDepartments = await this.departmentRepository.find({
               where: { careUnitId: hospitalCareUnit.id },
             });
             await this.redisService.set(
               redisKey,
               JSON.stringify(updatedDepartments),
+              24 * 3600, // 24시간
             );
             updatedCount++;
             console.log(
               `🔄 ${hospital.dutyName} 진료과목 업데이트:`,
               `삭제(${departmentsToDelete.length}),`,
-              `추가(${departmentsToAdd.length})`,
+              `추가(${uniqueDepartments.length})`,
             );
           }
         } catch (error) {
@@ -192,16 +201,16 @@ export class DepartmentsService {
   // 초기 DB세팅 - hospital 진료과목 데이터 저장
   async saveHospitalDepartments() {
     try {
-      console.log('1️⃣ 병원 진료과목 API 호출 시작');
+      console.log('▶️ 병원 진료과목 API 호출 시작');
       const url = `${this.HOSPITAL_BASIC_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=1000000&_type=json`;
-      console.log('2️⃣ API URL:', url);
+      console.log('▶️ API URL:', url);
       const response = await fetch(url, {
         headers: {
           Accept: 'application/json',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
         },
       });
-      console.log('3️⃣ API 응답 상태:', response.status);
+      console.log('▶️API 응답 상태:', response.status);
       const text = await response.text();
       if (text.startsWith('<')) {
         console.error('❌ XML/HTML 응답 감지');
@@ -233,30 +242,72 @@ export class DepartmentsService {
             skippedCount++;
             continue; // 다음 병원으로 넘어감
           }
+          const redisKey = `${this.REDIS_DEPARTMENT_KEY}${hospital.hpid}`;
 
-          // 기존 진료과목 데이터 삭제 (중복 방지)
-          await this.departmentRepository.delete({
-            careUnitId: hospitalCareUnit.id,
-          });
+          const cachedDepartments = await this.redisService.get(redisKey);
+          const existingDepartments = cachedDepartments
+            ? Array.isArray(JSON.parse(cachedDepartments))
+              ? JSON.parse(cachedDepartments)
+              : []
+            : await this.departmentRepository.find({
+                where: { careUnitId: hospitalCareUnit.id },
+              });
 
           // 새로운 진료과목 데이터 저장
-          const departments = hospital.dgidIdName
+          const newDepartments = hospital.dgidIdName
             .split(',')
-            .map((dgIdName) => dgIdName.trim()) // 공백 제거
-            .filter((dgIdName) => dgIdName) // 빈 문자열 제거
-            .map((dgIdName) => {
-              return this.departmentRepository.create({
+            .map((dgIdName) => dgIdName.trim())
+            .filter((dgIdName) => dgIdName)
+            .map(
+              (dgIdName): Partial<Department> => ({
                 name: dgIdName,
                 careUnitId: hospitalCareUnit.id,
-              });
-            });
+              }),
+            );
 
-          await this.departmentRepository.save(departments);
+          // 중복 제거를 위해 Set 사용
+          const uniqueDepartments = Array.from(
+            new Set(newDepartments.map((dept) => dept.name)),
+          ).map(
+            (name): Partial<Department> => ({
+              name: name as string,
+              careUnitId: hospitalCareUnit.id,
+            }),
+          );
+
+          const departmentsToDelete = existingDepartments.filter(
+            (existing) =>
+              !uniqueDepartments.some(
+                (newDept) => newDept.name === existing.name,
+              ),
+          );
+
+          if (departmentsToDelete.length > 0) {
+            await this.departmentRepository.remove(departmentsToDelete);
+          }
+
+          // upsert를 사용하여 중복 에러 방지
+          if (uniqueDepartments.length > 0) {
+            await this.departmentRepository.upsert(uniqueDepartments, [
+              'careUnitId',
+              'name',
+            ]);
+          }
+
+          // Redis 업데이트
+          const updatedDepartments = await this.departmentRepository.find({
+            where: { careUnitId: hospitalCareUnit.id },
+          });
+          await this.redisService.set(
+            redisKey,
+            JSON.stringify(updatedDepartments),
+            3600 * 24, // TTL 24시간
+          );
           successCount++;
 
           if (successCount % 1000 === 0) {
             console.log(
-              `6️⃣ 진행 상황: ${successCount}/${hospitalItems.length} 처리 완료`,
+              `✨ 진행 상황: ${successCount}/${hospitalItems.length} 처리 완료`,
             );
           }
         } catch (error) {
@@ -268,7 +319,6 @@ export class DepartmentsService {
           errorCount++;
         }
       }
-
       console.log('🎉 병원 진료과목 저장 완료');
       console.log(
         `✅ 성공: ${successCount}, ⚠️ 건너뜀: ${skippedCount}, ❌ 실패: ${errorCount}`,
