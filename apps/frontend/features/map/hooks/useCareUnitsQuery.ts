@@ -19,7 +19,7 @@ export function useCareUnitsQuery({
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
   const query = useInfiniteQuery({
     staleTime: 5000,
-    queryKey: ['careUnits', roundedLat, roundedLng, selectedCategory],
+    queryKey: ['careUnits', roundedLat, roundedLng, level, selectedCategory],
     queryFn: async ({ pageParam = 1 }) => {
       if (lat === null || lng === null) return { items: [], hasNext: false };
 
