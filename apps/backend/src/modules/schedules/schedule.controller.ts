@@ -3,7 +3,6 @@ import { ScheduleService } from './schedule.service';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Public } from 'src/modules/auth/decorators/public.decorator';
 
-@ApiTags('schedules')
 @Controller('schedules')
 export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}

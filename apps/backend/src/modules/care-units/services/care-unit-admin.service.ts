@@ -28,7 +28,7 @@ export class CareUnitAdminService {
     private readonly redisService: RedisService,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_DAY_AT_11AM)
   async syncCareUnits() {
     console.log('🔄 의료기관 동기화 시작');
     try {
@@ -73,7 +73,7 @@ export class CareUnitAdminService {
 
         for (const careUnit of careUnits) {
           currentHpIds.add(careUnit.hpId);
-          const redisKey = `${this.REDIS_CARE_UNIT_KEY}${careUnit.hpId}`;
+          const redisKey = `${this.REDIS_CARE_UNIT_KEY}${careUnit.hpId}:${careUnit.category}`;
           const cachedData = await this.redisService.get(redisKey);
 
           if (!cachedData) {
@@ -85,7 +85,10 @@ export class CareUnitAdminService {
             // 기존 의료기관 업데이트
             const existingData = JSON.parse(cachedData);
             if (this.hasChanges(existingData, careUnit)) {
-              await this.careUnitRepository.save(careUnit);
+              await this.careUnitRepository.upsert(careUnit, [
+                'hpId',
+                'category',
+              ]);
               await this.redisService.set(redisKey, JSON.stringify(careUnit));
               updatedCount++;
             }
@@ -95,9 +98,9 @@ export class CareUnitAdminService {
 
       // 삭제된 의료기관 처리
       for (const key of allRedisKeys) {
-        const hpId = key.replace(this.REDIS_CARE_UNIT_KEY, '');
+        const [hpId, category] = key.split(':');
         if (!currentHpIds.has(hpId)) {
-          await this.careUnitRepository.delete({ hpId });
+          await this.careUnitRepository.delete({ hpId, category });
           await this.redisService.del(key);
           deletedCount++;
         }
@@ -240,7 +243,7 @@ export class CareUnitAdminService {
 
           // Redis에 저장
           for (const careUnit of careUnits) {
-            const redisKey = `${this.REDIS_CARE_UNIT_KEY}${careUnit.hpId}`;
+            const redisKey = `${this.REDIS_CARE_UNIT_KEY}${careUnit.hpId}:${careUnit.category}`;
             await this.redisService.set(redisKey, JSON.stringify(careUnit));
           }
 
@@ -315,7 +318,7 @@ export class CareUnitAdminService {
 
           // Redis에 저장
           for (const emergencyUnit of emergencyUnits) {
-            const redisKey = `${this.REDIS_CARE_UNIT_KEY}${emergencyUnit.hpId}`;
+            const redisKey = `${this.REDIS_CARE_UNIT_KEY}${emergencyUnit.hpId}:${emergencyUnit.category}`;
             await this.redisService.set(
               redisKey,
               JSON.stringify(emergencyUnit),
