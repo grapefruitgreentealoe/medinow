@@ -13,7 +13,7 @@ import {
 import { CareUnit } from '@/features/map/type';
 import { useCareUnitsQuery } from '../model/useCareUnitsQuery';
 import { ListIcon } from 'lucide-react';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { getDefaultStore } from 'jotai';
 import {
@@ -22,6 +22,8 @@ import {
   selectedCareUnitAtom,
 } from '@/features/map/atoms/detailSheetAtoms';
 import CareUnitSheet from './CareUnitSheet';
+import FilterMenu from './FilterMenu';
+import { categoryAtom, openStatusAtom } from '../atoms/filterAtom';
 
 const store = getDefaultStore();
 
@@ -35,8 +37,8 @@ export default function NearbyCareUnitsMap() {
     lng: 127.0577,
   });
   const [location, setLocation] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('전체');
-  const [openFilter, setOpenFilter] = useState<string>('true');
+  const selectedCategory = useAtomValue(categoryAtom);
+  const openFilter = useAtomValue(openStatusAtom);
   const [lat, setLat] = useState<number | null>(37.5468);
   const [lng, setLng] = useState<number | null>(127.0577);
   const [level, setLevel] = useState<number>(5);
@@ -301,33 +303,6 @@ export default function NearbyCareUnitsMap() {
             현재 위치로 돌아가기
           </Button>
         </div>
-
-        <div className="flex items-center gap-2 justify-end w-[80vw]">
-          <Label>기관 종류</Label>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[120px] h-9 border-muted text-sm bg-white hover:bg-muted">
-              <SelectValue placeholder="종류 선택" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="전체">전체</SelectItem>
-              <SelectItem value="응급실">응급실</SelectItem>
-              <SelectItem value="약국">약국</SelectItem>
-              <SelectItem value="병원">병원</SelectItem>
-            </SelectContent>
-            <div className="w-[10px]" />
-
-            <Label>운영상태</Label>
-          </Select>
-          <Select value={openFilter} onValueChange={setOpenFilter}>
-            <SelectTrigger className="w-[120px] h-9 border-muted text-sm bg-white hover:bg-muted">
-              <SelectValue placeholder="운영상태" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={'true'}>운영중</SelectItem>
-              <SelectItem value={'false'}>전체</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       </div>
       <div className="relative h-[90vh]">
         <div
@@ -338,7 +313,7 @@ export default function NearbyCareUnitsMap() {
           <Button
             size="icon"
             variant="ghost"
-            className="w-9 h-9 text-xl bg-white hover:bg-muted rounded-md shadow-sm"
+            className="w-9 h-9 text-xl bg-white hover:bg-primary rounded-md shadow-sm"
             onClick={() => mapInstance.current?.setLevel(level - 1)}
           >
             +
@@ -346,7 +321,7 @@ export default function NearbyCareUnitsMap() {
           <Button
             size="icon"
             variant="ghost"
-            className="w-9 h-9 text-xl bg-white hover:bg-muted rounded-md shadow-sm"
+            className="w-9 h-9 text-xl bg-white hover:bg-primary rounded-md shadow-sm"
             onClick={() => mapInstance.current?.setLevel(level + 1)}
           >
             −
@@ -354,7 +329,7 @@ export default function NearbyCareUnitsMap() {
           <Button
             size="icon"
             variant="ghost"
-            className="w-9 h-9 bg-white hover:bg-muted rounded-md shadow-sm"
+            className="w-9 h-9 bg-white hover:bg-primary rounded-md shadow-sm"
             onClick={() => {
               store.set(detailSheetOpenAtom, true);
               store.set(selectedCareUnitAtom, null);
@@ -363,6 +338,7 @@ export default function NearbyCareUnitsMap() {
           >
             <ListIcon size={18} />
           </Button>
+          <FilterMenu />
         </div>
       </div>
       <CareUnitSheet {...{ lat, lng, level, selectedCategory, openFilter }} />

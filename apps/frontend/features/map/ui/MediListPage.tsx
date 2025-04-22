@@ -4,7 +4,7 @@ import { useRef, useEffect } from 'react';
 import { CareUnit } from '@/features/map/type';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { getTMCoordFromLatLng } from '@/shared/lib/kakao-utils';
+import { getTMCoordFromLatLng } from '@/lib/kakao-utils';
 import { CareUnitCard } from './CareUnitCard';
 
 import { useSetAtom } from 'jotai';
