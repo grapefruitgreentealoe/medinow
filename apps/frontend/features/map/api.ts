@@ -15,8 +15,9 @@ export const locationByCategory = async (
   data: LocationByCategoryData
 ): Promise<CareUnit[]> => {
   const { lat, lng, level, category, page, limit, OpenStatus } = data;
+  const isLogin = window.__INITIAL_IS_LOGGED_IN__;
   const res = await axiosInstance.get(
-    `/care-units/location-by-category?lat=${lat}&lng=${lng}&level=${level}${category ? `&category=${category}` : ''}&page=${page}&limit=${limit}&OpenStatus=${OpenStatus}`
+    `/care-units/${isLogin ? 'location-by-category-login' : 'location-by-category'}?lat=${lat}&lng=${lng}&level=${level}${category ? `&category=${category}` : ''}&page=${page}&limit=${limit}&OpenStatus=${OpenStatus}`
   );
   return res.data.items;
 };
