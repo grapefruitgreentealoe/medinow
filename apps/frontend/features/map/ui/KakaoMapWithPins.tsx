@@ -30,16 +30,13 @@ export default function NearbyCareUnitsMap() {
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const markersRef = useRef<kakao.maps.CustomOverlay[]>([]);
   const circleRef = useRef<kakao.maps.Circle | null>(null);
-  const [initialLocation, setInitialLocation] = useState<{
-    lat: number;
-    lng: number;
-  }>({ lat: 37.5468, lng: 127.0577 });
+  const [initialLocation, setInitialLocation] = useState({
+    lat: 37.5468,
+    lng: 127.0577,
+  });
   const [location, setLocation] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<
-    '전체' | '응급실' | '약국' | '병원'
-  >('전체');
+  const [selectedCategory, setSelectedCategory] = useState<string>('전체');
   const [openFilter, setOpenFilter] = useState<string>('true');
-  const [selectedMarker, setSelectedMarker] = useState<CareUnit | null>(null);
   const [lat, setLat] = useState<number | null>(37.5468);
   const [lng, setLng] = useState<number | null>(127.0577);
   const [level, setLevel] = useState<number>(5);
@@ -53,7 +50,7 @@ export default function NearbyCareUnitsMap() {
   const { data } = useCareUnitsQuery({
     lat: roundedLat,
     lng: roundedLng,
-    level: level,
+    level,
     selectedCategory,
     OpenStatus: JSON.parse(openFilter) as boolean,
   });
@@ -283,8 +280,6 @@ export default function NearbyCareUnitsMap() {
     const { lat, lng } = initialLocation;
     setLat(lat);
     setLng(lng);
-
-    // 지도 중심을 초기 위치로 설정
     if (mapInstance.current) {
       const center = new kakao.maps.LatLng(lat, lng);
       mapInstance.current.setCenter(center);
@@ -293,22 +288,21 @@ export default function NearbyCareUnitsMap() {
 
   return (
     <div className="p-4 space-y-2">
-      <div className="flex justify-between items-center mb-2">
-        <Label>현재 위치: {location ?? '엘리스'}</Label>
-        <div className="flex">
+      <div className="flex justify-between items-center gap-[10px] mb-2">
+        <Label className="text-sm text-muted-foreground">
+          현재 위치: {location ?? '엘리스'}
+        </Label>
+        <div className="flex items-center gap-2">
           <Button
-            className="w-auto  text-sm cursor-pointer"
+            variant="ghost"
+            size="sm"
+            className="text-sm !px-3"
             onClick={handleFirstLocationButton}
           >
-            <div>현재 위치로 돌아가기</div>
+            현재 위치로 돌아가기
           </Button>
-          <Select
-            value={selectedCategory}
-            onValueChange={(v: '전체' | '응급실' | '약국' | '병원') => {
-              setSelectedCategory(v);
-            }}
-          >
-            <SelectTrigger className="w-[120px]">
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-[120px] h-9 border-muted text-sm bg-white hover:bg-muted">
               <SelectValue placeholder="종류 선택" />
             </SelectTrigger>
             <SelectContent>
@@ -318,13 +312,8 @@ export default function NearbyCareUnitsMap() {
               <SelectItem value="병원">병원</SelectItem>
             </SelectContent>
           </Select>
-          <Select
-            value={openFilter}
-            onValueChange={(v: string) => {
-              setOpenFilter(v);
-            }}
-          >
-            <SelectTrigger className="w-[120px]">
+          <Select value={openFilter} onValueChange={setOpenFilter}>
+            <SelectTrigger className="w-[120px] h-9 border-muted text-sm bg-white hover:bg-muted">
               <SelectValue placeholder="운영상태" />
             </SelectTrigger>
             <SelectContent>
@@ -334,24 +323,39 @@ export default function NearbyCareUnitsMap() {
           </Select>
         </div>
       </div>
-      <div className="h-[20px]" />
-      <div className="relative">
+      <div className="relative h-[90vh]">
         <div
           ref={mapRef}
-          className="w-full h-[90vh] rounded-xl bg-gray-100 z-0"
+          className="w-full h-full rounded-xl bg-gray-100 z-0"
         />
-        <div className="absolute top-4 right-4 flex flex-col gap-1">
+        <div className="absolute top-4 right-4 flex flex-col gap-2">
           <Button
-            className="w-10 text-2xl cursor-pointer"
-            onClick={() => handleZoom('in')}
+            size="icon"
+            variant="ghost"
+            className="w-9 h-9 text-xl bg-white hover:bg-muted rounded-md shadow-sm"
+            onClick={() => mapInstance.current?.setLevel(level - 1)}
           >
             +
           </Button>
-          <Button className="w-10 text-2xl" onClick={() => handleZoom('out')}>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="w-9 h-9 text-xl bg-white hover:bg-muted rounded-md shadow-sm"
+            onClick={() => mapInstance.current?.setLevel(level + 1)}
+          >
             −
           </Button>
-          <Button className="w-10 text-xs" onClick={handleListButton}>
-            <ListIcon />
+          <Button
+            size="icon"
+            variant="ghost"
+            className="w-9 h-9 bg-white hover:bg-muted rounded-md shadow-sm"
+            onClick={() => {
+              store.set(detailSheetOpenAtom, true);
+              store.set(selectedCareUnitAtom, null);
+              store.set(detailSheetPageAtom, 'list');
+            }}
+          >
+            <ListIcon size={18} />
           </Button>
         </div>
       </div>
