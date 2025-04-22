@@ -24,6 +24,7 @@ import {
 import CareUnitSheet from './CareUnitSheet';
 import FilterMenu from './FilterMenu';
 import { categoryAtom, openStatusAtom } from '../atoms/filterAtom';
+import { getCategoryIconSvg } from '../utils';
 
 const store = getDefaultStore();
 
@@ -55,18 +56,6 @@ export default function NearbyCareUnitsMap() {
     selectedCategory,
     OpenStatus: JSON.parse(openFilter) as boolean,
   });
-  const getCategoryIconSvg = (category: string) => {
-    switch (category) {
-      case 'emergency':
-        return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ambulance-icon lucide-ambulance"><path d="M10 10H6"/><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.684-.948l-1.923-.641a1 1 0 0 1-.578-.502l-1.539-3.076A1 1 0 0 0 16.382 8H14"/><path d="M8 8v4"/><path d="M9 18h6"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>`;
-      case 'pharmacy':
-        return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>`;
-      case 'hospital':
-        return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v4"/><path d="M14 14h-4"/><path d="M14 18h-4"/><path d="M14 8h-4"/><path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/><path d="M18 22V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v18"/></svg>`;
-      default:
-        return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#6B7280" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>`;
-    }
-  };
 
   function drawRadiusCircle(
     map: kakao.maps.Map,
@@ -260,23 +249,6 @@ export default function NearbyCareUnitsMap() {
     fitMapToBounds(map, lat, lng, radius);
   }, [isMapReady, lat, lng, radius, isManualZoom]);
 
-  const handleZoom = (dir: 'in' | 'out') => {
-    const map = mapInstance.current;
-    if (!map) return;
-    const mapLevel = map.getLevel();
-    const newLevel = dir === 'in' ? mapLevel - 1 : mapLevel + 1;
-
-    setIsManualZoom(true);
-
-    map.setLevel(newLevel);
-    setLevel(newLevel);
-  };
-
-  const handleListButton = () => {
-    store.set(detailSheetOpenAtom, true); // 시트 열기
-    store.set(selectedCareUnitAtom, null); // 선택 해제 (선택된 병원 없음)
-    store.set(detailSheetPageAtom, 'list'); // 목록 페이지로 진입
-  };
   const handleFirstLocationButton = () => {
     const { lat, lng } = initialLocation;
     setLat(lat);
@@ -326,18 +298,28 @@ export default function NearbyCareUnitsMap() {
           >
             −
           </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="w-9 h-9 bg-white hover:bg-primary rounded-md shadow-sm"
-            onClick={() => {
-              store.set(detailSheetOpenAtom, true);
-              store.set(selectedCareUnitAtom, null);
-              store.set(detailSheetPageAtom, 'list');
-            }}
-          >
-            <ListIcon size={18} />
-          </Button>
+          <div className="relative">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="w-9 h-9 bg-white rounded-md shadow-sm disabled:[bg-slate-500 text-white]"
+              disabled={data.length === 0} // 리스트가 없으면 disabled
+              onClick={() => {
+                store.set(detailSheetOpenAtom, true);
+                store.set(selectedCareUnitAtom, null);
+                store.set(detailSheetPageAtom, 'list');
+              }}
+            >
+              <ListIcon size={18} />
+            </Button>
+
+            {data.length > 0 && (
+              <div className="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-medium rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                {data.length}
+              </div>
+            )}
+          </div>
+
           <FilterMenu />
         </div>
       </div>
