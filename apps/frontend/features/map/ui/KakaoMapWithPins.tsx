@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -31,6 +30,7 @@ export default function NearbyCareUnitsMap() {
   const [selectedCategory, setSelectedCategory] = useState<
     '전체' | '응급실' | '약국' | '병원'
   >('전체');
+  const [openFilter, setOpenFilter] = useState<string>('true');
   const [selectedMarker, setSelectedMarker] = useState<CareUnit | null>(null);
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
@@ -42,11 +42,12 @@ export default function NearbyCareUnitsMap() {
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
 
+
   const { data, fetchNextPage, hasNextPage, isFetching, isLoading } =
     useCareUnitsQuery({
       lat: roundedLat,
       lng: roundedLng,
-      level,
+      level: level,
       selectedCategory,
     });
 
@@ -77,41 +78,48 @@ export default function NearbyCareUnitsMap() {
     data.forEach((unit) => {
       const position = new kakao.maps.LatLng(unit.lat, unit.lng);
       const marker = new kakao.maps.Marker({ map, position });
+      marker.setTitle(unit.name);
 
-      kakao.maps.event.addListener(marker, 'click', () => {
-        if (overlayRef.current) overlayRef.current.setMap(null);
+      let currentOpenInfoWindow: kakao.maps.InfoWindow | null = null;
 
-        const overlayContent = document.createElement('div');
-        overlayContent.innerHTML = `
-        <div class="marker-popover">
-          <strong>${unit.name}</strong><br/>
-          <button id="popover-detail-${unit.id}">상세</button>
-          <button id="popover-chat-${unit.id}">💬 채팅</button>
-        </div>`;
-
-        const overlay = new kakao.maps.CustomOverlay({
-          content: overlayContent,
+      data.forEach((unit) => {
+        const position = new kakao.maps.LatLng(unit.lat, unit.lng);
+        const marker = new kakao.maps.Marker({
+          map,
           position,
-          yAnchor: 1,
+          clickable: true,
         });
 
-        overlay.setMap(map);
-        overlayRef.current = overlay;
+        const infowindow = new kakao.maps.InfoWindow({
+          content: `<div style="padding:6px 12px; font-size:14px;">${unit.name}</div>`,
+        });
 
-        setTimeout(() => {
-          document
-            .getElementById(`popover-detail-${unit.id}`)
-            ?.addEventListener('click', () => {
-              setSelectedMarker(unit);
-              overlay.setMap(null);
-            });
-          document
-            .getElementById(`popover-chat-${unit.id}`)
-            ?.addEventListener('click', () => {
-              setChat({ isOpen: true, target: unit });
-              overlay.setMap(null);
-            });
-        }, 0);
+        // PC: 마우스 호버
+        kakao.maps.event.addListener(marker, 'mouseover', () => {
+          if (currentOpenInfoWindow) currentOpenInfoWindow.close();
+          infowindow.open(map, marker);
+          currentOpenInfoWindow = infowindow;
+        });
+
+        kakao.maps.event.addListener(marker, 'mouseout', () => {
+          infowindow.close();
+          currentOpenInfoWindow = null;
+        });
+
+        // 모바일: 클릭(탭)용 - 토글 동작
+        kakao.maps.event.addListener(marker, 'click', () => {
+          // PC hover에서 열린 경우 닫기
+          if (currentOpenInfoWindow === infowindow) {
+            infowindow.close();
+            currentOpenInfoWindow = null;
+          } else {
+            if (currentOpenInfoWindow) currentOpenInfoWindow.close();
+            infowindow.open(map, marker);
+            currentOpenInfoWindow = infowindow;
+          }
+        });
+
+        newMarkers.push(marker);
       });
 
       newMarkers.push(marker);
@@ -147,7 +155,7 @@ export default function NearbyCareUnitsMap() {
         setLevel((prev) => {
           if (prev !== currentLevel) {
             setIsManualZoom(true); // 사용자가 줌했단 뜻
-            return Math.max(1, Math.min(5, currentLevel));
+            return currentLevel;
           }
           return prev;
         });
@@ -207,10 +215,8 @@ export default function NearbyCareUnitsMap() {
     const map = mapInstance.current;
     if (!map) return;
     const mapLevel = map.getLevel();
-    let newLevel = dir === 'in' ? mapLevel - 1 : mapLevel + 1;
+    const newLevel = dir === 'in' ? mapLevel - 1 : mapLevel + 1;
 
-    // 🔒 level 하한 / 상한 제한 추가 (예: 1~14)
-    newLevel = Math.max(1, Math.min(5, newLevel));
     setIsManualZoom(true);
 
     map.setLevel(newLevel);
@@ -231,22 +237,38 @@ export default function NearbyCareUnitsMap() {
     <div className="p-4 space-y-2">
       <div className="flex justify-between items-center mb-2">
         <Label>현재 위치: {location ?? '로딩 중...'}</Label>
-        <Select
-          value={selectedCategory}
-          onValueChange={(v: '전체' | '응급실' | '약국' | '병원') => {
-            setSelectedCategory(v);
-          }}
-        >
-          <SelectTrigger className="w-[120px]">
-            <SelectValue placeholder="종류 선택" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="전체">전체</SelectItem>
-            <SelectItem value="응급실">응급실</SelectItem>
-            <SelectItem value="약국">약국</SelectItem>
-            <SelectItem value="병원">병원</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex">
+          <Select
+            value={selectedCategory}
+            onValueChange={(v: '전체' | '응급실' | '약국' | '병원') => {
+              setSelectedCategory(v);
+            }}
+          >
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="종류 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="전체">전체</SelectItem>
+              <SelectItem value="응급실">응급실</SelectItem>
+              <SelectItem value="약국">약국</SelectItem>
+              <SelectItem value="병원">병원</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={openFilter}
+            onValueChange={(v: string) => {
+              setOpenFilter(v);
+            }}
+          >
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="종류 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={'false'}>운영중</SelectItem>
+              <SelectItem value={'true'}>전체</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div className="h-[20px]" />
       <div className="relative">
