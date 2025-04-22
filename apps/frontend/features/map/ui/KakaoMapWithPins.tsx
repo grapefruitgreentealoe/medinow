@@ -89,6 +89,12 @@ export default function NearbyCareUnitsMap() {
     circle.setMap(map);
     circleRef.current = circle;
   }
+  // hvec 기반 색상
+  function getDotColor(hvec: number): string {
+    if (hvec <= 0) return '#ef4444'; // 혼잡
+    if (hvec < 10) return '#f97316'; // 보통
+    return '#22c55e'; // 여유
+  }
   function createMarkersWithOverlay({
     map,
     data,
@@ -100,25 +106,59 @@ export default function NearbyCareUnitsMap() {
 
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
+
     data.forEach((unit, index) => {
       const position = new kakao.maps.LatLng(unit.lat, unit.lng);
       const iconHtml = getCategoryIconSvg(unit.category);
       const overlayId = `custom-overlay-${index}`;
+      const hvec = unit.congestion?.hvec ?? -1;
+
+      const hvecDots =
+        unit.nowOpen && unit.category === 'emergency'
+          ? `<div style="
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          display: flex;
+          gap: 1px;
+        ">
+        ${[...Array(Math.min(Math.max(hvec, 0), 5))]
+          .map(
+            () =>
+              `<span style="color: ${getDotColor(hvec)}; font-size: 8px; line-height: 1;">●</span>`
+          )
+          .join('')}
+      </div>`
+          : '';
+
+      const backgroundColor = unit.nowOpen ? '#ffffff' : '#d1d5db';
 
       const overlay = new kakao.maps.CustomOverlay({
         position,
         content: `
-      <div id="${overlayId}" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 100%; background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer;">
-        ${iconHtml}
-      </div>
-    `,
+    <div id="${overlayId}" style="
+      position: relative;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 100%;
+      background: ${backgroundColor};
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+    ">
+      ${iconHtml}
+      ${hvecDots}
+    </div>
+  `,
         yAnchor: 1,
       });
 
       overlay.setMap(map);
       markersRef.current.push(overlay);
 
-      // ✅ DOM 삽입 후 click 이벤트 바인딩
       setTimeout(() => {
         const el = document.getElementById(overlayId);
         if (el) {
@@ -126,10 +166,9 @@ export default function NearbyCareUnitsMap() {
             store.set(selectedCareUnitAtom, unit);
             store.set(detailSheetOpenAtom, true);
             store.set(detailSheetPageAtom, 'detail');
-            console.log('clicked:', unit.name);
           });
         }
-      }, 0); // 다음 tick에 DOM이 들어오니까
+      }, 0);
     });
   }
 
