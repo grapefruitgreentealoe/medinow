@@ -14,26 +14,22 @@ import {
   PhoneCallIcon,
 } from 'lucide-react';
 import { useToggleFavorite } from '../model/useOnToggleFavorite';
-import { renderTodayTime } from '../utils';
+import { openKakaoMap, renderTodayTime } from '../utils';
 import { useState } from 'react';
 
 interface CareUnitCardProps {
   unit: CareUnit;
   onSelect: (unit: CareUnit) => void;
-  onOpenKakaoMap: (unit: CareUnit) => void;
 }
 
-export function CareUnitCard({
-  unit,
-  onSelect,
-  onOpenKakaoMap,
-}: CareUnitCardProps) {
+export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
   const setChat = useSetAtom(chatModalAtom);
   const { mutate: toggleFavoriteMutation } = useToggleFavorite();
   const [localFavorite, setLocalFavorite] = useState(unit.isFavorite);
+
   const handleUrlButton = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
-    onOpenKakaoMap(unit);
+    openKakaoMap(unit);
   };
 
   const handleFavoriteButton = (e: { stopPropagation: () => void }) => {
