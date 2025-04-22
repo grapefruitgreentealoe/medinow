@@ -6,6 +6,8 @@ import { ChatMessage } from './entities/chat-message.entity';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { CustomLoggerService } from '../../shared/logger/logger.service';
+import { REDIS_CLIENT } from '../redis/redis.constants';
+import { RedisService } from '../redis/redis.service';
 
 describe('ChatsService', () => {
   let service: ChatsService;
@@ -18,6 +20,16 @@ describe('ChatsService', () => {
     save: jest.fn().mockReturnValue({}),
     update: jest.fn(),
     count: jest.fn(),
+  };
+
+  // Redis 모킹
+  const mockRedisClient = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+    quit: jest.fn(),
+    publish: jest.fn(),
+    scan: jest.fn().mockResolvedValue(['0', []]),
   };
 
   beforeEach(async () => {
@@ -35,6 +47,20 @@ describe('ChatsService', () => {
             log: jest.fn(),
             error: jest.fn(),
             warn: jest.fn(),
+          },
+        },
+        {
+          provide: REDIS_CLIENT,
+          useValue: mockRedisClient,
+        },
+        {
+          provide: RedisService,
+          useValue: {
+            set: jest.fn(),
+            get: jest.fn(),
+            del: jest.fn(),
+            expire: jest.fn(),
+            scan: jest.fn().mockResolvedValue([]),
           },
         },
       ],
