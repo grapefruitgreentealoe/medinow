@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/sheet';
 import { MediListPage } from './MediListPage';
 import CareUnitDetailPage from './CareUnitDetailPage';
-import { useCareUnitsQuery } from '@/features/map/hooks/useCareUnitsQuery';
+import { useCareUnitsQuery } from '@/features/map/model/useCareUnitsQuery';
 import { CareUnit } from '@/features/map/type';
 
 interface CareUnitSheetProps {

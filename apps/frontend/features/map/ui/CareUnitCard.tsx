@@ -7,7 +7,7 @@ import { cn } from '@/shared/lib/utils';
 import { useSetAtom } from 'jotai';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { Star, StarOff, MessageSquare } from 'lucide-react';
-import { useToggleFavorite } from '../hooks/useOnToggleFavorite';
+import { useToggleFavorite } from '../model/useOnToggleFavorite';
 import { renderTodayTime } from '../utils';
 import { useState } from 'react';
 

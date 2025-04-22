@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { CareUnit } from '@/features/map/type';
-import { useCareUnitsQuery } from '../hooks/useCareUnitsQuery';
+import { useCareUnitsQuery } from '../model/useCareUnitsQuery';
 import { ListIcon } from 'lucide-react';
 import { useSetAtom } from 'jotai';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
@@ -49,14 +49,13 @@ export default function NearbyCareUnitsMap() {
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
 
-  const { data, fetchNextPage, hasNextPage, isFetching, isLoading } =
-    useCareUnitsQuery({
-      lat: roundedLat,
-      lng: roundedLng,
-      level: level,
-      selectedCategory,
-      OpenStatus: JSON.parse(openFilter) as boolean,
-    });
+  const { data } = useCareUnitsQuery({
+    lat: roundedLat,
+    lng: roundedLng,
+    level: level,
+    selectedCategory,
+    OpenStatus: JSON.parse(openFilter) as boolean,
+  });
 
   function drawRadiusCircle(
     map: kakao.maps.Map,
