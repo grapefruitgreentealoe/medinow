@@ -279,13 +279,19 @@ export class CareUnitAdminService {
 
             // 카테고리별 카운팅
             const hospitalBatch = unitsToSave.filter(
-              (unit) => unit.category === CareUnitCategory.HOSPITAL,
+              (unit) =>
+                (unit.category as CareUnitCategory) ===
+                CareUnitCategory.HOSPITAL,
             ).length;
             const pharmacyBatch = unitsToSave.filter(
-              (unit) => unit.category === CareUnitCategory.PHARMACY,
+              (unit) =>
+                (unit.category as CareUnitCategory) ===
+                CareUnitCategory.PHARMACY,
             ).length;
             const emergencyBatch = unitsToSave.filter(
-              (unit) => unit.category === CareUnitCategory.EMERGENCY,
+              (unit) =>
+                (unit.category as CareUnitCategory) ===
+                CareUnitCategory.EMERGENCY,
             ).length;
 
             hospitalCount += hospitalBatch;

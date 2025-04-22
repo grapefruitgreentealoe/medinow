@@ -126,10 +126,10 @@ export class DepartmentsService {
 
           // 9. 추가 실행
           if (uniqueDepartments.length > 0) {
-            await this.departmentRepository.upsert(
-              uniqueDepartments as Partial<Department>[],
-              ['careUnitId', 'name'],
-            );
+            await this.departmentRepository.upsert(uniqueDepartments, [
+              'careUnitId',
+              'name',
+            ]);
             addedCount += uniqueDepartments.length;
           }
 
