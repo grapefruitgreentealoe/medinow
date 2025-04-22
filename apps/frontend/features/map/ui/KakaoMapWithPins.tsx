@@ -25,6 +25,7 @@ import CareUnitSheet from './CareUnitSheet';
 import FilterMenu from './FilterMenu';
 import { categoryAtom, openStatusAtom } from '../atoms/filterAtom';
 import { convertCoordsToDong, getCategoryIconSvg } from '../utils';
+import { useDebounce } from '@/shared/model/useDebounce';
 
 const store = getDefaultStore();
 
@@ -49,10 +50,12 @@ export default function NearbyCareUnitsMap() {
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
 
+  const debouncedLevel = useDebounce(level, 300); // 300ms 후 적용
+
   const { data } = useCareUnitsQuery({
     lat: roundedLat,
     lng: roundedLng,
-    level,
+    level: debouncedLevel,
     selectedCategory,
     OpenStatus: JSON.parse(openFilter) as boolean,
   });
