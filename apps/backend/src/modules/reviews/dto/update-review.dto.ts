@@ -33,8 +33,8 @@ export class UpdateReviewDto extends PartialType(CreateReviewDto) {
 
   @ApiProperty({ description: '의료기관 ID' })
   @IsUUID()
-  @IsOptional()
-  careUnitId: string | null;
+  @IsNotEmpty()
+  careUnitId: string;
 
   @ApiProperty({ description: '부서 ID' })
   @IsUUID()
