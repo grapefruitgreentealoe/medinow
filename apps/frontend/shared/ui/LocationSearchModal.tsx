@@ -3,7 +3,9 @@
 import Script from 'next/script';
 import { useEffect, useRef, useState } from 'react';
 
-interface HospitalSearchModalProps {
+interface LocationSearchModalProps {
+  subtitle: string;
+  title: string;
   open: boolean;
   onClose: () => void;
   onSelect: (data: {
@@ -14,11 +16,13 @@ interface HospitalSearchModalProps {
   }) => void;
 }
 
-export default function HospitalSearchModal({
+export default function LocationSearchModal({
+  title = '',
+  subtitle = '',
   open,
   onClose,
   onSelect,
-}: HospitalSearchModalProps) {
+}: LocationSearchModalProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState(false);
   const setMap = useState<kakao.maps.Map | null>(null)[1];
@@ -92,13 +96,14 @@ export default function HospitalSearchModal({
       />
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
         <div className="bg-white p-4 rounded-md shadow-lg w-[90vw] max-w-xl">
-          <h2 className="text-lg font-bold mb-2">병원 검색</h2>
+          <h2 className="text-lg font-bold mb-2">{title}</h2>
+          <span>{subtitle}</span>
           <div className="flex gap-2 mb-2">
             <input
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder="병원명으로 검색"
+              placeholder="키워드로 검색"
               className="border rounded px-2 py-1 w-full text-black"
             />
             <button
