@@ -24,7 +24,7 @@ export class CongestionTotalService {
   // }
 
   // //1️⃣ 전체 응급실 혼잡도 저장 (30분마다 갱신)
-  // @Cron(CronExpression.EVERY_30_MINUTES)
+  // @Cron('0 30 11 * * *')
   // async updateCongestion(): Promise<void> {
   //   try {
   //     console.log('🔄 혼잡도 업데이트 시작');
