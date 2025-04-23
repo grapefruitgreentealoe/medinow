@@ -7,6 +7,7 @@ import { UserSubscriber } from './subscribers/user.subscriber';
 import { UserProfile } from './entities/user-profile.entity';
 import { ImagesModule } from '../images/images.module';
 import { CareUnitModule } from '../care-units/care-unit.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, UserProfile]),

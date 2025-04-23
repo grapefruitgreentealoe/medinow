@@ -10,7 +10,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AppConfigModule } from '../../config/app/config.module';
 import { AppConfigService } from '../../config/app/config.service';
 import { ChatsController } from './chats.controller';
-import { WsJwtGuard } from './guards/ws-jwt.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RedisModule } from '../redis/redis.module';
 
 @Module({
@@ -30,7 +30,7 @@ import { RedisModule } from '../redis/redis.module';
     RedisModule,
   ],
   controllers: [ChatsController],
-  providers: [ChatsGateway, ChatsService, CustomLoggerService, WsJwtGuard],
+  providers: [ChatsGateway, ChatsService, CustomLoggerService, JwtAuthGuard],
   exports: [ChatsService, ChatsGateway],
 })
 export class ChatsModule {}

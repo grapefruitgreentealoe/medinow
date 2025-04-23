@@ -229,12 +229,36 @@ export class ChatsService {
     // 채팅방 정보 조회
     const room = await this.getRoomById(roomId);
 
-    // 수신자 ID 결정 (상대방)
-    const recipientId =
-      room.user.id === senderId ? room.careUnit.id : room.user.id;
+    let recipientId: string;
+
+    // 발신자가 일반 사용자인 경우: 의료기관의 관리자 찾기
+    if (room.user && room.user.id === senderId) {
+      // 의료기관의 관리자 사용자 조회
+      const adminUser = await this.usersService.getUserByCareUnitId(
+        room.careUnit.id,
+      );
+
+      if (!adminUser) {
+        this.logger.warn(
+          `의료기관 ${room.careUnit.id}의 관리자를 찾을 수 없습니다`,
+        );
+        recipientId = room.careUnit.id; // 관리자를 찾지 못하면 기본적으로 의료기관 ID 사용
+      } else {
+        this.logger.log(
+          `의료기관 ${room.careUnit.id}의 관리자 ID: ${adminUser.id}로 메시지 알림`,
+        );
+        recipientId = adminUser.id;
+      }
+    } else {
+      // 발신자가 관리자인 경우: 일반 사용자 ID 사용
+      recipientId = room.user.id;
+    }
 
     // 상대방 온라인 상태 확인
     const isOnline = await this.isUserOnlineRedis(recipientId);
+    this.logger.log(
+      `수신자 ${recipientId}의 온라인 상태: ${isOnline ? '온라인' : '오프라인'}`,
+    );
 
     // 상대방이 채팅방에 있는지 확인
     const isInRoom = await this.isUserInRoom(recipientId, roomId);
@@ -457,14 +481,14 @@ export class ChatsService {
         where: {
           careUnit: { id: careUnitId },
           user: { id: userId },
+          isActive: true,
         },
         relations: ['user', 'careUnit'],
       });
 
       if (existingRoom) {
         this.logger.log(`기존 채팅방 찾음: ${existingRoom.id}`);
-        existingRoom.isActive = true;
-        return this.chatRoomRepository.save(existingRoom);
+        return existingRoom;
       }
 
       // 새 채팅방 생성
@@ -654,8 +678,23 @@ export class ChatsService {
     room.updatedAt = new Date();
     room.lastMessageAt = new Date();
 
-    // 상대방의 읽지 않은 메시지 카운트 증가
-    room.unreadCount = (room.unreadCount || 0) + 1;
+    const recipientId =
+      room.user.id === data.senderId
+        ? (await this.usersService.getUserByCareUnitId(room.careUnit.id))?.id
+        : room.user.id;
+
+    if (!recipientId) {
+      this.logger.error(
+        `상대방 ID를 찾을 수 없습니다: 사용자 ${data.senderId}, 채팅방 ${data.roomId}`,
+      );
+      throw new NotFoundException('상대방 ID를 찾을 수 없습니다');
+    }
+
+    const isRecipientInRoom = await this.isUserInRoom(recipientId, data.roomId);
+
+    if (!isRecipientInRoom) {
+      room.unreadCount = (room.unreadCount || 0) + 1;
+    }
 
     await this.chatRoomRepository.save(room);
 
@@ -687,8 +726,22 @@ export class ChatsService {
 
     const room = await this.getRoomById(roomId);
 
-    const senderToMark =
-      room.user.id === userId ? room.careUnit.id : room.user.id;
+    let senderToMark: string | undefined;
+    if (room.user.id === userId) {
+      const adminUser = await this.usersService.getUserByCareUnitId(
+        room.careUnit.id,
+      );
+      senderToMark = adminUser?.id;
+
+      if (!senderToMark) {
+        this.logger.error(
+          `관리자 ID를 찾을 수 없습니다: 사용자 ${userId}, 채팅방 ${roomId}`,
+        );
+        throw new NotFoundException('관리자 ID를 찾을 수 없습니다');
+      }
+    } else {
+      senderToMark = room.user.id;
+    }
 
     // 상대방이 보낸 메시지만 읽음 처리
     await this.chatMessageRepository.update(

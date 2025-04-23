@@ -1,17 +1,9 @@
-import {
-  Entity,
-  Column,
-  OneToMany,
-  Index,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { ChatMessage } from './chat-message.entity';
 import { CareUnit } from '../../care-units/entities/care-unit.entity';
 import { User } from '../../users/entities/user.entity';
 
-@Index(['user', 'careUnit'], { unique: true })
 @Entity('chat_rooms')
 export class ChatRoom extends BaseEntity {
   @ManyToOne(() => User, (user) => user.chatRooms)

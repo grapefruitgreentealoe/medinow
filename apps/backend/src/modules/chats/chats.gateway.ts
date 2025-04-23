@@ -15,12 +15,13 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { WsJwtGuard } from './guards/ws-jwt.guard';
 import { CustomLoggerService } from '../../shared/logger/logger.service';
 import { UserRole } from '../../common/enums/roles.enum';
 import { JoinRoomDto } from './dto/join-room.dto';
 import { ChatRoom } from './entities/chat-room.entity';
+import { WsJwtGuard } from './guards/ws-jwt.guard';
 
+@UseGuards(WsJwtGuard)
 @WebSocketGateway({
   cors: {
     origin: [
@@ -125,13 +126,13 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  @UseGuards(WsJwtGuard)
   @SubscribeMessage('joinRoom')
   async handleJoinRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: JoinRoomDto,
   ): Promise<void> {
     try {
+      console.log('joinRoom 호출');
       const user = await this.chatsService.getUserFromSocket(client);
       if (!user) {
         client.emit('error', { message: '인증된 사용자를 찾을 수 없습니다' });
@@ -175,7 +176,11 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.logger.log(`사용자 ${user.id}가 채팅방 ${room.id}에 참여 완료`);
 
       // 채팅방 내 사용자가 아닌 경우에만 읽음 처리 수행
-      if (room.user && room.user.id !== user.id) {
+      if (
+        room.user &&
+        room.user.id !== user.id &&
+        room.user.role === UserRole.ADMIN
+      ) {
         await this.chatsService.markMessagesAsRead(room.id, user.id);
         this.logger.log(`채팅방 ${room.id}의 메시지 읽음 처리 완료`);
       }
@@ -196,7 +201,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  @UseGuards(WsJwtGuard)
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @ConnectedSocket() client: Socket,
@@ -262,7 +266,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  @UseGuards(WsJwtGuard)
   @SubscribeMessage('markAsRead')
   async handleMarkAsRead(
     @ConnectedSocket() client: Socket,
@@ -313,7 +316,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   // 읽지 않은 메시지 카운트 조회
-  @UseGuards(WsJwtGuard)
   @SubscribeMessage('getUnreadCount')
   async handleGetUnreadCount(@ConnectedSocket() client: Socket) {
     const user = client.data.user;
@@ -339,7 +341,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   // 채팅방 나가기
-  @UseGuards(WsJwtGuard)
   @SubscribeMessage('leaveRoom')
   async handleLeaveRoom(
     @ConnectedSocket() client: Socket,
@@ -375,7 +376,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  @UseGuards(WsJwtGuard)
   @SubscribeMessage('typing')
   async handleTyping(
     @ConnectedSocket() client: Socket,
