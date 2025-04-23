@@ -68,6 +68,8 @@ export class ReviewsService {
         findCareUnit.id,
         reviewCount,
       );
+      // 평균 평점 업데이트
+      await this.updateAverageRating(findCareUnit.id);
     }
     return savedReview;
   }
@@ -128,7 +130,11 @@ export class ReviewsService {
       }
     }
 
-    return this.reviewRepository.update(id, updateReviewData);
+    await this.reviewRepository.update(id, updateReviewData);
+    if (findCareUnit) {
+      await this.updateAverageRating(findCareUnit.id);
+    }
+    return this.getReviewById(id);
   }
 
   async deleteReview(id: string, user: User) {
@@ -148,7 +154,20 @@ export class ReviewsService {
         review.careUnit.id,
         reviewCount,
       );
+      await this.updateAverageRating(review.careUnit.id);
     }
     return deletedReview;
+  }
+
+  async updateAverageRating(careUnitId: string) {
+    const result = await this.reviewRepository
+      .createQueryBuilder('review')
+      .select('AVG(review.rating)', 'averageRating')
+      .where('review.careUnitId = :careUnitId', { careUnitId })
+      .getRawOne();
+
+    const averageRating = result.averageRating || 0;
+    await this.careUnitService.updateAverageRating(careUnitId, averageRating);
+    return result;
   }
 }

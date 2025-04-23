@@ -427,4 +427,11 @@ export class CareUnitService {
       where: { hpId: hpId, category },
     });
   }
+
+  // 평균 평점 업데이트
+  async updateAverageRating(careUnitId: string, averageRating: number) {
+    await this.careUnitRepository.update(careUnitId, {
+      averageRating: Number(averageRating.toFixed(1)),
+    });
+  }
 }
