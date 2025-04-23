@@ -1,27 +1,31 @@
 'use client';
+
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signupSchema } from '../schema/signupSchema';
 import { z } from 'zod';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { checkEmail, signup } from '../api';
 import { ROUTES } from '@/shared/constants/routes';
 
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+
 type FormData = z.infer<typeof signupSchema>;
 
 export default function SignupForm() {
-  const router = useRouter(); // ✅ 라우터 객체 생성
+  const router = useRouter();
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    setError,
-    formState: { errors },
-  } = useForm<FormData>({
+  const form = useForm<FormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       email: 'test@example.com',
@@ -41,59 +45,114 @@ export default function SignupForm() {
     const isDuplicated = await checkEmail(data.email);
     setChecking(false);
     if (isDuplicated) {
-      setError('email', { message: '이미 사용 중인 이메일입니다' });
+      form.setError('email', { message: '이미 사용 중인 이메일입니다' });
       return;
     }
 
+    setLoading(true);
     await signup({
       ...data,
       age: Number(data.age),
     });
-
     setLoading(false);
 
-    //  회원가입 후 로그인 페이지로 이동
     router.push(ROUTES.LOGIN);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4 max-w-md mx-auto"
-    >
-      <Input placeholder="이메일" {...register('email')} />
-      {errors.email && (
-        <p className="text-sm text-red-500">{errors.email.message}</p>
-      )}
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="!space-y-6 !max-w-md !mx-auto"
+      >
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>이메일</FormLabel>
+              <FormControl>
+                <Input placeholder="example@email.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <Input type="password" placeholder="비밀번호" {...register('password')} />
-      {errors.password && (
-        <p className="text-sm text-red-500">{errors.password.message}</p>
-      )}
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>비밀번호</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="비밀번호 입력" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <Input placeholder="이름" {...register('name')} />
-      {errors.name && (
-        <p className="text-sm text-red-500">{errors.name.message}</p>
-      )}
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>이름</FormLabel>
+              <FormControl>
+                <Input placeholder="홍길동" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <Input placeholder="닉네임" {...register('nickname')} />
-      {errors.nickname && (
-        <p className="text-sm text-red-500">{errors.nickname.message}</p>
-      )}
+        <FormField
+          control={form.control}
+          name="nickname"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>닉네임</FormLabel>
+              <FormControl>
+                <Input placeholder="사용할 닉네임" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <Input placeholder="읍/면/동 주소" {...register('address')} />
-      {errors.address && (
-        <p className="text-sm text-red-500">{errors.address.message}</p>
-      )}
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>주소</FormLabel>
+              <FormControl>
+                <Input placeholder="읍/면/동 단위 주소" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <Input placeholder="나이 (선택)" {...register('age')} />
-      {errors.age && (
-        <p className="text-sm text-red-500">{errors.age.message}</p>
-      )}
+        <FormField
+          control={form.control}
+          name="age"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>나이 (선택)</FormLabel>
+              <FormControl>
+                <Input placeholder="숫자 입력" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <Button type="submit" disabled={checking || loading}>
-        {checking ? '이메일 확인 중...' : '회원가입'}
-      </Button>
-    </form>
+        <Button type="submit" disabled={checking || loading} className="w-full">
+          {checking ? '이메일 확인 중...' : '회원가입'}
+        </Button>
+      </form>
+    </Form>
   );
 }
