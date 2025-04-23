@@ -1,7 +1,6 @@
 'use client';
 
-import { useAtom } from 'jotai';
-import { selectedCareUnitAtom } from '@/features/map/atoms/detailSheetAtoms';
+import { useAtom, useAtomValue } from 'jotai';
 import { useToggleFavorite } from '../model/useOnToggleFavorite';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { useSetAtom } from 'jotai';
@@ -9,13 +8,16 @@ import { cn } from '@/lib/utils';
 import { Star, StarOff, MessageSquare, PhoneCallIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { useOptimisticToggleFavorite } from '../model/useOptimisticToggleFavorite';
+import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
+import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 
 export default function CareUnitDetailPage() {
   const [unit] = useAtom(selectedCareUnitAtom);
   const setChat = useSetAtom(chatModalAtom);
-  const [localFavorite, setLocalFavorite] = useState(unit?.isFavorite || false);
-
-  const { mutate: toggleFavoriteMutation } = useToggleFavorite();
+  const selected = useAtomValue(selectedCareUnitAtom);
+  const queryKey = useAtom(careUnitsQueryKeyAtom);
+  const { toggleFavorite } = useOptimisticToggleFavorite(queryKey);
 
   if (!unit) return null;
 
@@ -41,20 +43,9 @@ export default function CareUnitDetailPage() {
   );
 
   const handleFavorite = () => {
-    toggleFavoriteMutation(
-      {
-        unitId: unit.id,
-        next: !unit.isFavorite,
-      },
-      {
-        onError: () => {
-          setLocalFavorite((o: boolean) => !o);
-        },
-        onSuccess: () => {
-          setLocalFavorite((o: boolean) => !o);
-        },
-      }
-    );
+    if (!selected) return;
+    console.log(selected);
+    toggleFavorite(selected.id, selected.isFavorite);
   };
 
   const handleChat = () => {
@@ -95,7 +86,7 @@ export default function CareUnitDetailPage() {
             className="w-8 h-8"
             onClick={handleFavorite}
           >
-            {localFavorite ? (
+            {unit.isFavorite ? (
               <Star className="text-yellow-500 fill-yellow-500" size={18} />
             ) : (
               <StarOff size={18} />

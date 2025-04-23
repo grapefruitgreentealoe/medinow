@@ -11,13 +11,13 @@ import { getDefaultStore } from 'jotai';
 import {
   detailSheetOpenAtom,
   detailSheetPageAtom,
-  selectedCareUnitAtom,
 } from '@/features/map/atoms/detailSheetAtoms';
 import CareUnitSheet from './CareUnitSheet';
 import FilterMenu from './FilterMenu';
 import { categoryAtom, openStatusAtom } from '../atoms/filterAtom';
 import { convertCoordsToDong, getCategoryIconSvg } from '../utils';
 import { useDebounce } from '@/shared/model/useDebounce';
+import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 
 const store = getDefaultStore();
 

@@ -4,7 +4,7 @@ import { CareUnit } from '@/features/map/type';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import {
   Star,
@@ -16,6 +16,9 @@ import {
 import { useToggleFavorite } from '../model/useOnToggleFavorite';
 import { openKakaoMap, renderTodayTime } from '../utils';
 import { useState } from 'react';
+import { useOptimisticToggleFavorite } from '../model/useOptimisticToggleFavorite';
+import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
+import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 
 interface CareUnitCardProps {
   unit: CareUnit;
@@ -25,7 +28,11 @@ interface CareUnitCardProps {
 export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
   const setChat = useSetAtom(chatModalAtom);
   const { mutate: toggleFavoriteMutation } = useToggleFavorite();
-  const [localFavorite, setLocalFavorite] = useState(unit.isFavorite);
+  const selected = useAtomValue(selectedCareUnitAtom);
+
+  const queryKey = useAtom(careUnitsQueryKeyAtom);
+
+  const { toggleFavorite } = useOptimisticToggleFavorite(queryKey);
 
   const handleUrlButton = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
@@ -34,21 +41,10 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
 
   const handleFavoriteButton = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
-    toggleFavoriteMutation(
-      {
-        unitId: unit.id,
-        next: !unit.isFavorite,
-      },
-      {
-        onError: () => {
-          setLocalFavorite((o) => !o);
-        },
-        onSuccess: () => {
-          setLocalFavorite((o) => !o);
-        },
-      }
-    );
+    if (!selected) return;
+    toggleFavorite(selected.id, selected.isFavorite);
   };
+
   return (
     <Card
       key={unit.id}
@@ -120,7 +116,7 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
               onClick={handleFavoriteButton}
               className="w-8 h-8"
             >
-              {localFavorite ? (
+              {unit.isFavorite ? (
                 <Star className="text-yellow-500 fill-yellow-500" size={18} />
               ) : (
                 <StarOff size={18} />

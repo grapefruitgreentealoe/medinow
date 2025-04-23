@@ -2,7 +2,6 @@
 
 import { useAtom } from 'jotai';
 import {
-  selectedCareUnitAtom,
   detailSheetOpenAtom,
   detailSheetPageAtom,
 } from '@/features/map/atoms/detailSheetAtoms';
@@ -18,6 +17,7 @@ import { CareUnitListPage } from './CareUnitListPage';
 import CareUnitDetailPage from './CareUnitDetailPage';
 import { useCareUnitsQuery } from '@/features/map/model/useCareUnitsQuery';
 import { ArrowLeft } from 'lucide-react';
+import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 
 interface CareUnitSheetProps {
   lat: number | null;
