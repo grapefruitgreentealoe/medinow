@@ -1,6 +1,6 @@
 'use client';
 
-import { CareUnit } from '@/features/map/type';
+import { CareUnit, CongestionLevel } from '@/features/map/type';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,7 @@ import { useState } from 'react';
 import { useOptimisticToggleFavorite } from '../model/useOptimisticToggleFavorite';
 import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
 import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
+import { CATEGORY_LABEL, congestionClassMap } from '../const';
 
 interface CareUnitCardProps {
   unit: CareUnit;
@@ -44,6 +45,10 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
     if (!selected) return;
     toggleFavorite(selected.id, selected.isFavorite);
   };
+<<<<<<< HEAD
+=======
+  const level = (unit?.congestion?.congestionLevel ?? 'LOW') as CongestionLevel;
+>>>>>>> a98efa2e02d7ec2b0439fbd5946cfc22301d686c
 
   return (
     <Card
@@ -51,6 +56,7 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
       className={cn(
         'mb-4 cursor-pointer hover:shadow-md bg-background transition-shadow rounded-none border-t-0 border-l-0 bordeer-r-0 border-b-[1px] border-b-slate-300 border-solid'
       )}
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '64px' }}
       onClick={() => onSelect(unit)}
     >
       <CardContent className="!p-5 space-y-4">
@@ -65,25 +71,10 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
         {/* 태그들 */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className="bg-muted text-muted-foreground !px-2 !py-0.5 rounded-full">
-            {unit.category === 'emergency'
-              ? '응급실'
-              : unit.category === 'pharmacy'
-                ? '약국'
-                : '병원'}
+            {CATEGORY_LABEL[unit.category]}
           </span>
-          {unit?.congestion && (
-            <span
-              className={cn(
-                '!px-2 !py-0.5 rounded-full',
-                unit?.congestion?.congestionLevel === 'HIGH'
-                  ? 'bg-red-100 text-red-600'
-                  : unit?.congestion?.congestionLevel === 'MEDIUM'
-                    ? 'bg-yellow-100 text-yellow-600'
-                    : 'bg-green-100 text-green-600'
-              )}
-            >
-              혼잡도: {unit?.congestion?.congestionLevel}
-            </span>
+          {unit?.congestion?.congestionLevel && (
+            <span className={congestionClassMap[level]}>혼잡도: {level}</span>
           )}
           <span className="bg-muted text-muted-foreground !px-2 !py-0.5 rounded-full">
             {unit.nowOpen ? '🟢 운영 중' : '🔴 운영 종료'}
@@ -106,7 +97,7 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
             className="text-primary text-xs underline !px-0"
             onClick={handleUrlButton}
           >
-            카카오지도에서 보기
+            길찾기
           </Button>
 
           <div className="flex gap-2 items-center">
@@ -137,18 +128,18 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
               </Button>
             )}
             {unit.tel && (
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                className="w-8 h-8"
-              >
-                <a href={`tel:${unit.tel}`}>
+              <a href={`tel:${unit.tel}`}>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className="w-8 h-8"
+                >
                   <PhoneCallIcon className="text-slate-500" size={18} />
-                </a>
-              </Button>
+                </Button>
+              </a>
             )}
           </div>
         </div>

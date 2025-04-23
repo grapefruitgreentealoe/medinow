@@ -22,7 +22,7 @@ import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 interface CareUnitSheetProps {
   lat: number | null;
   lng: number | null;
-  level: number;
+  level: number | null;
   selectedCategory: string;
   openFilter: string;
 }
