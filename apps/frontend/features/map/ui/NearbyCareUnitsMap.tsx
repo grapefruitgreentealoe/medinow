@@ -26,6 +26,7 @@ export default function NearbyCareUnitsMap() {
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const markersRef = useRef<kakao.maps.CustomOverlay[]>([]);
   const circleRef = useRef<kakao.maps.Circle | null>(null);
+
   const [initialLocation, setInitialLocation] = useState({
     lat: 37.5468,
     lng: 127.0577,
@@ -225,6 +226,46 @@ export default function NearbyCareUnitsMap() {
       return;
     fitMapToBounds(map, lat, lng);
   }, [isMapReady, lat, lng, isManualZoom]);
+  //4. 사용자위치
+
+  const currentLocationOverlayRef = useRef<kakao.maps.CustomOverlay | null>(
+    null
+  );
+
+  useEffect(() => {
+    const map = mapInstance.current;
+    const { lat, lng } = initialLocation;
+    if (!map || lat == null || lng == null) return;
+
+    const position = new kakao.maps.LatLng(lat, lng);
+
+    // 기존 오버레이 제거
+    if (currentLocationOverlayRef.current) {
+      currentLocationOverlayRef.current.setMap(null);
+    }
+
+    // 파란 점 스타일
+    const content = `
+    <div style="
+      width: 12px;
+      height: 12px;
+      background: #007aff;
+      border: 2px solid white;
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(0, 122, 255, 0.8);
+    "></div>
+  `;
+
+    const overlay = new kakao.maps.CustomOverlay({
+      position,
+      content,
+      yAnchor: 0.5,
+      xAnchor: 0.5,
+    });
+
+    overlay.setMap(map);
+    currentLocationOverlayRef.current = overlay;
+  }, [initialLocation.lat, initialLocation.lng, isMapReady]);
 
   const handleFirstLocationButton = () => {
     const { lat, lng } = initialLocation;
