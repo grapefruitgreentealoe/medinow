@@ -1,12 +1,10 @@
 import { DataSource } from 'typeorm';
-import * as dotenv from 'dotenv';
+import dotenv from 'dotenv';
 import { DbConfigService } from './db/config.service';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 
-// 환경 변수 로드
-dotenv.config({ path: '.env.local' });
-
+dotenv.config({ path: ['.env.local', '.env'] });
 // 설정 서비스 생성
 const dbConfigService = new DbConfigService(new ConfigService());
 

@@ -24,19 +24,37 @@ export class JwtRefreshStrategy extends PassportStrategy(
     }
 
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        (request: Request) => request?.cookies?.refreshToken,
+      ]),
       ignoreExpiration: false,
       secretOrKey: jwtRefreshSecret,
     });
   }
 
   async validate(payload: JwtPayload) {
-    const { sub } = payload;
-    const user = await this.usersService.findUserById(sub);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
+    try {
+      const { sub, email, role } = payload;
 
-    return plainToInstance(User, user);
+      // 기본적으로 DB에서 사용자 확인 (보안상 더 안전)
+      const user = await this.usersService.findUserById(sub);
+      if (!user || user.email !== email || user.role !== role) {
+        throw new UnauthorizedException('유효하지 않은 토큰');
+      }
+
+      // 토큰에서 가져온 role과 DB의 role이 다르면 오류 (토큰 조작 방지)
+      if (user.role !== role) {
+        throw new UnauthorizedException(
+          '권한이 변경되었습니다. 다시 로그인하세요.',
+        );
+      }
+
+      return plainToInstance(User, user);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : '알 수 없는 오류';
+      throw error;
+    }
   }
 }
