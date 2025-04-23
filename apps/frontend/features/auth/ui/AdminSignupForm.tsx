@@ -12,7 +12,7 @@ import HospitalSearchModal from '@/shared/ui/HospitalSearchModal';
 import type { AdminSignupData } from '../type';
 import { UploadCloud } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import axiosInstance from '@/shared/lib/axios';
+import axiosInstance from '@/lib/axios';
 
 export default function AdminSignupForm() {
   const router = useRouter();
