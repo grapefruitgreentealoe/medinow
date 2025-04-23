@@ -1,11 +1,24 @@
 'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
-import axiosInstance from '@/lib/axios';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ROUTES } from '@/shared/constants/routes';
+import axiosInstance from '@/lib/axios';
+
+type Role = 'user' | 'admin';
+
+interface User {
+  id: string;
+  email: string;
+  role: Role;
+  userProfile: {
+    name: string;
+    nickname: string;
+  };
+}
 
 declare global {
   interface Window {
@@ -16,9 +29,21 @@ declare global {
 export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    setIsLoggedIn(window.__INITIAL_IS_LOGGED_IN__ ?? false);
+    const isInitLoggedIn = window.__INITIAL_IS_LOGGED_IN__ ?? false;
+    setIsLoggedIn(isInitLoggedIn);
+
+    if (isInitLoggedIn) {
+      axiosInstance
+        .get('/users', { withCredentials: true })
+        .then((res) => {
+          const [firstUser] = res.data.users;
+          setUser(firstUser);
+        })
+        .catch(() => setUser(null));
+    }
   }, []);
 
   const handleLogout = async () => {
@@ -45,16 +70,31 @@ export default function Header() {
 
         <nav className="flex items-center gap-2">
           {isLoggedIn ? (
-            <Button
-              variant="ghost"
-              onClick={handleLogout}
-              className="text-sm font-medium text-foreground !px-4"
-            >
-              로그아웃
-            </Button>
+            <>
+              {user?.role === 'admin' ? (
+                <Link href={ROUTES.ADMIN.DASHBOARD}>
+                  <Button variant="ghost" className="text-sm font-medium !px-4">
+                    관리자 대시보드
+                  </Button>
+                </Link>
+              ) : (
+                <Link href={ROUTES.USER.ROOT}>
+                  <Button variant="ghost" className="text-sm font-medium !px-4">
+                    마이페이지
+                  </Button>
+                </Link>
+              )}
+
+              <Button
+                variant="ghost"
+                onClick={handleLogout}
+                className="text-sm font-medium text-foreground !px-4"
+              >
+                로그아웃
+              </Button>
+            </>
           ) : (
             <>
-              {/* 모바일 햄버거 */}
               <div className="md:hidden">
                 <Button
                   variant="ghost"
@@ -65,26 +105,19 @@ export default function Header() {
                 </Button>
               </div>
 
-              {/* 데스크탑 버튼들 */}
               <div className="hidden md:flex gap-[20px]">
                 <Link href={ROUTES.ADMIN_SIGN_UP}>
-                  <Button
-                    variant="ghost"
-                    className="text-sm font-medium text-foreground !px-4"
-                  >
+                  <Button variant="ghost" className="text-sm !px-4">
                     관리자 회원가입
                   </Button>
                 </Link>
                 <Link href={ROUTES.SIGN_UP}>
-                  <Button
-                    variant="ghost"
-                    className="text-sm font-medium text-foreground !px-4"
-                  >
+                  <Button variant="ghost" className="text-sm !px-4">
                     회원가입
                   </Button>
                 </Link>
                 <Link href={ROUTES.LOGIN}>
-                  <Button className="text-sm font-medium bg-primary text-white hover:bg-primary/90 !px-4">
+                  <Button className="text-sm bg-primary text-white !px-4">
                     로그인
                   </Button>
                 </Link>
@@ -94,7 +127,7 @@ export default function Header() {
         </nav>
       </div>
 
-      {/* 모바일 드롭다운 메뉴 */}
+      {/* 모바일 메뉴 */}
       <AnimatePresence>
         {!isLoggedIn && menuOpen && (
           <motion.div
@@ -102,7 +135,7 @@ export default function Header() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="md:hidden overflow-hidden absolute top-full left-0 w-full bg-background border-t border-border shadow-xl flex flex-col"
+            className="md:hidden absolute top-full left-0 w-full bg-background border-t border-border shadow-xl flex flex-col"
           >
             {[
               { href: ROUTES.ADMIN_SIGN_UP, label: '관리자 회원가입' },
@@ -112,7 +145,7 @@ export default function Header() {
               <Link
                 key={label}
                 href={href}
-                className="w-full h-[3rem] text-center flex items-center justify-center text-base border-b border-border hover:bg-primary hover:!text-white transition-colors"
+                className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:text-white transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 {label}
