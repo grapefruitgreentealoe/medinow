@@ -31,8 +31,8 @@ export default async function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <Header />
-          <main>{children}</main>
-          <FloatingChatWidget />
+        <main>{children}</main>
+        <FloatingChatWidget />
       </body>
     </html>
   );

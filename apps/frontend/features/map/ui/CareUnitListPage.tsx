@@ -4,7 +4,6 @@ import { useRef, useEffect } from 'react';
 import { CareUnit } from '@/features/map/type';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { getTMCoordFromLatLng } from '@/shared/lib/kakao-utils';
 import { CareUnitCard } from './CareUnitCard';
 
 import { useSetAtom } from 'jotai';
@@ -13,19 +12,19 @@ import {
   detailSheetPageAtom,
 } from '@/features/map/atoms/detailSheetAtoms';
 
-interface MediListPageProps {
+interface CareUnitListPageProps {
   data: CareUnit[];
   isLoading: boolean;
   hasNextPage: boolean | undefined;
   fetchNextPage: () => void;
 }
 
-export function MediListPage({
+export function CareUnitListPage({
   data,
   isLoading,
   hasNextPage,
   fetchNextPage,
-}: MediListPageProps) {
+}: CareUnitListPageProps) {
   const observerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -59,24 +58,8 @@ export function MediListPage({
     setPage('detail');
   };
 
-  const handleOpenKakaoMap = async (unit: CareUnit) => {
-    const { lng, lat, name, address } = unit;
-    const result = await getTMCoordFromLatLng(lng, lat);
-    if (!result) {
-      alert('카카오 지도 이동에 실패했습니다.');
-      return;
-    }
-
-    const kakaoUrl = `https://map.kakao.com/?q=${encodeURIComponent(
-      name
-    )}&urlX=${Math.round(result.x)}&urlY=${Math.round(result.y)}&road_address_name=${address}&urlLevel=2`;
-
-    window.open(kakaoUrl, '_blank');
-  };
-
   return (
     <div className="max-h-screen overflow-y-auto p-4" ref={scrollRef}>
-      <h2 className="text-lg font-semibold mb-2">의료기관 목록</h2>
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -89,7 +72,6 @@ export function MediListPage({
             key={unit.id}
             unit={unit}
             onSelect={() => handleSelect(unit)}
-            onOpenKakaoMap={() => handleOpenKakaoMap(unit)}
           />
         ))
       )}
