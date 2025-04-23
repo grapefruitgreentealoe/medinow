@@ -33,7 +33,7 @@ export class CareUnitAdminService {
     private readonly redisService: RedisService,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron('0 20 11 * * *')
   async syncCareUnits() {
     console.log('🔄 의료기관 동기화 시작');
     try {
