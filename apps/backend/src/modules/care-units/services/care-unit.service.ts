@@ -191,7 +191,7 @@ export class CareUnitService {
           'favorites.userId = :userId',
           { userId: user.id },
         )
-        .orderBy('favorites.id', 'DESC') // 즐겨찾기 우선
+        .orderBy('favorites.id', 'ASC') // 즐겨찾기 우선
         .addOrderBy('careUnit.isBadged', 'DESC') // 배지 우선
         .addOrderBy('careUnit.nowOpen', 'DESC') // 운영중인 곳 우선
         .addOrderBy('distance', 'ASC'); // 거리순
