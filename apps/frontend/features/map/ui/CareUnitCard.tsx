@@ -4,19 +4,15 @@ import { CareUnit, CongestionLevel } from '@/features/map/type';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
-import {
-  Star,
-  StarOff,
-  MessageSquare,
-  TelescopeIcon,
-  PhoneCallIcon,
-} from 'lucide-react';
-import { useToggleFavorite } from '../model/useOnToggleFavorite';
+import { Star, StarOff, MessageSquare, PhoneCallIcon } from 'lucide-react';
 import { openKakaoMap, renderTodayTime } from '../utils';
-import { useState } from 'react';
+import { useOptimisticToggleFavorite } from '../model/useOptimisticToggleFavorite';
+import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
+import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 import { CATEGORY_LABEL, congestionClassMap } from '../const';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface CareUnitCardProps {
   unit: CareUnit;
@@ -25,8 +21,14 @@ interface CareUnitCardProps {
 
 export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
   const setChat = useSetAtom(chatModalAtom);
-  const { mutate: toggleFavoriteMutation } = useToggleFavorite();
-  const [localFavorite, setLocalFavorite] = useState(unit.isFavorite);
+  const queryClient = useQueryClient();
+  const queryKey = useAtomValue(careUnitsQueryKeyAtom);
+  const cacheData = queryClient.getQueryData<any>(queryKey);
+  const freshUnit =
+    cacheData?.pages
+      ?.flatMap((p: any) => p.items)
+      ?.find((item: CareUnit) => item.id === unit.id) ?? unit;
+  const { mutate: toggleFavorite } = useOptimisticToggleFavorite(queryKey);
 
   const handleUrlButton = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
@@ -35,20 +37,7 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
 
   const handleFavoriteButton = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
-    toggleFavoriteMutation(
-      {
-        unitId: unit.id,
-        next: !unit.isFavorite,
-      },
-      {
-        onError: () => {
-          setLocalFavorite((o) => !o);
-        },
-        onSuccess: () => {
-          setLocalFavorite((o) => !o);
-        },
-      }
-    );
+    toggleFavorite({ unitId: unit.id });
   };
   const level = (unit?.congestion?.congestionLevel ?? 'LOW') as CongestionLevel;
 
@@ -109,7 +98,7 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
               onClick={handleFavoriteButton}
               className="w-8 h-8"
             >
-              {localFavorite ? (
+              {freshUnit.isFavorite ? (
                 <Star className="text-yellow-500 fill-yellow-500" size={18} />
               ) : (
                 <StarOff size={18} />

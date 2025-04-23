@@ -1,6 +1,8 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { locationByCategory } from '../api'; // 또는 locationByCategoryMock
 import { UseCareUnitsQueryResult } from '@/features/map/type';
+import { useSetAtom } from 'jotai';
+import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
 
 interface UseCareUnitsQueryProps {
   lat: number | null;
@@ -16,19 +18,24 @@ export function useCareUnitsQuery({
   level,
   selectedCategory,
   OpenStatus,
-}: UseCareUnitsQueryProps): UseCareUnitsQueryResult {
+}: UseCareUnitsQueryProps): UseCareUnitsQueryResult & { queryKey: any[] } {
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
+
+  const queryKey = [
+    'careUnits',
+    roundedLat,
+    roundedLng,
+    level,
+    selectedCategory,
+    OpenStatus,
+  ];
+  const setQueryKeyAtom = useSetAtom(careUnitsQueryKeyAtom);
+  setQueryKeyAtom(queryKey); // useEffect 말고 함수 안에서 직접 실행
+
   const query = useInfiniteQuery({
     staleTime: 5000,
-    queryKey: [
-      'careUnits',
-      roundedLat,
-      roundedLng,
-      level,
-      selectedCategory,
-      OpenStatus,
-    ],
+    queryKey,
     queryFn: async ({ pageParam = 1 }) => {
       if (lat === null || lng === null || level === null)
         return { items: [], hasNext: false };
@@ -71,6 +78,7 @@ export function useCareUnitsQuery({
     hasNextPage: query.hasNextPage,
     isFetching: query.isFetching,
     isLoading: query.isLoading,
-    raw: query, // 필요하면 원본도 같이 넘겨줌
+    raw: query,
+    queryKey, // 👈 이거 추가!
   };
 }
