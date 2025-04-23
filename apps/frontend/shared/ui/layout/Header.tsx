@@ -58,6 +58,31 @@ export default function Header() {
     }
   };
 
+  const getMenuItems = () => {
+    if (!isLoggedIn) {
+      return [
+        { href: ROUTES.ADMIN_SIGN_UP, label: '관리자 회원가입' },
+        { href: ROUTES.SIGN_UP, label: '회원가입' },
+        { href: ROUTES.LOGIN, label: '로그인' },
+      ];
+    }
+
+    if (user?.role === 'admin') {
+      return [
+        { href: ROUTES.ADMIN.DASHBOARD, label: '관리자 대시보드' },
+        { href: '#', label: '로그아웃', onClick: handleLogout },
+      ];
+    }
+
+    return [
+      { href: ROUTES.USER.ROOT, label: '마이페이지' },
+      { href: ROUTES.USER.FAVORITES, label: '즐겨찾기' },
+      { href: ROUTES.USER.REVIEWS, label: '내 리뷰' },
+      { href: ROUTES.USER.THANKS, label: '감사 메시지' },
+      { href: '#', label: '로그아웃', onClick: handleLogout },
+    ];
+  };
+
   return (
     <header className="w-full !px-6 !py-3 border-b border-border bg-background text-foreground relative z-50">
       <div className="flex justify-between items-center">
@@ -69,43 +94,44 @@ export default function Header() {
         </Link>
 
         <nav className="flex items-center gap-2">
-          {isLoggedIn ? (
-            <>
-              {user?.role === 'admin' ? (
-                <Link href={ROUTES.ADMIN.DASHBOARD}>
-                  <Button variant="ghost" className="text-sm font-medium !px-4">
-                    관리자 대시보드
-                  </Button>
-                </Link>
-              ) : (
-                <Link href={ROUTES.USER.ROOT}>
-                  <Button variant="ghost" className="text-sm font-medium !px-4">
-                    마이페이지
-                  </Button>
-                </Link>
-              )}
+          {/* 모바일: 햄버거 버튼 */}
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              className="p-2 w-[2rem]"
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              <Menu size={24} />
+            </Button>
+          </div>
 
-              <Button
-                variant="ghost"
-                onClick={handleLogout}
-                className="text-sm font-medium text-foreground !px-4"
-              >
-                로그아웃
-              </Button>
-            </>
-          ) : (
-            <>
-              <div className="md:hidden">
+          {/* 데스크탑: 로그인 상태에 따라 버튼 분기 */}
+          <div className="hidden md:flex gap-[20px]">
+            {isLoggedIn ? (
+              <>
+                {user?.role === 'admin' ? (
+                  <Link href={ROUTES.ADMIN.DASHBOARD}>
+                    <Button variant="ghost" className="text-sm !px-4">
+                      관리자 대시보드
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link href={ROUTES.USER.ROOT}>
+                    <Button variant="ghost" className="text-sm !px-4">
+                      마이페이지
+                    </Button>
+                  </Link>
+                )}
                 <Button
                   variant="ghost"
-                  className="p-2 w-[2rem]"
-                  onClick={() => setMenuOpen((prev) => !prev)}
+                  onClick={handleLogout}
+                  className="text-sm font-medium text-foreground !px-4"
                 >
-                  <Menu size={24} />
+                  로그아웃
                 </Button>
-              </div>
-
-              <div className="hidden md:flex gap-[20px]">
+              </>
+            ) : (
+              <>
                 <Link href={ROUTES.ADMIN_SIGN_UP}>
                   <Button variant="ghost" className="text-sm !px-4">
                     관리자 회원가입
@@ -121,15 +147,15 @@ export default function Header() {
                     로그인
                   </Button>
                 </Link>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </nav>
       </div>
 
-      {/* 모바일 메뉴 */}
+      {/* 모바일: 햄버거 메뉴 펼침 */}
       <AnimatePresence>
-        {!isLoggedIn && menuOpen && (
+        {menuOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -137,20 +163,29 @@ export default function Header() {
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="md:hidden absolute top-full left-0 w-full bg-background border-t border-border shadow-xl flex flex-col"
           >
-            {[
-              { href: ROUTES.ADMIN_SIGN_UP, label: '관리자 회원가입' },
-              { href: ROUTES.SIGN_UP, label: '회원가입' },
-              { href: ROUTES.LOGIN, label: '로그인' },
-            ].map(({ href, label }) => (
-              <Link
-                key={label}
-                href={href}
-                className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:text-white transition-colors"
-                onClick={() => setMenuOpen(false)}
-              >
-                {label}
-              </Link>
-            ))}
+            {getMenuItems().map(({ href, label, onClick }) =>
+              onClick ? (
+                <button
+                  key={label}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onClick();
+                  }}
+                  className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:text-white transition-colors"
+                >
+                  {label}
+                </button>
+              ) : (
+                <Link
+                  key={label}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:text-white transition-colors"
+                >
+                  {label}
+                </Link>
+              )
+            )}
           </motion.div>
         )}
       </AnimatePresence>
