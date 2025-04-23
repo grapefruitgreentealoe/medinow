@@ -147,8 +147,15 @@ export default function NearbyCareUnitsMap() {
 
       kakao.maps.event.addListener(map, 'idle', () => {
         const currentLevel = map.getLevel();
-        setIsManualZoom(level !== currentLevel);
-        setLevel(currentLevel);
+
+        setLevel((prev) => {
+          if (prev !== currentLevel) {
+            setIsManualZoom(true); // 사용자가 직접 줌했단 뜻
+            return currentLevel;
+          }
+          return prev;
+        });
+
         const c = map.getCenter();
         setLat((prev) =>
           Math.abs((prev ?? 0) - c.getLat()) > 0.0001 ? c.getLat() : prev
@@ -222,6 +229,17 @@ export default function NearbyCareUnitsMap() {
     }
     convertCoordsToDong(lat, lng).then(setLocation);
   };
+  const handleZoom = (dir: 'in' | 'out') => {
+    const map = mapInstance.current;
+    if (!map) return;
+
+    const currentLevel = map.getLevel();
+    const newLevel = dir === 'in' ? currentLevel - 1 : currentLevel + 1;
+
+    setIsManualZoom(true);
+    setLevel(newLevel); // 상태 갱신
+    map.setLevel(newLevel); // 지도에 적용
+  };
 
   return (
     <div className="p-4 space-y-2">
@@ -259,18 +277,20 @@ export default function NearbyCareUnitsMap() {
             size="icon"
             variant="ghost"
             className="w-9 h-9 text-xl bg-white hover:bg-primary rounded-md shadow-sm"
-            onClick={() => mapInstance.current?.setLevel(level - 1)}
+            onClick={() => handleZoom('in')}
           >
             +
           </Button>
+
           <Button
             size="icon"
             variant="ghost"
             className="w-9 h-9 text-xl bg-white hover:bg-primary rounded-md shadow-sm"
-            onClick={() => mapInstance.current?.setLevel(level + 1)}
+            onClick={() => handleZoom('out')}
           >
             −
           </Button>
+
           <div className="relative">
             <Button
               size="icon"
