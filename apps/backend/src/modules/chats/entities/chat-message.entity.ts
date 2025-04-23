@@ -1,10 +1,9 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
 import { ChatRoom } from './chat-room.entity';
 
 @Entity('chat_messages')
-@Index(['room'])
 export class ChatMessage extends BaseEntity {
   @Column({ type: 'text' })
   content: string;
