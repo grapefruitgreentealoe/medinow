@@ -27,9 +27,12 @@ export default function NearbyCareUnitsMap() {
   const markersRef = useRef<kakao.maps.CustomOverlay[]>([]);
   const circleRef = useRef<kakao.maps.Circle | null>(null);
 
-  const [initialLocation, setInitialLocation] = useState({
-    lat: 37.5468,
-    lng: 127.0577,
+  const [initialLocation, setInitialLocation] = useState<{
+    lat: number;
+    lng: number;
+  }>({
+    lat: 0,
+    lng: 0,
   });
   const [location, setLocation] = useState<string | null>(null);
   const selectedCategory = useAtomValue(categoryAtom);
@@ -179,7 +182,24 @@ export default function NearbyCareUnitsMap() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSearchFallback(true), 10000);
+    const fallbackToLocalStorage = () => {
+      const storedLat = localStorage.getItem('user_lat');
+      const storedLng = localStorage.getItem('user_lng');
+      const storedAddress = localStorage.getItem('user_address');
+
+      if (storedLat && storedLng) {
+        const lat = parseFloat(storedLat);
+        const lng = parseFloat(storedLng);
+        setInitialLocation({ lat, lng });
+        setLat(lat);
+        setLng(lng);
+        if (storedAddress) setLocation(storedAddress);
+      } else {
+        setShowSearchFallback(true);
+      }
+    };
+
+    const timer = setTimeout(() => fallbackToLocalStorage(), 10000);
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -188,13 +208,19 @@ export default function NearbyCareUnitsMap() {
         setInitialLocation({ lat: latitude, lng: longitude });
         setLat(latitude);
         setLng(longitude);
-        convertCoordsToDong(latitude, longitude).then(setLocation);
+
+        convertCoordsToDong(latitude, longitude).then((address) => {
+          setLocation(address);
+          localStorage.setItem('user_lat', latitude.toString());
+          localStorage.setItem('user_lng', longitude.toString());
+          localStorage.setItem('user_address', address);
+        });
       },
-      () => {
+      (err) => {
         clearTimeout(timer);
-        setShowSearchFallback(true);
+        fallbackToLocalStorage();
       },
-      { enableHighAccuracy: false }
+      { enableHighAccuracy: true }
     );
 
     return () => clearTimeout(timer);
@@ -273,16 +299,24 @@ export default function NearbyCareUnitsMap() {
     convertCoordsToDong(lat, lng).then(setLocation);
   };
   const handleHospitalSelect = (v: { lat: string; lng: string }) => {
-    const { lat: prelat, lng: prelng } = v;
-    const lat = JSON.parse(prelat);
-    const lng = JSON.parse(prelng);
+    const lat = parseFloat(v.lat);
+    const lng = parseFloat(v.lng);
     setLat(lat);
     setLng(lng);
+    setInitialLocation({ lat, lng });
+
+    convertCoordsToDong(lat, lng).then((address) => {
+      setLocation(address);
+      localStorage.setItem('user_lat', lat.toString());
+      localStorage.setItem('user_lng', lng.toString());
+      localStorage.setItem('user_address', address);
+    });
+
     if (mapInstance.current) {
       fitMapToBounds(mapInstance.current, lat, lng);
     }
-    convertCoordsToDong(lat, lng).then(setLocation);
   };
+
   const handleZoom = (dir: 'in' | 'out') => {
     const map = mapInstance.current;
     if (!map) return;
@@ -384,6 +418,12 @@ export default function NearbyCareUnitsMap() {
           setLng(lngNum);
           setInitialLocation({ lat: latNum, lng: lngNum });
           setLocation(address);
+
+          // 저장
+          localStorage.setItem('user_lat', lat);
+          localStorage.setItem('user_lng', lng);
+          localStorage.setItem('user_address', address);
+
           if (mapInstance.current) {
             mapInstance.current.setCenter(
               new kakao.maps.LatLng(latNum, lngNum)
