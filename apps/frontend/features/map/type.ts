@@ -55,3 +55,5 @@ export interface UseCareUnitsQueryResult {
   isLoading: boolean;
   raw: ReturnType<typeof useInfiniteQuery>;
 }
+
+export type CongestionLevel = 'HIGH' | 'MEDIUM' | 'LOW';
