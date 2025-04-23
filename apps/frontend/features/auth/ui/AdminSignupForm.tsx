@@ -214,7 +214,7 @@ export default function AdminSignupForm() {
           />
 
           {/* 이미지 업로드 */}
-          <FormItem>
+          {/* <FormItem>
             <FormLabel>사업자 등록증 업로드</FormLabel>
             <FormControl>
               <>
@@ -241,7 +241,7 @@ export default function AdminSignupForm() {
               </>
             </FormControl>
             <FormMessage>{form.formState.errors.imageUrl?.message}</FormMessage>
-          </FormItem>
+          </FormItem> */}
 
           {/* 숨겨진 필드 */}
           <input type="hidden" {...form.register('latitude')} />

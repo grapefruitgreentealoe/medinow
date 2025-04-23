@@ -8,9 +8,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogOverlay,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface LocationSearchModalProps {
   subtitle: string;
@@ -59,7 +61,7 @@ export default function LocationSearchModal({
       );
       setMap(mapInstance);
     });
-  }, [loaded, setMap]);
+  }, [loaded, open, setMap]);
 
   const search = (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -102,12 +104,12 @@ export default function LocationSearchModal({
         onLoad={() => setLoaded(true)}
       />
       <Dialog open={open} onOpenChange={onClose}>
+        <DialogOverlay className="bg-black/10 backdrop-brightness-80" />
         <DialogContent className="!p-6 !max-w-2xl">
           <DialogHeader className="!mb-2 !gap-1">
             <DialogTitle className="text-lg">{title}</DialogTitle>
             <DialogDescription>{subtitle}</DialogDescription>
           </DialogHeader>
-
           {/* 검색창 */}
           <form onSubmit={search} className="flex gap-2 !mb-3">
             <Input
@@ -120,16 +122,14 @@ export default function LocationSearchModal({
               검색
             </Button>
           </form>
-
           {/* 지도 영역 */}
           <div ref={mapRef} className="w-0 !h-0 !mb-3 border hidden" />
-
           {/* 검색 결과 */}
-          <ul className="max-h-50 overflow-auto scrollbar-hide space-y-2">
+          <ScrollArea className="h-72 w-full rounded-md border">
             {places.map((place, i) => (
               <li
                 key={i}
-                className="!p-3 bg-white border-b-[1px] border-b-slate-100 border-solid cursor-pointer hover:bg-muted transition-colors text-sm"
+                className="!p-3 bg-white border-b-[1px] border-b-slate-100 border-solid cursor-pointer hover:bg-muted transition-colors text-sm list-none"
                 onClick={() => handleSelect(place)}
               >
                 <strong className="text-base">{place.place_name}</strong>
@@ -139,7 +139,7 @@ export default function LocationSearchModal({
                 </span>
               </li>
             ))}
-          </ul>
+          </ScrollArea>{' '}
         </DialogContent>
       </Dialog>
     </>
