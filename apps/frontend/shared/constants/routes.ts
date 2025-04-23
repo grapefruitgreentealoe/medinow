@@ -6,12 +6,10 @@ export const ROUTES = {
   SIGN_UP: '/signup',
   ADMIN_SIGN_UP: '/admin/signup',
   USER: {
-    ROOT: '/',
-    MYPAGE: '/my',
-    FAVORITES: '/my/favorites',
-    PROFILE: '/my/profile',
-    REVIEWS: '/my/reviews',
-    THANKS: '/my/thanks',
+    FAVORITES: '/user/favorites',
+    ROOT: '/user',
+    REVIEWS: '/user/reviews',
+    THANKS: '/user/thanks',
     WRITE_REVIEW: (id: string | number) => `/review/${id}`,
   },
 
