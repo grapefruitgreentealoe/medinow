@@ -433,7 +433,7 @@ export default function NearbyCareUnitsMap() {
       />
 
       <LocationSearchModal
-        subtitle="키워드로 검색하세요"
+        subtitle="주소와 키워드로 검색하세요"
         title="위치 검색"
         open={hospitalSearchModal}
         onClose={() => setHospitalSearchModal(false)}

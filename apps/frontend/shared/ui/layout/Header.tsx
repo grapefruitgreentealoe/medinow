@@ -180,7 +180,7 @@ export default function Header() {
                   key={label}
                   href={href}
                   onClick={() => setMenuOpen(false)}
-                  className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:text-white transition-colors"
+                  className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:!text-white transition-colors !text-primary"
                 >
                   {label}
                 </Link>
