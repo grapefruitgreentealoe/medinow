@@ -52,8 +52,8 @@ export default function SignupForm() {
 
     setLoading(false);
 
-    //  회원가입 후 홈페이지로 이동
-    router.push(ROUTES.HOME);
+    //  회원가입 후 로그인 페이지로 이동
+    router.push(ROUTES.LOGIN);
   };
 
   return (
