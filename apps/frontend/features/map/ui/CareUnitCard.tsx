@@ -41,8 +41,6 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
   };
   const level = (unit?.congestion?.congestionLevel ?? 'LOW') as CongestionLevel;
 
-  console.log('cache', queryClient.getQueryData(queryKey));
-
   return (
     <Card
       key={unit.id}

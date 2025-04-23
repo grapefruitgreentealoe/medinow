@@ -48,7 +48,6 @@ export default function SignupForm() {
       ...data,
       age: Number(data.age),
     });
-    console.log('회원가입 성공:', data);
 
     setLoading(false);
 
