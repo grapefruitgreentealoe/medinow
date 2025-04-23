@@ -146,18 +146,13 @@ export default function NearbyCareUnitsMap() {
   }
 
   useEffect(() => {
-    if (
-      !window.kakao?.maps ||
-      !mapRef.current ||
-      mapInstance.current ||
-      lat ||
-      lng ||
-      level
-    )
-      return;
+    if (!window.kakao?.maps || !mapRef.current) return;
     window.kakao.maps.load(() => {
       const center = new kakao.maps.LatLng(37.5665, 126.978);
-      const map = new kakao.maps.Map(mapRef.current!, { center, level });
+      const map = new kakao.maps.Map(mapRef.current!, {
+        center,
+        level: level ?? 5,
+      });
       mapInstance.current = map;
       setIsMapReady(true);
 
