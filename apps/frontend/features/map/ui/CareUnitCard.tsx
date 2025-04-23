@@ -28,7 +28,7 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
     cacheData?.pages
       ?.flatMap((p: any) => p.items)
       ?.find((item: CareUnit) => item.id === unit.id) ?? unit;
-  const { toggleFavorite } = useOptimisticToggleFavorite(queryKey);
+  const { mutate: toggleFavorite } = useOptimisticToggleFavorite(queryKey);
 
   const handleUrlButton = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
@@ -37,7 +37,7 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
 
   const handleFavoriteButton = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
-    toggleFavorite(unit.id, unit.isFavorite);
+    toggleFavorite({ unitId: unit.id });
   };
   const level = (unit?.congestion?.congestionLevel ?? 'LOW') as CongestionLevel;
 

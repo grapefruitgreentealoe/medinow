@@ -14,7 +14,7 @@ export default function CareUnitDetailPage() {
   const [unit] = useAtom(selectedCareUnitAtom);
   const setChat = useSetAtom(chatModalAtom);
   const queryKey = useAtomValue(careUnitsQueryKeyAtom);
-  const { toggleFavorite } = useOptimisticToggleFavorite(queryKey);
+  const { mutate: toggleFavorite } = useOptimisticToggleFavorite(queryKey);
 
   if (!unit) return null;
 
@@ -40,7 +40,7 @@ export default function CareUnitDetailPage() {
   );
 
   const handleFavorite = () => {
-    toggleFavorite(unit.id, unit.isFavorite);
+    toggleFavorite({ unitId: unit.id });
   };
 
   const handleChat = () => {

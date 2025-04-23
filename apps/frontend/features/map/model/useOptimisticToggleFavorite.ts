@@ -1,67 +1,71 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toggleFavorite } from '../api';
 import { CareUnit } from '../type';
-import { useAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 
 export function useOptimisticToggleFavorite(queryKey: any[]) {
   const queryClient = useQueryClient();
-  const [selected, setSelected] = useAtom(selectedCareUnitAtom);
+  const selected = useAtomValue(selectedCareUnitAtom);
+  const setSelected = useSetAtom(selectedCareUnitAtom);
 
-  return {
-    toggleFavorite: (unitId: string, currentFavorite: boolean) => {
-      const next = !currentFavorite;
+  return useMutation({
+    mutationFn: async ({ unitId }: { unitId: string }) => {
+      return toggleFavorite(unitId);
+    },
 
-      // 1. 디테일 atom 수정
+    // 1. Optimistic Update
+    onMutate: async ({ unitId }: { unitId: string }) => {
+      await queryClient.cancelQueries({ queryKey });
+
+      const previousData = queryClient.getQueryData(queryKey) as
+        | { pages: { items: CareUnit[] }[] }
+        | undefined;
+
+      const cached = previousData?.pages
+        ?.flatMap((p: any) => p.items)
+        .find((i: CareUnit) => i.id === unitId);
+      const next = !cached?.isFavorite;
+
+      // update selectedCareUnit atom
       if (selected?.id === unitId) {
         setSelected({ ...selected, isFavorite: next });
       }
 
-      // 2. 리스트 캐시 수정
       queryClient.setQueryData(queryKey, (old: any) => {
         if (!old) return old;
 
-        let found = false;
-
-        const newPages = old.pages.map((page: any) => ({
-          ...page,
-          items: page.items.map((item: CareUnit) => {
-            if (item.id === unitId) {
-              found = true;
-              return { ...item, isFavorite: next };
-            }
-            return item;
-          }),
-        }));
-
-        if (!found) return old; // 바뀐 게 없으면 그대로
-
-        return { ...old, pages: newPages };
-      });
-
-      // 3. 서버 요청
-      toggleFavorite(unitId).catch(() => {
-        // 4. 롤백: 디테일
-        if (selected?.id === unitId) {
-          setSelected({ ...selected, isFavorite: currentFavorite });
-        }
-
-        // 5. 롤백: 리스트 캐시
-        queryClient.setQueryData(queryKey, (old: any) => {
-          if (!old) return old;
-
-          const rollbackPages = old.pages.map((page: any) => ({
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
             ...page,
             items: page.items.map((item: CareUnit) =>
-              item.id === unitId
-                ? { ...item, isFavorite: currentFavorite }
-                : item
+              item.id === unitId ? { ...item, isFavorite: next } : item
             ),
-          }));
-
-          return { ...old, pages: rollbackPages };
-        });
+          })),
+        };
       });
+
+      //context
+      return { previousData, unitId, currentFavorite: !next };
     },
-  };
+
+    // 2. Rollback on error
+    onError: (_err, _variables, context) => {
+      if (!context) return;
+
+      // rollback selectedCareUnit
+      if (selected?.id === context.unitId) {
+        setSelected({ ...selected, isFavorite: context.currentFavorite });
+      }
+
+      // rollback query cache
+      queryClient.setQueryData(queryKey, context.previousData);
+    },
+
+    // 3. (Optional) Invalidate on settled if needed
+    onSettled: () => {
+      // do nothing – we assume optimistic update is final
+    },
+  });
 }
