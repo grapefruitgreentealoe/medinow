@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useCareUnitsQuery } from '../model/useCareUnitsQuery';
@@ -17,6 +17,7 @@ import CareUnitSheet from './CareUnitSheet';
 import FilterMenu from './FilterMenu';
 import { ListIcon } from 'lucide-react';
 import LocationSearchModal from '@/shared/ui/LocationSearchModal';
+import { CareUnit } from '../type';
 
 const store = getDefaultStore();
 
@@ -40,13 +41,15 @@ export default function NearbyCareUnitsMap() {
   const [showSearchFallback, setShowSearchFallback] = useState(false); //
   const [hospitalSearchModal, setHospitalSearchModal] = useState(false);
   const radius = 0.005 * level;
-  const debouncedLevel = useDebounce(level, 300);
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
+  const debouncedLevel = useDebounce(level, 300);
+  const debouncedLat = useDebounce(roundedLat, 300);
+  const debouncedLng = useDebounce(roundedLng, 300);
 
   const { data = [] } = useCareUnitsQuery({
-    lat: roundedLat,
-    lng: roundedLng,
+    lat: debouncedLat,
+    lng: debouncedLng,
     level: debouncedLevel,
     selectedCategory,
     OpenStatus: JSON.parse(openFilter) as boolean,
@@ -77,6 +80,12 @@ export default function NearbyCareUnitsMap() {
     if (hvec < 10) return '#f97316';
     return '#22c55e';
   }
+
+  const handleMarkerClick = useCallback((unit: CareUnit) => {
+    store.set(selectedCareUnitAtom, unit);
+    store.set(detailSheetOpenAtom, true);
+    store.set(detailSheetPageAtom, 'detail');
+  }, []);
 
   function createMarkersWithOverlay({
     map,
@@ -120,9 +129,7 @@ export default function NearbyCareUnitsMap() {
         const el = document.getElementById(overlayId);
         if (el) {
           el.addEventListener('click', () => {
-            store.set(selectedCareUnitAtom, unit);
-            store.set(detailSheetOpenAtom, true);
-            store.set(detailSheetPageAtom, 'detail');
+            handleMarkerClick(unit);
           });
         }
       }, 0);
@@ -189,18 +196,21 @@ export default function NearbyCareUnitsMap() {
     return () => clearTimeout(timer);
   }, []);
 
+  // 1. Circle (반경 표시)
   useEffect(() => {
     const map = mapInstance.current;
     if (!isMapReady || !map || lat == null || lng == null) return;
     drawRadiusCircle(map, lat, lng, radius);
   }, [isMapReady, lat, lng, radius, data]);
 
+  // 2. 마커 그리기
   useEffect(() => {
     const map = mapInstance.current;
     if (!isMapReady || !map || !data) return;
     createMarkersWithOverlay({ map, data });
   }, [isMapReady, data]);
 
+  // 3. bounds 설정
   useEffect(() => {
     const map = mapInstance.current;
     if (!isMapReady || !map || lat == null || lng == null || isManualZoom)
