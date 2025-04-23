@@ -1,59 +1,65 @@
-// /features/map/model/useOptimisticToggleFavorite.ts
-
 import { useQueryClient } from '@tanstack/react-query';
-import { useSetAtom, useAtomValue } from 'jotai';
-import { selectedCareUnitAtom } from '@/features/map/atoms/selectedCareUnitAtom';
 import { toggleFavorite } from '../api';
+import { CareUnit } from '../type';
+import { useAtom } from 'jotai';
+import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 
 export function useOptimisticToggleFavorite(queryKey: any[]) {
   const queryClient = useQueryClient();
-  const setSelected = useSetAtom(selectedCareUnitAtom);
-  const selected = useAtomValue(selectedCareUnitAtom);
+  const [selected, setSelected] = useAtom(selectedCareUnitAtom);
 
   return {
     toggleFavorite: (unitId: string, currentFavorite: boolean) => {
-      // 1. optimistic update → atom 변경
+      const next = !currentFavorite;
+
+      // 1. 디테일 atom 수정
       if (selected?.id === unitId) {
-        setSelected({ ...selected, isFavorite: !currentFavorite });
+        setSelected({ ...selected, isFavorite: next });
       }
 
-      // 2. 리스트 쿼리 캐시도 업데이트
+      // 2. 리스트 캐시 수정
       queryClient.setQueryData(queryKey, (old: any) => {
         if (!old) return old;
-        return {
-          ...old,
-          pages: old.pages.map((page: any) => ({
-            ...page,
-            items: page.items.map((item: any) =>
-              item.id === unitId
-                ? { ...item, isFavorite: !currentFavorite }
-                : item
-            ),
-          })),
-        };
+
+        let found = false;
+
+        const newPages = old.pages.map((page: any) => ({
+          ...page,
+          items: page.items.map((item: CareUnit) => {
+            if (item.id === unitId) {
+              found = true;
+              return { ...item, isFavorite: next };
+            }
+            return item;
+          }),
+        }));
+
+        if (!found) return old; // 바뀐 게 없으면 그대로
+
+        return { ...old, pages: newPages };
       });
 
       // 3. 서버 요청
       toggleFavorite(unitId).catch(() => {
-        // 4. 롤백: atom
+        // 4. 롤백: 디테일
         if (selected?.id === unitId) {
           setSelected({ ...selected, isFavorite: currentFavorite });
         }
 
-        // 5. 롤백: 리스트 쿼리 캐시
+        // 5. 롤백: 리스트 캐시
         queryClient.setQueryData(queryKey, (old: any) => {
           if (!old) return old;
-          return {
-            ...old,
-            pages: old.pages.map((page: any) => ({
-              ...page,
-              items: page.items.map((item: any) =>
-                item.id === unitId
-                  ? { ...item, isFavorite: currentFavorite }
-                  : item
-              ),
-            })),
-          };
+
+          const rollbackPages = old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((item: CareUnit) =>
+              item.id === unitId
+                ? { ...item, isFavorite: currentFavorite }
+                : item
+            ),
+          }));
+
+          return { ...old, pages: rollbackPages };
         });
       });
     },

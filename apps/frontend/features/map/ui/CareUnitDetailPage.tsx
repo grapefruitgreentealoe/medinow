@@ -1,13 +1,11 @@
 'use client';
 
 import { useAtom, useAtomValue } from 'jotai';
-import { useToggleFavorite } from '../model/useOnToggleFavorite';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { useSetAtom } from 'jotai';
 import { cn } from '@/lib/utils';
 import { Star, StarOff, MessageSquare, PhoneCallIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
 import { useOptimisticToggleFavorite } from '../model/useOptimisticToggleFavorite';
 import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
 import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
@@ -15,14 +13,13 @@ import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 export default function CareUnitDetailPage() {
   const [unit] = useAtom(selectedCareUnitAtom);
   const setChat = useSetAtom(chatModalAtom);
-  const selected = useAtomValue(selectedCareUnitAtom);
-  const queryKey = useAtom(careUnitsQueryKeyAtom);
+  const queryKey = useAtomValue(careUnitsQueryKeyAtom);
   const { toggleFavorite } = useOptimisticToggleFavorite(queryKey);
 
   if (!unit) return null;
 
   const timeToStr = (time: number | null) => {
-    if (time == 0) return '00:00';
+    if (time === 0) return '00:00';
     if (!time) return '휴무';
     const h = String(Math.floor(time / 100)).padStart(2, '0');
     const m = String(time % 100).padStart(2, '0');
@@ -43,9 +40,7 @@ export default function CareUnitDetailPage() {
   );
 
   const handleFavorite = () => {
-    if (!selected) return;
-    console.log(selected);
-    toggleFavorite(selected.id, selected.isFavorite);
+    toggleFavorite(unit.id, unit.isFavorite);
   };
 
   const handleChat = () => {
@@ -106,9 +101,7 @@ export default function CareUnitDetailPage() {
             <Button
               size="icon"
               variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
+              onClick={(e) => e.stopPropagation()}
               className="w-8 h-8"
             >
               <a href={`tel:${unit.tel}`}>
@@ -118,6 +111,7 @@ export default function CareUnitDetailPage() {
           )}
         </div>
       </div>
+
       <div className="h-[1rem]" />
 
       {/* 기본 정보 */}
