@@ -13,6 +13,7 @@ import type { AdminSignupData } from '../type';
 import { UploadCloud } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import axiosInstance from '@/lib/axios';
+import { ROUTES } from '@/shared/constants/routes';
 
 export default function AdminSignupForm() {
   const router = useRouter();
@@ -94,7 +95,7 @@ export default function AdminSignupForm() {
       longitude: Number(data.longitude),
     };
     await adminSignup(signupData);
-    router.push('/');
+    router.push(ROUTES.HOME);
   };
 
   return (

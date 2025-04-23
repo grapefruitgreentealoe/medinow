@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react';
 import axiosInstance from '@/lib/axios';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ROUTES } from '@/shared/constants/routes';
 
 declare global {
   interface Window {
@@ -35,7 +36,10 @@ export default function Header() {
   return (
     <header className="w-full !px-6 !py-3 border-b border-border bg-background text-foreground relative z-50">
       <div className="flex justify-between items-center">
-        <Link href="/" className="text-lg font-semibold tracking-tight">
+        <Link
+          href={ROUTES.HOME}
+          className="text-lg font-semibold tracking-tight"
+        >
           <span className="text-primary text-3xl">Medinow</span>
         </Link>
 
@@ -63,7 +67,7 @@ export default function Header() {
 
               {/* 데스크탑 버튼들 */}
               <div className="hidden md:flex gap-[20px]">
-                <Link href="/signup/admin">
+                <Link href={ROUTES.ADMIN_SIGN_UP}>
                   <Button
                     variant="ghost"
                     className="text-sm font-medium text-foreground !px-4"
@@ -71,7 +75,7 @@ export default function Header() {
                     관리자 회원가입
                   </Button>
                 </Link>
-                <Link href="/signup">
+                <Link href={ROUTES.SIGN_UP}>
                   <Button
                     variant="ghost"
                     className="text-sm font-medium text-foreground !px-4"
@@ -79,7 +83,7 @@ export default function Header() {
                     회원가입
                   </Button>
                 </Link>
-                <Link href="/login">
+                <Link href={ROUTES.LOGIN}>
                   <Button className="text-sm font-medium bg-primary text-white hover:bg-primary/90 !px-4">
                     로그인
                   </Button>
@@ -101,9 +105,9 @@ export default function Header() {
             className="md:hidden overflow-hidden absolute top-full left-0 w-full bg-background border-t border-border shadow-xl flex flex-col"
           >
             {[
-              { href: '/signup/admin', label: '관리자 회원가입' },
-              { href: '/signup', label: '회원가입' },
-              { href: '/login', label: '로그인' },
+              { href: ROUTES.ADMIN_SIGN_UP, label: '관리자 회원가입' },
+              { href: ROUTES.SIGN_UP, label: '회원가입' },
+              { href: ROUTES.LOGIN, label: '로그인' },
             ].map(({ href, label }) => (
               <Link
                 key={label}

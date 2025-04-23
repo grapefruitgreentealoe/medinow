@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { checkEmail, signup } from '../api';
+import { ROUTES } from '@/shared/constants/routes';
 
 type FormData = z.infer<typeof signupSchema>;
 
@@ -51,8 +52,8 @@ export default function SignupForm() {
 
     setLoading(false);
 
-    // ✅ 회원가입 후 홈페이지로 이동
-    router.push('/');
+    //  회원가입 후 홈페이지로 이동
+    router.push(ROUTES.HOME);
   };
 
   return (
