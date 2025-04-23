@@ -159,6 +159,12 @@ export class CareUnitService {
 
     const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
 
+    // 거리 계산을 위한 서브쿼리 추가
+    queryBuilder.addSelect(
+      `POWER(careUnit.lat - :lat, 2) + POWER(careUnit.lng - :lng, 2)`,
+      'distance',
+    );
+
     // 거리 계산 (필요시 Haversine 공식 등 더 정확한 계산 방식 고려)
     queryBuilder
       .where('careUnit.lat BETWEEN :minLat AND :maxLat', {
@@ -168,7 +174,8 @@ export class CareUnitService {
       .andWhere('careUnit.lng BETWEEN :minLng AND :maxLng', {
         minLng: lng - 0.005 * level,
         maxLng: lng + 0.005 * level,
-      });
+      })
+      .setParameters({ lat, lng });
 
     // 카테고리 필터링
     if (category) {
@@ -186,24 +193,14 @@ export class CareUnitService {
         )
         .orderBy('favorites.id', 'DESC') // 즐겨찾기 우선
         .addOrderBy('careUnit.isBadged', 'DESC') // 배지 우선
-        .addOrderBy(
-          `ST_Distance(
-              ST_SetSRID(ST_MakePoint(careUnit.lng, careUnit.lat), 4326),
-              ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
-            )`,
-          'ASC',
-        );
+        .addOrderBy('careUnit.nowOpen', 'DESC') // 운영중인 곳 우선
+        .addOrderBy('distance', 'ASC'); // 거리순
     } else {
       // 비로그인 사용자인 경우
       queryBuilder
         .orderBy('careUnit.isBadged', 'DESC') // 배지 우선
-        .addOrderBy(
-          `ST_Distance(
-              ST_SetSRID(ST_MakePoint(careUnit.lng, careUnit.lat), 4326),
-              ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
-            )`,
-          'ASC',
-        );
+        .addOrderBy('careUnit.nowOpen', 'DESC') // 운영중인 곳 우선
+        .addOrderBy('distance', 'ASC'); // 거리순
     }
 
     // 페이지네이션
