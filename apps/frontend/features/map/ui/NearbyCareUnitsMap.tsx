@@ -33,14 +33,14 @@ export default function NearbyCareUnitsMap() {
   const [location, setLocation] = useState<string | null>(null);
   const selectedCategory = useAtomValue(categoryAtom);
   const openFilter = useAtomValue(openStatusAtom);
-  const [lat, setLat] = useState<number | null>(37.5468);
-  const [lng, setLng] = useState<number | null>(127.0577);
-  const [level, setLevel] = useState<number>(5);
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
+  const [level, setLevel] = useState<number | null>(null);
   const [isManualZoom, setIsManualZoom] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false);
   const [showSearchFallback, setShowSearchFallback] = useState(false); //
   const [hospitalSearchModal, setHospitalSearchModal] = useState(false);
-  const radius = 0.005 * level;
+  const radius = 0.005 * (level ?? 0);
   const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
   const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
   const debouncedLevel = useDebounce(level, 300);
@@ -145,7 +145,15 @@ export default function NearbyCareUnitsMap() {
   }
 
   useEffect(() => {
-    if (!window.kakao?.maps || !mapRef.current || mapInstance.current) return;
+    if (
+      !window.kakao?.maps ||
+      !mapRef.current ||
+      mapInstance.current ||
+      lat ||
+      lng ||
+      level
+    )
+      return;
     window.kakao.maps.load(() => {
       const center = new kakao.maps.LatLng(37.5665, 126.978);
       const map = new kakao.maps.Map(mapRef.current!, { center, level });
@@ -256,7 +264,7 @@ export default function NearbyCareUnitsMap() {
       <div className="flex justify-between flex-wrap items-center gap-[10px] !m-2">
         <div className="flex gap-1">
           <Label className="text-sm text-muted-foreground">
-            현재 위치: {location ?? '엘리스'}
+            현재 위치: {location ?? '위치 없음'}
           </Label>
           <Button
             variant="outline"

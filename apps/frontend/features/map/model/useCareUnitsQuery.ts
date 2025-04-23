@@ -5,7 +5,7 @@ import { UseCareUnitsQueryResult } from '@/features/map/type';
 interface UseCareUnitsQueryProps {
   lat: number | null;
   lng: number | null;
-  level: number;
+  level: number | null;
   selectedCategory: string;
   OpenStatus: boolean;
 }
@@ -30,7 +30,8 @@ export function useCareUnitsQuery({
       OpenStatus,
     ],
     queryFn: async ({ pageParam = 1 }) => {
-      if (lat === null || lng === null) return { items: [], hasNext: false };
+      if (lat === null || lng === null || level === null)
+        return { items: [], hasNext: false };
 
       const items = await locationByCategory({
         lat,
