@@ -23,7 +23,6 @@ export const locationByCategory = async (
 };
 
 export const toggleFavorite = async (careUnitId: string) => {
-  console.log(careUnitId);
   const res = await axiosInstance.post('/favorites', {
     careUnitId,
   });

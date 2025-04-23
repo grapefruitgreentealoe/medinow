@@ -49,7 +49,6 @@ export default function AdminSignupForm() {
     lat: string;
     lng: string;
   }) => {
-    console.log(data);
     setValue('careUnitName', data.name, { shouldDirty: true });
     setValue('careUnitAddress', data.address, { shouldDirty: true });
     setValue('longitude', data.lng, { shouldDirty: true });
@@ -94,7 +93,6 @@ export default function AdminSignupForm() {
       latitude: Number(data.latitude),
       longitude: Number(data.longitude),
     };
-    console.log(signupData);
     await adminSignup(signupData);
     router.push('/');
   };
