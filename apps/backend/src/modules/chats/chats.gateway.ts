@@ -176,7 +176,11 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.logger.log(`사용자 ${user.id}가 채팅방 ${room.id}에 참여 완료`);
 
       // 채팅방 내 사용자가 아닌 경우에만 읽음 처리 수행
-      if (room.user && room.user.id !== user.id) {
+      if (
+        room.user &&
+        room.user.id !== user.id &&
+        room.user.role === UserRole.ADMIN
+      ) {
         await this.chatsService.markMessagesAsRead(room.id, user.id);
         this.logger.log(`채팅방 ${room.id}의 메시지 읽음 처리 완료`);
       }
