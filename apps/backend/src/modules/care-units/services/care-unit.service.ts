@@ -182,104 +182,127 @@ export class CareUnitService {
       queryBuilder.andWhere('careUnit.category = :category', { category });
     }
 
-    // 모든 데이터 조회 (페이지네이션 전)
-    const allCareUnits = await queryBuilder
+    // 로그인 사용자인 경우
+    if (user) {
+      queryBuilder
+        .leftJoinAndSelect(
+          'careUnit.favorites',
+          'favorites',
+          'favorites.userId = :userId',
+          { userId: user.id },
+        )
+        .orderBy('favorites.id', 'ASC') // 즐겨찾기 우선
+        .addOrderBy('careUnit.isBadged', 'DESC') // 배지 우선
+        // .addOrderBy('careUnit.nowOpen', 'DESC') // 운영중인 곳 우선
+        .addOrderBy('distance', 'ASC'); // 거리순
+    } else {
+      // 비로그인 사용자인 경우
+      queryBuilder
+        .orderBy('careUnit.isBadged', 'DESC') // 배지 우선
+        // .addOrderBy('careUnit.nowOpen', 'DESC') // 운영중인 곳 우선
+        .addOrderBy('distance', 'ASC'); // 거리순
+    }
+
+    // 페이지네이션
+    queryBuilder.skip(skip).take(limit);
+
+    const [careUnits, total] = await queryBuilder
       .leftJoinAndSelect('careUnit.departments', 'departments')
-      .getMany();
+      .getManyAndCount();
 
-    // 운영 상태 확인 및 추가 정보 조회
-    const careUnitsWithStatus = await Promise.all(
-      allCareUnits.map(async (careUnit) => {
-        // 운영 상태, 즐겨찾기, 관리자 정보 확인
-        const [isOpen, adminUser, isFavorite] = await Promise.all([
-          this.checkNowOpen(careUnit.id),
-          this.usersService.getUserByCareUnitId(careUnit.id).catch(() => null),
-          user?.id
-            ? this.favoritesService
-                .checkIsFavorite(user.id, careUnit.id)
-                .catch(() => false)
-            : Promise.resolve(false),
-        ]);
-
-        // 거리 계산
-        const distance =
-          Math.pow(careUnit.lat - lat, 2) + Math.pow(careUnit.lng - lng, 2);
-
-        // 응급실인 경우 혼잡도 정보 조회
-        // let congestion = null;
-        // if (careUnit.category === 'emergency' || category === 'emergency') {
-        //   try {
-        //     congestion = await this.congestionOneService.getCongestion(
-        //       careUnit.id,
-        //     );
-        //   } catch (error) {
-        //     const err = error as Error;
-        //     this.logger.error(
-        //       `혼잡도 데이터 조회 실패 (${careUnit.name}): ${err.message}`,
-        //     );
-        //   }
-        // }
-
-        return {
-          ...careUnit,
-          nowOpen: isOpen,
-          isChatAvailable: !!adminUser,
-          isFavorite,
-          departments: careUnit.departments || [],
-          distance,
-          // congestion,
-        };
-      }),
+    this.logger.log(
+      `getCareUnitByCategoryAndLocation 결과 - 총 기관 수: ${total}, 검색된 기관 수: ${careUnits.length}`,
     );
 
-    // 필터링 (운영중만 보기)
-    const filteredUnits = OpenStatus
-      ? careUnitsWithStatus.filter((unit) => unit.nowOpen)
-      : careUnitsWithStatus;
+    // 성능 개선: 병렬로 처리하되 에러 처리 강화
+    try {
+      const careUnitsWithStatus = await Promise.all(
+        careUnits.map(async (careUnit) => {
+          const isOpen = await this.checkNowOpen(careUnit.id);
+          const adminUser = await this.usersService
+            .getUserByCareUnitId(careUnit.id)
+            .catch(() => null);
 
-    // 7. 정렬 (요구사항에 따라)
-    filteredUnits.sort((a, b) => {
-      // 로그인 사용자: 즐겨찾기 > 배지 > (운영중) > 거리
-      if (user) {
-        // 즐겨찾기 비교
-        if (a.isFavorite !== b.isFavorite) {
-          return a.isFavorite ? -1 : 1;
-        }
-        // 배지 비교
-        if (a.isBadged !== b.isBadged) {
-          return a.isBadged ? -1 : 1;
-        }
-        // 운영중 필터가 꺼져있을 때만 운영 상태로 정렬
-        if (!OpenStatus && a.nowOpen !== b.nowOpen) {
-          return a.nowOpen ? -1 : 1;
-        }
-        // 거리 비교
-        return a.distance - b.distance;
+          // 응급실인 경우 혼잡도 데이터도 함께 반환
+          // let congestionData = null;
+          // if (category === 'emergency' || careUnit.category === 'emergency') {
+          //   try {
+          //     congestionData = await this.congestionOneService
+          //       .getCongestion(careUnit.id)
+          //       .catch((error) => {
+          //         this.logger.error(
+          //           `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
+          //         );
+          //         return null;
+          //       });
+          //   } catch (error) {
+          //     const err = error as Error;
+          //     this.logger.error(
+          //       `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
+          //     );
+          //   }
+          // }
+
+          // 사용자가 제공된 경우 즐겨찾기 정보 추가
+          let isFavorite = false;
+          if (user && user.id) {
+            this.logger.log(
+              `즐겨찾기 확인 시작 - 사용자: ${user.id}, 병원: ${careUnit.id} (${careUnit.name})`,
+            );
+            try {
+              isFavorite = await this.favoritesService.checkIsFavorite(
+                user.id,
+                careUnit.id,
+              );
+              this.logger.log(
+                `즐겨찾기 상태: ${isFavorite ? '등록됨' : '미등록'}`,
+              );
+            } catch (error) {
+              const err = error as Error;
+              this.logger.error(`즐겨찾기 확인 중 오류: ${err.message}`);
+              isFavorite = false;
+            }
+          } else {
+            this.logger.log('사용자 정보 없음 - 즐겨찾기 확인 건너뜀');
+          }
+
+          return {
+            ...careUnit,
+            nowOpen: isOpen,
+            isChatAvailable: !!adminUser,
+            // congestion: congestionData,
+            isFavorite: isFavorite,
+            departments: careUnit.departments || [],
+          };
+        }),
+      );
+
+      // 운영 여부에 따라 필터링 (선택적)
+      const filteredCareUnits = OpenStatus
+        ? careUnitsWithStatus.filter((unit) => unit.nowOpen)
+        : careUnitsWithStatus;
+
+      if (filteredCareUnits.length > 0) {
+        return createPaginatedResponse(
+          filteredCareUnits,
+          total,
+          page ? page : 1,
+          limit ? limit : 10,
+        );
       }
-      // 비로그인 사용자: 배지 > (운영중) > 거리
-      else {
-        // 배지 비교
-        if (a.isBadged !== b.isBadged) {
-          return a.isBadged ? -1 : 1;
-        }
-        // 운영중 필터가 꺼져있을 때만 운영 상태로 정렬
-        if (!OpenStatus && a.nowOpen !== b.nowOpen) {
-          return a.nowOpen ? -1 : 1;
-        }
-        // 거리 비교
-        return a.distance - b.distance;
-      }
-    });
-    // 페이지네이션 적용
-    const paginatedUnits = filteredUnits
-      .slice(skip, skip + (limit || 10))
-      .map(({ distance, ...unit }) => unit); // distance 제거
-    return createPaginatedResponse(
-      paginatedUnits,
-      filteredUnits.length,
-      page || 1,
-      limit || 10,
+
+      // 현재 반경에서 결과가 없으면 다음 반경으로 계속
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`의료기관 상태 확인 중 오류 발생: ${err.message}`);
+      throw new Error('의료기관 정보를 처리하는 중 오류가 발생했습니다.');
+    }
+
+    // 최대 반경까지 검색해도 결과가 없는 경우
+    this.logger.log(
+      '해당 반경 내 운영 중인 기관이 없습니다. 위치를 이동해주세요.',
     );
+    return createPaginatedResponse([], 0, page ? page : 1, limit ? limit : 10);
   }
 
   //🏥 실시간 채팅 가능 여부 조회
