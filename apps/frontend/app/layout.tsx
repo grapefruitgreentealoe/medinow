@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import './globals.css';
 import Header from '@/shared/ui/layout/Header';
 import { FloatingChatWidget } from '@/widgets/chat/FloatingChatWidget';
+import { Toaster } from '@/components/ui/sonner';
 
 export default async function RootLayout({
   children,
@@ -33,6 +34,8 @@ export default async function RootLayout({
         <Header />
         <main>{children}</main>
         <FloatingChatWidget />
+
+        <Toaster position="bottom-center" duration={1000} />
       </body>
     </html>
   );
