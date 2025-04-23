@@ -1,6 +1,7 @@
 .frontend_changes: &frontend_changes
   - apps/frontend/**/*
-  - .ci/**/*
+  - .ci/jobs/docker-build-frontend.yml
+  - .ci/common-variables.yml
   - package.json
   - pnpm-workspace.yaml
 
@@ -11,30 +12,17 @@
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
     - set -xe
-    - docker build --platform=linux/amd64 --progress=plain -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:$TAG .
+    - docker build --platform=linux/amd64 -f apps/frontend/Dockerfile -t $DOCKER_IMAGE_FRONTEND:$TAG .
     - docker tag $DOCKER_IMAGE_FRONTEND:$TAG $DOCKER_IMAGE_FRONTEND:$TAG-$CI_COMMIT_SHORT_SHA
     - docker push $DOCKER_IMAGE_FRONTEND:$TAG
     - docker push $DOCKER_IMAGE_FRONTEND:$TAG-$CI_COMMIT_SHORT_SHA
-    # ✅ 빌드 후: dev 포함 최근 3개만 남기고 나머지 이미지 태그 삭제
     - |
       echo "🧹 Docker 이미지 정리 시작"
-      docker images "$DOCKER_IMAGE_FRONTEND" --format '{{.Repository}}:{{.Tag}} {{.CreatedAt}} {{.ID}}' | \
-      sort -r -k2 | \
-      awk 'NR>3 {print $1}' | \
-      xargs -r docker rmi || echo "정리할 이미지 없음"
-
+      docker image prune -af --filter "until=24h" || echo "정리할 이미지 없음"
 docker-build-frontend-dev:
   extends: .docker-build-frontend-template
   variables:
     TAG: dev
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
-      changes: *frontend_changes
-
-docker-build-frontend-prod:
-  extends: .docker-build-frontend-template
-  variables:
-    TAG: latest
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       changes: *frontend_changes

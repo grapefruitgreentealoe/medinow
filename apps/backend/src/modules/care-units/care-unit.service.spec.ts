@@ -7,6 +7,13 @@ import { S3Service } from '../s3/s3.service';
 import { AwsConfigService } from '../../config/aws/config.service';
 import { ConfigService } from '@nestjs/config';
 import { AppConfigService } from '../../config/app/config.service';
+import { Department } from '../departments/entities/department.entity';
+import { UsersService } from '../users/users.service';
+import { CongestionOneService } from '../congestion/services/congestion-one.service';
+import { RedisService } from '../redis/redis.service';
+import { CongestionTotalService } from '../congestion/services/congestion-total.service';
+import { FavoritesService } from '../favorites/favorites.service';
+import { CustomLoggerService } from '../../shared/logger/logger.service';
 
 describe('CareUnitService', () => {
   let service: CareUnitService;
@@ -15,6 +22,53 @@ describe('CareUnitService', () => {
     find: jest.fn(),
     findOne: jest.fn(),
     save: jest.fn(),
+    create: jest.fn(),
+    createQueryBuilder: jest.fn(() => ({
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([]),
+    })),
+  };
+
+  const mockDepartmentRepository = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    save: jest.fn(),
+    create: jest.fn(),
+  };
+
+  const mockConfigService = {
+    emergencyApiUrl: 'test-url',
+    hospitalApiUrl: 'test-url',
+    pharmacyApiUrl: 'test-url',
+    serviceKey: 'test-key',
+  };
+
+  const mockRedisService = {
+    get: jest.fn(),
+    set: jest.fn(),
+  };
+
+  const mockUsersService = {
+    getUserByCareUnitId: jest.fn().mockResolvedValue(null),
+  };
+
+  const mockCongestionOneService = {
+    getCongestion: jest.fn().mockResolvedValue(null),
+  };
+
+  const mockFavoritesService = {
+    // 필요한 메서드들을 여기에 추가
+  };
+
+  const mockLoggerService = {
+    setContext: jest.fn().mockReturnThis(),
+    log: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+    verbose: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -27,6 +81,10 @@ describe('CareUnitService', () => {
         {
           provide: getRepositoryToken(CareUnit),
           useValue: mockCareUnitRepository,
+        },
+        {
+          provide: getRepositoryToken(Department),
+          useValue: mockDepartmentRepository,
         },
         {
           provide: ConfigService,
@@ -42,9 +100,31 @@ describe('CareUnitService', () => {
         },
         {
           provide: AppConfigService,
-          useValue: {
-            get: jest.fn(),
-          },
+          useValue: mockConfigService,
+        },
+        {
+          provide: RedisService,
+          useValue: mockRedisService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: CongestionOneService,
+          useValue: mockCongestionOneService,
+        },
+        {
+          provide: CongestionTotalService,
+          useValue: mockCongestionOneService,
+        },
+        {
+          provide: FavoritesService,
+          useValue: mockFavoritesService,
+        },
+        {
+          provide: CustomLoggerService,
+          useValue: mockLoggerService,
         },
       ],
     }).compile();

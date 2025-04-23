@@ -1,3 +1,4 @@
+```
 apps/
 └── frontend/
 ├── app/ # Next.js App Router 루트
@@ -14,3 +15,4 @@ apps/
 ├── public/ # 정적 파일
 ├── types/ # 글로벌 타입 정의
 └── constants/ # 상수들
+```

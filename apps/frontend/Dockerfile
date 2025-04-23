@@ -5,6 +5,8 @@ WORKDIR /app
 # 전체 루트 복사 (모노레포니까 루트 package.json + pnpm-workspace.yaml 있어야 함)
 COPY . .
 
+ENV NEXT_PUBLIC_API_URL=https://kdt-node-2-team02.elicecoding.com/api/v1
+
 # pnpm 준비
 RUN corepack enable && corepack prepare pnpm@latest --activate
 

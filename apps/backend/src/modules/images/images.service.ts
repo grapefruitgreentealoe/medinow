@@ -1,38 +1,285 @@
-import { Injectable } from '@nestjs/common';
-import { S3 } from '@aws-sdk/client-s3';
-import { S3Service } from './../s3/s3.service';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  UnsupportedMediaTypeException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Image } from './entities/image.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { ImageType } from '../../common/enums/imageType.enum';
+import { User } from '../users/entities/user.entity';
+import { CareUnit } from '../care-units/entities/care-unit.entity';
+import { S3Service } from '../s3/s3.service';
 
 @Injectable()
 export class ImagesService {
+  // 허용되는 이미지 MIME 타입
+  private readonly ALLOWED_MIME_TYPES = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'image/svg+xml',
+    'application/pdf',
+  ];
+
+  // 최대 파일 크기 (10MB)
+  private readonly MAX_FILE_SIZE = 10 * 1024 * 1024;
+
   constructor(
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
     private readonly s3Service: S3Service,
   ) {}
-  async uploadImage(file: Express.Multer.File) {
-    // const fileName = `${Date.now()}-${originalname}}`;
-    const filePath = `userUploads`;
-    const imgUrl = await this.s3Service.uploadFile(file, filePath);
-    const image = this.imageRepository.create({
-      imgUrl,
-      filePath,
-    });
-    await this.imageRepository.save(image);
-    return { imgUrl };
+
+  /**
+   * 파일 형식 및 크기 검증
+   * @param file 업로드할 파일
+   */
+  private validateFile(file: Express.Multer.File): void {
+    // 파일 존재 여부 확인
+    if (!file) {
+      throw new BadRequestException('파일이 없습니다.');
+    }
+
+    // MIME 타입 검증
+    if (!this.ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      throw new UnsupportedMediaTypeException(
+        `지원하지 않는 파일 형식입니다. 허용된 형식: ${this.ALLOWED_MIME_TYPES.join(', ')}`,
+      );
+    }
+
+    // 파일 크기 검증
+    if (file.size > this.MAX_FILE_SIZE) {
+      throw new BadRequestException(
+        `파일 크기가 너무 큽니다. 최대 ${this.MAX_FILE_SIZE / (1024 * 1024)}MB까지 허용됩니다.`,
+      );
+    }
   }
 
-  //   findOne(id: number) {
-  //     return `This action returns a #${id} image`;
-  //   }
+  /**
+   * 파일을 S3에 업로드하고 URL 반환
+   * @param file 업로드할 파일
+   * @param type 이미지 타입
+   * @returns 업로드된 파일의 URL
+   */
+  async uploadFileToS3(
+    file: Express.Multer.File,
+    type: ImageType,
+  ): Promise<string> {
+    // 파일 형식 및 크기 검증
+    this.validateFile(file);
 
-  //   update(id: number) {
-  //     return `This action updates a #${id} image`;
-  //   }
+    try {
+      // 이미지 타입에 따라 디렉토리 설정
+      const typeDir = type;
+      const dirPath = `images/${typeDir}`;
 
-  //   remove(id: number) {
-  //     return `This action removes a #${id} image`;
-  //   }
+      // S3에 파일 업로드하고 URL 반환
+      return await this.s3Service.uploadFile(file, dirPath);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : '알 수 없는 오류';
+      throw new BadRequestException(`파일 업로드 실패: ${errorMessage}`);
+    }
+  }
+
+  /**
+   * 사업자등록증 이미지 업로드
+   * @param file 업로드할 파일
+   * @returns 업로드된 파일의 URL
+   */
+  async uploadBusinessLicenseImage(file: Express.Multer.File): Promise<string> {
+    return this.uploadFileToS3(file, ImageType.BUSINESS_LICENSE);
+  }
+
+  /**
+   * 사용자 프로필 이미지 업로드
+   * @param file 업로드할 파일
+   * @returns 업로드된 파일의 URL
+   */
+  async uploadUserProfileImage(file: Express.Multer.File): Promise<string> {
+    return this.uploadFileToS3(file, ImageType.USER_PROFILE);
+  }
+
+  /**
+   * 의료기관 이미지 업로드
+   * @param file 업로드할 파일
+   * @returns 업로드된 파일의 URL
+   */
+  async uploadCareUnitImage(file: Express.Multer.File): Promise<string> {
+    return this.uploadFileToS3(file, ImageType.CARE_UNIT);
+  }
+
+  /**
+   * URL을 기반으로 이미지 엔티티 생성
+   * @param imageUrl 이미지 URL
+   * @param type 이미지 타입
+   * @param user 이미지 소유자 (선택적)
+   * @param careUnit 이미지 관련 의료기관 (선택적)
+   * @returns 생성된 이미지 엔티티
+   */
+  async createImageFromUrl(
+    imageUrl: string,
+    type: ImageType,
+    user?: User,
+    careUnit?: CareUnit,
+  ) {
+    if (!imageUrl) {
+      throw new BadRequestException('이미지 URL이 없습니다.');
+    }
+
+    try {
+      // 이미지 엔티티 생성
+      const image = this.imageRepository.create({
+        imgUrl: imageUrl,
+        type,
+        user: user || null,
+        careUnit: careUnit || null,
+      });
+
+      return await this.imageRepository.save(image);
+    } catch (error: any) {
+      throw new BadRequestException(`이미지 생성 실패: ${error.message}`);
+    }
+  }
+
+  /**
+   * 사업자등록증 이미지 엔티티 생성
+   * @param imageUrl 이미지 URL
+   * @param user 사용자 (선택적)
+   * @param careUnit 의료기관 (선택적)
+   * @returns 생성된 이미지 엔티티
+   */
+  async createBusinessLicenseImage(
+    imageUrl: string,
+    user?: User,
+    careUnit?: CareUnit,
+  ) {
+    return this.createImageFromUrl(
+      imageUrl,
+      ImageType.BUSINESS_LICENSE,
+      user,
+      careUnit,
+    );
+  }
+
+  /**
+   * 사용자 프로필 이미지 엔티티 생성
+   * @param imageUrl 이미지 URL
+   * @param user 사용자 (선택적)
+   * @returns 생성된 이미지 엔티티
+   */
+  async createUserProfileImage(imageUrl: string, user?: User) {
+    return this.createImageFromUrl(imageUrl, ImageType.USER_PROFILE, user);
+  }
+
+  /**
+   * 의료기관 이미지 엔티티 생성
+   * @param imageUrl 이미지 URL
+   * @param careUnit 의료기관 (선택적)
+   * @returns 생성된 이미지 엔티티
+   */
+  async createCareUnitImage(imageUrl: string, careUnit?: CareUnit) {
+    return this.createImageFromUrl(
+      imageUrl,
+      ImageType.CARE_UNIT,
+      undefined,
+      careUnit,
+    );
+  }
+
+  /**
+   * 사용자의 최신 사업자등록증 이미지 찾기
+   * @param userId 사용자 ID
+   * @returns 사업자등록증 이미지 또는 null
+   */
+  async findUserBusinessLicense(userId: string) {
+    return this.imageRepository.findOne({
+      where: {
+        user: { id: userId },
+        type: ImageType.BUSINESS_LICENSE,
+      },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  /**
+   * 사용자의 최신 프로필 이미지 찾기
+   * @param userId 사용자 ID
+   * @returns 프로필 이미지 또는 null
+   */
+  async findUserProfileImage(userId: string) {
+    return this.imageRepository.findOne({
+      where: {
+        user: { id: userId },
+        type: ImageType.USER_PROFILE,
+      },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  /**
+   * ID로 이미지 찾기
+   * @param id 이미지 ID
+   * @returns 이미지 엔티티
+   */
+  async findById(id: string) {
+    const image = await this.imageRepository.findOne({
+      where: { id },
+      relations: ['user', 'userProfile', 'careUnit'],
+    });
+
+    if (!image) {
+      throw new NotFoundException(`이미지를 찾을 수 없습니다. ID: ${id}`);
+    }
+
+    return image;
+  }
+
+  /**
+   * 특정 타입의 이미지 조회
+   * @param type 이미지 타입
+   * @returns 이미지 목록
+   */
+  async findByType(type: ImageType) {
+    return this.imageRepository.find({ where: { type } });
+  }
+
+  /**
+   * 특정 사용자의 이미지 조회
+   * @param userId 사용자 ID
+   * @returns 이미지 목록
+   */
+  async findByUser(userId: string) {
+    return this.imageRepository.find({
+      where: { user: { id: userId } },
+    });
+  }
+
+  /**
+   * 특정 의료기관의 이미지 조회
+   * @param careUnitId 의료기관 ID
+   * @returns 이미지 목록
+   */
+  async findByCareUnit(careUnitId: string) {
+    return this.imageRepository.find({
+      where: { careUnit: { id: careUnitId } },
+    });
+  }
+
+  /**
+   * 이미지와 엔티티 연결 해제
+   * @param id 이미지 ID
+   * @returns 연결 해제된 이미지
+   */
+  async unlinkFromEntities(id: string) {
+    const image = await this.findById(id);
+    image.user = null;
+    image.userProfile = null;
+    image.careUnit = null;
+    return this.imageRepository.save(image);
+  }
 }

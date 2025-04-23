@@ -4,11 +4,9 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '../schema/loginSchema';
-import { useLogin } from '../model/useLogin';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
-import { Checkbox } from '@/components/ui/checkbox';
+import { login } from '../api';
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -21,19 +19,24 @@ export default function LoginForm() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: 'test@example.com',
-      password: 'password123',
-      isAdmin: true,
+      password: 'Abcd1234!',
     },
   });
 
-  const { mutateAsync } = useLogin();
-  const router = useRouter();
-
   const onSubmit = async (data: FormData) => {
     try {
-      const result = await mutateAsync(data);
-      localStorage.setItem('accessToken', result.accessToken);
-      router.push('/');
+      await login(data);
+
+      // SSR에 반영되기 전이라도 클라이언트에서 isLoggedIn 즉시 반영
+      if (typeof window !== 'undefined') {
+        window.__INITIAL_IS_LOGGED_IN__ = true;
+      }
+
+      // SSR 새로고침 유도
+      // 쿠키 저장이 완료될 시간 주기 (200~500ms 사이)
+      setTimeout(() => {
+        location.href = '/';
+      }, 1000);
     } catch (e) {
       alert((e as Error).message);
     }
@@ -53,12 +56,6 @@ export default function LoginForm() {
       {errors.password && (
         <p className="text-sm text-red-500">{errors.password.message}</p>
       )}
-      <div className="flex items-center gap-2">
-        <Checkbox id="terms" {...register('isAdmin')} />
-        <label htmlFor="terms" className="text-sm">
-          관리자 로그인
-        </label>
-      </div>
       <Button type="submit" className="w-full">
         로그인
       </Button>

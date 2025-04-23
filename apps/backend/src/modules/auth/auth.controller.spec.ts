@@ -1,10 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { ImagesService } from '../images/images.service';
 
 // AuthService 모킹
 const mockAuthService = {
   signup: jest.fn(),
+};
+
+// ImagesService 모킹
+const mockImagesService = {
+  uploadImage: jest.fn(),
 };
 
 describe('AuthController', () => {
@@ -17,6 +23,10 @@ describe('AuthController', () => {
         {
           provide: AuthService,
           useValue: mockAuthService,
+        },
+        {
+          provide: ImagesService,
+          useValue: mockImagesService,
         },
       ],
     }).compile();

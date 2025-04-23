@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { CreateAdminDto } from '../users/dto/create-admin.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import {
@@ -17,8 +18,9 @@ import {
   ApiBody,
   ApiResponse,
   ApiTags,
-  ApiBearerAuth,
-  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiBadRequestResponse,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 import { SignupResponseDto } from './dto/signup-response.dto';
 import { plainToInstance } from 'class-transformer';
@@ -26,40 +28,58 @@ import { RequestOrigin } from '../../common/decorators/request-origin.decorator'
 import { RequestUserId } from '../../common/decorators/request-userId.decorator';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ImagesService } from '../images/images.service';
+import { Public } from './decorators/public.decorator';
 
 @ApiTags('인증')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly imagesService: ImagesService,
+  ) {}
 
+  @Public()
   @ApiOperation({ summary: '회원가입' })
   @ApiBody({ type: CreateUserDto })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
+  @ApiCreatedResponse({
     description: '회원가입 성공',
     type: SignupResponseDto,
   })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
+  @ApiBadRequestResponse({
     description: '회원가입 실패',
   })
   @UseInterceptors(ClassSerializerInterceptor)
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto) {
-    const user = await this.authService.signup(createUserDto);
+    await this.authService.signup(createUserDto);
     return {
       message: '회원가입 성공',
     };
   }
 
+  @Public()
+  @ApiOperation({ summary: '관리자 회원가입' })
+  @ApiBody({ type: CreateAdminDto })
+  @ApiCreatedResponse({
+    description: '관리자 회원가입 성공',
+  })
+  @Post('admin-signup')
+  async adminSignup(@Body() createAdminDto: CreateAdminDto) {
+    await this.authService.signupAdmin(createAdminDto);
+
+    return {
+      message: '관리자 회원가입 성공',
+    };
+  }
+
+  @Public()
   @ApiOperation({ summary: '로그인' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiOkResponse({
     description: '로그인 성공',
   })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
+  @ApiBadRequestResponse({
     description: '로그인 실패',
   })
   @Post('login')
@@ -68,26 +88,24 @@ export class AuthController {
     @RequestOrigin() requestOrigin: string,
     @Res({ passthrough: true }) response: Response,
   ): Promise<LoginResponseDto> {
-    const { accessToken, accessOptions, refreshToken, refreshOptions } =
-      await this.authService.login(loginDto, requestOrigin);
+    const { accessToken, accessOptions } = await this.authService.login(
+      loginDto,
+      requestOrigin,
+    );
 
     response.cookie('accessToken', accessToken, accessOptions);
-    response.cookie('refreshToken', refreshToken, refreshOptions);
 
     return plainToInstance(LoginResponseDto, {
       message: '로그인 성공',
     });
   }
 
-  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '로그아웃' })
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiOkResponse({
     description: '로그아웃 성공',
   })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
+  @ApiBadRequestResponse({
     description: '로그아웃 실패',
   })
   @Post('logout')

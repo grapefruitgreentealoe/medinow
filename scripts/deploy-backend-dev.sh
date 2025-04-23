@@ -2,11 +2,19 @@
 
 APP_NAME="backend-dev"
 COMPOSE_FILE="./apps/backend/docker-compose.dev.yml"
+ENV_PATH="./apps/backend/.env"
 
 echo "🚀 [DEV] 백엔드 배포 시작"
+# ✅ GitLab CI/CD 변수로부터 .env 파일 생성
+mkdir -p ./apps/backend
+echo "$ENV_DEVELOPMENT" > $ENV_PATH
+echo "✅ .env 파일 생성 완료(local): $ENV_PATH"
 
 # ✅ 기존 컨테이너 및 네트워크 정리
 docker-compose -f $COMPOSE_FILE down
+
+# 최신 이미지 pull
+docker pull grapefruitgreentealoe/medinow-backend:dev
 
 # ✅ 새로 빌드 및 실행
 docker-compose -f $COMPOSE_FILE up -d --build
