@@ -310,18 +310,18 @@ export default function NearbyCareUnitsMap() {
           <Button
             variant="outline"
             size="sm"
-            className="text-sm !px-3"
+            className="text-xs !px-3"
             onClick={handleFirstLocationButton}
           >
-            현재 위치로 돌아가기
+            현재 위치로
           </Button>
           <Button
             variant="outline"
             size="sm"
-            className="text-sm !px-3"
+            className="text-xs !px-3"
             onClick={() => setHospitalSearchModal(true)}
           >
-            키워드로 위치 이동
+            위치 검색
           </Button>
         </div>
       </div>
