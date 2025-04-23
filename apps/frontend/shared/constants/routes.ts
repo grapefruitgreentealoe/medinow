@@ -4,7 +4,7 @@ export const ROUTES = {
   HOME: '/',
   LOGIN: '/login',
   SIGN_UP: '/signup',
-  ADMIN_SIGN_UP: '/admin/signup',
+  ADMIN_SIGN_UP: '/signup/admin',
   USER: {
     FAVORITES: '/user/favorites',
     ROOT: '/user',
