@@ -22,7 +22,7 @@ import { ArrowLeft } from 'lucide-react';
 interface CareUnitSheetProps {
   lat: number | null;
   lng: number | null;
-  level: number;
+  level: number | null;
   selectedCategory: string;
   openFilter: string;
 }
