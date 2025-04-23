@@ -84,7 +84,7 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full !px-6 !py-3 border-b border-border bg-background text-foreground relative z-50">
+    <header className="w-full min-h-[61px] !px-6 !py-3 border-b border-border bg-background text-foreground relative z-50">
       <div className="flex justify-between items-center">
         <Link
           href={ROUTES.HOME}
@@ -93,64 +93,66 @@ export default function Header() {
           <span className="text-primary text-3xl">Medinow</span>
         </Link>
 
-        <nav className="flex items-center gap-2">
-          {/* 모바일: 햄버거 버튼 */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              className="p-2 w-[2rem]"
-              onClick={() => setMenuOpen((prev) => !prev)}
-            >
-              <Menu size={24} />
-            </Button>
-          </div>
+        {isLoggedIn !== null ? (
+          <nav className="flex items-center gap-2">
+            {/* 모바일: 햄버거 버튼 */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                className="p-2 w-[2rem]"
+                onClick={() => setMenuOpen((prev) => !prev)}
+              >
+                <Menu size={24} />
+              </Button>
+            </div>
 
-          {/* 데스크탑: 로그인 상태에 따라 버튼 분기 */}
-          <div className="hidden md:flex gap-[20px]">
-            {isLoggedIn ? (
-              <>
-                {user?.role === 'admin' ? (
-                  <Link href={ROUTES.ADMIN.DASHBOARD}>
+            {/* 데스크탑: 로그인 상태에 따라 버튼 분기 */}
+            <div className="hidden md:flex gap-[20px]">
+              {isLoggedIn ? (
+                <>
+                  {user?.role === 'admin' ? (
+                    <Link href={ROUTES.ADMIN.DASHBOARD}>
+                      <Button variant="ghost" className="text-sm !px-4">
+                        관리자 대시보드
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link href={ROUTES.USER.ROOT}>
+                      <Button variant="ghost" className="text-sm !px-4">
+                        마이페이지
+                      </Button>
+                    </Link>
+                  )}
+                  <Button
+                    variant="ghost"
+                    onClick={handleLogout}
+                    className="text-sm font-medium text-foreground !px-4"
+                  >
+                    로그아웃
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href={ROUTES.ADMIN_SIGN_UP}>
                     <Button variant="ghost" className="text-sm !px-4">
-                      관리자 대시보드
+                      관리자 회원가입
                     </Button>
                   </Link>
-                ) : (
-                  <Link href={ROUTES.USER.ROOT}>
+                  <Link href={ROUTES.SIGN_UP}>
                     <Button variant="ghost" className="text-sm !px-4">
-                      마이페이지
+                      회원가입
                     </Button>
                   </Link>
-                )}
-                <Button
-                  variant="ghost"
-                  onClick={handleLogout}
-                  className="text-sm font-medium text-foreground !px-4"
-                >
-                  로그아웃
-                </Button>
-              </>
-            ) : (
-              <>
-                <Link href={ROUTES.ADMIN_SIGN_UP}>
-                  <Button variant="ghost" className="text-sm !px-4">
-                    관리자 회원가입
-                  </Button>
-                </Link>
-                <Link href={ROUTES.SIGN_UP}>
-                  <Button variant="ghost" className="text-sm !px-4">
-                    회원가입
-                  </Button>
-                </Link>
-                <Link href={ROUTES.LOGIN}>
-                  <Button className="text-sm bg-primary text-white !px-4">
-                    로그인
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
-        </nav>
+                  <Link href={ROUTES.LOGIN}>
+                    <Button className="text-sm bg-primary text-white !px-4">
+                      로그인
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
+          </nav>
+        ) : null}
       </div>
 
       {/* 모바일: 햄버거 메뉴 펼침 */}
