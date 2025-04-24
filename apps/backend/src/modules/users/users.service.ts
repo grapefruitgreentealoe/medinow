@@ -103,7 +103,7 @@ export class UsersService {
         careUnitAddress,
         careUnitName,
         careUnitCategory,
-      ) ;
+      );
 
       if (!careUnit) {
         throw new NotFoundException('존재하지 않는 의료기관입니다.');
@@ -118,12 +118,12 @@ export class UsersService {
       });
 
       // if (imageUrl) {
-        // const image = await this.imagesService.createBusinessLicenseImage(
-        //   imageUrl,
-        //   savedUser,
-        //   careUnit,
-        // );
-        // newUserProfile.image = image;
+      // const image = await this.imagesService.createBusinessLicenseImage(
+      //   imageUrl,
+      //   savedUser,
+      //   careUnit,
+      // );
+      // newUserProfile.image = image;
       // }
 
       await queryRunner.manager.save(newUserProfile);
