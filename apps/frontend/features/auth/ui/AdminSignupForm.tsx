@@ -79,7 +79,7 @@ export default function AdminSignupForm() {
       });
 
       if (exists) {
-        setValue('isCareUnitVerified', true);
+        setValue('isCareUnitVerified', true, { shouldDirty: true });
       } else {
         alert('등록되지 않은 병원입니다.');
         setValue('isCareUnitVerified', false);
@@ -88,8 +88,16 @@ export default function AdminSignupForm() {
       alert('병원 확인 중 오류가 발생했습니다.');
     }
   };
+  console.log(form.formState.errors);
 
   const onSubmit = async (data: AdminSignupData) => {
+    const isCareUnitVerified = form.getValues('isCareUnitVerified');
+    if (!isCareUnitVerified) {
+      alert('병원 확인을 완료해주세요.');
+      return;
+    }
+
+    console.log('submit');
     setChecking(true);
     const isDuplicated = await checkEmail(data.email);
     setChecking(false);
@@ -187,7 +195,7 @@ export default function AdminSignupForm() {
           </Button>
 
           {form.watch('isCareUnitVerified') && (
-            <p className="text-green-600 text-sm">✔️ 확인 완료된 병원입니다</p>
+            <p className="text-green-600 text-sm">가입 가능한 병원입니다</p>
           )}
 
           <input type="hidden" {...form.register('isCareUnitVerified')} />
