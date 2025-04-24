@@ -13,6 +13,7 @@ import { UsersService } from '../users/users.service';
 import { FavoritesService } from 'src/modules/favorites/favorites.service';
 import { CustomLoggerService } from 'src/shared/logger/logger.service';
 import { DepartmentsService } from '../departments/departments.service';
+import { ReviewsService } from '../reviews/reviews.service';
 
 describe('CareUnitController', () => {
   let controller: CareUnitController;
@@ -71,6 +72,14 @@ describe('CareUnitController', () => {
     debug: jest.fn(),
     verbose: jest.fn(),
   };
+  const mockReviewsService = {
+    getReviewsByCareUnitId: jest.fn().mockResolvedValue({
+      reviews: [],
+      total: 0,
+      page: 1,
+      totalPages: 0
+    }),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -123,6 +132,10 @@ describe('CareUnitController', () => {
         {
           provide: CustomLoggerService,
           useValue: mockLoggerService,
+        },
+        {
+          provide: ReviewsService,
+          useValue: mockReviewsService,
         },
       ],
     }).compile();
