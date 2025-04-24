@@ -22,7 +22,7 @@ export default function UserProfilePage() {
   useEffect(() => {
     axiosInstance
       .get('/users', { withCredentials: true })
-      .then((res) => setUser(res.data.users[0]))
+      .then((res) => setUser(res.data.user))
       .catch(() => setUser(null));
   }, []);
 
@@ -44,14 +44,14 @@ export default function UserProfilePage() {
             <p className="text-sm text-muted-foreground">이메일</p>
             <p className="font-medium">{user.email}</p>
           </div>
-          <div className="h-[60px] w-full">
+          {/* <div className="h-[60px] w-full">
             <p className="text-sm text-muted-foreground">이름</p>
             <p className="font-medium">{user.userProfile.name}</p>
           </div>
           <div className="h-[60px] w-full">
             <p className="text-sm text-muted-foreground">주소</p>
             <p className="font-medium">{user.userProfile.address}</p>
-          </div>
+          </div> */}
         </div>
       </CardContent>
     </Card>
