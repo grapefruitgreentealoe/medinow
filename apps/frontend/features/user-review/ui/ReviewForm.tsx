@@ -56,7 +56,7 @@ export function ReviewForm() {
     if (!careUnit) return;
     await submitReview({
       careUnitId: careUnit.id,
-      departmentId: '565c1680-f6d3-4378-931d-573085a32baf',
+      departmentId: 'b9adcad8-bc9c-4fd9-b4e0-2daa93328510',
       content: values.content,
       thankMessage: values.thanksMessage,
       rating,

@@ -12,6 +12,7 @@ export function useCareUnitReviews(careUnitId: string) {
       const { page, totalPages } = lastPage.pagination;
       return page < totalPages ? page + 1 : undefined;
     },
+    staleTime: 1000 * 60,
     enabled: !!careUnitId,
   });
 }

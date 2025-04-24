@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useOptimisticToggleFavorite } from '../model/useOptimisticToggleFavorite';
 import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
 import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
+import { ReviewList } from '@/features/review/ui/ReviewList';
 
 export default function CareUnitDetailPage() {
   const [unit] = useAtom(selectedCareUnitAtom);
@@ -165,6 +166,7 @@ export default function CareUnitDetailPage() {
           {renderTimeRow('공휴일', unit.holidayOpen, unit.holidayClose)}
         </div>
       </div>
+      <ReviewList careUnitId={unit.id} />
     </div>
   );
 }

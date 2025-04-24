@@ -16,7 +16,7 @@ export async function getReviewsByCareUnit(
   page = 1
 ): Promise<PaginatedReviewResponse> {
   const res = await axiosInstance.get(`/care-units/reviews/${careUnitId}`, {
-    params: { page, limit: 1 },
+    params: { page, limit: 10 },
   });
   return res.data;
 }
