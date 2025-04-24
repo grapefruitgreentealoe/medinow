@@ -2,6 +2,17 @@
 
 import Script from 'next/script';
 import { useEffect, useRef, useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogOverlay,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface LocationSearchModalProps {
   subtitle: string;
@@ -50,7 +61,7 @@ export default function LocationSearchModal({
       );
       setMap(mapInstance);
     });
-  }, [loaded, setMap]);
+  }, [loaded, open, setMap]);
 
   const search = (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -86,59 +97,51 @@ export default function LocationSearchModal({
     onClose();
   };
 
-  if (!open) return null;
-
   return (
     <>
       <Script
         src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY}&libraries=services&autoload=false`}
         onLoad={() => setLoaded(true)}
       />
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white p-4 rounded-md shadow-lg w-[90vw] max-w-xl">
-          <h2 className="text-lg font-bold mb-2">{title}</h2>
-          <span>{subtitle}</span>
-          <div className="flex gap-2 mb-2">
-            <input
-              type="text"
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogOverlay className="bg-black/10 backdrop-brightness-80" />
+        <DialogContent className="!p-6 !max-w-2xl">
+          <DialogHeader className="!mb-2 !gap-1">
+            <DialogTitle className="text-lg">{title}</DialogTitle>
+            <DialogDescription>{subtitle}</DialogDescription>
+          </DialogHeader>
+          {/* 검색창 */}
+          <form onSubmit={search} className="flex gap-2 !mb-3">
+            <Input
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder="키워드로 검색"
-              className="border rounded px-2 py-1 w-full text-black"
+              placeholder="장소 키워드를 입력하세요"
+              className="text-black bg-white"
             />
-            <button
-              onClick={search}
-              className="bg-blue-500 text-white px-4 py-1 rounded"
-            >
+            <Button type="submit" className="!px-4 !py-2">
               검색
-            </button>
-          </div>
-          <div ref={mapRef} className="w-full my-2 " />
-          <ul className="max-h-40 overflow-auto space-y-1">
+            </Button>
+          </form>
+          {/* 지도 영역 */}
+          <div ref={mapRef} className="w-0 !h-0 !mb-3 border hidden" />
+          {/* 검색 결과 */}
+          <ScrollArea className="h-72 w-full rounded-md border">
             {places.map((place, i) => (
               <li
                 key={i}
-                className="p-2 border rounded cursor-pointer hover:bg-gray-100 text-black"
+                className="!p-3 bg-white border-b-[1px] border-b-slate-100 border-solid cursor-pointer hover:bg-muted transition-colors text-sm list-none"
                 onClick={() => handleSelect(place)}
               >
-                <strong>{place.place_name}</strong>
+                <strong className="text-base">{place.place_name}</strong>
                 <br />
-                <span className="text-sm text-gray-500">
+                <span className="text-muted-foreground">
                   {place.road_address_name || place.address_name}
                 </span>
               </li>
             ))}
-          </ul>
-          <div className="text-right mt-2">
-            <button
-              onClick={onClose}
-              className="text-sm text-gray-600 hover:underline"
-            >
-              닫기
-            </button>
-          </div>
-        </div>
-      </div>
+          </ScrollArea>{' '}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -1,0 +1,52 @@
+'use client';
+
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
+import { useSetAtom, useAtomValue } from 'jotai';
+import {
+  selectedCareUnitIdAtom,
+  selectedCareUnitAtom,
+  selectedDepartmentsAtom,
+} from '@/features/user-review/atoms/reviewFormAtom';
+import { getCareUnitById } from '@/features/user-review/api';
+import { ReviewForm } from '@/features/user-review/ui/ReviewForm';
+import { SearchCareUnitForReview } from '@/features/user-review/ui/SearchCareUnitForReview';
+
+import { ROUTES } from '@/shared/constants/routes';
+
+export default function WriteReviewPage() {
+  const searchParams = useSearchParams();
+  const setId = useSetAtom(selectedCareUnitIdAtom);
+  const setCareUnit = useSetAtom(selectedCareUnitAtom);
+  const careUnit = useAtomValue(selectedCareUnitAtom);
+  const setDepartments = useSetAtom(selectedDepartmentsAtom);
+
+  const careUnitIdFromUrl = searchParams.get('careUnitId');
+  const router = useRouter();
+
+  const sendReview = (id: string) => {
+    try {
+      getCareUnitById(id).then((res) => {
+        setCareUnit(res);
+        setDepartments(res.departments || []);
+      });
+      router.push(ROUTES.USER.REVIEWS);
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (careUnitIdFromUrl) {
+      setId(careUnitIdFromUrl);
+      sendReview(careUnitIdFromUrl);
+    }
+  }, [careUnitIdFromUrl, setId, setCareUnit, setDepartments]);
+
+  return (
+    <main className="min-h-screen px-4 py-6">
+      <h1 className="text-2xl font-semibold mb-6">리뷰 작성</h1>
+
+      {!careUnit && <SearchCareUnitForReview />}
+      {careUnit && <ReviewForm />}
+    </main>
+  );
+}

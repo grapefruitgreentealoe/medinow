@@ -3,6 +3,7 @@ import { toggleFavorite } from '../api';
 import { CareUnit } from '../type';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
+import { toast } from 'sonner';
 
 export function useOptimisticToggleFavorite(queryKey: any[]) {
   const queryClient = useQueryClient();
@@ -61,6 +62,17 @@ export function useOptimisticToggleFavorite(queryKey: any[]) {
 
       // rollback query cache
       queryClient.setQueryData(queryKey, context.previousData);
+      // 경고 스타일 + 버튼
+      toast.warning('적용 실패', {
+        description: '네트워크 연결 불가',
+      });
+    },
+    onSuccess: (a, b, context) => {
+      toast.success('저장 완료!', {
+        description: !context.currentFavorite
+          ? '즐겨찾기 완료!'
+          : '즐겨찾기 해제',
+      });
     },
 
     // 3. (Optional) Invalidate on settled if needed
