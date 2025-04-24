@@ -36,10 +36,14 @@ export class FavoritesService {
   }
 
   // 즐겨찾기 목록 조회
-  async getUserFavorites(userId: string) {
-    const favorites = await this.favoriteRepository.find({
+  async getUserFavorites(userId: string, page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const [favorites, total] = await this.favoriteRepository.findAndCount({
       where: { user: { id: userId } },
       relations: ['careUnit', 'careUnit.departments', 'careUnit.reviews'],
+      skip,
+      take: limit,
+      order: { createdAt: 'DESC' },
     });
 
     if (favorites.length === 0) {
@@ -60,7 +64,12 @@ export class FavoritesService {
       };
     });
 
-    return careUnits;
+    return {
+      careUnits,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   // 즐겨찾기 존재 여부 확인

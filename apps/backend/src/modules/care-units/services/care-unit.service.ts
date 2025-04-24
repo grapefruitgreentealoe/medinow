@@ -236,16 +236,19 @@ export class CareUnitService {
           } else {
             this.logger.log('사용자 정보 없음 - 즐겨찾기 확인 건너뜀');
           }
-
+          const { favorites, reviews, ...restCareUnit } = careUnit;
           return {
-            ...careUnit,
+            ...restCareUnit,
             nowOpen: isOpen,
             isChatAvailable: !!adminUser,
             // congestion: congestionData,
             isFavorite: isFavorite,
             averageRating: careUnit.averageRating,
             reviewCount: careUnit.reviews.length || 0,
-            departments: careUnit.departments || [],
+            departments:
+              careUnit.departments.map((department) => {
+                return department.name;
+              }) || [],
           };
         }),
       );

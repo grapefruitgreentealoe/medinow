@@ -81,8 +81,8 @@ export class ReviewsController {
         thankMessage: review.thankMessage,
         rating: review.rating,
         isPublic: review.isPublic,
-        careUnitId: review.careUnit?.id,
-        departmentId: review.department?.id,
+        careUnitId: review.careUnit?.name,
+        departmentId: review.department?.name,
       })),
       pagination: {
         total,

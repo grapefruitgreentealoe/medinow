@@ -74,12 +74,25 @@ export class ReviewsService {
     return savedReview;
   }
 
-  async getReviewsByCareUnitId(careUnitId: string) {
-    const reviews = await this.reviewRepository.find({
+  async getReviewsByCareUnitId(
+    careUnitId: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
+    const skip = (page - 1) * limit;
+    const [reviews, total] = await this.reviewRepository.findAndCount({
       where: { careUnit: { id: careUnitId } },
-      relations: ['user', 'careUnit', 'department'],
+      relations: ['careUnit', 'department'],
+      skip,
+      take: limit,
+      order: { createdAt: 'DESC' },
     });
-    return reviews;
+    return {
+      reviews,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async getReviewsByUserId(
