@@ -61,18 +61,21 @@ export class CareUnitService {
     const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
 
     if (name) {
-      queryBuilder.andWhere('careUnit.name = :name', {
-        name: name,
+      queryBuilder.andWhere('careUnit.name like :name', {
+        name: `%${name}%`,
       });
     } else {
       throw new BadRequestException('병원 이름이 잘못되었습니다');
     }
 
     if (address) {
-      queryBuilder.andWhere('careUnit.address like :address', {
-        address: `%${address}%`,
+      const addressParts = address.trim().split(/\s+/);
+      addressParts.forEach((part, index) => {
+        queryBuilder.andWhere(`careUnit.address LIKE :part${index}`, {
+          [`part${index}`]: `%${part}%`,
+        });
       });
-    } else {
+    }else {
       throw new BadRequestException('주소 값이 잘못되었습니다');
     }
 
@@ -175,6 +178,7 @@ export class CareUnitService {
 
     const [careUnits, total] = await queryBuilder
       .leftJoinAndSelect('careUnit.departments', 'departments')
+      .leftJoinAndSelect('careUnit.reviews', 'reviews')
       .getManyAndCount();
 
     this.logger.log(
@@ -239,6 +243,8 @@ export class CareUnitService {
             isChatAvailable: !!adminUser,
             // congestion: congestionData,
             isFavorite: isFavorite,
+            averageRating: careUnit.averageRating,
+            reviewCount: careUnit.reviews.length || 0,
             departments: careUnit.departments || [],
           };
         }),

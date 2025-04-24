@@ -19,13 +19,18 @@ import {
   ApiOperation,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiBody,
+  ApiTags,
 } from '@nestjs/swagger';
+
+@ApiTags('리뷰')
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Post()
   @ApiOperation({ summary: '리뷰 생성' })
+  @ApiBody({ type: CreateReviewDto })
   @ApiCreatedResponse({
     description: '리뷰가 성공적으로 생성되었습니다.',
     type: ResponseReviewDto,

@@ -39,7 +39,7 @@ export class FavoritesService {
   async getUserFavorites(userId: string) {
     const favorites = await this.favoriteRepository.find({
       where: { user: { id: userId } },
-      relations: ['careUnit'],
+      relations: ['careUnit', 'careUnit.departments', 'careUnit.reviews'],
     });
 
     if (favorites.length === 0) {
@@ -51,6 +51,12 @@ export class FavoritesService {
         name: favorite.careUnit.name,
         address: favorite.careUnit.address,
         favorite: true,
+        departments:
+          favorite.careUnit.departments.map((department) => {
+            return department.name;
+          }) || [],
+        averageRating: favorite.careUnit.averageRating || 0,
+        reviewCount: favorite.careUnit.reviews.length || 0,
       };
     });
 
