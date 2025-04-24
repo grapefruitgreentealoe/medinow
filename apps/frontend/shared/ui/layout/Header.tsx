@@ -80,9 +80,8 @@ export default function Header() {
     return [
       { href: ROUTES.USER.ROOT, label: '마이페이지' },
       { href: ROUTES.USER.FAVORITES, label: '즐겨찾기' },
-      { href: ROUTES.USER.THANKS, label: '리뷰 작성하기' },
+      { href: ROUTES.USER.WRITE_REVIEW, label: '리뷰 작성하기' },
       { href: ROUTES.USER.REVIEWS, label: '내 리뷰' },
-      { href: ROUTES.USER.THANKS, label: '내 감사 메시지' },
       { href: '#', label: '로그아웃', onClick: handleLogout },
     ];
   };
