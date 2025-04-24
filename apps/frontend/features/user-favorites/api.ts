@@ -1,6 +1,14 @@
 import axiosInstance from '@/lib/axios';
 
-export const getFavoriteList = async (): Promise<any[]> => {
-  const res = await axiosInstance.get('/favorites');
+export async function getFavoriteList({
+  page,
+  limit,
+}: {
+  page: number;
+  limit: number;
+}) {
+  const res = await axiosInstance.get(`/favorites`, {
+    params: { page, limit },
+  });
   return res.data;
-};
+}
