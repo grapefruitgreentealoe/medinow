@@ -13,7 +13,6 @@ export default function FavoritesPage() {
   const {
     data: pages,
     isLoading,
-    isFetching,
     hasNextPage,
     fetchNextPage,
   } = useFavoritesQuery();

@@ -1,6 +1,6 @@
 'use client';
 
-import { CareUnit } from '@/features/map/type';
+import { CareUnit, CongestionLevel } from '@/features/map/type';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, PhoneCallIcon, Star, StarOff } from 'lucide-react';
@@ -31,7 +31,9 @@ export function RichCareUnitCard({ unit, onDetail, onToggleFavorite }: Props) {
           <span className="bg-muted px-2 py-0.5 rounded-full">
             {CATEGORY_LABEL[unit.category]}
           </span>
-          <span className={congestionClassMap[level]}>혼잡도: {level}</span>
+          <span className={congestionClassMap[level as CongestionLevel]}>
+            혼잡도: {level}
+          </span>
           <span className="bg-muted px-2 py-0.5 rounded-full">
             {unit.nowOpen ? '🟢 운영 중' : '🔴 운영 종료'}
           </span>
