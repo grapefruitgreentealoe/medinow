@@ -75,7 +75,7 @@ export class CareUnitService {
           [`part${index}`]: `%${part}%`,
         });
       });
-    }else {
+    } else {
       throw new BadRequestException('주소 값이 잘못되었습니다');
     }
 
