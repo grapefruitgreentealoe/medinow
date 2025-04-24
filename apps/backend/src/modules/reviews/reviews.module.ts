@@ -16,5 +16,6 @@ import { CareUnitModule } from '../care-units/care-unit.module';
   ],
   controllers: [ReviewsController],
   providers: [ReviewsService],
+  exports: [ReviewsService],
 })
 export class ReviewsModule {}
