@@ -172,7 +172,7 @@ export default function AdminSignupForm() {
               <FormItem>
                 <FormLabel>기관명</FormLabel>
                 <FormControl>
-                  <Input placeholder="의료기관명" {...field} disabled />
+                  <Input placeholder="의료기관명" {...field} readOnly />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -186,7 +186,7 @@ export default function AdminSignupForm() {
               <FormItem>
                 <FormLabel>기관 주소</FormLabel>
                 <FormControl>
-                  <Input placeholder="의료기관 주소" {...field} disabled />
+                  <Input placeholder="의료기관 주소" {...field} readOnly />
                 </FormControl>
                 <FormMessage />
               </FormItem>
