@@ -14,8 +14,13 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Star } from 'lucide-react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { selectedCareUnitAtom } from '@/features/map/atoms/selectedCareUnitAtom';
+import { ReviewList } from '@/features/review/ui/ReviewList';
 
-export function HospitalDetailDrawer() {
+interface Props {
+  onToggleFavorite: () => void;
+}
+
+export function HospitalDetailDrawer({ onToggleFavorite }: Props) {
   const unit = useAtomValue(selectedCareUnitAtom);
   const setSelected = useSetAtom(selectedCareUnitAtom);
 
@@ -43,14 +48,14 @@ export function HospitalDetailDrawer() {
           <div className="flex items-center gap-2">
             <Star className="text-yellow-500 fill-yellow-500" size={16} />
             <span>
-              {(unit.rating ?? 0).toFixed(1)} ({unit.reviewCount ?? 0}건)
+              {(unit.averageRating ?? 0).toFixed(1)} ({unit.reviewCount ?? 0}건)
             </span>
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {unit.departments?.map((s) => (
-              <Badge key={s} variant="outline">
-                {s}
+            {unit.departments?.map((s, i) => (
+              <Badge key={i} variant="outline">
+                {s.name}
               </Badge>
             ))}
           </div>
@@ -70,20 +75,15 @@ export function HospitalDetailDrawer() {
           </div>
         </div>
 
-        <DrawerFooter className="mt-6">
-          <Button variant="outline" asChild>
-            <a
-              href={`https://map.kakao.com/?q=${unit.name}&road_address_name=${unit.address}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              길찾기 열기
-            </a>
+        <DrawerFooter className="mt-6 flex justify-between">
+          <Button variant="outline" onClick={onToggleFavorite}>
+            {unit.isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
           </Button>
           <DrawerClose asChild>
             <Button variant="ghost">닫기</Button>
           </DrawerClose>
         </DrawerFooter>
+        <ReviewList careUnitId={unit.id} />
       </DrawerContent>
     </Drawer>
   );
