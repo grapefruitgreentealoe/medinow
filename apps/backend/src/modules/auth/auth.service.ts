@@ -105,7 +105,6 @@ export class AuthService {
     const expiresIn = this.appConfigService.jwtAccessExpirationTime!;
     const maxAge = expiresIn * 1000;
     const accessOptions = this.setCookieOptions(maxAge, requestOrigin);
-
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.appConfigService.jwtAccessSecret,
       expiresIn,

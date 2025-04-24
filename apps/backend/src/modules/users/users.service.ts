@@ -155,8 +155,21 @@ export class UsersService {
   async findUserById(id: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
-      relations: ['userProfile', 'userProfile.careUnit'],
     });
+  }
+
+  async findUserByIdWithRelations(id: string) {
+    const user = await this.findUserById(id);
+    if (!user) {
+      throw new NotFoundException('유저를 찾을 수 없습니다.');
+    }
+    const userProfile = await this.userProfileRepository.findOne({
+      where: { user: { id } },
+    });
+    return {
+      ...user,
+      userProfile,
+    };
   }
 
   async isExistEmail(email: string): Promise<boolean> {
