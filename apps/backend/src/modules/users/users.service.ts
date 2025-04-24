@@ -79,9 +79,6 @@ export class UsersService {
       careUnitCategory,
       careUnitAddress,
       careUnitName,
-      latitude,
-      longitude,
-      imageUrl,
     } = createAdminDto;
 
     const queryRunner =
@@ -98,8 +95,6 @@ export class UsersService {
       const savedUser = await queryRunner.manager.save(newUser);
 
       const careUnit = await this.careUnitService.findCareUnitByFilters(
-        // latitude,
-        // longitude,
         careUnitAddress,
         careUnitName,
         careUnitCategory,
@@ -116,15 +111,6 @@ export class UsersService {
         user: savedUser,
         careUnit: careUnit,
       });
-
-      // if (imageUrl) {
-      // const image = await this.imagesService.createBusinessLicenseImage(
-      //   imageUrl,
-      //   savedUser,
-      //   careUnit,
-      // );
-      // newUserProfile.image = image;
-      // }
 
       await queryRunner.manager.save(newUserProfile);
 
@@ -155,8 +141,40 @@ export class UsersService {
   async findUserById(id: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
-      relations: ['userProfile', 'userProfile.careUnit'],
     });
+  }
+
+  async findUserByIdWithRelations(id: string) {
+    const user = await this.findUserById(id);
+
+    if (!user) {
+      throw new NotFoundException('유저를 찾을 수 없습니다.');
+    }
+
+    const userProfile = await this.userProfileRepository.findOne({
+      where: { user: { id } },
+      relations: ['careUnit'],
+    });
+
+    if (!userProfile) {
+      throw new NotFoundException('유저 프로필을 찾을 수 없습니다.');
+    }
+
+    if (userProfile.careUnit) {
+      const careUnit = await this.careUnitService.getCareUnitDetail(
+        userProfile.careUnit.id,
+      );
+      return {
+        ...user,
+        userProfile,
+        careUnit,
+      };
+    } else {
+      return {
+        ...user,
+        userProfile,
+      };
+    }
   }
 
   async isExistEmail(email: string): Promise<boolean> {

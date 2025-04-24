@@ -84,23 +84,6 @@ export class UsersController {
   }
 
   @Get()
-  @ApiExcludeEndpoint()
-  @ApiOperation({ summary: '사용자 목록 조회' })
-  @ApiOkResponse({
-    description: '사용자 목록 조회 성공',
-  })
-  @ApiNotFoundResponse({
-    description: '사용자 목록 조회 실패',
-  })
-  async getUsers() {
-    const users = await this.usersService.findUsers();
-    return {
-      message: '사용자 목록 조회 성공',
-      users,
-    };
-  }
-
-  @Get()
   @ApiOperation({ summary: '사용자 상세 조회' })
   @ApiOkResponse({
     description: '사용자 상세 조회 성공',
@@ -112,7 +95,16 @@ export class UsersController {
     const userInfo = await this.usersService.findUserById(userId);
     return {
       message: '사용자 상세 조회 성공',
-      userInfo,
+      user: {
+        id: userInfo?.id,
+        email: userInfo?.email,
+        name: userInfo?.userProfile?.name,
+      },
+      unitData: {
+        id: userInfo?.userProfile?.careUnit?.id,
+        name: userInfo?.userProfile?.careUnit?.name,
+        address: userInfo?.userProfile?.careUnit?.address,
+      },
     };
   }
 
