@@ -23,4 +23,5 @@ export const adminSignupSchema = z.object({
   careUnitCategory: z.string().min(1, '기관 유형을 선택해주세요'),
 
   imageUrl: z.string().optional(),
+  isCareUnitVerified: z.boolean(),
 });
