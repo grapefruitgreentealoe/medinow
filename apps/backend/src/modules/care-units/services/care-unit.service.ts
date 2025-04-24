@@ -22,7 +22,6 @@ import { FavoritesService } from 'src/modules/favorites/favorites.service';
 import { CustomLoggerService } from 'src/shared/logger/logger.service';
 import { CareUnitCategory } from 'src/common/enums/careUnits.enum';
 import { ExtendedCareUnit } from 'src/common/interfaces/extended-care-unit.interface';
-
 @Injectable()
 export class CareUnitService {
   private readonly EMERGENCY_API_URL = this.appConfigService.emergencyApiUrl;
@@ -57,60 +56,24 @@ export class CareUnitService {
     }
   }
 
-  //🏥 위치, 주소, 이름 필터 조회
-  async findCareUnitByFilters(
-    lat: number,
-    lng: number,
-    address: string,
-    name: string,
-    category: string,
-  ) {
-    if (!lat || !lng || !address || !name || !category) {
-      throw new BadRequestException('입력값이 올바르지 않습니다');
-    }
-
+  //🏥 이름, 주소, 카테고리 필터 조회
+  async findCareUnitByFilters(name: string, address: string, category: string) {
     const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
 
-    if (lat) {
-      const latPrefix = Math.floor(lat * 10) / 10;
-      queryBuilder.andWhere(`CAST(careUnit.lat AS TEXT) LIKE :lat`, {
-        lat: `${latPrefix}%`,
+    if (name) {
+      queryBuilder.andWhere('careUnit.name = :name', {
+        name: name,
       });
     } else {
-      throw new BadRequestException('위도 값이 없습니다');
-    }
-
-    if (lng) {
-      const lngPrefix = Math.floor(lng * 10) / 10;
-      queryBuilder.andWhere(`CAST(careUnit.lng AS TEXT) LIKE :lng`, {
-        lng: `${lngPrefix}%`,
-      });
-    } else {
-      throw new BadRequestException('경도 값이 없습니다');
+      throw new BadRequestException('병원 이름이 잘못되었습니다');
     }
 
     if (address) {
-      const addressParts = address.split(' ');
-      if (addressParts.length > 1) {
-        const remainingAddress = addressParts.slice(1).join(' ');
-        queryBuilder.andWhere('careUnit.address LIKE :address', {
-          address: `%${remainingAddress}%`,
-        });
-      } else {
-        queryBuilder.andWhere('careUnit.address LIKE :address', {
-          address: `%${address}%`,
-        });
-      }
-    } else {
-      throw new BadRequestException('주소 값이 없습니다');
-    }
-
-    if (name) {
-      queryBuilder.andWhere('careUnit.name LIKE :name', {
-        name: `%${name}%`,
+      queryBuilder.andWhere('careUnit.address like :address', {
+        address: `%${address}%`,
       });
     } else {
-      throw new BadRequestException('이름 값이 없습니다');
+      throw new BadRequestException('주소 값이 잘못되었습니다');
     }
 
     if (category) {
@@ -123,7 +86,11 @@ export class CareUnitService {
     if (!careUnit) {
       throw new NotFoundException('조회된 의료기관이 없습니다');
     }
-    return careUnit;
+    return {
+      id: careUnit.id,
+      name: careUnit.name,
+      address: careUnit.address,
+    };
   }
 
   //🏥 상세 정보 조회 by 위치
@@ -425,6 +392,13 @@ export class CareUnitService {
   async getHospitalCareUnit(hpId: string, category: string) {
     return this.careUnitRepository.findOne({
       where: { hpId: hpId, category },
+    });
+  }
+
+  // 평균 평점 업데이트
+  async updateAverageRating(careUnitId: string, averageRating: number) {
+    await this.careUnitRepository.update(careUnitId, {
+      averageRating: Number(averageRating.toFixed(1)),
     });
   }
 }
