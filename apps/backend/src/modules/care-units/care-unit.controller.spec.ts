@@ -77,7 +77,7 @@ describe('CareUnitController', () => {
       reviews: [],
       total: 0,
       page: 1,
-      totalPages: 0
+      totalPages: 0,
     }),
   };
 
