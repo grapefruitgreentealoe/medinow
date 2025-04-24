@@ -26,8 +26,6 @@ export function CareUnitCard({
   onConfirmUnfavorite,
   currentPage,
 }: CareUnitCardProps) {
-  const queryClient = useQueryClient();
-  const { mutate: toggleButtonMutate } = useFavoriteToggle(currentPage);
   const setConfirmUnit = useSetAtom(unfavoriteConfirmUnitAtom);
   const setChat = useSetAtom(chatModalAtom);
 
@@ -52,7 +50,7 @@ export function CareUnitCard({
     <Card
       key={unit.id}
       className={cn(
-        'mb-4 cursor-pointer hover:shadow-md bg-background transition-shadow rounded-none border-t-0 border-l-0 border-r-0 border-b-[1px] border-b-slate-300 border-solid'
+        'mb-4 cursor-pointer hover:shadow-md bg-background transition-shadow  border-t-0 border-l-0 border-r-0 border-b-[1px] border-b-slate-300 border-solid'
       )}
       style={{ contentVisibility: 'auto', containIntrinsicSize: '64px' }}
       onClick={() => onSelect(unit)}

@@ -1,39 +1,55 @@
 'use client';
 
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerClose,
-  DrawerFooter,
-} from '@/components/ui/drawer';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogOverlay,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Star } from 'lucide-react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { ReviewList } from '@/features/review/ui/ReviewList';
 import { selectedFavoriteCareUnitAtom } from '../atoms/selectedFavoriteCareUnitAtom';
+import { cn } from '@/lib/utils';
 
-export function HospitalDetailDrawer() {
+export function HospitalDetailDialog() {
   const unit = useAtomValue(selectedFavoriteCareUnitAtom);
   const setSelected = useSetAtom(selectedFavoriteCareUnitAtom);
 
   if (!unit) return null;
 
   return (
-    <Drawer
+    <Dialog
       open={!!unit}
       onOpenChange={(open) => {
         if (!open) setSelected(null);
       }}
     >
-      <DrawerContent className="p-4 pb-8 max-h-[90dvh] overflow-y-auto">
-        <DrawerHeader>
-          <DrawerTitle className="text-xl font-bold">{unit.name}</DrawerTitle>
-          <DrawerDescription>{unit.address}</DrawerDescription>
-        </DrawerHeader>
+      <DialogOverlay className="bg-black/10 backdrop-brightness-75" />
+
+      <DialogContent className="!max-w-3xl !p-[40px]">
+        <DialogHeader className="mb-2 gap-1">
+          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+            {unit.name}{' '}
+            <Badge
+              variant={unit.nowOpen ? 'default' : 'outline'}
+              className={cn(
+                unit.nowOpen
+                  ? 'bg-green-500 hover:bg-green-600'
+                  : 'bg-gray-300 text-gray-600',
+                '!p-1 rounded-2xl'
+              )}
+            >
+              {unit.nowOpen ? '운영 중' : '운영 종료'}
+            </Badge>
+          </DialogTitle>
+          <DialogDescription>{unit.address}</DialogDescription>
+        </DialogHeader>
 
         <div className="space-y-4 mt-2 text-sm">
           <div className="flex items-center gap-2">
@@ -55,29 +71,10 @@ export function HospitalDetailDrawer() {
               </Badge>
             ))}
           </div>
-
-          <div>
-            <span className="text-muted-foreground">상태: </span>
-            <Badge
-              variant={unit.nowOpen ? 'default' : 'outline'}
-              className={
-                unit.nowOpen
-                  ? 'bg-green-500 hover:bg-green-600'
-                  : 'bg-gray-300 text-gray-600'
-              }
-            >
-              {unit.nowOpen ? '운영 중' : '운영 종료'}
-            </Badge>
-          </div>
         </div>
 
-        <DrawerFooter className="mt-6 flex justify-between">
-          <DrawerClose asChild>
-            <Button variant="ghost">닫기</Button>
-          </DrawerClose>
-        </DrawerFooter>
         <ReviewList careUnitId={unit.id} />
-      </DrawerContent>
-    </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 }
