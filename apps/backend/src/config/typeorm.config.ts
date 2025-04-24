@@ -4,7 +4,7 @@ import { DbConfigService } from './db/config.service';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 
-dotenv.config({ path: ['.env.local', '.env'] });
+dotenv.config({ path: ['.env', '.env.local'] });
 // 설정 서비스 생성
 const dbConfigService = new DbConfigService(new ConfigService());
 
