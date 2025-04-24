@@ -2,10 +2,10 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { getCareUnitById } from '@/features/user-review/api';
 import { CareUnit } from '@/features/map/type';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
+import { ReviewForm } from '@/features/user-review/ui/ReviewForm';
+import { SearchCareUnitForReview } from '@/features/user-review/ui/SearchCareUnitForReview';
 
 export default function WriteReviewPage() {
   const searchParams = useSearchParams();
@@ -15,32 +15,21 @@ export default function WriteReviewPage() {
 
   useEffect(() => {
     if (careUnitId) {
-      // 병원 정보 가져오기 (careUnitId로 조회)
-      fetch(`/api/care-units/${careUnitId}`)
-        .then((res) => res.json())
-        .then((data) => setCareUnit(data));
+      getCareUnitById(careUnitId).then(setCareUnit);
     }
   }, [careUnitId]);
 
   return (
-    <div className="space-y-6 max-w-xl mx-auto py-6">
-      <h1 className="text-2xl font-semibold">리뷰 작성</h1>
+    <main className="min-h-screen px-4 py-6">
+      <h1 className="text-2xl font-semibold mb-6">리뷰 작성</h1>
 
-      {careUnit && (
-        <div className="p-4 bg-muted rounded-md">
-          <p className="text-sm text-muted-foreground">리뷰 대상 병원</p>
-          <p className="font-medium text-lg">{careUnit.name}</p>
-          <p className="text-sm text-muted-foreground">{careUnit.address}</p>
-        </div>
+      {!careUnitId && !careUnit && (
+        <SearchCareUnitForReview onSelect={setCareUnit} />
       )}
 
-      <Textarea placeholder="리뷰 내용을 작성해주세요." rows={6} />
+      {careUnitId && !careUnit && <p>병원 정보를 불러오는 중...</p>}
 
-      <Input placeholder="감사 메시지 (선택)" />
-
-      <Button type="submit" className="mt-4">
-        리뷰 등록
-      </Button>
-    </div>
+      {careUnit && <ReviewForm careUnit={careUnit} />}
+    </main>
   );
 }

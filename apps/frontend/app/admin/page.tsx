@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next';
 
 const AdminDashBoardPage = () => {
-  return <div>Enter</div>;
+  return <section>Enter</section>;
 };
 
 export default AdminDashBoardPage;
