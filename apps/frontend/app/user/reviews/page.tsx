@@ -1,7 +1,5 @@
-import { GetServerSideProps } from 'next';
+import React from 'react';
 
-const UserReviewPage = () => {
-  return <div>Enter</div>;
-};
-
-export default UserReviewPage;
+export default function ReviewsPage() {
+  return <div>ReviewsPage</div>;
+}

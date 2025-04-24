@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { HeartPulseIcon, Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ROUTES } from '@/shared/constants/routes';
@@ -61,8 +61,8 @@ export default function Header() {
   const getMenuItems = () => {
     if (!isLoggedIn) {
       return [
-        { href: ROUTES.ADMIN_SIGN_UP, label: '관리자 회원가입' },
-        { href: ROUTES.SIGN_UP, label: '회원가입' },
+        { href: ROUTES.SIGN_UP.ADMIN, label: '관리자 회원가입' },
+        { href: ROUTES.SIGN_UP.USER, label: '회원가입' },
         { href: ROUTES.LOGIN, label: '로그인' },
       ];
     }
@@ -77,8 +77,9 @@ export default function Header() {
     return [
       { href: ROUTES.USER.ROOT, label: '마이페이지' },
       { href: ROUTES.USER.FAVORITES, label: '즐겨찾기' },
+      { href: ROUTES.USER.THANKS, label: '리뷰 작성하기' },
       { href: ROUTES.USER.REVIEWS, label: '내 리뷰' },
-      { href: ROUTES.USER.THANKS, label: '감사 메시지' },
+      { href: ROUTES.USER.THANKS, label: '내 감사 메시지' },
       { href: '#', label: '로그아웃', onClick: handleLogout },
     ];
   };
@@ -90,7 +91,9 @@ export default function Header() {
           href={ROUTES.HOME}
           className="text-lg font-semibold tracking-tight"
         >
-          <span className="text-primary text-3xl">Medinow</span>
+          <span className="text-primary text-2xl flex items-center gap-1">
+            <HeartPulseIcon /> Medinow
+          </span>
         </Link>
 
         {isLoggedIn !== null ? (
@@ -133,12 +136,12 @@ export default function Header() {
                 </>
               ) : (
                 <>
-                  <Link href={ROUTES.ADMIN_SIGN_UP}>
+                  <Link href={ROUTES.SIGN_UP.ADMIN}>
                     <Button variant="ghost" className="text-sm !px-4">
                       관리자 회원가입
                     </Button>
                   </Link>
-                  <Link href={ROUTES.SIGN_UP}>
+                  <Link href={ROUTES.SIGN_UP.USER}>
                     <Button variant="ghost" className="text-sm !px-4">
                       회원가입
                     </Button>

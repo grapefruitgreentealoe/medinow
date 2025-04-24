@@ -43,6 +43,9 @@ export interface CareUnit {
     hpid: string;
     name: string;
   };
+  departments: string[];
+  rating: number;
+  reviewCount: number;
 }
 
 export type CareUnitCategory = 'hospital' | 'pharmacy' | 'emergency';

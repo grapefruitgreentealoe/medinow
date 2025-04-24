@@ -33,7 +33,6 @@ export default async function RootLayout({
       <body suppressHydrationWarning>
         <Header />
         <main>{children}</main>
-        <FloatingChatWidget />
 
         <Toaster position="bottom-center" duration={1000} />
       </body>
