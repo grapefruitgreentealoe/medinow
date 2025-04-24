@@ -15,6 +15,7 @@ import { UserProfile } from './entities/user-profile.entity';
 import { ImagesService } from '../images/images.service';
 import { UserRole } from '../../common/enums/roles.enum';
 import { CareUnitService } from '../care-units/services/care-unit.service';
+import { CareUnit } from '../care-units/entities/care-unit.entity';
 
 @Injectable()
 export class UsersService {
@@ -95,8 +96,8 @@ export class UsersService {
       const savedUser = await queryRunner.manager.save(newUser);
 
       const careUnit = await this.careUnitService.findCareUnitByFilters(
-        careUnitAddress,
         careUnitName,
+        careUnitAddress,
         careUnitCategory,
       );
 
@@ -104,13 +105,20 @@ export class UsersService {
         throw new NotFoundException('존재하지 않는 의료기관입니다.');
       }
 
-      const newUserProfile = this.userProfileRepository.create({
-        name,
-        address: careUnit.address,
-        nickname: careUnit.name,
-        user: savedUser,
-        careUnit: careUnit,
-      });
+      const careUnitDetail = await this.careUnitService.getCareUnitDetail(
+        careUnit.id,
+      );
+
+      if (!careUnitDetail) {
+        throw new NotFoundException('존재하지 않는 의료기관입니다.');
+      }
+
+      const newUserProfile = new UserProfile();
+      newUserProfile.name = name;
+      newUserProfile.address = careUnitDetail.address;
+      newUserProfile.nickname = careUnitDetail.name;
+      newUserProfile.user = savedUser;
+      newUserProfile.careUnit = careUnitDetail;
 
       await queryRunner.manager.save(newUserProfile);
 
