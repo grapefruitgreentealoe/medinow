@@ -6,33 +6,37 @@ import { cn } from '@/lib/utils';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { Star, StarOff, MessageSquare, PhoneCallIcon } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { selectedFavoriteCareUnitsQueryKeyAtom } from '../atoms/selectedFavoriteCareUnitAtom';
 import { unfavoriteConfirmUnitAtom } from '../atoms/unfavoriteConfirmModalAtom';
 import { openKakaoMap, renderTodayTime } from '@/features/map/utils';
 import { CATEGORY_LABEL, congestionClassMap } from '@/features/map/const';
-import { favoritesQueryKeyAtom } from '../atoms/favoritesQueryKeyAtom';
 import { CareUnit, CongestionLevel } from '@/shared/type';
+import { useFavoriteToggle } from '../model/useFavoriteToggle';
+import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 
 interface CareUnitCardProps {
   unit: CareUnit;
   onSelect: (unit: CareUnit) => void;
   onConfirmUnfavorite: () => void;
+  currentPage: number;
 }
 
 export function CareUnitCard({
   unit,
   onSelect,
   onConfirmUnfavorite,
+  currentPage,
 }: CareUnitCardProps) {
   const queryClient = useQueryClient();
-
+  const { mutate: toggleButtonMutate } = useFavoriteToggle(currentPage);
   const setConfirmUnit = useSetAtom(unfavoriteConfirmUnitAtom);
+  const setChat = useSetAtom(chatModalAtom);
 
   const handleFavoriteButton = (e: React.MouseEvent) => {
     e.stopPropagation();
+
     if (unit.isFavorite) {
-      setConfirmUnit(unit); // ✅ 모달로 넘김
-      onConfirmUnfavorite(); // 모달 띄우기
+      setConfirmUnit(unit); // 모달로 단건 정보 넘기고
+      onConfirmUnfavorite(); // 모달 오픈
     }
   };
 
@@ -43,6 +47,7 @@ export function CareUnitCard({
 
   const level = (unit?.congestion?.congestionLevel ?? 'LOW') as CongestionLevel;
 
+  console.log('CARD1', unit);
   return (
     <Card
       key={unit.id}
@@ -106,6 +111,33 @@ export function CareUnitCard({
                 <StarOff size={18} />
               )}
             </Button>
+            {unit.isChatAvailable && (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setChat({ isOpen: true, target: unit });
+                }}
+                className="w-8 h-8"
+              >
+                <MessageSquare className="text-blue-500" size={18} />
+              </Button>
+            )}
+            {unit.tel && (
+              <a href={`tel:${unit.tel}`}>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className="w-8 h-8"
+                >
+                  <PhoneCallIcon className="text-slate-500" size={18} />
+                </Button>
+              </a>
+            )}
           </div>
         </div>
       </CardContent>

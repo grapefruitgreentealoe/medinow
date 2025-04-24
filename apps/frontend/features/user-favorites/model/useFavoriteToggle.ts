@@ -1,7 +1,7 @@
 import { toggleFavorite } from '@/features/map/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-export function useFavoriteToggle() {
+export function useFavoriteToggle(currentPage: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -9,7 +9,9 @@ export function useFavoriteToggle() {
       return toggleFavorite(unitId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['favorites', currentPage] });
     },
   });
 }
+
+//todo: optimiscit update 넣기

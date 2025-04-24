@@ -10,5 +10,5 @@ export async function getFavoriteList({
   const res = await axiosInstance.get(`/favorites`, {
     params: { page, limit },
   });
-  return res.data;
+  return res.data.careUnits;
 }
