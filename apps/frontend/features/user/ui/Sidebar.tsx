@@ -11,7 +11,6 @@ const navItems = [
   { href: ROUTES.USER.ROOT, label: '회원 정보' },
   { href: ROUTES.USER.FAVORITES, label: '즐겨찾기한 의료기관' },
   { href: ROUTES.USER.REVIEWS, label: '내 리뷰' },
-  { href: ROUTES.USER.THANKS, label: '내 감사 메시지' },
   { href: ROUTES.USER.WRITE_REVIEW, label: '리뷰 작성하러 가기' },
 ];
 
