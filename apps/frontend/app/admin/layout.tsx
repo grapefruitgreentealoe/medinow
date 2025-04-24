@@ -1,5 +1,3 @@
-import { FloatingChatWidget } from '@/widgets/chat/FloatingChatWidget';
-
 export default function AdminLayout({
   children,
 }: {
@@ -8,7 +6,6 @@ export default function AdminLayout({
   return (
     <div>
       <section>{children}</section>
-      <FloatingChatWidget />
     </div>
   );
 }

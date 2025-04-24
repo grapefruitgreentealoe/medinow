@@ -2,7 +2,6 @@ import Script from 'next/script';
 import { cookies } from 'next/headers';
 import './globals.css';
 import Header from '@/shared/ui/layout/Header';
-import { FloatingChatWidget } from '@/widgets/chat/FloatingChatWidget';
 import { Toaster } from '@/components/ui/sonner';
 
 export default async function RootLayout({
