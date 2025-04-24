@@ -98,8 +98,8 @@ export class UsersService {
       const savedUser = await queryRunner.manager.save(newUser);
 
       const careUnit = await this.careUnitService.findCareUnitByFilters(
-        latitude,
-        longitude,
+        // latitude,
+        // longitude,
         careUnitAddress,
         careUnitName,
         careUnitCategory,
@@ -117,14 +117,14 @@ export class UsersService {
         careUnit: careUnit,
       });
 
-      if (imageUrl) {
-        const image = await this.imagesService.createBusinessLicenseImage(
-          imageUrl,
-          savedUser,
-          careUnit,
-        );
-        newUserProfile.image = image;
-      }
+      // if (imageUrl) {
+      // const image = await this.imagesService.createBusinessLicenseImage(
+      //   imageUrl,
+      //   savedUser,
+      //   careUnit,
+      // );
+      // newUserProfile.image = image;
+      // }
 
       await queryRunner.manager.save(newUserProfile);
 
