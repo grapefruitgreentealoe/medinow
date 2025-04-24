@@ -11,7 +11,7 @@ echo "$ENV_DEVELOPMENT" > $ENV_PATH
 echo "✅ .env 파일 생성 완료(local): $ENV_PATH"
 
 # ✅ 기존 컨테이너 및 네트워크 정리
-docker-compose -f $COMPOSE_FILE down
+docker-compose -f $COMPOSE_FILE down -v
 
 # 최신 이미지 pull
 docker pull grapefruitgreentealoe/medinow-backend:dev

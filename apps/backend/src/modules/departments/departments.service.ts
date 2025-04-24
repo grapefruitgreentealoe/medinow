@@ -307,7 +307,7 @@ export class DepartmentsService {
 
           if (successCount % 1000 === 0) {
             console.log(
-              `✨ 진행 상황: ${successCount}/${hospitalItems.length} 처리 완료`,
+              `✨ 진행 상황: ${successCount}/${hospitalItems.length} 처리 완료!`,
             );
           }
         } catch (error) {
