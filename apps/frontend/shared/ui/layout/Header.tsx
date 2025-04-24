@@ -23,6 +23,7 @@ interface User {
 declare global {
   interface Window {
     __INITIAL_IS_LOGGED_IN__?: boolean;
+    __USER_ROLE__?: string;
   }
 }
 
@@ -30,10 +31,13 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<string>('');
 
   useEffect(() => {
     const isInitLoggedIn = window.__INITIAL_IS_LOGGED_IN__ ?? false;
+    const userRole = window.__USER_ROLE__ ?? '';
     setIsLoggedIn(isInitLoggedIn);
+    setRole(userRole);
 
     if (isInitLoggedIn) {
       axiosInstance
@@ -66,8 +70,7 @@ export default function Header() {
         { href: ROUTES.LOGIN, label: '로그인' },
       ];
     }
-
-    if (user?.role === 'admin') {
+    if (role === 'admin') {
       return [
         { href: ROUTES.ADMIN.DASHBOARD, label: '관리자 대시보드' },
         { href: '#', label: '로그아웃', onClick: handleLogout },
@@ -85,7 +88,7 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full min-h-[61px] !px-6 !py-3 border-b border-border bg-background text-foreground relative z-50">
+    <header className="sticky w-full min-h-[61px] !px-6 !py-3 border-b border-border bg-background text-foreground  z-50">
       <div className="flex justify-between items-center">
         <Link
           href={ROUTES.HOME}
@@ -113,7 +116,7 @@ export default function Header() {
             <div className="hidden md:flex gap-[20px]">
               {isLoggedIn ? (
                 <>
-                  {user?.role === 'admin' ? (
+                  {role === 'admin' ? (
                     <Link href={ROUTES.ADMIN.DASHBOARD}>
                       <Button variant="ghost" className="text-sm !px-4">
                         관리자 대시보드
