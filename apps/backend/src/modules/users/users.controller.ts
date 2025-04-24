@@ -40,7 +40,7 @@ export class UsersController {
   @ApiOperation({ summary: '사용자 등록' })
   @ApiBody({ type: CreateUserDto })
   @ApiCreatedResponse({
-    description: '사용자 등록 성공',
+    description: '사용자 등록 성공!',
     type: User,
   })
   @ApiBadRequestResponse({
