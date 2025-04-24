@@ -38,9 +38,7 @@ export default function FavoritePage() {
   if (isLoading) return <div>로딩 중...</div>;
 
   return (
-    <div className="!space-y-6 !mx-[10px]">
-      <h1 className="text-2xl font-semibold">즐겨찾기 병원</h1>
-
+    <div className="!space-y-6 !mx-[20px] !mt-[30px]">
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {data?.map((unit: CareUnit) => {
           if (!unit) return null;
