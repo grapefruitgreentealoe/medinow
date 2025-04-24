@@ -51,16 +51,44 @@ export class FavoritesService {
     }
 
     const careUnits = favorites.map((favorite) => {
+      if (!favorite.careUnit) {
+        return null;
+      }
       return {
+        id: favorite.careUnit.id,
         name: favorite.careUnit.name,
         address: favorite.careUnit.address,
-        favorite: true,
+        tel: favorite.careUnit.tel,
+        category: favorite.careUnit.category,
+        hpId: favorite.careUnit.hpId,
+        mondayOpen: favorite.careUnit.mondayOpen,
+        mondayClose: favorite.careUnit.mondayClose,
+        tuesdayOpen: favorite.careUnit.tuesdayOpen,
+        tuesdayClose: favorite.careUnit.tuesdayClose,
+        wednesdayOpen: favorite.careUnit.wednesdayOpen,
+        wednesdayClose: favorite.careUnit.wednesdayClose,
+        thursdayOpen: favorite.careUnit.thursdayOpen,
+        thursdayClose: favorite.careUnit.thursdayClose,
+        fridayOpen: favorite.careUnit.fridayOpen,
+        fridayClose: favorite.careUnit.fridayClose,
+        saturdayOpen: favorite.careUnit.saturdayOpen,
+        saturdayClose: favorite.careUnit.saturdayClose,
+        sundayOpen: favorite.careUnit.sundayOpen,
+        sundayClose: favorite.careUnit.sundayClose,
+        holidayOpen: favorite.careUnit.holidayOpen,
+        holidayClose: favorite.careUnit.holidayClose,
+        lat: favorite.careUnit.lat,
+        lng: favorite.careUnit.lng,
+        isBadged: favorite.careUnit.isBadged,
+        nowOpen: favorite.careUnit.nowOpen,
+        kakaoUrl: favorite.careUnit.kakaoUrl,
+        isFavorite: true,
+        averageRating: favorite.careUnit.averageRating || 0,
+        reviewCount: favorite.careUnit.reviews.length || 0,
         departments:
           favorite.careUnit.departments.map((department) => {
             return department.name;
           }) || [],
-        averageRating: favorite.careUnit.averageRating || 0,
-        reviewCount: favorite.careUnit.reviews.length || 0,
       };
     });
 
