@@ -3,7 +3,7 @@ export const ROUTES = {
   LOGIN: '/login',
 
   SIGN_UP: {
-    USER: '/signup/user',
+    USER: '/signup',
     ADMIN: '/signup/admin',
   },
 
@@ -14,14 +14,12 @@ export const ROUTES = {
     REVIEW_DETAIL: (id: string | number) => `/user/reviews/${id}`,
     WRITE_REVIEW: '/user/reviews/post',
     EDIT_REVIEW: (id: string | number) => `/user/reviews/${id}/edit`,
-    THANKS: '/user/thanks',
   },
 
   ADMIN: {
-    ROOT: '/admin',
-    DASHBOARD: '/admin/dashboard',
+    DASHBOARD: '/admin',
     REVIEWS: '/admin/reviews',
-    THANKS: '/admin/thanks',
+    REVIEW_DETAIL: (id: string | number) => `/admin/reviews/${id}`,
   },
 
   CHAT: {
