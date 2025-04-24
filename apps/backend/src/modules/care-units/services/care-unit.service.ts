@@ -20,7 +20,6 @@ import { CongestionOneService } from 'src/modules/congestion/services/congestion
 import { User } from 'src/modules/users/entities/user.entity';
 import { FavoritesService } from 'src/modules/favorites/favorites.service';
 import { CustomLoggerService } from 'src/shared/logger/logger.service';
-import { CareUnitCategory } from 'src/common/enums/careUnits.enum';
 import { ExtendedCareUnit } from 'src/common/interfaces/extended-care-unit.interface';
 @Injectable()
 export class CareUnitService {
@@ -58,7 +57,9 @@ export class CareUnitService {
 
   //🏥 이름, 주소, 카테고리 필터 조회
   async findCareUnitByFilters(name: string, address: string, category: string) {
-    const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
+    const queryBuilder = this.careUnitRepository
+      .createQueryBuilder('careUnit')
+      .leftJoinAndSelect('careUnit.departments', 'departments');
 
     if (name) {
       queryBuilder.andWhere('careUnit.name like :name', {
@@ -93,6 +94,8 @@ export class CareUnitService {
       id: careUnit.id,
       name: careUnit.name,
       address: careUnit.address,
+      departments:
+        careUnit.departments.map((department) => department.name) || null,
     };
   }
 
