@@ -12,7 +12,13 @@ export default async function RootLayout({
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get('accessToken')?.value;
+  const payload = token
+    ? JSON.parse(
+        Buffer.from(token?.split('.')[1] ?? '', 'base64').toString('utf-8')
+      )
+    : {};
   const isLoggedIn = !!token;
+  const role = payload?.role || '';
 
   return (
     <html lang="ko">
@@ -21,7 +27,9 @@ export default async function RootLayout({
           <Script
             id="initial-is-logged-in"
             dangerouslySetInnerHTML={{
-              __html: `window.__INITIAL_IS_LOGGED_IN__ = ${JSON.stringify(isLoggedIn)};`,
+              __html: `window.__INITIAL_IS_LOGGED_IN__ = ${JSON.stringify(isLoggedIn)};
+              window.__USER_ROLE__ = '${role}';
+              `,
             }}
           />
           <Script
