@@ -13,16 +13,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Star } from 'lucide-react';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { selectedCareUnitAtom } from '@/features/map/atoms/selectedCareUnitAtom';
 import { ReviewList } from '@/features/review/ui/ReviewList';
+import { selectedFavoriteCareUnitAtom } from '../atoms/selectedFavoriteCareUnitAtom';
 
-interface Props {
-  onToggleFavorite: () => void;
-}
-
-export function HospitalDetailDrawer({ onToggleFavorite }: Props) {
-  const unit = useAtomValue(selectedCareUnitAtom);
-  const setSelected = useSetAtom(selectedCareUnitAtom);
+export function HospitalDetailDrawer() {
+  const unit = useAtomValue(selectedFavoriteCareUnitAtom);
+  const setSelected = useSetAtom(selectedFavoriteCareUnitAtom);
 
   if (!unit) return null;
 
@@ -76,9 +72,6 @@ export function HospitalDetailDrawer({ onToggleFavorite }: Props) {
         </div>
 
         <DrawerFooter className="mt-6 flex justify-between">
-          <Button variant="outline" onClick={onToggleFavorite}>
-            {unit.isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-          </Button>
           <DrawerClose asChild>
             <Button variant="ghost">닫기</Button>
           </DrawerClose>

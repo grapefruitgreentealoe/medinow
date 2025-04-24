@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { getFavoriteList } from '../api'; // 너의 API에 따라 경로 수정
-import { CareUnit } from '@/features/map/type';
+import { CareUnit } from '@/shared/type';
 
 export function useFavoritesQuery(): {
   data: CareUnit[];

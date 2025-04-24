@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { CareUnit } from '@/features/map/type';
+import { CareUnit } from '@/shared/type';
 
 interface ChatModalState {
   isOpen: boolean;

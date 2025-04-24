@@ -11,13 +11,11 @@ export interface Review {
 }
 
 export interface PaginatedReviewResponse {
-  items: Review[];
-  meta: {
-    currentPage: number;
-    itemsPerPage: number;
-    totalItems: number;
+  reviews: Review[];
+  pagination: {
+    total: number;
+    page: number;
     totalPages: number;
-    hasNextPage: boolean;
   };
 }
 

@@ -1,5 +1,5 @@
 import axiosInstance from '@/lib/axios';
-import { CareUnit } from '@/features/map/type';
+import { CareUnit } from '@/shared/type';
 import { PaginatedReviewResponse, SubmitReviewPayload } from './type';
 
 export const getCareUnitById = async (id: string): Promise<CareUnit> => {
