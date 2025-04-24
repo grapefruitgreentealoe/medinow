@@ -27,7 +27,7 @@ import { SchedulesModule } from './modules/schedules/schedule.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath:
-        process.env.NODE_ENV === 'production' ? '/app/.env' : '.env.local',
+        process.env.NODE_ENV === 'production' ? '.env' : '.env.local',
     }),
     TypeOrmModule.forRoot(typeOrmConfig.options),
     LoggerModule,
