@@ -35,7 +35,7 @@ export function HospitalDetailDialog() {
       <DialogContent className="!max-w-3xl !p-[40px]">
         <DialogHeader className="mb-2 gap-1">
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            {unit.name}{' '}
+            {unit.name}
             <Badge
               variant={unit.nowOpen ? 'default' : 'outline'}
               className={cn(

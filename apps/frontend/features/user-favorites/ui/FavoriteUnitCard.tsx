@@ -4,7 +4,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { Star, StarOff, MessageSquare, PhoneCallIcon } from 'lucide-react';
+import {
+  Star,
+  StarOff,
+  MessageSquare,
+  PhoneCallIcon,
+  NotepadTextIcon,
+  PenBoxIcon,
+  ThumbsUpIcon,
+  PencilIcon,
+} from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { unfavoriteConfirmUnitAtom } from '../atoms/unfavoriteConfirmModalAtom';
 import { openKakaoMap, renderTodayTime } from '@/features/map/utils';
@@ -12,6 +21,8 @@ import { CATEGORY_LABEL, congestionClassMap } from '@/features/map/const';
 import { CareUnit, CongestionLevel } from '@/shared/type';
 import { useFavoriteToggle } from '../model/useFavoriteToggle';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
+import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/shared/constants/routes';
 
 interface CareUnitCardProps {
   unit: CareUnit;
@@ -28,6 +39,7 @@ export function CareUnitCard({
 }: CareUnitCardProps) {
   const setConfirmUnit = useSetAtom(unfavoriteConfirmUnitAtom);
   const setChat = useSetAtom(chatModalAtom);
+  const router = useRouter();
 
   const handleFavoriteButton = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -122,6 +134,18 @@ export function CareUnitCard({
                 <MessageSquare className="text-blue-500" size={18} />
               </Button>
             )}
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(ROUTES.USER.WRITE_REVIEW);
+              }}
+              className="w-8 h-8"
+            >
+              <PencilIcon className="text-blue-500" size={18} />
+            </Button>
+
             {unit.tel && (
               <a href={`tel:${unit.tel}`}>
                 <Button
