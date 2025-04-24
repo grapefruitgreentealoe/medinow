@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Query } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { ResponseFavoriteDto } from './dto/response-favorite.dto';
 import { RequestUserId } from '../../common/decorators/request-userId.decorator';
@@ -81,8 +81,12 @@ export class FavoritesController {
     type: Array,
     example: [],
   })
-  async getUserFavorites(@RequestUserId() userId: string) {
-    return this.favoritesService.getUserFavorites(userId);
+  async getUserFavorites(
+    @RequestUserId() userId: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.favoritesService.getUserFavorites(userId, page, limit);
   }
 
   @Public()
