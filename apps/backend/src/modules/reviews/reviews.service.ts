@@ -74,15 +74,64 @@ export class ReviewsService {
     return savedReview;
   }
 
-  async getReviews(careUnitId?: string, departmentId?: string) {
+  async getReviewsByCareUnitId(careUnitId: string) {
     const reviews = await this.reviewRepository.find({
-      where: {
-        ...(careUnitId ? { careUnit: { id: careUnitId } } : {}),
-        ...(departmentId ? { department: { id: departmentId } } : {}),
-      },
+      where: { careUnit: { id: careUnitId } },
       relations: ['user', 'careUnit', 'department'],
     });
     return reviews;
+  }
+
+  async getReviewsByUserId(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
+    const user = await this.usersService.findUserByIdWithRelations(userId);
+
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    const userProfile = user.userProfile;
+
+    if (!userProfile) {
+      throw new NotFoundException('사용자 프로필을 찾을 수 없습니다.');
+    }
+
+    const skip = (page - 1) * limit;
+
+    if (userProfile.careUnit) {
+      // 케어유닛이 있는 경우 해당 케어유닛의 리뷰만 반환
+      const [reviews, total] = await this.reviewRepository.findAndCount({
+        where: { careUnit: { id: userProfile.careUnit.id } },
+        relations: ['user', 'careUnit', 'department'],
+        skip,
+        take: limit,
+        order: { createdAt: 'DESC' },
+      });
+      return {
+        reviews,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      };
+    } else {
+      // 케어유닛이 없는 경우 유저가 작성한 모든 리뷰 반환
+      const [reviews, total] = await this.reviewRepository.findAndCount({
+        where: { user: { id: userId } },
+        relations: ['user', 'careUnit', 'department'],
+        skip,
+        take: limit,
+        order: { createdAt: 'DESC' },
+      });
+      return {
+        reviews,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      };
+    }
   }
 
   async getReviewById(id: string) {
@@ -91,14 +140,6 @@ export class ReviewsService {
       relations: ['user', 'careUnit', 'department'],
     });
     return review;
-  }
-
-  async getReviewsByUserId(userId: string) {
-    const reviews = await this.reviewRepository.find({
-      where: { user: { id: userId } },
-      relations: ['user', 'careUnit', 'department'],
-    });
-    return reviews;
   }
 
   async updateReview(id: string, updateReviewDto: UpdateReviewDto, user: User) {
