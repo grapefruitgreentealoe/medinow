@@ -31,7 +31,7 @@ export class DepartmentsService {
     private readonly redisService: RedisService,
   ) {}
 
-  @Cron('0 25 11 * * *')
+  @Cron('0 45 22 * * *')
   async syncHospitalDepartments() {
     console.log('🔄 병원 진료과목 동기화 시작');
     try {
