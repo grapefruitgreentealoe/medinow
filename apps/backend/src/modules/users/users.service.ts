@@ -98,12 +98,12 @@ export class UsersService {
       const savedUser = await queryRunner.manager.save(newUser);
 
       const careUnit = await this.careUnitService.findCareUnitByFilters(
-        latitude,
-        longitude,
+        // latitude,
+        // longitude,
         careUnitAddress,
         careUnitName,
         careUnitCategory,
-      );
+      ) ;
 
       if (!careUnit) {
         throw new NotFoundException('존재하지 않는 의료기관입니다.');
@@ -117,14 +117,14 @@ export class UsersService {
         careUnit: careUnit,
       });
 
-      if (imageUrl) {
-        const image = await this.imagesService.createBusinessLicenseImage(
-          imageUrl,
-          savedUser,
-          careUnit,
-        );
-        newUserProfile.image = image;
-      }
+      // if (imageUrl) {
+        // const image = await this.imagesService.createBusinessLicenseImage(
+        //   imageUrl,
+        //   savedUser,
+        //   careUnit,
+        // );
+        // newUserProfile.image = image;
+      // }
 
       await queryRunner.manager.save(newUserProfile);
 

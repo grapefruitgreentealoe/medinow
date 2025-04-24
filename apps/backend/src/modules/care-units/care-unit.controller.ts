@@ -373,6 +373,41 @@ export class CareUnitController {
     );
   }
 
+  @Get('exist')
+  @Public()
+  @ApiOperation({ summary: '사용자 : 기관 존재 여부 확인' })
+  @ApiQuery({
+    name: 'name',
+    required: true,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'address',
+    required: true,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'category',
+    required: true,
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공',
+    example: {
+      id: 'uuid-example',
+      name: '서울대학교병원',
+      address: '서울특별시 종로구 대학로 101',
+    },
+  })
+  async getCareUnitExist(
+    @Query('name') name: string,
+    @Query('address') address: string,
+    @Query('category') category: string,
+  ) {
+    return this.careUnitService.findCareUnitByFilters(name, address, category);
+  }
+
   @Get(':id')
   @Public()
   @ApiOperation({ summary: '사용자, 기관관리자 : Care Unit 상세 정보 조회' })
