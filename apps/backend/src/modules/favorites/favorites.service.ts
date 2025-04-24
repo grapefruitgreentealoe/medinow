@@ -51,6 +51,9 @@ export class FavoritesService {
     }
 
     const careUnits = favorites.map((favorite) => {
+      if (!favorite.careUnit) {
+        return null;
+      }
       return {
         id: favorite.careUnit.id,
         name: favorite.careUnit.name,
