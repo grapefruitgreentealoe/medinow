@@ -29,6 +29,7 @@ import { RequestUser } from 'src/common/decorators/request-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DepartmentsService } from '../departments/departments.service';
+import { ReviewsService } from '../reviews/reviews.service';
 @ApiTags('의료기관')
 @Controller('care-units')
 export class CareUnitController {
@@ -37,6 +38,7 @@ export class CareUnitController {
     private readonly careUnitAdminService: CareUnitAdminService,
     private readonly congestionService: CongestionOneService,
     private readonly departmentsService: DepartmentsService,
+    private readonly reviewsService: ReviewsService,
   ) {}
 
   @Post('full')
@@ -460,5 +462,47 @@ export class CareUnitController {
   })
   async getCongestion(@Param('id') id: string) {
     return this.congestionService.getCongestion(id);
+  }
+
+  @Get('reviews/:id')
+  @Public()
+  @ApiOperation({ summary: '사용자 : 특정 기관 리뷰 조회' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    type: String,
+    description: '기관 고유 아이디',
+    example: '46dcef6e-b986-4688-adea-04dd39fe8323',
+  })
+  @ApiOkResponse({
+    description: '성공',
+  })
+  async getReviewsByCareUnit(
+    @Param('id') id: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    const reviews = await this.reviewsService.getReviewsByCareUnitId(
+      id,
+      page,
+      limit,
+    );
+    return {
+      message: '리뷰가 성공적으로 조회되었습니다.',
+      reviews: reviews.reviews.map((review) => ({
+        reviewId: review.id,
+        content: review.content,
+        thankMessage: review.thankMessage,
+        rating: review.rating,
+        isPublic: review.isPublic,
+        careUnitId: review.careUnit?.name,
+        departmentId: review.department?.name,
+      })),
+      pagination: {
+        total: reviews.total,
+        page: reviews.page,
+        totalPages: reviews.totalPages,
+      },
+    };
   }
 }
