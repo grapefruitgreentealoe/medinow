@@ -95,7 +95,15 @@ export class CareUnitService {
       name: careUnit.name,
       address: careUnit.address,
       departments:
-        careUnit.departments.map((department) => department.name) || null,
+        careUnit.departments.map((department) => {
+          if (!department) {
+            return null;
+          }
+          return {
+            id: department.id,
+            name: department.name,
+          };
+        }) || null,
     };
   }
 
