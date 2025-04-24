@@ -51,26 +51,6 @@ export class CreateAdminDto {
   readonly name: string;
 
   @ApiProperty({
-    type: Number,
-    description: '위도',
-    example: 37.566535,
-    required: true,
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  readonly latitude: number;
-
-  @ApiProperty({
-    type: Number,
-    description: '경도',
-    example: 126.915261,
-    required: true,
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  readonly longitude: number;
-
-  @ApiProperty({
     type: String,
     description: '의료기관 이름',
     example: '서울대학교병원',
@@ -101,12 +81,12 @@ export class CreateAdminDto {
   @IsEnum(CareUnitCategory)
   readonly careUnitCategory: CareUnitCategory;
 
-  @ApiProperty({
-    type: String,
-    description: '관리자 소속 기관 사업자 번호 이미지 URL',
-    example: 'https://example.com/image.jpg',
-    required: false,
-  })
-  @IsOptional()
-  readonly imageUrl: string;
+  // @ApiProperty({
+  //   type: String,
+  //   description: '관리자 소속 기관 사업자 번호 이미지 URL',
+  //   example: 'https://example.com/image.jpg',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // readonly imageUrl: string;
 }
