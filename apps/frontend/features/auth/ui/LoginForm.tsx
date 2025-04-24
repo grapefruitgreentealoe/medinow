@@ -4,18 +4,23 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '../schema/loginSchema';
+import { login } from '../api';
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { login } from '../api';
 
 type FormData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({
+  const form = useForm<FormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: 'test@example.com',
@@ -26,14 +31,9 @@ export default function LoginForm() {
   const onSubmit = async (data: FormData) => {
     try {
       await login(data);
-
-      // SSR에 반영되기 전이라도 클라이언트에서 isLoggedIn 즉시 반영
       if (typeof window !== 'undefined') {
         window.__INITIAL_IS_LOGGED_IN__ = true;
       }
-
-      // SSR 새로고침 유도
-      // 쿠키 저장이 완료될 시간 주기 (200~500ms 사이)
       setTimeout(() => {
         location.href = '/';
       }, 1000);
@@ -43,22 +43,43 @@ export default function LoginForm() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4 max-w-md mx-auto"
-    >
-      <Input placeholder="이메일" {...register('email')} />
-      {errors.email && (
-        <p className="text-sm text-red-500">{errors.email.message}</p>
-      )}
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="!space-y-6 !max-w-md !mx-auto "
+      >
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>이메일</FormLabel>
+              <FormControl>
+                <Input placeholder="example@email.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <Input type="password" placeholder="비밀번호" {...register('password')} />
-      {errors.password && (
-        <p className="text-sm text-red-500">{errors.password.message}</p>
-      )}
-      <Button type="submit" className="w-full">
-        로그인
-      </Button>
-    </form>
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>비밀번호</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="비밀번호 입력" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full">
+          로그인
+        </Button>
+      </form>
+    </Form>
   );
 }

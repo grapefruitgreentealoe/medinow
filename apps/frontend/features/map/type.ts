@@ -1,10 +1,28 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 
+export interface Department {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  name: string;
+  careUnitId: string;
+}
+
+export interface Congestion {
+  hvec: number;
+  congestionLevel: 'LOW' | 'MEDIUM' | 'HIGH' | string;
+  updatedAt: string;
+  hpid: string;
+  name: string;
+}
+
 export interface CareUnit {
   id: string;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+
   name: string;
   address: string;
   tel: string;
@@ -34,15 +52,15 @@ export interface CareUnit {
   isBadged: boolean;
   nowOpen: boolean;
   kakaoUrl: string | null;
+
   isChatAvailable: boolean;
   isFavorite: boolean;
-  congestion: {
-    hvec: number;
-    congestionLevel: 'LOW' | 'MEDIUM' | 'HIGH' | string;
-    updatedAt: string;
-    hpid: string;
-    name: string;
-  };
+
+  departments: Department[];
+  congestion: Congestion;
+
+  averageRating: number;
+  reviewCount: number;
 }
 
 export type CareUnitCategory = 'hospital' | 'pharmacy' | 'emergency';
