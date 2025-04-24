@@ -11,5 +11,5 @@ export const checkCareUnitExist = async (data: {
   });
 
   const res = await axiosInstance.get(`/care-units/exist?${query.toString()}`);
-  return res.data as boolean;
+  return res.data;
 };
