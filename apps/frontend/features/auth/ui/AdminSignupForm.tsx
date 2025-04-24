@@ -43,7 +43,6 @@ export default function AdminSignupForm() {
       careUnitName: '테스트병원',
       careUnitAddress: '서울특별시 종로구 세종대로 110',
       careUnitCategory: '',
-      imageUrl: '',
     },
   });
 
@@ -95,7 +94,7 @@ export default function AdminSignupForm() {
     };
 
     await adminSignup(signupData);
-    router.push(ROUTES.HOME);
+    router.push(ROUTES.LOGIN);
   };
 
   return (
