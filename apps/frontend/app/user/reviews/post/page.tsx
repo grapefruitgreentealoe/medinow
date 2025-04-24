@@ -1,35 +1,52 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
+import { useSetAtom, useAtomValue } from 'jotai';
+import {
+  selectedCareUnitIdAtom,
+  selectedCareUnitAtom,
+  selectedDepartmentsAtom,
+} from '@/features/user-review/atoms/reviewFormAtom';
 import { getCareUnitById } from '@/features/user-review/api';
-import { CareUnit } from '@/features/map/type';
 import { ReviewForm } from '@/features/user-review/ui/ReviewForm';
 import { SearchCareUnitForReview } from '@/features/user-review/ui/SearchCareUnitForReview';
 
+import { ROUTES } from '@/shared/constants/routes';
+
 export default function WriteReviewPage() {
   const searchParams = useSearchParams();
-  const careUnitId = searchParams.get('careUnitId');
+  const setId = useSetAtom(selectedCareUnitIdAtom);
+  const setCareUnit = useSetAtom(selectedCareUnitAtom);
+  const careUnit = useAtomValue(selectedCareUnitAtom);
+  const setDepartments = useSetAtom(selectedDepartmentsAtom);
 
-  const [careUnit, setCareUnit] = useState<CareUnit | null>(null);
+  const careUnitIdFromUrl = searchParams.get('careUnitId');
+  const router = useRouter();
+
+  const sendReview = (id: string) => {
+    try {
+      getCareUnitById(id).then((res) => {
+        setCareUnit(res);
+        setDepartments(res.departments || []);
+      });
+      router.push(ROUTES.USER.REVIEWS);
+    } catch {}
+  };
 
   useEffect(() => {
-    if (careUnitId) {
-      getCareUnitById(careUnitId).then(setCareUnit);
+    if (careUnitIdFromUrl) {
+      setId(careUnitIdFromUrl);
+      sendReview(careUnitIdFromUrl);
     }
-  }, [careUnitId]);
+  }, [careUnitIdFromUrl, setId, setCareUnit, setDepartments]);
 
   return (
     <main className="min-h-screen px-4 py-6">
       <h1 className="text-2xl font-semibold mb-6">리뷰 작성</h1>
 
-      {!careUnitId && !careUnit && (
-        <SearchCareUnitForReview onSelect={setCareUnit} />
-      )}
-
-      {careUnitId && !careUnit && <p>병원 정보를 불러오는 중...</p>}
-
-      {careUnit && <ReviewForm careUnit={careUnit} />}
+      {!careUnit && <SearchCareUnitForReview />}
+      {careUnit && <ReviewForm />}
     </main>
   );
 }
