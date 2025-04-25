@@ -98,12 +98,17 @@ export class UsersController {
         id: userInfo?.id,
         email: userInfo?.email,
         name: userInfo?.userProfile?.name,
+        nickname: userInfo?.userProfile?.nickname,
+        address: userInfo?.userProfile?.address,
+        age: userInfo?.userProfile?.age,
       },
-      unitData: {
-        id: userInfo?.userProfile?.careUnit?.id,
-        name: userInfo?.userProfile?.careUnit?.name,
-        address: userInfo?.userProfile?.careUnit?.address,
-      },
+      unitData: userInfo.userProfile.careUnit
+        ? {
+            id: userInfo?.userProfile?.careUnit?.id,
+            name: userInfo?.userProfile?.careUnit?.name,
+            address: userInfo?.userProfile?.careUnit?.address,
+          }
+        : null,
     };
   }
 
