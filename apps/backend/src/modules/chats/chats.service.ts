@@ -609,7 +609,7 @@ export class ChatsService {
         return true;
       }
 
-      // 2. 의료기관 ID가 직접 일치하는 경우 (일부 케이스에서 사용될 수 있음)
+      // 2. 의료기관 ID가 직접 일치하는 경우
       if (room.careUnit.id === userId) {
         this.logger.log(
           `사용자 ${userId}는 의료기관 ID와 일치하여 채팅방 ${roomId}에 접근 권한 있음`,
@@ -617,24 +617,11 @@ export class ChatsService {
         return true;
       }
 
-      // 3. 관리자 권한 확인: 의료기관의 관리자인 경우
+      // 3. 관리자 권한 확인
       const user = await this.usersService.findUserById(userId);
-      if (
-        user &&
-        user.role === UserRole.ADMIN &&
-        user.userProfile &&
-        user.userProfile.careUnit
-      ) {
-        // 관리자가 관리하는 의료기관 ID
-        const adminCareUnitId = user.userProfile.careUnit.id;
-
-        // 채팅방의 의료기관과 관리자의 의료기관이 일치하는지 확인
-        if (adminCareUnitId === room.careUnit.id) {
-          this.logger.log(
-            `관리자 ${userId}는 의료기관 ${adminCareUnitId}의 관리자로 채팅방 ${roomId}에 접근 권한 있음`,
-          );
-          return true;
-        }
+      if (user && user.role === UserRole.ADMIN) {
+        this.logger.log(`관리자 ${userId}는 채팅방 ${roomId}에 접근 권한 있음`);
+        return true;
       }
 
       this.logger.warn(`사용자 ${userId}는 채팅방 ${roomId}에 접근 권한 없음`);
@@ -696,9 +683,19 @@ export class ChatsService {
       room.unreadCount = (room.unreadCount || 0) + 1;
     }
 
-    await this.chatRoomRepository.save(room);
+    const savedMessage = await this.chatMessageRepository.save(message);
 
-    return this.chatMessageRepository.save(message);
+    // Redis를 통해 메시지 발행
+    await this.publishMessage(data.roomId, {
+      id: savedMessage.id,
+      content: savedMessage.content,
+      senderId: data.senderId,
+      roomId: data.roomId,
+      createdAt: savedMessage.createdAt,
+      isRead: savedMessage.isRead,
+    });
+
+    return savedMessage;
   }
 
   // 채팅방 메시지 목록 조회
