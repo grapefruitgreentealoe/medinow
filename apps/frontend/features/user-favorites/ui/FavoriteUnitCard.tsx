@@ -139,7 +139,9 @@ export function CareUnitCard({
               variant="ghost"
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(ROUTES.USER.WRITE_REVIEW);
+                router.push(
+                  ROUTES.USER.WRITE_REVIEW + `?careUnitId=${unit.id}`
+                );
               }}
               className="w-8 h-8"
             >
