@@ -48,7 +48,6 @@ export function HospitalDetailDialog() {
               {unit.nowOpen ? '운영 중' : '운영 종료'}
             </Badge>
           </DialogTitle>
-          <DialogDescription>{unit.address}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 mt-2 text-sm">
