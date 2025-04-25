@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toggleFavorite } from '../api';
-import { CareUnit } from '../type';
+import { CareUnit } from '../../../shared/type';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 import { toast } from 'sonner';

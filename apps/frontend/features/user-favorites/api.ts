@@ -1,14 +1,17 @@
-import axiosInstance from '@/lib/axios';
+// api/index.ts or api/favorites.ts
 
-export async function getFavoriteList({
+import axiosInstance from '@/lib/axios';
+import { FavoritesResponse } from './type';
+
+export const getFavorites = async ({
   page,
   limit,
 }: {
   page: number;
   limit: number;
-}) {
-  const res = await axiosInstance.get(`/favorites`, {
+}): Promise<FavoritesResponse> => {
+  const res = await axiosInstance.get('/favorites', {
     params: { page, limit },
   });
   return res.data;
-}
+};

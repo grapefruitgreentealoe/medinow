@@ -1,18 +1,26 @@
 'use client';
 
-import { CareUnit, CongestionLevel } from '@/features/map/type';
+import { CareUnit, CongestionLevel } from '@/shared/type';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
-import { Star, StarOff, MessageSquare, PhoneCallIcon } from 'lucide-react';
+import {
+  Star,
+  StarOff,
+  MessageSquare,
+  PhoneCallIcon,
+  PencilIcon,
+} from 'lucide-react';
 import { openKakaoMap, renderTodayTime } from '../utils';
 import { useOptimisticToggleFavorite } from '../model/useOptimisticToggleFavorite';
 import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
 import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 import { CATEGORY_LABEL, congestionClassMap } from '../const';
 import { useQueryClient } from '@tanstack/react-query';
+import { ROUTES } from '@/shared/constants/routes';
+import { useRouter } from 'next/navigation';
 
 interface CareUnitCardProps {
   unit: CareUnit;
@@ -20,6 +28,7 @@ interface CareUnitCardProps {
 }
 
 export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
+  const router = useRouter();
   const setChat = useSetAtom(chatModalAtom);
   const queryClient = useQueryClient();
   const queryKey = useAtomValue(careUnitsQueryKeyAtom);
@@ -118,6 +127,19 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
                 <MessageSquare className="text-blue-500" size={18} />
               </Button>
             )}
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(
+                  ROUTES.USER.WRITE_REVIEW + `?careUnitId=${unit.id}`
+                );
+              }}
+              className="w-8 h-8"
+            >
+              <PencilIcon className="text-blue-500" size={18} />
+            </Button>
             {unit.tel && (
               <a href={`tel:${unit.tel}`}>
                 <Button

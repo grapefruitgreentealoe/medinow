@@ -1,0 +1,70 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { getReviewById, updateReview } from '@/features/user-review/api';
+import { getCareUnitById } from '@/shared/api';
+import { ReviewForm } from '@/features/user-review/ui/ReviewForm';
+import { FormSchema } from '@/features/user-review/schema/reviewSchema';
+import { editReviewAtom } from '@/features/user-review/atoms/editReviewAtom';
+import { createStore, Provider, useAtomValue } from 'jotai';
+import { ReviewData, UpdateReviewInput } from '@/features/user-review/type';
+import { toast } from 'sonner';
+import { ROUTES } from '@/shared/constants/routes';
+
+function EditReviewPage() {
+  const { id } = useParams(); // reviewId
+  const reviewAtomData = useAtomValue(editReviewAtom) as ReviewData;
+  const [departments, setDepartments] = useState<
+    { id: string; name: string }[] | null
+  >(null);
+
+  const defaultValues = {
+    content: reviewAtomData.content,
+    thankMessage: reviewAtomData.thankMessage,
+    departmentId: reviewAtomData.departmentId,
+    rating: reviewAtomData.rating,
+    isPublic: reviewAtomData.isPublic,
+  };
+  const careUnit = {
+    name: reviewAtomData.careUnitName,
+    address: '',
+  };
+
+  useEffect(() => {
+    getCareUnitById(reviewAtomData.careUnitId as string).then((unit) => {
+      setDepartments(unit.departments); // [{ id, name }]
+    });
+  }, [reviewAtomData]);
+
+  if (!defaultValues || !careUnit || !departments || !id || !reviewAtomData)
+    return <div>잘못된 접근입니다</div>;
+
+  const handleSubmit = async (data: UpdateReviewInput) => {
+    try {
+      await updateReview(id as string, data);
+      location.href = ROUTES.USER.REVIEWS;
+      toast.success('적용 완료!');
+    } catch {
+      toast.warning('실패!');
+    }
+  };
+  return (
+    <ReviewForm
+      defaultValues={defaultValues}
+      onSubmit={handleSubmit}
+      careUnit={careUnit}
+      departments={departments}
+    />
+  );
+}
+
+const store = createStore();
+
+export default function EditReviewPageWithProvider() {
+  return (
+    <Provider store={store}>
+      <EditReviewPage />
+    </Provider>
+  );
+}

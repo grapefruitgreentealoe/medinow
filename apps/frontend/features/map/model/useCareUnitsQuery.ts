@@ -1,8 +1,8 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { locationByCategory } from '../api'; // 또는 locationByCategoryMock
-import { UseCareUnitsQueryResult } from '@/features/map/type';
 import { useSetAtom } from 'jotai';
 import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
+import { UseCareUnitsQueryResult } from '../type';
 
 interface UseCareUnitsQueryProps {
   lat: number | null;
