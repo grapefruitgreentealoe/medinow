@@ -36,6 +36,8 @@ services:
       - redis
     ports:
       - '4001:4000'
+    environment:
+      - TZ=Asia/Seoul
     env_file:
       - .env
     networks:
