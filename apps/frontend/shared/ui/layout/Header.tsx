@@ -170,19 +170,40 @@ export default function Header() {
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="md:hidden absolute top-full left-0 w-full bg-background border-t border-border shadow-xl flex flex-col"
           >
-            {getMenuItems().map(({ href, label, onClick }) =>
-              onClick ? (
-                <button
-                  key={label}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onClick();
-                  }}
-                  className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:text-white transition-colors"
-                >
-                  {label}
-                </button>
-              ) : (
+            {getMenuItems().map(({ href, label, onClick }) => {
+              const isReviewWrite = href === ROUTES.USER.WRITE_REVIEW;
+
+              if (onClick) {
+                return (
+                  <button
+                    key={label}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onClick();
+                    }}
+                    className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:text-white transition-colors"
+                  >
+                    {label}
+                  </button>
+                );
+              }
+
+              if (isReviewWrite) {
+                return (
+                  <button
+                    key={label}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      window.location.href = href; // ✅ 새로고침 이동
+                    }}
+                    className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:text-white transition-colors"
+                  >
+                    {label}
+                  </button>
+                );
+              }
+
+              return (
                 <Link
                   key={label}
                   href={href}
@@ -191,8 +212,8 @@ export default function Header() {
                 >
                   {label}
                 </Link>
-              )
-            )}
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
