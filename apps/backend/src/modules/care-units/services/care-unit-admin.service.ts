@@ -218,9 +218,9 @@ export class CareUnitAdminService {
 
       // 한 번에 모든 데이터 처리 (약국, 병원, 응급실)
 
-        for (let i = 0; i < items.length; i += batchSize) {
-          const batch = items.slice(i, i + batchSize);
-          const careUnits: CareUnit[] = [];
+      for (let i = 0; i < items.length; i += batchSize) {
+        const batch = items.slice(i, i + batchSize);
+        const careUnits: CareUnit[] = [];
 
         for (const item of batch) {
           if (!item?.hpid) continue;
