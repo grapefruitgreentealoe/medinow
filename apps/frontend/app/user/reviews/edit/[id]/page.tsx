@@ -12,7 +12,7 @@ import { ReviewData, UpdateReviewInput } from '@/features/user-review/type';
 import { toast } from 'sonner';
 import { ROUTES } from '@/shared/constants/routes';
 
-function EditReviewPage() {
+export default function EditReviewPage() {
   const { id } = useParams(); // reviewId
   const reviewAtomData = useAtomValue(editReviewAtom) as ReviewData;
   const [departments, setDepartments] = useState<
@@ -56,15 +56,5 @@ function EditReviewPage() {
       careUnit={careUnit}
       departments={departments}
     />
-  );
-}
-
-const store = createStore();
-
-export default function EditReviewPageWithProvider() {
-  return (
-    <Provider store={store}>
-      <EditReviewPage />
-    </Provider>
   );
 }

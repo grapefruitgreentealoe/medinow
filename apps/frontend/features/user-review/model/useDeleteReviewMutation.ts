@@ -1,24 +1,23 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteReview } from '../api';
 
-export function useDeleteReviewMutation() {
+export function useDeleteReviewMutation(page: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: deleteReview,
 
     onMutate: async (reviewId) => {
-      await queryClient.cancelQueries({ queryKey: ['reviews'] });
+      await queryClient.cancelQueries({ queryKey: ['reviews', page] });
 
-      const previous = queryClient.getQueryData(['reviews']);
+      const previous = queryClient.getQueryData(['reviews', page]);
 
-      queryClient.setQueryData(['reviews'], (old: any) => {
+      queryClient.setQueryData(['reviews', page], (old: any) => {
+        if (!old || !old.reviews) return old;
+
         return {
           ...old,
-          pages: old.pages.map((page: any) => ({
-            ...page,
-            reviews: page.reviews.filter((r: any) => r.reviewId !== reviewId),
-          })),
+          reviews: old.reviews.filter((r: any) => r.reviewId !== reviewId),
         };
       });
 
@@ -26,13 +25,14 @@ export function useDeleteReviewMutation() {
     },
 
     onError: (_err, _id, context) => {
+      console.log(_err);
       if (context?.previous) {
-        queryClient.setQueryData(['reviews'], context.previous);
+        queryClient.setQueryData(['reviews', page], context.previous);
       }
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      // queryClient.invalidateQueries({ queryKey: ['reviews', page] });
     },
   });
 }

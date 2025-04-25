@@ -12,7 +12,6 @@ export function ReviewList({ careUnitId }: Props) {
     useCareUnitReviews(careUnitId);
 
   const reviews = data?.pages?.flatMap((page) => page.reviews ?? []) ?? [];
-  console.log(reviews);
   if (!reviews) return null;
   return (
     <section className="pt-4 border-t">

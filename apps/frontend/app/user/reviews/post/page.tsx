@@ -16,7 +16,7 @@ import { ROUTES } from '@/shared/constants/routes';
 import { FormSchema } from '@/features/user-review/schema/reviewSchema';
 import { toast } from 'sonner';
 
-function WriteReviewPage() {
+export default function WriteReviewPage() {
   const searchParams = useSearchParams();
   const setId = useSetAtom(selectedCareUnitIdAtom);
   const setCareUnit = useSetAtom(selectedCareUnitAtom);
@@ -67,15 +67,5 @@ function WriteReviewPage() {
       {!careUnit && <SearchCareUnitForReview />}
       {careUnit && <ReviewForm onSubmit={onSubmit} />}
     </main>
-  );
-}
-
-const store = createStore();
-
-export default function WriteReviewPageWithProvider() {
-  return (
-    <Provider store={store}>
-      <WriteReviewPage />
-    </Provider>
   );
 }
