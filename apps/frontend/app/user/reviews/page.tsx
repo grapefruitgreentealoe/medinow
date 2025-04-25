@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-
+import { useState } from 'react';
 import {
   Pagination,
   PaginationContent,
@@ -18,41 +17,42 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ReviewItem } from '@/features/user-review/ui/ReviewItem';
-import { useInfiniteReviewsQuery } from '@/features/user-review/model/useReviewsQuery';
+import { usePaginatedReviewsQuery } from '@/features/user-review/model/useReviewsQuery';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/shared/constants/routes';
 import { editReviewAtom } from '@/features/user-review/atoms/editReviewAtom';
 import { useSetAtom } from 'jotai';
+import { useDeleteReviewMutation } from '@/features/user-review/model/useDeleteReviewMutation';
+import { toast } from 'sonner';
 
 export default function ReviewPaginationPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [confirmEditId, setConfirmEditId] = useState<string | null>(null);
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteReviewsQuery(5);
+  const { data, isFetching } = usePaginatedReviewsQuery(currentPage);
+  const { mutate: deleteReviewMutate } = useDeleteReviewMutation(currentPage);
   const router = useRouter();
-  const totalPages = data?.pages?.[0]?.pagination.totalPages ?? 1;
   const setEditReview = useSetAtom(editReviewAtom);
-  
-  useEffect(() => {
-    if (
-      currentPage > (data?.pages.length || 0) &&
-      hasNextPage &&
-      !isFetchingNextPage
-    ) {
-      fetchNextPage();
-    }
-  }, [currentPage, data, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const currentReviews = data?.pages?.[currentPage - 1]?.reviews ?? [];
+  const reviews = data?.reviews ?? [];
+  const totalPages = data?.pagination.totalPages ?? 1;
+
   const handleDeleteReview = () => {
-    
-  }
+    deleteReviewMutate(confirmDeleteId!, {
+      onSuccess: () => {
+        toast.success('삭제 완료!');
+        setConfirmDeleteId(null);
+      },
+      onError: () => {
+        toast.warning('에러 발생');
+      },
+    });
+  };
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {currentReviews.map((review) => (
+        {reviews.map((review) => (
           <ReviewItem
             key={review.reviewId}
             review={review}
@@ -101,7 +101,9 @@ export default function ReviewPaginationPage() {
           </DialogHeader>
           <p className="text-sm mt-2">정말 이 리뷰를 삭제하시겠습니까?</p>
           <DialogFooter className="mt-4 flex gap-2 justify-end">
-            <Button variant="destructive" onClick={handleDeleteReview}>삭제하기</Button>
+            <Button variant="destructive" onClick={handleDeleteReview}>
+              삭제하기
+            </Button>
             <Button variant="outline" onClick={() => setConfirmDeleteId(null)}>
               취소
             </Button>
@@ -121,7 +123,7 @@ export default function ReviewPaginationPage() {
           <DialogFooter className="mt-4 flex gap-2 justify-end">
             <Button
               onClick={() => {
-                const review = currentReviews.find(
+                const review = reviews.find(
                   (r) => r.reviewId === confirmEditId
                 );
                 if (review) {
@@ -139,7 +141,7 @@ export default function ReviewPaginationPage() {
         </DialogContent>
       </Dialog>
 
-      {isFetchingNextPage && (
+      {isFetching && (
         <p className="text-center text-muted-foreground">불러오는 중...</p>
       )}
     </div>

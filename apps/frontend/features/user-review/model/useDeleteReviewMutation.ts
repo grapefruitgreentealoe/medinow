@@ -8,17 +8,16 @@ export function useDeleteReviewMutation(page: number) {
     mutationFn: deleteReview,
 
     onMutate: async (reviewId) => {
-      await queryClient.cancelQueries({ queryKey: ['reviews'] });
+      await queryClient.cancelQueries({ queryKey: ['reviews', page] });
 
-      const previous = queryClient.getQueryData(['reviews']);
+      const previous = queryClient.getQueryData(['reviews', page]);
 
       queryClient.setQueryData(['reviews', page], (old: any) => {
+        if (!old || !old.reviews) return old;
+
         return {
           ...old,
-          pages: old.pages.map((page: any) => ({
-            ...page,
-            reviews: page.reviews.filter((r: any) => r.reviewId !== reviewId),
-          })),
+          reviews: old.reviews.filter((r: any) => r.reviewId !== reviewId),
         };
       });
 
@@ -26,13 +25,14 @@ export function useDeleteReviewMutation(page: number) {
     },
 
     onError: (_err, _id, context) => {
+      console.log(_err);
       if (context?.previous) {
         queryClient.setQueryData(['reviews', page], context.previous);
       }
     },
 
     onSettled: () => {
-      // queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      // queryClient.invalidateQueries({ queryKey: ['reviews', page] });
     },
   });
 }
