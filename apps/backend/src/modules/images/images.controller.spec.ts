@@ -6,6 +6,7 @@ import { Image } from './entities/image.entity';
 import { S3Service } from '../s3/s3.service';
 import { AwsConfigService } from '../../config/aws/config.service';
 import { ConfigService } from '@nestjs/config';
+import { UsersService } from '../users/users.service';
 
 describe('ImagesController', () => {
   let controller: ImagesController;
@@ -37,6 +38,12 @@ describe('ImagesController', () => {
               if (key === 'AWS_BUCKET_NAME') return 'test-bucket';
               return null;
             }),
+          },
+        },
+        {
+          provide: UsersService,
+          useValue: {
+            findUserByEmail: jest.fn(),
           },
         },
       ],

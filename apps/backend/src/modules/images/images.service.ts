@@ -8,9 +8,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Image } from './entities/image.entity';
 import { ImageType } from '../../common/enums/imageType.enum';
-import { User } from '../users/entities/user.entity';
 import { CareUnit } from '../care-units/entities/care-unit.entity';
 import { S3Service } from '../s3/s3.service';
+import { UserProfile } from '../users/entities/user-profile.entity';
 
 @Injectable()
 export class ImagesService {
@@ -124,7 +124,7 @@ export class ImagesService {
   async createImageFromUrl(
     imageUrl: string,
     type: ImageType,
-    user?: User,
+    userProfile?: UserProfile,
     careUnit?: CareUnit,
   ) {
     if (!imageUrl) {
@@ -136,7 +136,7 @@ export class ImagesService {
       const image = this.imageRepository.create({
         imgUrl: imageUrl,
         type,
-        user: user || null,
+        userProfile: userProfile || null,
         careUnit: careUnit || null,
       });
 
@@ -149,19 +149,19 @@ export class ImagesService {
   /**
    * 사업자등록증 이미지 엔티티 생성
    * @param imageUrl 이미지 URL
-   * @param user 사용자 (선택적)
+   * @param userProfile 사용자 프로필 (선택적)
    * @param careUnit 의료기관 (선택적)
    * @returns 생성된 이미지 엔티티
    */
   async createBusinessLicenseImage(
     imageUrl: string,
-    user?: User,
+    userProfile?: UserProfile,
     careUnit?: CareUnit,
   ) {
     return this.createImageFromUrl(
       imageUrl,
       ImageType.BUSINESS_LICENSE,
-      user,
+      userProfile,
       careUnit,
     );
   }
@@ -169,11 +169,15 @@ export class ImagesService {
   /**
    * 사용자 프로필 이미지 엔티티 생성
    * @param imageUrl 이미지 URL
-   * @param user 사용자 (선택적)
+   * @param userProfile 사용자 프로필 (선택적)
    * @returns 생성된 이미지 엔티티
    */
-  async createUserProfileImage(imageUrl: string, user?: User) {
-    return this.createImageFromUrl(imageUrl, ImageType.USER_PROFILE, user);
+  async createUserProfileImage(imageUrl: string, userProfile?: UserProfile) {
+    return this.createImageFromUrl(
+      imageUrl,
+      ImageType.USER_PROFILE,
+      userProfile,
+    );
   }
 
   /**
@@ -199,7 +203,7 @@ export class ImagesService {
   async findUserBusinessLicense(userId: string) {
     return this.imageRepository.findOne({
       where: {
-        user: { id: userId },
+        userProfile: { user: { id: userId } },
         type: ImageType.BUSINESS_LICENSE,
       },
       order: { createdAt: 'DESC' },
@@ -214,7 +218,7 @@ export class ImagesService {
   async findUserProfileImage(userId: string) {
     return this.imageRepository.findOne({
       where: {
-        user: { id: userId },
+        userProfile: { user: { id: userId } },
         type: ImageType.USER_PROFILE,
       },
       order: { createdAt: 'DESC' },
@@ -255,7 +259,7 @@ export class ImagesService {
    */
   async findByUser(userId: string) {
     return this.imageRepository.find({
-      where: { user: { id: userId } },
+      where: { userProfile: { user: { id: userId } } },
     });
   }
 
@@ -277,7 +281,6 @@ export class ImagesService {
    */
   async unlinkFromEntities(id: string) {
     const image = await this.findById(id);
-    image.user = null;
     image.userProfile = null;
     image.careUnit = null;
     return this.imageRepository.save(image);
