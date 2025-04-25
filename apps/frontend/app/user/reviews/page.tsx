@@ -33,7 +33,7 @@ export default function ReviewPaginationPage() {
   const router = useRouter();
   const totalPages = data?.pages?.[0]?.pagination.totalPages ?? 1;
   const setEditReview = useSetAtom(editReviewAtom);
-
+  
   useEffect(() => {
     if (
       currentPage > (data?.pages.length || 0) &&
@@ -45,6 +45,9 @@ export default function ReviewPaginationPage() {
   }, [currentPage, data, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const currentReviews = data?.pages?.[currentPage - 1]?.reviews ?? [];
+  const handleDeleteReview = () => {
+    
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
@@ -98,7 +101,7 @@ export default function ReviewPaginationPage() {
           </DialogHeader>
           <p className="text-sm mt-2">정말 이 리뷰를 삭제하시겠습니까?</p>
           <DialogFooter className="mt-4 flex gap-2 justify-end">
-            <Button variant="destructive">삭제하기</Button>
+            <Button variant="destructive" onClick={handleDeleteReview}>삭제하기</Button>
             <Button variant="outline" onClick={() => setConfirmDeleteId(null)}>
               취소
             </Button>
