@@ -10,10 +10,9 @@ import { Card, CardContent } from '@/components/ui/card';
 
 interface User {
   email: string;
-  userProfile: {
-    name: string;
-    address: string;
-  };
+  name: string;
+  address: string;
+  age: number;
 }
 
 export default function UserProfilePage() {
@@ -46,11 +45,15 @@ export default function UserProfilePage() {
           </div>
           <div className="h-[60px] w-full">
             <p className="text-sm text-muted-foreground">이름</p>
-            <p className="font-medium">{user.userProfile.name}</p>
+            <p className="font-medium">{user.name}</p>
+          </div>
+          <div className="h-[60px] w-full">
+            <p className="text-sm text-muted-foreground">나이</p>
+            <p className="font-medium">{user.age}</p>
           </div>
           <div className="h-[60px] w-full">
             <p className="text-sm text-muted-foreground">주소</p>
-            <p className="font-medium">{user.userProfile.address}</p>
+            <p className="font-medium">{user.address}</p>
           </div>
         </div>
       </CardContent>
