@@ -26,12 +26,16 @@ import {
 export function ReviewForm({
   defaultValues,
   onSubmit,
+  careUnit: careUnitProp,
+  departments: departmentsProp,
 }: {
   defaultValues?: Partial<FormSchema>;
   onSubmit: (data: any) => void;
+  careUnit?: { name: string; address: string };
+  departments?: { id: string; name: string }[];
 }) {
-  const careUnit = useAtomValue(selectedCareUnitAtom);
-  const departments = useAtomValue(selectedDepartmentsAtom);
+  const careUnit = careUnitProp ?? useAtomValue(selectedCareUnitAtom); // 새로 작성시 활용하는 atom임.
+  const departments = departmentsProp ?? useAtomValue(selectedDepartmentsAtom);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -161,7 +165,11 @@ export function ReviewForm({
           />
 
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? '등록 중...' : '리뷰 등록'}
+            {isSubmitting
+              ? '처리 중...'
+              : defaultValues
+                ? '리뷰 수정'
+                : '리뷰 등록'}
           </Button>
         </form>
       </Form>
