@@ -1,28 +1,63 @@
 'use client';
 
-import { useAtomValue } from 'jotai';
-import { editReviewAtom } from '@/features/user-review/atoms/editReviewAtom';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { getReviewById, updateReview } from '@/features/user-review/api';
+import { getCareUnitById } from '@/shared/api';
 import { ReviewForm } from '@/features/user-review/ui/ReviewForm';
-import { updateReview } from '@/features/user-review/api';
+import { FormSchema } from '@/features/user-review/schema/reviewSchema';
+import { editReviewAtom } from '@/features/user-review/atoms/editReviewAtom';
+import { useAtomValue } from 'jotai';
+import { UpdateReviewInput } from '@/features/user-review/type';
+import { toast } from 'sonner';
 import { ROUTES } from '@/shared/constants/routes';
 
-interface EditPageProps {
-  params: { id: string };
-}
-
-export default function EditReviewPage({ params }: EditPageProps) {
-  const defaultValues = useAtomValue(editReviewAtom);
-  console.log(defaultValues);
+export default function EditReviewPage() {
+  const { id } = useParams(); // reviewId
   const router = useRouter();
+  const reviewAtomData = useAtomValue(editReviewAtom);
+  const [departments, setDepartments] = useState<
+    { id: string; name: string }[] | null
+  >(null);
 
-  if (!defaultValues) return <div>잘못된 접근입니다. 목록으로 돌아가세요.</div>;
+  if (!reviewAtomData) return <div>잘못된 접근입니다</div>;
 
-  const handleUpdate = async (data: typeof defaultValues) => {
-    updateReview(params.id, data);
-    alert('리뷰가 수정되었습니다!');
-    router.push(ROUTES.USER.REVIEWS);
+  const defaultValues = {
+    content: reviewAtomData.content,
+    thankMessage: reviewAtomData.thankMessage,
+    departmentId: reviewAtomData.departmentId,
+    rating: reviewAtomData.rating,
+    isPublic: reviewAtomData.isPublic,
+  };
+  const careUnit = {
+    name: reviewAtomData.careUnitName,
+    address: '',
   };
 
-  return <ReviewForm defaultValues={defaultValues} onSubmit={handleUpdate} />;
+  useEffect(() => {
+    getCareUnitById(reviewAtomData.careUnitId as string).then((unit) => {
+      setDepartments(unit.departments); // [{ id, name }]
+    });
+  }, [reviewAtomData]);
+
+  if (!defaultValues || !careUnit || !departments || !id || !reviewAtomData)
+    return <div>잘못된 접근입니다</div>;
+
+  const handleSubmit = async (data: UpdateReviewInput) => {
+    try {
+      await updateReview(id as string, data);
+      location.href = ROUTES.USER.REVIEWS;
+      toast.success('적용 완료!');
+    } catch {
+      toast.warning('실패!');
+    }
+  };
+  return (
+    <ReviewForm
+      defaultValues={defaultValues}
+      onSubmit={handleSubmit}
+      careUnit={careUnit}
+      departments={departments}
+    />
+  );
 }
