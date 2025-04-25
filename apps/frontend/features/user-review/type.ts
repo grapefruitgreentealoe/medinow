@@ -1,24 +1,11 @@
-export interface Review {
-  reviewId: string;
-  content: string;
-  thankMessage: string;
-  rating: number;
-  isPublic: boolean;
-  careUnitId: string;
-  departmentId: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
 export interface PaginatedReviewResponse {
-  reviews: Review[];
+  reviews: ReviewData[];
   pagination: {
     total: number;
     page: number;
     totalPages: number;
   };
 }
-
 
 export interface SubmitReviewPayload {
   content: string;
@@ -37,8 +24,8 @@ export interface ReviewData {
   isPublic: boolean;
   careUnitId: string;
   careUnitName: string;
-  departmentId: string;
   departmentName: string;
+  departmentId: string;
   createdAt: string;
 }
 

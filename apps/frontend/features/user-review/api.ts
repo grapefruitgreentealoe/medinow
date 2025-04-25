@@ -2,7 +2,6 @@ import axiosInstance from '@/lib/axios';
 import { CareUnit } from '@/shared/type';
 import {
   PaginatedReviewResponse,
-  Review,
   ReviewData,
   SubmitReviewPayload,
   UpdateReviewInput,
@@ -41,7 +40,7 @@ export const getReviews = async ({
   return res.data;
 };
 
-export async function getReviewById(id: string): Promise<Review> {
+export async function getReviewById(id: string): Promise<ReviewData> {
   const res = await axiosInstance.get(`/reviews/${id}`);
   return res.data;
 }
