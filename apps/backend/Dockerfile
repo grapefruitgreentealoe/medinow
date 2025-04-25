@@ -21,7 +21,7 @@ ENV NODE_ENV=production
 ENV PORT=4000
 
 # 백엔드 디렉토리로 이동
-WORKDIR /app
+WORKDIR /app/apps/backend
 
 # 포트 오픈
 EXPOSE 4000
