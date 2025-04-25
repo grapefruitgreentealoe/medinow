@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteReview } from '../api';
 
-export function useDeleteReviewMutation() {
+export function useDeleteReviewMutation(page: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -12,7 +12,7 @@ export function useDeleteReviewMutation() {
 
       const previous = queryClient.getQueryData(['reviews']);
 
-      queryClient.setQueryData(['reviews'], (old: any) => {
+      queryClient.setQueryData(['reviews', page], (old: any) => {
         return {
           ...old,
           pages: old.pages.map((page: any) => ({
@@ -27,12 +27,12 @@ export function useDeleteReviewMutation() {
 
     onError: (_err, _id, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(['reviews'], context.previous);
+        queryClient.setQueryData(['reviews', page], context.previous);
       }
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      // queryClient.invalidateQueries({ queryKey: ['reviews'] });
     },
   });
 }
