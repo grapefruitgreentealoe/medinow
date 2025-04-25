@@ -6,6 +6,7 @@ import { Image } from './entities/image.entity';
 import { S3Service } from '../s3/s3.service';
 import { AwsConfigService } from '../../config/aws/config.service';
 import { ConfigService } from '@nestjs/config';
+import { UsersService } from '../users/users.service';
 
 describe('ImagesController', () => {
   let controller: ImagesController;
@@ -14,6 +15,10 @@ describe('ImagesController', () => {
     find: jest.fn(),
     findOne: jest.fn(),
     save: jest.fn(),
+  };
+
+  const mockUserService = {
+    findById: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -26,6 +31,10 @@ describe('ImagesController', () => {
         {
           provide: getRepositoryToken(Image),
           useValue: mockImageRepository,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUserService,
         },
         {
           provide: ConfigService,
