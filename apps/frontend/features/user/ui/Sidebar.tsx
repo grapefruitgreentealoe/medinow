@@ -21,20 +21,18 @@ export function Sidebar() {
     <nav className="flex flex-col gap-2 !p-[20px]">
       {navItems.map(({ href, label }) =>
         href === ROUTES.USER.WRITE_REVIEW ? (
-          <button
+          <Button
             key={href}
+            variant={pathname === href ? 'secondary' : 'ghost'}
+            className={cn('w-full justify-start')}
             onClick={() => {
+              
               // 강제로 리로드 (SSR처럼 새 상태로 진입)
               window.location.href = href;
             }}
           >
-            <Button
-              variant={pathname === href ? 'secondary' : 'ghost'}
-              className={cn('w-full justify-start')}
-            >
-              {label}
-            </Button>
-          </button>
+            {label}
+          </Button>
         ) : (
           <Link href={href} key={href}>
             <Button
