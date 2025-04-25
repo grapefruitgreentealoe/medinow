@@ -20,8 +20,11 @@ ENV NODE_ENV=production
 
 ENV PORT=4000
 
+# 백엔드 디렉토리로 이동
+WORKDIR /app
+
 # 포트 오픈
 EXPOSE 4000
 
 # 실행
-CMD ["sh", "-c", "pnpm --filter ./apps/backend run migration:run && pnpm --filter ./apps/backend run start:prod"]
+CMD ["sh", "-c", "pnpm run migration:run && pnpm run start:prod"]
