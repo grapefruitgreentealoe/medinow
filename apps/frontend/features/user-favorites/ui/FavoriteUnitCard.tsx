@@ -19,7 +19,6 @@ import { unfavoriteConfirmUnitAtom } from '../atoms/unfavoriteConfirmModalAtom';
 import { openKakaoMap, renderTodayTime } from '@/features/map/utils';
 import { CATEGORY_LABEL, congestionClassMap } from '@/features/map/const';
 import { CareUnit, CongestionLevel } from '@/shared/type';
-import { useFavoriteToggle } from '../model/useFavoriteToggle';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/shared/constants/routes';
