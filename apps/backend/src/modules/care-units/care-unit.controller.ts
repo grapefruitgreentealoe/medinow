@@ -424,8 +424,8 @@ export class CareUnitController {
     description: '성공',
     type: CareUnit,
   })
-  async getCareUnitDetail(@Param('id') id: string): Promise<CareUnit | null> {
-    return this.careUnitService.getCareUnitDetail(id);
+  async getCareUnitDetail(@Param('id') id: string) {
+    return this.careUnitService.getCareUnitDetailWithDepartment(id);
   }
 
   @Post('check-now-open')
