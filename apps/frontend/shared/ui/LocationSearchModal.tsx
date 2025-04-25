@@ -35,6 +35,7 @@ export default function LocationSearchModal({
   onSelect,
 }: LocationSearchModalProps) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<kakao.maps.Map | null>(null); // 👈 map 객체 보관
   const [loaded, setLoaded] = useState(false);
   const setMap = useState<kakao.maps.Map | null>(null)[1];
   const [places, setPlaces] = useState<
@@ -48,24 +49,28 @@ export default function LocationSearchModal({
   >([]);
   const [keyword, setKeyword] = useState('');
 
+  // Dialog 열릴 때마다 새 맵 생성
   useEffect(() => {
-    if (!loaded || !mapRef.current) return;
+    if (!loaded || !open) return;
 
-    window.kakao.maps.load(() => {
-      const mapInstance = new window.kakao.maps.Map(
-        mapRef.current as HTMLElement,
-        {
+    const frame = requestAnimationFrame(() => {
+      if (!mapRef.current) return;
+
+      window.kakao.maps.load(() => {
+        const mapInstance = new window.kakao.maps.Map(mapRef.current!, {
           center: new window.kakao.maps.LatLng(37.5665, 126.978),
-          level: 3,
-        }
-      );
-      setMap(mapInstance);
+        });
+        setMap(mapInstance);
+      });
     });
+
+    return () => cancelAnimationFrame(frame);
   }, [loaded, open, setMap]);
 
-  const search = (e: { preventDefault: () => void }) => {
+  const search = (e: React.FormEvent) => {
     e.preventDefault();
     if (!window.kakao?.maps?.services) return;
+
     const ps = new window.kakao.maps.services.Places();
 
     ps.keywordSearch(
@@ -110,6 +115,7 @@ export default function LocationSearchModal({
             <DialogTitle className="text-lg">{title}</DialogTitle>
             <DialogDescription>{subtitle}</DialogDescription>
           </DialogHeader>
+
           {/* 검색창 */}
           <form onSubmit={search} className="flex gap-2 !mb-3">
             <Input
@@ -122,8 +128,13 @@ export default function LocationSearchModal({
               검색
             </Button>
           </form>
-          {/* 지도 영역 */}
-          <div ref={mapRef} className="w-0 !h-0 !mb-3 border hidden" />
+
+          {/* 지도 영역 - 반드시 사이즈 지정 */}
+          <div
+            ref={mapRef}
+            className="w-[100px] h-[100px] absolute -top-[9999px] overflow-hidden opacity-0 pointer-events-none"
+          />
+
           {/* 검색 결과 */}
           <ScrollArea className="h-72 w-full rounded-md border">
             {places.map((place, i) => (
@@ -139,7 +150,7 @@ export default function LocationSearchModal({
                 </span>
               </li>
             ))}
-          </ScrollArea>{' '}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </>
