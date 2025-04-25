@@ -57,7 +57,6 @@ export function CareUnitCard({
 
   const level = (unit?.congestion?.congestionLevel ?? 'LOW') as CongestionLevel;
 
-  console.log('CARD1', unit);
   return (
     <Card
       key={unit.id}
