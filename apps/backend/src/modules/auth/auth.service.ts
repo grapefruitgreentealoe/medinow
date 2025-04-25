@@ -83,7 +83,7 @@ export class AuthService {
         await this.setJwtTokenBuilder(user, requestOrigin);
 
       return {
-        message: '로그인 성공',
+        message: '로그인 성공!',
         accessToken,
         refreshToken,
         accessOptions,
