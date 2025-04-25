@@ -122,13 +122,7 @@ export default function ReviewPaginationPage() {
                   (r) => r.reviewId === confirmEditId
                 );
                 if (review) {
-                  setEditReview({
-                    content: review.content,
-                    thankMessage: review.thankMessage,
-                    departmentId: review.departmentId,
-                    rating: review.rating,
-                    isPublic: review.isPublic,
-                  });
+                  setEditReview(review);
                 }
                 router.push(ROUTES.USER.EDIT_REVIEW(confirmEditId ?? ''));
               }}
