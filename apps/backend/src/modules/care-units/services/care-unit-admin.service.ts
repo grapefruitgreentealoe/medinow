@@ -22,6 +22,7 @@ import {
 export class CareUnitAdminService {
   private readonly SERVICE_KEY = this.appConfigService.serviceKey;
   private readonly API_URL = this.appConfigService.hospitalApiUrl;
+  private readonly API_URL2 = this.appConfigService.pharmacyApiUrl;
   private readonly REDIS_CARE_UNIT_KEY = 'care_unit:';
 
   constructor(
@@ -37,24 +38,41 @@ export class CareUnitAdminService {
   async syncCareUnits() {
     console.log('🔄 의료기관 동기화 시작');
     try {
-      const url = `${this.API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
-      const response = await fetch(url, {
+      const url1 = `${this.API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
+      const url2 = `${this.API_URL2}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
+      const response1 = await fetch(url1, {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      const response2 = await fetch(url2, {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },
       });
 
-      const text = await response.text();
-      if (text.startsWith('<')) {
+      const text1 = await response1.text();
+      if (text1.startsWith('<')) {
+        console.error('❌ XML/HTML 응답 감지');
+        throw new BadRequestException('API가 XML/HTML을 반환했습니다.');
+      }
+      const text2 = await response2.text();
+      if (text2.startsWith('<')) {
         console.error('❌ XML/HTML 응답 감지');
         throw new BadRequestException('API가 XML/HTML을 반환했습니다.');
       }
 
-      const data = JSON.parse(text);
-      const items = Array.isArray(data.response?.body?.items?.item)
-        ? data.response.body.items.item
-        : [data.response.body.items.item];
+      const data1 = JSON.parse(text1);
+      const data2 = JSON.parse(text2);
+      const items1 = Array.isArray(data1.response?.body?.items?.item)
+        ? data1.response.body.items.item
+        : [data1.response.body.items.item];
+      const items2 = Array.isArray(data2.response?.body?.items?.item)
+        ? data2.response.body.items.item
+        : [data2.response.body.items.item];
+      const items = [...items1, ...items2];
 
       let addedCount = 0;
       let updatedCount = 0;
@@ -145,28 +163,51 @@ export class CareUnitAdminService {
   async saveAllCareUnits() {
     try {
       console.log('▶️ API 호출 시작');
-      const url = `${this.API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
-      console.log('▶️  API URL:', url);
+      const url1 = `${this.API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
+      const url2 = `${this.API_URL2}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
+      console.log('▶️  API URL:', url1);
+      console.log('▶️  API URL:', url2);
 
-      const response = await fetch(url, {
+      const response1 = await fetch(url1, {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },
       });
 
-      console.log('▶️  API 응답 상태:', response.status);
-      const text = await response.text();
+      const response2 = await fetch(url2, {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
 
-      if (text.startsWith('<')) {
+      console.log('▶️  API 응답 상태:', response1.status);
+      const text1 = await response1.text();
+      console.log('▶️  API 응답 상태:', response2.status);
+      const text2 = await response2.text();
+
+      if (text1.startsWith('<')) {
+        console.error('❌ XML/HTML 응답 감지');
+        return;
+      }
+      if (text2.startsWith('<')) {
         console.error('❌ XML/HTML 응답 감지');
         return;
       }
 
-      const data = JSON.parse(text);
-      const items = Array.isArray(data.response?.body?.items?.item)
-        ? data.response.body.items.item
-        : [data.response.body.items.item];
+      const data1 = JSON.parse(text1);
+      const data2 = JSON.parse(text2);
+
+      const items1 = Array.isArray(data1.response?.body?.items?.item)
+        ? data1.response.body.items.item
+        : [data1.response.body.items.item];
+
+      const items2 = Array.isArray(data2.response?.body?.items?.item)
+        ? data2.response.body.items.item
+        : [data2.response.body.items.item];
+
+      const items = [...items1, ...items2];
 
       console.log('▶️  처리할 아이템 수:', items.length);
 
@@ -176,9 +217,10 @@ export class CareUnitAdminService {
       let emergencyCount = 0;
 
       // 한 번에 모든 데이터 처리 (약국, 병원, 응급실)
-      for (let i = 0; i < items.length; i += batchSize) {
-        const batch = items.slice(i, i + batchSize);
-        const careUnits: CareUnit[] = [];
+
+        for (let i = 0; i < items.length; i += batchSize) {
+          const batch = items.slice(i, i + batchSize);
+          const careUnits: CareUnit[] = [];
 
         for (const item of batch) {
           if (!item?.hpid) continue;
