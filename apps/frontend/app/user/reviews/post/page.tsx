@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
-import { useSetAtom, useAtomValue } from 'jotai';
+import { useSetAtom, useAtomValue, createStore, Provider } from 'jotai';
 import {
   selectedCareUnitIdAtom,
   selectedCareUnitAtom,
@@ -14,8 +14,9 @@ import { SearchCareUnitForReview } from '@/features/user-review/ui/SearchCareUni
 
 import { ROUTES } from '@/shared/constants/routes';
 import { FormSchema } from '@/features/user-review/schema/reviewSchema';
+import { toast } from 'sonner';
 
-export default function WriteReviewPage() {
+function WriteReviewPage() {
   const searchParams = useSearchParams();
   const setId = useSetAtom(selectedCareUnitIdAtom);
   const setCareUnit = useSetAtom(selectedCareUnitAtom);
@@ -43,17 +44,20 @@ export default function WriteReviewPage() {
 
   const onSubmit = async (values: FormSchema) => {
     if (!careUnit) return;
-    await submitReview({
-      careUnitId: careUnit.id,
-      departmentId: values.departmentId,
-      content: values.content,
-      thankMessage: values.thankMessage,
-      rating: values.rating,
-      isPublic: true,
-    });
-    router.push(ROUTES.USER.REVIEWS);
-
-    alert('리뷰가 등록되었습니다!');
+    try {
+      await submitReview({
+        careUnitId: careUnit.id,
+        departmentId: values.departmentId,
+        content: values.content,
+        thankMessage: values.thankMessage,
+        rating: values.rating,
+        isPublic: true,
+      });
+      router.push(ROUTES.USER.REVIEWS);
+      toast.success('리뷰가 등록되었습니다!');
+    } catch {
+      toast.warning('문제발생');
+    }
   };
 
   return (
@@ -63,5 +67,15 @@ export default function WriteReviewPage() {
       {!careUnit && <SearchCareUnitForReview />}
       {careUnit && <ReviewForm onSubmit={onSubmit} />}
     </main>
+  );
+}
+
+const store = createStore();
+
+export default function WriteReviewPageWithProvider() {
+  return (
+    <Provider store={store}>
+      <WriteReviewPage />
+    </Provider>
   );
 }

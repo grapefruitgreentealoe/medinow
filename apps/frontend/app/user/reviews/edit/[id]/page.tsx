@@ -7,20 +7,17 @@ import { getCareUnitById } from '@/shared/api';
 import { ReviewForm } from '@/features/user-review/ui/ReviewForm';
 import { FormSchema } from '@/features/user-review/schema/reviewSchema';
 import { editReviewAtom } from '@/features/user-review/atoms/editReviewAtom';
-import { useAtomValue } from 'jotai';
-import { UpdateReviewInput } from '@/features/user-review/type';
+import { createStore, Provider, useAtomValue } from 'jotai';
+import { ReviewData, UpdateReviewInput } from '@/features/user-review/type';
 import { toast } from 'sonner';
 import { ROUTES } from '@/shared/constants/routes';
 
-export default function EditReviewPage() {
+function EditReviewPage() {
   const { id } = useParams(); // reviewId
-  const router = useRouter();
-  const reviewAtomData = useAtomValue(editReviewAtom);
+  const reviewAtomData = useAtomValue(editReviewAtom) as ReviewData;
   const [departments, setDepartments] = useState<
     { id: string; name: string }[] | null
   >(null);
-
-  if (!reviewAtomData) return <div>잘못된 접근입니다</div>;
 
   const defaultValues = {
     content: reviewAtomData.content,
@@ -59,5 +56,15 @@ export default function EditReviewPage() {
       careUnit={careUnit}
       departments={departments}
     />
+  );
+}
+
+const store = createStore();
+
+export default function EditReviewPageWithProvider() {
+  return (
+    <Provider store={store}>
+      <EditReviewPage />
+    </Provider>
   );
 }
