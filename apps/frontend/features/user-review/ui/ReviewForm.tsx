@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { FormSchema, formSchema } from '../schema/reviewSchema';
 import {
   Form,
   FormField,
@@ -16,54 +15,42 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { submitReview } from '../api';
+import { Checkbox } from '@/components/ui/checkbox';
+import { StarRating } from './StarRating';
 import { useAtomValue } from 'jotai';
 import {
   selectedCareUnitAtom,
-  selectedDepartmentIdAtom,
   selectedDepartmentsAtom,
 } from '../atoms/reviewFormAtom';
-import { StarRating } from './StarRating';
 
-const formSchema = z.object({
-  content: z.string().min(10, '리뷰는 10자 이상 입력해주세요.'),
-  thanksMessage: z.string().optional(),
-});
-
-type FormSchema = z.infer<typeof formSchema>;
-
-export function ReviewForm() {
+export function ReviewForm({
+  defaultValues,
+  onSubmit,
+}: {
+  defaultValues?: Partial<FormSchema>;
+  onSubmit: (data: any) => void;
+}) {
   const careUnit = useAtomValue(selectedCareUnitAtom);
   const departments = useAtomValue(selectedDepartmentsAtom);
-  const [departmentId, setDepartmentId] = useState<string>('');
-  const [rating, setRating] = useState(3);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       content: '',
-      thanksMessage: '',
+      thankMessage: '',
+      departmentId: '',
+      rating: 3,
+      isPublic: true,
+      ...defaultValues,
     },
   });
 
   const {
     handleSubmit,
     control,
+    setValue,
     formState: { isSubmitting },
   } = form;
-
-  const onSubmit = async (values: FormSchema) => {
-    if (!careUnit) return;
-    await submitReview({
-      careUnitId: careUnit.id,
-      departmentId: 'b9adcad8-bc9c-4fd9-b4e0-2daa93328510',
-      content: values.content,
-      thankMessage: values.thanksMessage,
-      rating,
-      isPublic: true,
-    });
-    alert('리뷰가 등록되었습니다!');
-  };
 
   return (
     <div className="space-y-6 max-w-xl mx-auto py-6">
@@ -73,30 +60,53 @@ export function ReviewForm() {
         <p className="text-sm text-muted-foreground">{careUnit?.address}</p>
       </div>
 
-      <label className="text-sm font-medium">진료 과 선택</label>
-      <select
-        value={departmentId}
-        onChange={(e) => setDepartmentId(e.target.value)}
-        className="w-full border rounded p-2"
-      >
-        <option value="">진료 과를 선택하세요</option>
-        {departments.map((d) => (
-          <option key={d.name} value={d.id}>
-            {d.name}
-          </option>
-        ))}
-      </select>
-
-      <Card className="p-4">
-        <p className="text-sm font-medium mb-2">별점</p>
-        <StarRating value={rating} onChange={setRating} />
-        <p className="text-sm mt-2 text-muted-foreground">
-          선택한 별점: {rating}점
-        </p>
-      </Card>
-
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* 진료과 선택 */}
+          <FormField
+            control={control}
+            name="departmentId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>진료 과</FormLabel>
+                <FormControl>
+                  <select className="w-full border rounded p-2" {...field}>
+                    <option value="">진료 과를 선택하세요</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* 별점 */}
+          <FormField
+            control={control}
+            name="rating"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>별점</FormLabel>
+                <FormControl>
+                  <Card className="p-4">
+                    <StarRating
+                      value={field.value}
+                      onChange={(val) => setValue('rating', val)}
+                    />
+                    <p className="text-sm mt-2 text-muted-foreground">
+                      선택한 별점: {field.value}점
+                    </p>
+                  </Card>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {/* 리뷰 내용 */}
           <FormField
             control={control}
             name="content"
@@ -114,9 +124,11 @@ export function ReviewForm() {
               </FormItem>
             )}
           />
+
+          {/* 감사 메시지 */}
           <FormField
             control={control}
-            name="thanksMessage"
+            name="thankMessage"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>감사 메시지 (선택)</FormLabel>
@@ -130,6 +142,24 @@ export function ReviewForm() {
               </FormItem>
             )}
           />
+
+          {/* 공개 여부 */}
+          <FormField
+            control={control}
+            name="isPublic"
+            render={({ field }) => (
+              <FormItem className="flex items-center gap-2">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(!!checked)}
+                  />
+                </FormControl>
+                <FormLabel className="text-sm">리뷰를 공개할래요</FormLabel>
+              </FormItem>
+            )}
+          />
+
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? '등록 중...' : '리뷰 등록'}
           </Button>

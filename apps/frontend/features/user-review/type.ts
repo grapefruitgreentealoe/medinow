@@ -19,13 +19,14 @@ export interface PaginatedReviewResponse {
   };
 }
 
+
 export interface SubmitReviewPayload {
   content: string;
   thankMessage?: string;
   rating: number;
   isPublic: boolean;
   careUnitId: string;
-  departmentId: string;
+  departmentId?: string;
 }
 
 export interface ReviewData {
@@ -39,4 +40,12 @@ export interface ReviewData {
   departmentId: string;
   departmentName: string;
   createdAt: string;
+}
+
+export interface UpdateReviewInput {
+  content: string;
+  thankMessage?: string;
+  departmentId: string;
+  rating: number;
+  isPublic: boolean;
 }
