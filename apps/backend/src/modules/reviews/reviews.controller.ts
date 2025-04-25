@@ -53,6 +53,7 @@ export class ReviewsController {
       rating: review.rating,
       isPublic: review.isPublic,
       departmentId: review.department ? review.department.id : null,
+      createdAt: review.createdAt,
     };
   }
 
@@ -83,6 +84,7 @@ export class ReviewsController {
         isPublic: review.isPublic,
         careUnitName: review.careUnit?.name,
         departmentName: review.department?.name,
+        createdAt: review.createdAt,
       })),
       pagination: {
         total,
@@ -112,6 +114,7 @@ export class ReviewsController {
       isPublic: review.isPublic,
       careUnitName: review.careUnit.name,
       departmentName: review.department.name,
+      createdAt: review.createdAt,
     };
   }
 
@@ -141,6 +144,8 @@ export class ReviewsController {
       isPublic: review.isPublic,
       careUnitName: review.careUnit.name,
       departmentName: review.department.name,
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
     };
   }
 
