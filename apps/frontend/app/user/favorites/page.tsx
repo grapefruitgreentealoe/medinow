@@ -34,13 +34,16 @@ export default function FavoritePage() {
   const setSelected = useSetAtom(selectedFavoriteCareUnitAtom);
   const confirmUnit = useAtomValue(unfavoriteConfirmUnitAtom);
   const { mutate: toggleFavorite } = useFavoriteToggle(page);
+  const units = data?.careUnits ?? [];
+  const totalPages = data?.totalPages ?? 1;
+  const isLastPage = page >= totalPages;
 
   if (isLoading) return <div>로딩 중...</div>;
 
   return (
     <div className="!space-y-6 !mx-[20px] !mt-[30px]">
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {data?.map((unit: CareUnit) => {
+        {units?.map((unit: CareUnit) => {
           if (!unit) return null;
           return (
             <CareUnitCard
@@ -58,14 +61,29 @@ export default function FavoritePage() {
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
-              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              onClick={() => {
+                if (page > 1) setPage(page - 1);
+              }}
+              className={page <= 1 ? 'pointer-events-none hidden' : ''}
             />
           </PaginationItem>
           <PaginationItem>
-            <PaginationNext onClick={() => setPage((p) => p + 1)} />
+            <PaginationNext
+              onClick={() => {
+                if (page < totalPages) setPage((p) => p + 1); // ✅ 조건 체크
+              }}
+              className={page >= totalPages ? 'pointer-events-none hidden' : ''}
+            />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
+      {isLastPage && (
+        <div className="w-full text-center !mb-4">
+          <div className="inline-block !px-4 !py-2 rounded-md bg-secondary text-muted-foreground text-sm shadow-sm">
+            마지막 페이지입니다
+          </div>
+        </div>
+      )}
 
       <Dialog open={!!confirmUnit} onOpenChange={() => setConfirmUnit(null)}>
         <DialogContent>
