@@ -20,6 +20,8 @@ ENV NODE_ENV=production
 
 ENV PORT=4000
 
+ENV TZ=Asia/Seoul
+
 # 백엔드 디렉토리로 이동
 WORKDIR /app/apps/backend
 
