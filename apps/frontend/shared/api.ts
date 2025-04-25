@@ -1,5 +1,5 @@
 import axiosInstance from '@/lib/axios';
-import { CareUnitWithDepartments } from './type';
+import { CareUnit, CareUnitWithDepartments } from './type';
 
 export const checkCareUnitExist = async (data: {
   name: string;
@@ -13,5 +13,10 @@ export const checkCareUnitExist = async (data: {
   });
 
   const res = await axiosInstance.get(`/care-units/exist?${query.toString()}`);
+  return res.data;
+};
+
+export const getCareUnitById = async (id: string): Promise<CareUnit> => {
+  const res = await axiosInstance.get(`/care-units/${id}`);
   return res.data;
 };
