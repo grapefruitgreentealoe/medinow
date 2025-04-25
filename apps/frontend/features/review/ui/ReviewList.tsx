@@ -11,8 +11,9 @@ export function ReviewList({ careUnitId }: Props) {
   const { data, fetchNextPage, isLoading, hasNextPage } =
     useCareUnitReviews(careUnitId);
 
-  const reviews = data?.pages.flatMap((page) => page.items) ?? [];
-
+  const reviews = data?.pages?.flatMap((page) => page.reviews ?? []) ?? [];
+  console.log(reviews);
+  if (!reviews) return null;
   return (
     <section className="pt-4 border-t">
       <h2 className="text-lg font-semibold mb-2">방문자 리뷰</h2>
@@ -23,7 +24,7 @@ export function ReviewList({ careUnitId }: Props) {
         <p className="text-sm text-muted-foreground">작성된 리뷰가 없습니다.</p>
       ) : (
         <ul className="space-y-4">
-          {reviews.map((review) => (
+          {reviews?.map((review) => (
             <li key={review.reviewId} className="p-3 border rounded-lg">
               <p className="text-sm text-foreground whitespace-pre-line">
                 {review.content}

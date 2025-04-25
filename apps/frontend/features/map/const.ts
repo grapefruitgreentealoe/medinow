@@ -1,4 +1,4 @@
-import { CareUnit, CongestionLevel } from './type';
+import { CareUnit, CongestionLevel } from '../../shared/type';
 
 export const congestionClassMap: Record<CongestionLevel, string> = {
   HIGH: 'bg-red-100 text-red-600',

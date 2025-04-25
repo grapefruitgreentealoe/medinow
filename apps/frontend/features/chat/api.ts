@@ -1,5 +1,5 @@
 import axiosInstance from '@/lib/axios';
-import { CareUnit } from '../map/type';
+import { CareUnit } from '../../shared/type';
 
 export interface ChatRoom {
   id: string;

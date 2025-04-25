@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { CareUnit } from '@/features/map/type';
+import { CareUnit } from '@/shared/type';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { CareUnitCard } from './CareUnitCard';

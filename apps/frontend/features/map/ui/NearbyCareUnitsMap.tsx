@@ -17,7 +17,7 @@ import CareUnitSheet from './CareUnitSheet';
 import FilterMenu from './FilterMenu';
 import { ListIcon } from 'lucide-react';
 import LocationSearchModal from '@/shared/ui/LocationSearchModal';
-import { CareUnit } from '../type';
+import { CareUnit } from '../../../shared/type';
 
 const store = getDefaultStore();
 

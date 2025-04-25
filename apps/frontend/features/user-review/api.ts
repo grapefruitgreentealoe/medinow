@@ -1,6 +1,11 @@
 import axiosInstance from '@/lib/axios';
-import { CareUnit } from '@/features/map/type';
-import { PaginatedReviewResponse, SubmitReviewPayload } from './type';
+import { CareUnit } from '@/shared/type';
+import {
+  PaginatedReviewResponse,
+  ReviewData,
+  SubmitReviewPayload,
+  UpdateReviewInput,
+} from './type';
 
 export const getCareUnitById = async (id: string): Promise<CareUnit> => {
   const res = await axiosInstance.get(`/care-units/${id}`);
@@ -16,7 +21,33 @@ export async function getReviewsByCareUnit(
   page = 1
 ): Promise<PaginatedReviewResponse> {
   const res = await axiosInstance.get(`/care-units/reviews/${careUnitId}`, {
-    params: { page, limit: 1 },
+    params: { page, limit: 10 },
   });
   return res.data;
+}
+
+export const getReviews = async ({
+  pageParam,
+  limit,
+}: {
+  pageParam: number;
+  limit: number;
+}): Promise<PaginatedReviewResponse> => {
+  const res = await axiosInstance.get('/reviews', {
+    params: { page: pageParam, limit },
+  });
+
+  return res.data;
+};
+
+export async function getReviewById(id: string): Promise<ReviewData> {
+  const res = await axiosInstance.get(`/reviews/${id}`);
+  return res.data;
+}
+
+export async function updateReview(id: string, data: UpdateReviewInput) {
+  await axiosInstance.patch(`/reviews/${id}`, data);
+}
+export async function deleteReview(id: string) {
+  await axiosInstance.delete(`/reviews/${id}`);
 }

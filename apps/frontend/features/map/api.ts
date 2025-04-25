@@ -1,5 +1,5 @@
 import axiosInstance from '@/lib/axios';
-import { CareUnit } from './type';
+import { CareUnit } from '../../shared/type';
 
 interface LocationByCategoryData {
   lat: number;

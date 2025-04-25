@@ -39,7 +39,7 @@ export default async function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <Header />
-        <main>{children}</main>
+        <main className="!pt-[61px]">{children}</main>
 
         <Toaster position="bottom-center" duration={1000} />
       </body>
