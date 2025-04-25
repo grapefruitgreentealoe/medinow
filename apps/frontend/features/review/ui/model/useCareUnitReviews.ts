@@ -8,8 +8,11 @@ export function useCareUnitReviews(careUnitId: string) {
     queryFn: ({ pageParam = 1 }) =>
       getReviewsByCareUnit(careUnitId, pageParam as number),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
-      lastPage.meta.hasNextPage ? lastPage.meta.currentPage + 1 : undefined,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    staleTime: 1000 * 60,
     enabled: !!careUnitId,
   });
 }

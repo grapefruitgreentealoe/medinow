@@ -13,7 +13,7 @@ export const ROUTES = {
     REVIEWS: '/user/reviews',
     REVIEW_DETAIL: (id: string | number) => `/user/reviews/${id}`,
     WRITE_REVIEW: '/user/reviews/post',
-    EDIT_REVIEW: (id: string | number) => `/user/reviews/${id}/edit`,
+    EDIT_REVIEW: (id: string | number) => `/user/reviews/edit/${id}`,
   },
 
   ADMIN: {

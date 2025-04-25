@@ -4,13 +4,23 @@ import { useAtom, useAtomValue } from 'jotai';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { useSetAtom } from 'jotai';
 import { cn } from '@/lib/utils';
-import { Star, StarOff, MessageSquare, PhoneCallIcon } from 'lucide-react';
+import {
+  Star,
+  StarOff,
+  MessageSquare,
+  PhoneCallIcon,
+  PencilIcon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useOptimisticToggleFavorite } from '../model/useOptimisticToggleFavorite';
 import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
 import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
+import { ReviewList } from '@/features/review/ui/ReviewList';
+import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/shared/constants/routes';
 
 export default function CareUnitDetailPage() {
+  const router = useRouter();
   const [unit] = useAtom(selectedCareUnitAtom);
   const setChat = useSetAtom(chatModalAtom);
   const queryKey = useAtomValue(careUnitsQueryKeyAtom);
@@ -97,6 +107,17 @@ export default function CareUnitDetailPage() {
               <MessageSquare className="text-blue-500" size={18} />
             </Button>
           )}
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(ROUTES.USER.WRITE_REVIEW + `?careUnitId=${unit.id}`);
+            }}
+            className="w-8 h-8"
+          >
+            <PencilIcon className="text-blue-500" size={18} />
+          </Button>
           {unit.tel && (
             <Button
               size="icon"
@@ -165,6 +186,7 @@ export default function CareUnitDetailPage() {
           {renderTimeRow('공휴일', unit.holidayOpen, unit.holidayClose)}
         </div>
       </div>
+      <ReviewList careUnitId={unit.id} />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { CareUnit } from './type';
+import { CareUnit } from '../../shared/type';
 
 export const formatTime = (time: number | null) => {
   if (time === null) return '없음';

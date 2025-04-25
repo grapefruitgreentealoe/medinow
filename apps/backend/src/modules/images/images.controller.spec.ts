@@ -48,6 +48,12 @@ describe('ImagesController', () => {
             }),
           },
         },
+        {
+          provide: UsersService,
+          useValue: {
+            findUserByEmail: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
