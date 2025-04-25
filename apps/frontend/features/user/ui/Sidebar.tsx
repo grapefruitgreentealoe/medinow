@@ -19,16 +19,33 @@ export function Sidebar() {
 
   return (
     <nav className="flex flex-col gap-2 !p-[20px]">
-      {navItems.map(({ href, label }) => (
-        <Link href={href} key={href}>
-          <Button
-            variant={pathname === href ? 'secondary' : 'ghost'}
-            className={cn('w-full justify-start')}
+      {navItems.map(({ href, label }) =>
+        href === ROUTES.USER.WRITE_REVIEW ? (
+          <button
+            key={href}
+            onClick={() => {
+              // 강제로 리로드 (SSR처럼 새 상태로 진입)
+              window.location.href = href;
+            }}
           >
-            {label}
-          </Button>
-        </Link>
-      ))}
+            <Button
+              variant={pathname === href ? 'secondary' : 'ghost'}
+              className={cn('w-full justify-start')}
+            >
+              {label}
+            </Button>
+          </button>
+        ) : (
+          <Link href={href} key={href}>
+            <Button
+              variant={pathname === href ? 'secondary' : 'ghost'}
+              className={cn('w-full justify-start')}
+            >
+              {label}
+            </Button>
+          </Link>
+        )
+      )}
     </nav>
   );
 }
