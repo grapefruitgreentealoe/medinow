@@ -46,6 +46,27 @@ export class CareUnitService {
     return this.careUnitRepository.findOne({ where: { id } });
   }
 
+  // 상세 정보 조회 + department by id
+  async getCareUnitDetailWithDepartment(id: string) {
+    const careUnit = await this.careUnitRepository.findOne({
+      where: { id },
+      relations: ['departments'],
+    });
+    if (!careUnit) {
+      throw new NotFoundException('조회된 의료기관이 없습니다');
+    }
+    const { departments, ...restCareUnit } = careUnit;
+    return {
+      ...restCareUnit,
+      departments: departments.map((department) => {
+        return {
+          id: department.id,
+          name: department.name,
+        };
+      }),
+    };
+  }
+
   //🏥 상세 정보 조회 by hpId & category
   async getCareUnitDetailByHpid(hpId: string, category?: string) {
     if (category) {
