@@ -6,8 +6,8 @@ import { CareUnitAdminService } from '../care-units/services/care-unit-admin.ser
 import { DepartmentsService } from '../departments/departments.service';
 
 @Injectable()
-export class ScheduleService {
-  // export class ScheduleService implements OnModuleInit {
+// export class ScheduleService {
+export class ScheduleService implements OnModuleInit {
   constructor(
     @InjectRepository(Schedule)
     private readonly scheduleRepository: Repository<Schedule>,
@@ -15,18 +15,23 @@ export class ScheduleService {
     private readonly departmentsService: DepartmentsService,
   ) {}
 
-  // onModuleInit() {
-  //   console.log('🚀🚀🚀 ScheduleService onModuleInit 호출됨');
-  //   console.log('현재 시간:', new Date().toISOString());
-  //   console.log('3초 후에 데이터 초기화 실행 예정');
+  onModuleInit() {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🚀 개발 환경에서는 초기화 스크립트가 실행되지 않습니다.');
+      return;
+    }
 
-  //   setTimeout(() => {
-  //     console.log('⏰ 타이머 실행됨 -', new Date().toISOString());
-  //     this.initializeData().catch((error) => {
-  //       console.error('❌ 초기 데이터 저장 실패:', error);
-  //     });
-  //   }, 3000); // 서버 시작 후 3초 후에 실행
-  // }
+    console.log('🚀🚀🚀 ScheduleService onModuleInit 호출됨');
+    console.log('현재 시간:', new Date().toISOString());
+    console.log('3초 후에 데이터 초기화 실행 예정');
+
+    setTimeout(() => {
+      console.log('⏰ 타이머 실행됨 -', new Date().toISOString());
+      this.initializeData().catch((error) => {
+        console.error('❌ 초기 데이터 저장 실패:', error);
+      });
+    }, 3000); // 서버 시작 후 3초 후에 실행
+  }
 
   // 서버 시작 시 초기 데이터 저장
   async initializeData() {
