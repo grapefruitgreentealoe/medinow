@@ -2,7 +2,6 @@ import {
   Controller,
   Post,
   Body,
-  HttpStatus,
   Get,
   Query,
   UseGuards,
@@ -40,14 +39,14 @@ export class UsersController {
   @ApiOperation({ summary: '사용자 등록' })
   @ApiBody({ type: CreateUserDto })
   @ApiCreatedResponse({
-    description: '사용자 등록 성공',
+    description: '사용자 등록 성공!',
     type: User,
   })
   @ApiBadRequestResponse({
-    description: '사용자 등록 실패',
+    description: '사용자 등록 실패!',
   })
   async createUser(@Body() createUserDto: CreateUserDto) {
-    const user = await this.usersService.createUser(createUserDto);
+    await this.usersService.createUser(createUserDto);
     return {
       message: '사용자 등록 성공',
     };
@@ -92,7 +91,7 @@ export class UsersController {
     description: '사용자 상세 조회 실패',
   })
   async getUser(@RequestUserId() userId: string) {
-    const userInfo = await this.usersService.findUserById(userId);
+    const userInfo = await this.usersService.findUserByIdWithRelations(userId);
     return {
       message: '사용자 상세 조회 성공',
       user: {

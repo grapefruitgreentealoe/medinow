@@ -4,13 +4,16 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
 
 @Entity('favorites')
-@Index(['user', 'careUnit'], { unique: true })
 export class Favorite extends BaseEntity {
-  @ManyToOne(() => User, (user) => user.favorites)
+  @ManyToOne(() => User, (user) => user.favorites, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @ManyToOne(() => CareUnit, (careUnit) => careUnit.favorites)
+  @ManyToOne(() => CareUnit, (careUnit) => careUnit.favorites, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'careUnitId' })
   careUnit: CareUnit;
 }
