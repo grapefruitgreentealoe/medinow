@@ -2,11 +2,14 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 
 export interface Department {
   id: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
   name: string;
-  careUnitId: string;
+}
+
+export interface CareUnitWithDepartments {
+  id: string;
+  name: string;
+  address: string;
+  departments: Department[];
 }
 
 export interface Congestion {

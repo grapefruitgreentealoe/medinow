@@ -1,9 +1,11 @@
 import axiosInstance from '@/lib/axios';
+import { CareUnitWithDepartments } from './type';
+
 export const checkCareUnitExist = async (data: {
   name: string;
   address: string;
   category: string;
-}) => {
+}): Promise<CareUnitWithDepartments> => {
   const query = new URLSearchParams({
     name: data.name,
     address: data.address,

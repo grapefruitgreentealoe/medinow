@@ -13,6 +13,7 @@ import {
   selectedDepartmentIdAtom,
   selectedDepartmentsAtom,
 } from '../atoms/reviewFormAtom';
+import { CareUnit } from '@/shared/type';
 
 export function SearchCareUnitForReview() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -32,7 +33,7 @@ export function SearchCareUnitForReview() {
     const result = await checkCareUnitExist({ name, address, category });
     if (result?.id) {
       setId(result.id);
-      setCareUnit(result);
+      setCareUnit(result as CareUnit);
       setDepartments(result.departments || []);
       setModalOpen(false);
     }
