@@ -7,7 +7,7 @@ ENV_PATH="./apps/backend/.env"
 echo "🚀 [DEV] 백엔드 배포 시작"
 # ✅ GitLab CI/CD 변수로부터 .env 파일 생성
 mkdir -p ./apps/backend
-echo "$ENV_DEVELOPMENT" > $ENV_PATH
+echo "$ENV_PRODUCTION" > $ENV_PATH
 echo "✅ .env 파일 생성 완료: $ENV_PATH"
 
 # ✅ 기존 컨테이너 및 네트워크 정리

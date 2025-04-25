@@ -5,6 +5,7 @@
   - .ci/common-variables.yml
   - package.json
   - pnpm-workspace.yaml
+  - deploy-backend-dev.sh
 
 .deploy-backend-template:
   stage: deploy

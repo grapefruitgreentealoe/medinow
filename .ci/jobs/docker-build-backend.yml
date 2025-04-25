@@ -4,6 +4,7 @@
   - .ci/common-variables.yml
   - package.json
   - pnpm-workspace.yaml
+  - deploy-backend-dev.sh
 
 .docker-build-backend-template:
   stage: docker-build
