@@ -1,10 +1,18 @@
-import { Inject, forwardRef, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  forwardRef,
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Favorite } from './entities/favorite.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CareUnitService } from '../care-units/services/care-unit.service';
 import { UsersService } from '../users/users.service';
 import { Not, IsNull } from 'typeorm';
+import { CustomLoggerService } from 'src/shared/logger/logger.service';
+
 @Injectable()
 export class FavoritesService {
   constructor(
@@ -14,30 +22,58 @@ export class FavoritesService {
     private readonly careUnitService: CareUnitService,
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
+    private readonly logger: CustomLoggerService,
   ) {}
 
   // 즐겨찾기 추가 및 해제
   async toggleFavorite(userId: string, careUnitId: string) {
-    const existingFavorite = await this.favoriteRepository.findOne({
-      where: { user: { id: userId }, careUnit: { id: careUnitId } },
-    });
+    try {
+      // 사용자 존재 여부 확인
+      const user = await this.usersService.findUserById(userId);
+      if (!user) {
+        throw new NotFoundException('사용자를 찾을 수 없습니다.');
+      }
 
-    if (existingFavorite) {
-      await this.favoriteRepository.remove(existingFavorite);
-      return { message: '즐겨찾기 해제' };
+      // 의료기관 존재 여부 확인
+      const careUnit = await this.careUnitService.getCareUnitDetail(careUnitId);
+      if (!careUnit) {
+        throw new NotFoundException('의료기관을 찾을 수 없습니다.');
+      }
+
+      const existingFavorite = await this.favoriteRepository.findOne({
+        where: { user: { id: userId }, careUnit: { id: careUnitId } },
+      });
+
+      if (existingFavorite) {
+        await this.favoriteRepository.remove(existingFavorite);
+        this.logger.log(
+          `즐겨찾기 해제 - 사용자: ${userId}, 의료기관: ${careUnitId}`,
+        );
+        return { message: '즐겨찾기 해제' };
+      }
+
+      const newFavorite = this.favoriteRepository.create({
+        user: { id: userId },
+        careUnit: { id: careUnitId },
+      });
+
+      await this.favoriteRepository.save(newFavorite);
+      this.logger.log(
+        `즐겨찾기 추가 - 사용자: ${userId}, 의료기관: ${careUnitId}`,
+      );
+      return { message: '즐겨찾기 추가' };
+    } catch (error: unknown) {
+      const err = error as Error;
+      this.logger.error(`즐겨찾기 토글 중 오류 발생: ${err.message}`);
+      throw error;
     }
-
-    const newFavorite = this.favoriteRepository.create({
-      user: { id: userId },
-      careUnit: { id: careUnitId },
-    });
-
-    await this.favoriteRepository.save(newFavorite);
-    return { message: '즐겨찾기 추가' };
   }
 
   // 즐겨찾기 목록 조회
   async getUserFavorites(userId: string, page: number = 1, limit: number = 10) {
+    if (!userId) {
+      throw new BadRequestException('로그인이 필요한 서비스입니다.');
+    }
     const skip = (page - 1) * limit;
     const [favorites, total] = await this.favoriteRepository.findAndCount({
       where: {
@@ -116,6 +152,12 @@ export class FavoritesService {
 
   // 즐겨찾기 존재 여부 확인
   async checkIsFavorite(userId: string, careUnitId: string): Promise<boolean> {
+    if (!userId) {
+      throw new BadRequestException('로그인이 필요한 서비스입니다.');
+    }
+    if (!careUnitId) {
+      throw new BadRequestException('즐겨찾기 존재 여부 확인 실패');
+    }
     const count = await this.favoriteRepository.count({
       where: {
         user: { id: userId },

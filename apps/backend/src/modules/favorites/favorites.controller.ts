@@ -19,7 +19,6 @@ import {
 import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('즐겨찾기')
-// @UseGuards(JwtAuthGuard)
 @Controller('favorites')
 export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}

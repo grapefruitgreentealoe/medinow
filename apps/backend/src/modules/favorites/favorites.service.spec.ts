@@ -4,6 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Favorite } from './entities/favorite.entity';
 import { CareUnitService } from '../care-units/services/care-unit.service';
 import { UsersService } from '../users/users.service';
+import { CustomLoggerService } from 'src/shared/logger/logger.service';
 
 describe('FavoritesService', () => {
   let service: FavoritesService;
@@ -28,6 +29,11 @@ describe('FavoritesService', () => {
     findOne: jest.fn(),
   };
 
+  const mockLoggerService = {
+    log: jest.fn(),
+    error: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -43,6 +49,10 @@ describe('FavoritesService', () => {
         {
           provide: UsersService,
           useValue: mockUsersService,
+        },
+        {
+          provide: CustomLoggerService,
+          useValue: mockLoggerService,
         },
       ],
     }).compile();
