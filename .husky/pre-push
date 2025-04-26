@@ -1,7 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 echo "🚀 pre-push 훅 실행됨!"
-export PATH="$HOME/.pnpm-global/bin:$PATH" # (또는 너가 pnpm 설치한 경로)
 
 
 pnpm lint
