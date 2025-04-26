@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 export function SearchCareUnitForReview() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -51,7 +52,7 @@ export function SearchCareUnitForReview() {
       <label className="text-sm font-medium">병원 카테고리</label>
       <Select onValueChange={setCategory} value={category}>
         <SelectTrigger className="w-full">
-          <SelectValue placeholder="카테고리를 선택하세요" />
+          <SelectValue placeholder="먼저 카테고리를 선택하세요" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="emergency">응급실</SelectItem>
@@ -63,13 +64,16 @@ export function SearchCareUnitForReview() {
       <div className="flex gap-2">
         <Input
           value={selected?.name || ''}
-          placeholder="병원명을 선택하세요"
+          placeholder="병원명을 입력하세요"
           readOnly
-          onClick={() => setModalOpen(true)}
+          onClick={() => {
+            if (category) {
+              setModalOpen(true);
+            } else {
+              toast.warning('카테고리를 먼저 선택하세요');
+            }
+          }}
         />
-        <Button onClick={() => setModalOpen(true)} disabled={!category}>
-          병원 검색하기
-        </Button>
       </div>
 
       {selected && (
@@ -83,8 +87,8 @@ export function SearchCareUnitForReview() {
       )}
 
       <LocationSearchModal
-        title="병원 위치 검색1"
-        subtitle="병원명을 입력하세요"
+        title="병원 위치 검색"
+        subtitle={'병원명을 입력하세요'}
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSelect={handleSelect}

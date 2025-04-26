@@ -48,8 +48,8 @@ export default function AdminSignupForm() {
       password: 'Test1234!',
       name: '홍길동',
 
-      careUnitName: '테스트병원',
-      careUnitAddress: '서울특별시 종로구 세종대로 110',
+      careUnitName: '',
+      careUnitAddress: '',
       careUnitCategory: '',
       isCareUnitVerified: false,
     },
@@ -67,6 +67,8 @@ export default function AdminSignupForm() {
     setValue('careUnitAddress', data.address, { shouldDirty: true });
     form.clearErrors('isCareUnitVerified');
     setValue('isCareUnitVerified', false); // 유효성 검사 초기화
+
+    handleCareUnitValidation();
   };
 
   const handleCareUnitValidation = async () => {
@@ -74,7 +76,7 @@ export default function AdminSignupForm() {
       form.getValues();
 
     if (!careUnitName || !careUnitAddress || !careUnitCategory) {
-      toast.warning('기관명, 주소, 유형을 모두 입력해주세요.');
+      toast.warning('기관주소, 유형을 모두 입력해주세요.');
       return;
     }
 
@@ -116,6 +118,14 @@ export default function AdminSignupForm() {
     router.push(ROUTES.LOGIN);
   };
 
+  const handleClickHospitalInput = () => {
+    if (form.getValues('careUnitCategory') === '') {
+      toast.warning('의료기관 유형을 선택해주세요.');
+      return;
+    }
+    setHospitalModalOpen(true);
+  };
+
   return (
     <>
       <Form {...form}>
@@ -146,24 +156,26 @@ export default function AdminSignupForm() {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="careUnitName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>기관명</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="의료기관명"
-                    {...field}
-                    readOnly
-                    disabled
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {form.getValues('careUnitAddress') ? (
+            <FormField
+              control={form.control}
+              name="careUnitName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>기관명</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="의료기관명"
+                      {...field}
+                      readOnly
+                      disabled
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
 
           <FormField
             control={form.control}
@@ -177,31 +189,15 @@ export default function AdminSignupForm() {
                       placeholder="의료기관 주소"
                       {...field}
                       readOnly
-                      disabled
                       className="flex-1"
+                      onClick={handleClickHospitalInput}
                     />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={() => setHospitalModalOpen(true)}
-                    >
-                      병원 검색
-                    </Button>
                   </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          <Button
-            type="button"
-            variant="default"
-            onClick={handleCareUnitValidation}
-            className="w-full bg-blend-soft-light"
-          >
-            가입가능 여부 확인
-          </Button>
 
           {form.watch('isCareUnitVerified') && (
             <p className="text-green-600 text-sm">가입 가능한 병원입니다</p>
