@@ -290,7 +290,7 @@ export class CareUnitService {
             reviewCount: careUnit.reviews.length || 0,
             departments:
               careUnit.departments.map((department) => {
-                return department.name;
+                return { id: department.id, name: department.name };
               }) || [],
           };
         }),
