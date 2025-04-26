@@ -83,7 +83,7 @@ export function SearchCareUnitForReview() {
       )}
 
       <LocationSearchModal
-        title="병원 위치 검색"
+        title="병원 위치 검색1"
         subtitle="병원명을 입력하세요"
         open={modalOpen}
         onClose={() => setModalOpen(false)}
