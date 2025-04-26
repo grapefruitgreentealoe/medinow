@@ -20,17 +20,7 @@ export function useCareUnitsQuery({
   selectedCategory,
   OpenStatus,
 }: UseCareUnitsQueryProps): UseCareUnitsQueryResult & { queryKey: any[] } {
-  const roundedLat = lat ? Math.floor(lat * 1000) / 1000 : null;
-  const roundedLng = lng ? Math.floor(lng * 1000) / 1000 : null;
-
-  const queryKey = [
-    'careUnits',
-    roundedLat,
-    roundedLng,
-    level,
-    selectedCategory,
-    OpenStatus,
-  ];
+  const queryKey = ['careUnits', lat, lng, selectedCategory, OpenStatus];
   const setQueryKeyAtom = useSetAtom(careUnitsQueryKeyAtom);
 
   // queryKeyAtom을 업데이트하는 useEffect
@@ -38,17 +28,19 @@ export function useCareUnitsQuery({
     setQueryKeyAtom(queryKey);
   }, [setQueryKeyAtom, queryKey]);
 
+  // lat, lng, level이 모두 null이 아닐 때만 쿼리 활성화
+  const shouldFetch = lat !== null && lng !== null && level !== null;
+
   const query = useInfiniteQuery({
-    staleTime: 5000,
+    gcTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 5,
+    enabled: shouldFetch,
     queryKey,
     queryFn: async ({ pageParam = 1 }) => {
-      if (lat === null || lng === null || level === null)
-        return { items: [], hasNext: false };
-
       const items = await locationByCategory({
-        lat,
-        lng,
-        level,
+        lat: lat!,
+        lng: lng!,
+        level: level!,
         page: pageParam,
         limit: 10,
         OpenStatus,
@@ -61,18 +53,15 @@ export function useCareUnitsQuery({
                 ? 'pharmacy'
                 : undefined,
       });
-
       return {
         items,
         hasNext: items.length === 10,
-        nextPage: undefined,
       };
     },
     getNextPageParam: (lastPage, pages) => {
       return lastPage.hasNext ? pages.length + 1 : undefined;
     },
     initialPageParam: 1,
-    enabled: lat !== null && lng !== null,
   });
 
   const flatItems = query.data?.pages.flatMap((p) => p.items) ?? [];
