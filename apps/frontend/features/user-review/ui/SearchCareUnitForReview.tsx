@@ -14,6 +14,13 @@ import {
   selectedDepartmentsAtom,
 } from '../atoms/reviewFormAtom';
 import { CareUnit } from '@/shared/type';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export function SearchCareUnitForReview() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -42,16 +49,16 @@ export function SearchCareUnitForReview() {
   return (
     <div className="space-y-4">
       <label className="text-sm font-medium">병원 카테고리</label>
-      <select
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        className="w-full border rounded p-2"
-      >
-        <option value="">카테고리를 선택하세요</option>
-        <option value="emergency">응급실</option>
-        <option value="hospital">병원</option>
-        <option value="pharmacy">약국</option>
-      </select>
+      <Select onValueChange={setCategory} value={category}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="카테고리를 선택하세요" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="emergency">응급실</SelectItem>
+          <SelectItem value="hospital">병원</SelectItem>
+          <SelectItem value="pharmacy">약국</SelectItem>
+        </SelectContent>
+      </Select>
 
       <div className="flex gap-2">
         <Input
