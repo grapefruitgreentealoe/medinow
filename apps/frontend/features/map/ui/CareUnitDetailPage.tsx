@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/accordion';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { renderTodayTime } from '../utils';
 export default function CareUnitDetailPage() {
   const router = useRouter();
   const [unit] = useAtom(selectedCareUnitAtom);
@@ -156,8 +157,21 @@ export default function CareUnitDetailPage() {
           </a>
         </div>
 
-        <div className="text-muted-foreground">운영</div>
-        <div>{unit.nowOpen ? '🟢 운영 중' : '🔴 운영 종료'}</div>
+        <div className="text-muted-foreground !mt-1">오늘 운영시간</div>
+        <div className=" !mt-1 text-muted-foreground">
+          <span className="text-foreground font-medium">
+            {renderTodayTime(unit)}
+          </span>
+          <span className="inline-block !px-2"></span>
+          <span
+            className={cn(
+              'w-fit bg-muted  text-white !px-2 !py-0.5 rounded-full',
+              unit.nowOpen ? 'bg-primary' : 'bg-accent'
+            )}
+          >
+            {unit.nowOpen ? '운영 중' : '운영 종료'}
+          </span>
+        </div>
       </div>
       {unit.congestion && (
         <div className="space-y-1">
@@ -221,9 +235,10 @@ export default function CareUnitDetailPage() {
       </Accordion>
 
       <Separator />
-      <div className="flex items-center !pt-6">
+      <div className="flex items-center gap-2 !pt-6">
         <span>방문자 리뷰</span>
-        <div className="flex items-center gap-2 text-sm mt-2">
+
+        <div className="flex items-center text-sm mt-2">
           <Star size={16} className="text-yellow-400 fill-yellow-400" />
           <span className="font-medium text-muted-foreground">
             {(unit.averageRating ?? 0).toFixed(1)}
