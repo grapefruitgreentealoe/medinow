@@ -8,7 +8,7 @@ export default function HomePage() {
   const queryClient = getQueryClient();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="h-[calc(100vh-64px)] overflow-hidden !overflow-y-hidden">
+      <div className="h-[calc(100vh-64px)] overflow-hidden">
         <NearbyCareUnits />
       </div>
     </QueryClientProvider>
