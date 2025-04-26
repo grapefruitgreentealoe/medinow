@@ -59,7 +59,7 @@ export interface CareUnit {
   isChatAvailable: boolean;
   isFavorite: boolean;
 
-  departments: Department[] | string[];
+  departments: Department[];
   congestion: Congestion;
 
   averageRating: number;
