@@ -144,7 +144,7 @@ export class FavoritesService {
 
     return {
       careUnits: filteredCareUnits,
-      total: filteredCareUnits.length,
+      total,
       page,
       totalPages: Math.ceil(total / limit),
     };
