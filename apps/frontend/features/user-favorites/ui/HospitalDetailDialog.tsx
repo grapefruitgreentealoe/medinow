@@ -116,7 +116,7 @@ export function HospitalDetailDialog() {
           <div className="space-y-1 !mt-5">
             <div className="font-medium">진료과</div>
             <div className="flex flex-wrap gap-2">
-              {unit.departments.slice(0, 3).map((dept, index) => (
+              {unit.departments.map((dept, index) => (
                 <Badge
                   key={index}
                   variant="secondary"
@@ -125,16 +125,6 @@ export function HospitalDetailDialog() {
                   {dept?.name ?? dept}
                 </Badge>
               ))}
-
-              {unit.departments.length > 3 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 !px-2 rounded-2xl text-xs text-muted-foreground"
-                >
-                  +{unit.departments.length - 3}개
-                </Button>
-              )}
             </div>
           </div>
         )}
