@@ -81,8 +81,13 @@ export function CareUnitCard({
           {unit?.congestion?.congestionLevel && (
             <span className={congestionClassMap[level]}>혼잡도: {level}</span>
           )}
-          <span className="bg-muted text-muted-foreground !px-2 !py-0.5 rounded-full">
-            {unit.nowOpen ? '🟢 운영 중' : '🔴 운영 종료'}
+          <span
+            className={cn(
+              'bg-muted  text-white !px-2 !py-0.5 rounded-full',
+              unit.nowOpen ? 'bg-primary' : 'bg-accent'
+            )}
+          >
+            {unit.nowOpen ? '운영 중' : '운영 종료'}
           </span>
         </div>
 
