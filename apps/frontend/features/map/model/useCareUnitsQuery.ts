@@ -3,6 +3,7 @@ import { locationByCategory } from '../api'; // 또는 locationByCategoryMock
 import { useSetAtom } from 'jotai';
 import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
 import { UseCareUnitsQueryResult } from '../type';
+import { useEffect } from 'react';
 
 interface UseCareUnitsQueryProps {
   lat: number | null;
@@ -31,7 +32,11 @@ export function useCareUnitsQuery({
     OpenStatus,
   ];
   const setQueryKeyAtom = useSetAtom(careUnitsQueryKeyAtom);
-  setQueryKeyAtom(queryKey); // useEffect 말고 함수 안에서 직접 실행
+
+  // queryKeyAtom을 업데이트하는 useEffect
+  useEffect(() => {
+    setQueryKeyAtom(queryKey);
+  }, [setQueryKeyAtom, queryKey]);
 
   const query = useInfiniteQuery({
     staleTime: 5000,
