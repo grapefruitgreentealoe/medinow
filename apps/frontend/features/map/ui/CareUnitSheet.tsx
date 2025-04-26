@@ -59,7 +59,7 @@ export default function CareUnitSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="right" className="w-[90vw] sm:w-[400px] !p-0">
+      <SheetContent side="right" className="w-[90vw] sm:w-[400px] !p-0 ">
         <SheetHeader className="!p-4 border-b">
           <div className="relative flex justify-center items-center">
             {page === 'detail' && (
