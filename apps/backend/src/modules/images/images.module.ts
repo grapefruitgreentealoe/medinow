@@ -7,11 +7,7 @@ import { S3Module } from '../s3/s3.module';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Image]),
-    S3Module,
-    forwardRef(() => UsersModule),
-  ],
+  imports: [TypeOrmModule.forFeature([Image]), S3Module, UsersModule],
   controllers: [ImagesController],
   providers: [ImagesService],
   exports: [ImagesService],

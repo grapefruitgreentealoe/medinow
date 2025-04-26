@@ -83,9 +83,20 @@ export class CareUnitService {
       .leftJoinAndSelect('careUnit.departments', 'departments');
 
     if (name) {
-      queryBuilder.andWhere('careUnit.name like :name', {
-        name: `%${name}%`,
+      const nameParts = name.trim().split(/\s+/);
+      const searchConditions = nameParts.map((part, index) => {
+        return `careUnit.name LIKE :namePart${index}`;
       });
+      queryBuilder.andWhere(
+        `(${searchConditions.join(' OR ')})`,
+        nameParts.reduce(
+          (acc, part, index) => ({
+            ...acc,
+            [`namePart${index}`]: `%${part}%`,
+          }),
+          {},
+        ),
+      );
     } else {
       throw new BadRequestException('병원 이름이 잘못되었습니다');
     }
