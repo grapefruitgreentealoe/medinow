@@ -163,14 +163,11 @@ export default function CareUnitDetailPage() {
             {renderTodayTime(unit)}
           </span>
           <span className="inline-block !px-2"></span>
-          <span
-            className={cn(
-              'w-fit bg-muted  text-white !px-2 !py-0.5 rounded-full',
-              unit.nowOpen ? 'bg-primary' : 'bg-accent'
-            )}
+          <Badge
+            className={'!p-1 rounded-xl  text-muted-foreground bg-muted border'}
           >
             {unit.nowOpen ? '운영 중' : '운영 종료'}
-          </span>
+          </Badge>
         </div>
       </div>
       {unit.congestion && (

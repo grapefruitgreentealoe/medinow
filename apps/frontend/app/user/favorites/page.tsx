@@ -25,6 +25,8 @@ import { selectedFavoriteCareUnitsQueryKeyAtom } from '@/features/user-favorites
 
 import { useFavoriteToggle } from '@/features/user-favorites/model/useFavoriteToggle';
 import { CareUnit } from '@/shared/type';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { SimplePagination } from '@/shared/ui/SimplePagination';
 
 export default function FavoritePage() {
   const [page, setPage] = useState(1);
@@ -57,60 +59,25 @@ export default function FavoritePage() {
         })}
       </div>
       <HospitalDetailDialog />
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => {
-                if (page > 1) setPage(page - 1);
-              }}
-              className={page <= 1 ? 'pointer-events-none hidden' : ''}
-            />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => {
-                if (page < totalPages) setPage((p) => p + 1); // ✅ 조건 체크
-              }}
-              className={page >= totalPages ? 'pointer-events-none hidden' : ''}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-      {isLastPage && (
-        <div className="w-full text-center !mb-4">
-          <div className="inline-block !px-4 !py-2 rounded-md bg-secondary text-muted-foreground text-sm shadow-sm">
-            마지막 페이지입니다
-          </div>
-        </div>
-      )}
+      <SimplePagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
 
-      <Dialog open={!!confirmUnit} onOpenChange={() => setConfirmUnit(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <p className="text-lg font-semibold">즐겨찾기 해제</p>
-          </DialogHeader>
-          <p className="text-sm mt-2">
-            정말 <strong>{confirmUnit?.name}</strong> 병원을 즐겨찾기
-            해제하시겠어요?
-          </p>
-
-          <DialogFooter className="mt-4 flex gap-2 justify-end">
-            <Button
-              variant="destructive"
-              onClick={() => {
-                toggleFavorite({ unitId: confirmUnit?.id ?? '' });
-                setConfirmUnit(null);
-              }}
-            >
-              해제하기
-            </Button>
-            <Button variant="outline" onClick={() => setConfirmUnit(null)}>
-              취소
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={!!confirmUnit}
+        onClose={() => setConfirmUnit(null)}
+        onConfirm={() => {
+          toggleFavorite({ unitId: confirmUnit?.id ?? '' });
+          setConfirmUnit(null);
+        }}
+        title="즐겨찾기 해제"
+        description={`정말 ${confirmUnit?.name} 병원을 즐겨찾기 해제하시겠어요?`}
+        confirmText="해제하기"
+        cancelText="취소"
+        confirmVariant="destructive"
+      />
     </div>
   );
 }

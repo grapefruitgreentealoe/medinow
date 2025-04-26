@@ -1,20 +1,12 @@
 'use client';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogOverlay,
-} from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { MapPin, Star } from 'lucide-react';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { ReviewList } from '@/features/review/ui/ReviewList';
 import { selectedFavoriteCareUnitAtom } from '../atoms/selectedFavoriteCareUnitAtom';
+import { Badge } from '@/components/ui/badge';
+import { MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CATEGORY_LABEL } from '@/features/map/const';
+import { ContentDialog } from '@/shared/ui/ContentDialog';
 
 export function HospitalDetailDialog() {
   const unit = useAtomValue(selectedFavoriteCareUnitAtom);
@@ -44,45 +36,30 @@ export function HospitalDetailDialog() {
   );
 
   return (
-    <Dialog
+    <ContentDialog
       open={!!unit}
-      onOpenChange={(open) => {
-        if (!open) setSelected(null);
-      }}
+      onClose={() => setSelected(null)}
+      title="병원 상세 정보"
+      hideFooter
     >
-      <DialogOverlay className="bg-black/10 backdrop-brightness-75" />
-      <DialogContent className=" w-fit !p-8 gap-0 bg-background text-foreground text-sm leading-relaxed">
+      <div className="space-y-4 text-sm leading-relaxed">
         {/* 병원명 + 운영 상태 */}
-        <DialogHeader className="mb-2 gap-1">
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            {unit.name}
-            <Badge
-              variant={unit.nowOpen ? 'default' : 'outline'}
-              className="!p-1 rounded-2xl"
-            >
-              {CATEGORY_LABEL[unit.category]}
-            </Badge>
-            <Badge
-              variant={unit.nowOpen ? 'default' : 'outline'}
-              className={cn(
-                unit.nowOpen
-                  ? 'bg-green-500 hover:bg-green-600'
-                  : 'bg-gray-300 text-gray-600',
-                '!p-1 rounded-2xl'
-              )}
-            >
-              {unit.nowOpen ? '운영 중' : '운영 종료'}
-            </Badge>
-          </DialogTitle>
-        </DialogHeader>
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="text-lg font-bold">{unit.name}</h2>
+          <Badge className="!p-1 rounded-2xl bg-muted text-muted-foreground">
+            {CATEGORY_LABEL[unit.category]}
+          </Badge>
+          <Badge className="!p-1 rounded-xl bg-muted text-muted-foreground border">
+            {unit.nowOpen ? '운영 중' : '운영 종료'}
+          </Badge>
+        </div>
 
-        {/* 주소 */}
-        <div>
+        {/* 주소, 전화번호 */}
+        <div className="space-y-1">
           <div className="inline-flex items-center gap-1 text-muted-foreground">
             <MapPin size={16} />
-            <span className="whitespace-nowrap">{unit.address}</span>
+            <span>{unit.address}</span>
           </div>
-          {/* 전화번호 */}
           {unit.tel && (
             <div className="inline-flex items-center gap-1 text-muted-foreground">
               <a href={`tel:${unit.tel}`} className="text-blue-600 underline">
@@ -94,7 +71,7 @@ export function HospitalDetailDialog() {
 
         {/* 혼잡도 */}
         {unit.congestion && (
-          <div className="space-y-1">
+          <div>
             <div className="font-medium">혼잡도</div>
             <div
               className={cn(
@@ -113,12 +90,12 @@ export function HospitalDetailDialog() {
 
         {/* 진료과 */}
         {unit.departments?.length > 0 && (
-          <div className="space-y-1 !mt-5">
+          <div>
             <div className="font-medium">진료과</div>
             <div className="flex flex-wrap gap-2">
-              {unit.departments.map((dept, index) => (
+              {unit.departments.map((dept, idx) => (
                 <Badge
-                  key={index}
+                  key={idx}
                   variant="secondary"
                   className="text-xs !px-2 rounded-2xl"
                 >
@@ -130,11 +107,9 @@ export function HospitalDetailDialog() {
         )}
 
         {/* 운영시간 */}
-        <div className="!mt-5 max-w-[320px]">
-          <div className="text-md font-semibold !mb-2 text-left text-foreground">
-            운영시간
-          </div>
-          <div className="grid grid-cols-[80px_1fr] gap-y-1 gap-x-4 text-sm">
+        <div>
+          <div className="text-md font-semibold mb-2">운영시간</div>
+          <div className="grid grid-cols-[80px_1fr] gap-y-1 gap-x-4">
             {renderTimeRow('월요일', unit.mondayOpen, unit.mondayClose)}
             {renderTimeRow('화요일', unit.tuesdayOpen, unit.tuesdayClose)}
             {renderTimeRow('수요일', unit.wednesdayOpen, unit.wednesdayClose)}
@@ -145,7 +120,7 @@ export function HospitalDetailDialog() {
             {renderTimeRow('공휴일', unit.holidayOpen, unit.holidayClose)}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </ContentDialog>
   );
 }
