@@ -23,7 +23,6 @@ export function middleware(request: NextRequest) {
   const isUserRoute = pathname.startsWith('/user');
   const isAdminRoute = pathname.startsWith('/admin');
 
-  console.log(role);
   // 관리자라면 루트 페이지 접근 시 /admin으로 리디렉션
   if (pathname === '/' && role === 'admin') {
     return NextResponse.redirect(new URL('/admin', request.url));

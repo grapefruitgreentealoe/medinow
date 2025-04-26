@@ -18,13 +18,16 @@ import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 import { ReviewList } from '@/features/review/ui/ReviewList';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/shared/constants/routes';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Badge } from '@/components/ui/badge';
 
+import { Badge } from '@/components/ui/badge';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 export default function CareUnitDetailPage() {
   const router = useRouter();
   const [unit] = useAtom(selectedCareUnitAtom);
@@ -173,78 +176,67 @@ export default function CareUnitDetailPage() {
           </div>
         </div>
       )}
-      {/* 진료과 뱃지 */}
-      {unit.departments?.length > 0 && (
-        <div className="space-y-1 !mt-5">
-          <div className="font-medium">진료과</div>
-          <div className="flex flex-wrap gap-2">
-            {unit.departments.slice(0, 3).map((dept, index) => (
-              <Badge
-                key={index}
-                variant="secondary"
-                className="text-xs !px-2 rounded-2xl"
-              >
-                {dept?.name ?? dept}
-              </Badge>
-            ))}
 
-            {unit.departments.length > 3 && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 !px-2 rounded-2xl text-xs text-muted-foreground"
+      <Accordion className="!mt-6 !space-y-4" type="single" collapsible>
+        {/* 진료과목 */}
+        {unit.departments?.length > 0 && (
+          <AccordionItem value="departments">
+            <AccordionTrigger className="cursor-pointer">
+              진료 과목
+            </AccordionTrigger>
+            <AccordionContent className="!my-3">
+              <div className="flex flex-wrap gap-2 mt-2">
+                {unit.departments.map((dept, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="text-xs !px-2 rounded-2xl"
                   >
-                    +{unit.departments.length - 3}개
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-40 p-2">
-                  <div className="flex flex-col gap-1">
-                    {unit.departments.map((dept, index) => (
-                      <div key={index} className="text-sm text-foreground">
-                        {dept?.name ?? dept}
-                      </div>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
-          </div>
-        </div>
-      )}
+                    {dept?.name ?? dept}
+                  </Badge>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+        {/* 운영시간 */}
+        <AccordionItem value="operation-hours">
+          <AccordionTrigger className="cursor-pointer">
+            운영 시간
+          </AccordionTrigger>
+          <AccordionContent className="!my-3">
+            <div className="mt-2 grid grid-cols-[80px_1fr] gap-y-1 gap-x-4 text-sm max-w-[280px]">
+              {renderTimeRow('월요일', unit.mondayOpen, unit.mondayClose)}
+              {renderTimeRow('화요일', unit.tuesdayOpen, unit.tuesdayClose)}
+              {renderTimeRow('수요일', unit.wednesdayOpen, unit.wednesdayClose)}
+              {renderTimeRow('목요일', unit.thursdayOpen, unit.thursdayClose)}
+              {renderTimeRow('금요일', unit.fridayOpen, unit.fridayClose)}
+              {renderTimeRow('토요일', unit.saturdayOpen, unit.saturdayClose)}
+              {renderTimeRow('일요일', unit.sundayOpen, unit.sundayClose)}
+              {renderTimeRow('공휴일', unit.holidayOpen, unit.holidayClose)}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        {/* 리뷰 */}
+      </Accordion>
 
-      {/* 운영시간 */}
-      <div className="!mt-5 max-w-[280px]">
-        <div className="text-md font-semibold !mb-2 text-left text-foreground">
-          운영시간
-        </div>
-        <div className="grid grid-cols-[80px_1fr] gap-y-1 gap-x-4 text-sm">
-          {renderTimeRow('월요일', unit.mondayOpen, unit.mondayClose)}
-          {renderTimeRow('화요일', unit.tuesdayOpen, unit.tuesdayClose)}
-          {renderTimeRow('수요일', unit.wednesdayOpen, unit.wednesdayClose)}
-          {renderTimeRow('목요일', unit.thursdayOpen, unit.thursdayClose)}
-          {renderTimeRow('금요일', unit.fridayOpen, unit.fridayClose)}
-          {renderTimeRow('토요일', unit.saturdayOpen, unit.saturdayClose)}
-          {renderTimeRow('일요일', unit.sundayOpen, unit.sundayClose)}
-          {renderTimeRow('공휴일', unit.holidayOpen, unit.holidayClose)}
+      <Separator />
+      <div className="flex items-center !pt-6">
+        <span>방문자 리뷰</span>
+        <div className="flex items-center gap-2 text-sm mt-2">
+          <Star size={16} className="text-yellow-400 fill-yellow-400" />
+          <span className="font-medium text-muted-foreground">
+            {(unit.averageRating ?? 0).toFixed(1)}
+          </span>
+          <span className="text-muted-foreground">
+            ({unit.reviewCount ?? 0}건)
+          </span>
         </div>
       </div>
-      {/* 별점 + 리뷰 */}
-      <div className="h-[1rem]" />
-
-      <div className="flex items-center gap-2 text-sm ">
-        <h2 className="text-lg font-semibold mb-2">방문자 리뷰</h2>
-        <Star size={16} className="text-yellow-400 fill-yellow-400" />
-        <span className="font-medium  text-muted-foreground">
-          {(unit.averageRating ?? 0).toFixed(1)}
-        </span>
-        <span className="text-muted-foreground">
-          ({unit.reviewCount ?? 0}건)
-        </span>
-      </div>
-      {/* 혼잡도 */}
-      <ReviewList careUnitId={unit.id} />
+      <ScrollArea className="h-[50vh] w-auto rounded-md border-none !py-3">
+        <ReviewList careUnitId={unit.id} />
+        <div className="h-[200px]" />
+      </ScrollArea>
     </div>
   );
 }
