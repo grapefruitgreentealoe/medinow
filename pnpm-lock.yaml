@@ -26,9 +26,6 @@ importers:
       husky:
         specifier: ^8.0.0
         version: 8.0.3
-      pnpm:
-        specifier: ^10.9.0
-        version: 10.9.0
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
@@ -5393,11 +5390,6 @@ packages:
   pluralize@8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
-
-  pnpm@10.9.0:
-    resolution: {integrity: sha512-BIbjlGQNPB+zydQ9Sc+Sh5/3T4UWlZwjUwj1qPYuLhlSimXNwqMFj1h83nHro9W1YyfIwzqX5MQFHKSKEMotXw==}
-    engines: {node: '>=18.12'}
-    hasBin: true
 
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
@@ -12434,8 +12426,6 @@ snapshots:
       find-up: 4.1.0
 
   pluralize@8.0.0: {}
-
-  pnpm@10.9.0: {}
 
   possible-typed-array-names@1.1.0: {}
 
