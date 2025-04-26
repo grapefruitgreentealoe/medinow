@@ -129,6 +129,7 @@ export default function NearbyCareUnitsMap() {
       overlay.setMap(map);
       markersRef.current.push(overlay);
 
+      //todo: requestAnimationFrame으로 변경하기
       setTimeout(() => {
         const el = document.getElementById(overlayId);
         if (el) {
@@ -171,12 +172,18 @@ export default function NearbyCareUnitsMap() {
         });
 
         const c = map.getCenter();
-        setLat((prev) =>
-          Math.abs((prev ?? 0) - c.getLat()) > 0.0001 ? c.getLat() : prev
-        );
-        setLng((prev) =>
-          Math.abs((prev ?? 0) - c.getLng()) > 0.0001 ? c.getLng() : prev
-        );
+        setLat((prev) => {
+          //  lat이 진짜 바뀔 때만 set
+          if (prev === null) return c.getLat();
+          if (Math.abs(prev - c.getLat()) > 0.00001) return c.getLat();
+          return prev;
+        });
+        setLng((prev) => {
+          // lng이 진짜 바뀔 때만 set
+          if (prev === null) return c.getLng();
+          if (Math.abs(prev - c.getLng()) > 0.00001) return c.getLng();
+          return prev;
+        });
       });
     });
   }, []);

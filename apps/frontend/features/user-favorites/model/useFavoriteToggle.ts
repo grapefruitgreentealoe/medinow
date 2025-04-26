@@ -14,7 +14,6 @@ export function useFavoriteToggle(currentPage: number) {
       const previous = queryClient.getQueryData(['favorites', currentPage]);
 
       queryClient.setQueryData(['favorites', currentPage], (old: any) => {
-        console.log(old);
         if (!old || !old.careUnits) return old;
 
         return {
@@ -27,7 +26,6 @@ export function useFavoriteToggle(currentPage: number) {
     },
 
     onError: (_err, _id, context) => {
-      console.log(_err);
       if (context?.previous) {
         queryClient.setQueryData(['favorites', currentPage], context.previous);
       }

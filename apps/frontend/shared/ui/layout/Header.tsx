@@ -38,16 +38,6 @@ export default function Header() {
     const userRole = window.__USER_ROLE__ ?? '';
     setIsLoggedIn(isInitLoggedIn);
     setRole(userRole);
-
-    if (isInitLoggedIn) {
-      axiosInstance
-        .get('/users', { withCredentials: true })
-        .then((res) => {
-          const [firstUser] = res.data.users;
-          setUser(firstUser);
-        })
-        .catch(() => setUser(null));
-    }
   }, []);
 
   const handleLogout = async () => {

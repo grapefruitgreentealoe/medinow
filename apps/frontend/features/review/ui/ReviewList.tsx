@@ -14,9 +14,7 @@ export function ReviewList({ careUnitId }: Props) {
   const reviews = data?.pages?.flatMap((page) => page.reviews ?? []) ?? [];
   if (!reviews) return null;
   return (
-    <section className="pt-4 border-t">
-      <h2 className="text-lg font-semibold mb-2">방문자 리뷰</h2>
-
+    <section className="pt-4">
       {isLoading ? (
         <p className="text-sm text-muted-foreground">리뷰 불러오는 중...</p>
       ) : reviews.length === 0 ? (
