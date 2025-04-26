@@ -67,7 +67,9 @@ export function SearchCareUnitForReview() {
           readOnly
           onClick={() => setModalOpen(true)}
         />
-        <Button onClick={() => setModalOpen(true)}>병원 검색하기</Button>
+        <Button onClick={() => setModalOpen(true)} disabled={!category}>
+          병원 검색하기
+        </Button>
       </div>
 
       {selected && (
