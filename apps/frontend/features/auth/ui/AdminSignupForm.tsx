@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { SelectSeparator } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 export default function AdminSignupForm() {
   const router = useRouter();
@@ -73,7 +74,7 @@ export default function AdminSignupForm() {
       form.getValues();
 
     if (!careUnitName || !careUnitAddress || !careUnitCategory) {
-      alert('기관명, 주소, 유형을 모두 입력해주세요.');
+      toast.warning('기관명, 주소, 유형을 모두 입력해주세요.');
       return;
     }
 
@@ -87,18 +88,18 @@ export default function AdminSignupForm() {
       if (exists) {
         setValue('isCareUnitVerified', true, { shouldDirty: true });
       } else {
-        alert('등록되지 않은 병원입니다.');
+        toast.warning('등록되지 않은 병원입니다.');
         setValue('isCareUnitVerified', false);
       }
     } catch (e) {
-      alert('병원 확인 중 오류가 발생했습니다.');
+      toast.warning('등록되지 않은 병원입니다.');
     }
   };
 
   const onSubmit = async (data: AdminSignupData) => {
     const isCareUnitVerified = form.getValues('isCareUnitVerified');
     if (!isCareUnitVerified) {
-      alert('병원 확인을 완료해주세요.');
+      toast.warning('병원 확인을 완료해주세요.');
       return;
     }
 
