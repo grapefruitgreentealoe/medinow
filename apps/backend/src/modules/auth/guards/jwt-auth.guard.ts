@@ -36,7 +36,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   handleRequest(err: any, user: any) {
     if (err || !user) {
-      throw err || new UnauthorizedException('유효하지 않은 토큰');
+      throw err || new UnauthorizedException('로그인이 필요한 서비스입니다.');
     }
     return user;
   }
