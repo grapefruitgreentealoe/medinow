@@ -18,6 +18,12 @@ import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 import { ReviewList } from '@/features/review/ui/ReviewList';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/shared/constants/routes';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Badge } from '@/components/ui/badge';
 
 export default function CareUnitDetailPage() {
   const router = useRouter();
@@ -150,8 +156,6 @@ export default function CareUnitDetailPage() {
         <div className="text-muted-foreground">운영</div>
         <div>{unit.nowOpen ? '🟢 운영 중' : '🔴 운영 종료'}</div>
       </div>
-
-      {/* 혼잡도 */}
       {unit.congestion && (
         <div className="space-y-1">
           <div className="font-medium">혼잡도</div>
@@ -166,6 +170,46 @@ export default function CareUnitDetailPage() {
             )}
           >
             {unit.congestion.congestionLevel} ({unit.congestion.hvec} 병상)
+          </div>
+        </div>
+      )}
+      {/* 진료과 뱃지 */}
+      {unit.departments?.length > 0 && (
+        <div className="space-y-1 !mt-5">
+          <div className="font-medium">진료과</div>
+          <div className="flex flex-wrap gap-2">
+            {unit.departments.slice(0, 3).map((dept, index) => (
+              <Badge
+                key={index}
+                variant="secondary"
+                className="text-xs !px-2 rounded-2xl"
+              >
+                {dept?.name ?? dept}
+              </Badge>
+            ))}
+
+            {unit.departments.length > 3 && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 !px-2 rounded-2xl text-xs text-muted-foreground"
+                  >
+                    +{unit.departments.length - 3}개
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-40 p-2">
+                  <div className="flex flex-col gap-1">
+                    {unit.departments.map((dept, index) => (
+                      <div key={index} className="text-sm text-foreground">
+                        {dept?.name ?? dept}
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
         </div>
       )}
@@ -186,6 +230,20 @@ export default function CareUnitDetailPage() {
           {renderTimeRow('공휴일', unit.holidayOpen, unit.holidayClose)}
         </div>
       </div>
+      {/* 별점 + 리뷰 */}
+      <div className="h-[1rem]" />
+
+      <div className="flex items-center gap-2 text-sm ">
+        <h2 className="text-lg font-semibold mb-2">방문자 리뷰</h2>
+        <Star size={16} className="text-yellow-400 fill-yellow-400" />
+        <span className="font-medium  text-muted-foreground">
+          {(unit.averageRating ?? 0).toFixed(1)}
+        </span>
+        <span className="text-muted-foreground">
+          ({unit.reviewCount ?? 0}건)
+        </span>
+      </div>
+      {/* 혼잡도 */}
       <ReviewList careUnitId={unit.id} />
     </div>
   );

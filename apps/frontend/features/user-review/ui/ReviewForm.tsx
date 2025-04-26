@@ -22,6 +22,13 @@ import {
   selectedCareUnitAtom,
   selectedDepartmentsAtom,
 } from '../atoms/reviewFormAtom';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export function ReviewForm({
   defaultValues,
@@ -42,7 +49,7 @@ export function ReviewForm({
     defaultValues: {
       content: '',
       thankMessage: '',
-      departmentId: '',
+      departmentId: null,
       rating: 3,
       isPublic: true,
       ...defaultValues,
@@ -74,14 +81,21 @@ export function ReviewForm({
               <FormItem>
                 <FormLabel>진료 과</FormLabel>
                 <FormControl>
-                  <select className="w-full border rounded p-2" {...field}>
-                    <option value="">진료 과를 선택하세요</option>
-                    {departments.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? undefined}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="진료 과를 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {departments.map((d) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {d.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>

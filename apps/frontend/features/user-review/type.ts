@@ -13,7 +13,7 @@ export interface SubmitReviewPayload {
   rating: number;
   isPublic: boolean;
   careUnitId: string;
-  departmentId?: string;
+  departmentId?: string | null;
 }
 
 export interface ReviewData {
