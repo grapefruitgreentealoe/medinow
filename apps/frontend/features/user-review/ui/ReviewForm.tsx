@@ -42,7 +42,7 @@ export function ReviewForm({
     defaultValues: {
       content: '',
       thankMessage: '',
-      departmentId: '',
+      departmentId: null,
       rating: 3,
       isPublic: true,
       ...defaultValues,
