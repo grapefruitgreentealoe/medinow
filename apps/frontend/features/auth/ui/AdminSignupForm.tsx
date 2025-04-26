@@ -88,7 +88,6 @@ export default function AdminSignupForm() {
       alert('병원 확인 중 오류가 발생했습니다.');
     }
   };
-  console.log(form.formState.errors);
 
   const onSubmit = async (data: AdminSignupData) => {
     const isCareUnitVerified = form.getValues('isCareUnitVerified');
@@ -97,7 +96,6 @@ export default function AdminSignupForm() {
       return;
     }
 
-    console.log('submit');
     setChecking(true);
     const isDuplicated = await checkEmail(data.email);
     setChecking(false);

@@ -331,7 +331,7 @@ export default function NearbyCareUnitsMap() {
 
   return (
     <div className="p-4 space-y-2">
-      <div className="flex justify-between flex-wrap items-center gap-[10px] !m-2">
+      <div className="flex justify-between flex-wrap items-center gap-[10px] !m-2 !overscroll-none">
         <div className="flex justify-between gap-4">
           <Label className="text-sm text-muted-foreground">
             현재 위치: {location ?? '위치 없음'}
