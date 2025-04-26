@@ -233,28 +233,7 @@ export default function CareUnitDetailPage() {
           </span>
         </div>
       </div>
-      <ScrollArea className="h-[50vh] w-auto rounded-md border-none !p-3">
-        <ReviewList careUnitId={unit.id} />
-        <ReviewList careUnitId={unit.id} />
-        <ReviewList careUnitId={unit.id} />
-
-        <ReviewList careUnitId={unit.id} />
-        <ReviewList careUnitId={unit.id} />
-        <ReviewList careUnitId={unit.id} />
-
-        <ReviewList careUnitId={unit.id} />
-        <ReviewList careUnitId={unit.id} />
-        <ReviewList careUnitId={unit.id} />
-        <ReviewList careUnitId={unit.id} />
-        <ReviewList careUnitId={unit.id} />
-        <ReviewList careUnitId={unit.id} />
-
-        <ReviewList careUnitId={unit.id} />
-        <ReviewList careUnitId={unit.id} />
-        <ReviewList careUnitId={unit.id} />
-
-        <ReviewList careUnitId={unit.id} />
-        <ReviewList careUnitId={unit.id} />
+      <ScrollArea className="h-[50vh] w-auto rounded-md border-none !py-3">
         <ReviewList careUnitId={unit.id} />
         <div className="h-[200px]" />
       </ScrollArea>
