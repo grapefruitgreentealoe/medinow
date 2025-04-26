@@ -13,7 +13,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useFixBodyMargin } from '../model/useFixedBodyMargin';
 
 interface LocationSearchModalProps {
   subtitle: string;
@@ -35,8 +34,6 @@ export default function LocationSearchModal({
   onClose,
   onSelect,
 }: LocationSearchModalProps) {
-  useFixBodyMargin(open);
-
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<kakao.maps.Map | null>(null); // 👈 map 객체 보관
   const [loaded, setLoaded] = useState(false);

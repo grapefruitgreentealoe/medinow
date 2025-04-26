@@ -10,7 +10,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { ReactNode } from 'react';
 import { DialogTitle } from '@radix-ui/react-dialog';
-import { useFixBodyMargin } from '../model/useFixedBodyMargin';
 
 interface ContentDialogProps {
   open: boolean;

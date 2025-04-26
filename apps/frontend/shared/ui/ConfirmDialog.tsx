@@ -8,7 +8,6 @@ import {
   DialogOverlay,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useFixBodyMargin } from '../model/useFixedBodyMargin';
 
 interface ConfirmDialogProps {
   open: boolean;
