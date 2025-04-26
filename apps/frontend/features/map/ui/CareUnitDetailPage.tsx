@@ -18,6 +18,13 @@ import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 import { ReviewList } from '@/features/review/ui/ReviewList';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/shared/constants/routes';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Badge } from '@/components/ui/badge';
+import { normalizeDepartments } from '../utils';
 
 export default function CareUnitDetailPage() {
   const router = useRouter();
@@ -63,6 +70,7 @@ export default function CareUnitDetailPage() {
       : unit.category === 'pharmacy'
         ? '약국'
         : '병원';
+  const departmentNames = normalizeDepartments(unit.departments);
 
   return (
     <div className="!p-6 !pt-7 !pb-8 space-y-6 bg-background text-foreground text-sm leading-relaxed">
@@ -166,6 +174,46 @@ export default function CareUnitDetailPage() {
             )}
           >
             {unit.congestion.congestionLevel} ({unit.congestion.hvec} 병상)
+          </div>
+        </div>
+      )}
+      {/* 진료과 뱃지 */}
+      {departmentNames?.length > 0 && (
+        <div className="space-y-1 !mt-5">
+          <div className="font-medium">진료과</div>
+          <div className="flex flex-wrap gap-2">
+            {departmentNames.slice(0, 3).map((dept, index) => (
+              <Badge
+                key={index}
+                variant="secondary"
+                className="text-xs !px-2 rounded-2xl"
+              >
+                {dept}
+              </Badge>
+            ))}
+
+            {departmentNames.length > 3 && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 !px-2 rounded-2xl text-xs text-muted-foreground"
+                  >
+                    +{departmentNames.length - 3}개
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-40 p-2">
+                  <div className="flex flex-col gap-1">
+                    {departmentNames.map((dept, index) => (
+                      <div key={index} className="text-sm text-foreground">
+                        {dept}
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
         </div>
       )}
