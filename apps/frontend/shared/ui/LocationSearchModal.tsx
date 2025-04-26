@@ -108,7 +108,7 @@ export default function LocationSearchModal({
         src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY}&libraries=services&autoload=false`}
         onLoad={() => setLoaded(true)}
       />
-      <Dialog open={open} onOpenChange={onClose}>
+      <Dialog open={open} onOpenChange={onClose} modal>
         <DialogOverlay className="bg-black/10 backdrop-brightness-80" />
         <DialogContent className="!p-6 !max-w-2xl">
           <DialogHeader className="!mb-2 !gap-1">

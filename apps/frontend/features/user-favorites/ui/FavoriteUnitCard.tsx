@@ -22,6 +22,7 @@ import { CareUnit, CongestionLevel } from '@/shared/type';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/shared/constants/routes';
+import { Badge } from '@/components/ui/badge';
 
 interface CareUnitCardProps {
   unit: CareUnit;
@@ -81,14 +82,14 @@ export function CareUnitCard({
           {unit?.congestion?.congestionLevel && (
             <span className={congestionClassMap[level]}>혼잡도: {level}</span>
           )}
-          <span className="bg-muted text-muted-foreground !px-2 !py-0.5 rounded-full">
-            {unit.nowOpen ? '🟢 운영 중' : '🔴 운영 종료'}
-          </span>
+          <Badge className={'!p-1 rounded-xl  text-muted-foreground bg-muted'}>
+            {unit.nowOpen ? '운영 중' : '운영 종료'}
+          </Badge>
         </div>
 
         {/* 운영시간 */}
         <div className="text-sm text-muted-foreground">
-          ⏰ 오늘 운영시간:{' '}
+          오늘 운영시간:{' '}
           <span className="text-foreground font-medium">
             {renderTodayTime(unit)}
           </span>
