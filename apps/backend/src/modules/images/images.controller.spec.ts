@@ -17,6 +17,10 @@ describe('ImagesController', () => {
     save: jest.fn(),
   };
 
+  const mockUserService = {
+    findById: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ImagesController],
@@ -27,6 +31,10 @@ describe('ImagesController', () => {
         {
           provide: getRepositoryToken(Image),
           useValue: mockImageRepository,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUserService,
         },
         {
           provide: ConfigService,
