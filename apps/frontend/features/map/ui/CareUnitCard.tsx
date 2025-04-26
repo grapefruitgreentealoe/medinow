@@ -62,6 +62,16 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
         {/* 제목 + 주소 */}
         <div className="space-y-1">
           <h3 className="text-base font-bold text-primary">{unit.name}</h3>
+          <div className="flex items-center gap-2 text-xs mt-2">
+            <Star size={10} className="text-yellow-400 fill-yellow-400" />
+            <span className="text-muted-foreground">
+              {(unit.averageRating ?? 0).toFixed(1)}
+            </span>
+            <span className="text-muted-foreground">
+              ({unit.reviewCount ?? 0}건)
+            </span>
+          </div>
+
           <p className="text-sm text-muted-foreground leading-snug">
             {unit.address}
           </p>
@@ -75,14 +85,19 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
           {unit?.congestion?.congestionLevel && (
             <span className={congestionClassMap[level]}>혼잡도: {level}</span>
           )}
-          <span className="bg-muted text-muted-foreground !px-2 !py-0.5 rounded-full">
-            {unit.nowOpen ? '🟢 운영 중' : '🔴 운영 종료'}
+          <span
+            className={cn(
+              'bg-muted  text-white !px-2 !py-0.5 rounded-full',
+              unit.nowOpen ? 'bg-primary' : 'bg-accent'
+            )}
+          >
+            {unit.nowOpen ? '운영 중' : '운영 종료'}
           </span>
         </div>
 
         {/* 운영시간 */}
-        <div className="text-sm text-muted-foreground">
-          ⏰ 오늘 운영시간:{' '}
+        <div className="text-xs !mt-1 text-muted-foreground">
+          오늘 운영시간:{' '}
           <span className="text-foreground font-medium">
             {renderTodayTime(unit)}
           </span>
