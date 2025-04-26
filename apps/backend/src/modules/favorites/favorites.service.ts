@@ -1,4 +1,9 @@
-import { Inject, forwardRef, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  forwardRef,
+  Injectable,
+  BadRequestException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Favorite } from './entities/favorite.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,6 +23,12 @@ export class FavoritesService {
 
   // 즐겨찾기 추가 및 해제
   async toggleFavorite(userId: string, careUnitId: string) {
+    if (!userId) {
+      throw new BadRequestException('로그인이 필요한 서비스입니다.');
+    }
+    if (!careUnitId) {
+      throw new BadRequestException('즐겨찾기 추가/해제 실패');
+    }
     const existingFavorite = await this.favoriteRepository.findOne({
       where: { user: { id: userId }, careUnit: { id: careUnitId } },
     });
@@ -38,6 +49,9 @@ export class FavoritesService {
 
   // 즐겨찾기 목록 조회
   async getUserFavorites(userId: string, page: number = 1, limit: number = 10) {
+    if (!userId) {
+      throw new BadRequestException('로그인이 필요한 서비스입니다.');
+    }
     const skip = (page - 1) * limit;
     const [favorites, total] = await this.favoriteRepository.findAndCount({
       where: {
@@ -116,6 +130,12 @@ export class FavoritesService {
 
   // 즐겨찾기 존재 여부 확인
   async checkIsFavorite(userId: string, careUnitId: string): Promise<boolean> {
+    if (!userId) {
+      throw new BadRequestException('로그인이 필요한 서비스입니다.');
+    }
+    if (!careUnitId) {
+      throw new BadRequestException('즐겨찾기 존재 여부 확인 실패');
+    }
     const count = await this.favoriteRepository.count({
       where: {
         user: { id: userId },
