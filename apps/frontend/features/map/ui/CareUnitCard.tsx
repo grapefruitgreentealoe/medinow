@@ -54,10 +54,9 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
     <Card
       key={unit.id}
       className={cn(
-        'mb-4 cursor-pointer hover:shadow-md bg-background transition-shadow rounded-none border-t-0 border-l-0 border-r-0 border-b-[1px] border-b-slate-300 border-solid'
+        'mb-4 hover:shadow-md bg-background transition-shadow rounded-none border-t-0 border-l-0 border-r-0 border-b-[1px] border-b-slate-300 border-solid'
       )}
       style={{ contentVisibility: 'auto', containIntrinsicSize: '64px' }}
-      onClick={() => onSelect(unit)}
     >
       <CardContent className="!p-5 space-y-4">
         {/* 제목 + 주소 */}
@@ -91,14 +90,24 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
 
         {/* 기능 버튼 */}
         <div className="flex justify-between items-center pt-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-primary text-xs underline !px-0"
-            onClick={handleUrlButton}
-          >
-            길찾기
-          </Button>
+          <div className="flex gap-2 items-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary text-xs !px-0"
+              onClick={handleUrlButton}
+            >
+              길찾기
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary text-xs !px-0"
+              onClick={() => onSelect(unit)}
+            >
+              상세보기
+            </Button>
+          </div>
 
           <div className="flex gap-2 items-center">
             <Button

@@ -23,7 +23,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@radix-ui/react-select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { SelectSeparator } from '@/components/ui/select';
 
 export default function AdminSignupForm() {
@@ -123,12 +129,16 @@ export default function AdminSignupForm() {
               <FormItem>
                 <FormLabel>의료기관 유형</FormLabel>
                 <FormControl>
-                  <select {...field} className="w-full border rounded p-2">
-                    <option value="">선택하세요</option>
-                    <option value="emergency">응급실</option>
-                    <option value="hospital">병원</option>
-                    <option value="pharmacy">약국</option>
-                  </select>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="emergency">응급실</SelectItem>
+                      <SelectItem value="hospital">병원</SelectItem>
+                      <SelectItem value="pharmacy">약국</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
