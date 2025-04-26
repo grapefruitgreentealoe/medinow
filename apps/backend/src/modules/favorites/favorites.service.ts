@@ -98,7 +98,7 @@ export class FavoritesService {
           reviewCount: favorite.careUnit.reviews.length || 0,
           departments:
             favorite.careUnit.departments.map((department) => {
-              return department.name;
+              return { id: department.id, name: department.name };
             }) || [],
         };
       }),
