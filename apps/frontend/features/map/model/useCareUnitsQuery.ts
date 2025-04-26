@@ -32,6 +32,7 @@ export function useCareUnitsQuery({
   const shouldFetch = lat !== null && lng !== null && level !== null;
 
   const query = useInfiniteQuery({
+    refetchOnWindowFocus: false,
     gcTime: 1000 * 60 * 10,
     staleTime: 1000 * 60 * 5,
     enabled: shouldFetch,
@@ -73,6 +74,6 @@ export function useCareUnitsQuery({
     isFetching: query.isFetching,
     isLoading: query.isLoading,
     raw: query,
-    queryKey, // 👈 이거 추가!
+    queryKey,
   };
 }
