@@ -25,7 +25,6 @@ export function useDeleteReviewMutation(page: number) {
     },
 
     onError: (_err, _id, context) => {
-      console.log(_err);
       if (context?.previous) {
         queryClient.setQueryData(['reviews', page], context.previous);
       }
