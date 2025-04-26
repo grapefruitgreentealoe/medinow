@@ -1,4 +1,4 @@
-import { CareUnit } from '../../shared/type';
+import { CareUnit, Department } from '../../shared/type';
 
 export const formatTime = (time: number | null) => {
   if (time === null) return '없음';
@@ -88,3 +88,13 @@ export const openKakaoMap = async (unit: CareUnit) => {
 
   window.open(kakaoUrl, '_blank');
 };
+
+export function normalizeDepartments(
+  departments: Department[] | string[]
+): string[] {
+  if (!departments) return [];
+  if (typeof departments[0] === 'string') {
+    return departments as string[];
+  }
+  return (departments as Department[]).map((dept) => dept.name);
+}
