@@ -1,6 +1,7 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 echo "🚀 pre-push 훅 실행됨!"
+export PATH="$HOME/.nvm/versions/node/v20.11.0/bin:$PATH"
 
 pnpm lint
 pnpm test
