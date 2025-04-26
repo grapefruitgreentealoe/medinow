@@ -22,14 +22,31 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: Request) => request?.cookies?.accessToken,
-        ExtractJwt.fromAuthHeaderAsBearerToken(),
         (request: Request) => {
-          const socket = (request as any).handshake.query.token;
-          if (!socket) return null;
-          const cookie = JSON.parse(socket);
-          if (!cookie?.accessToken) return null;
-          return cookie.accessToken;
+          // 쿠키에서 토큰 추출
+          if (request?.cookies?.accessToken) {
+            return request.cookies.accessToken;
+          }
+
+          // Authorization 헤더에서 토큰 추출
+          const authHeader = request?.headers?.authorization;
+          if (authHeader && authHeader.startsWith('Bearer ')) {
+            return authHeader.substring(7);
+          }
+
+          // WebSocket 연결에서 토큰 추출
+          if ((request as any)?.handshake?.query?.token) {
+            try {
+              const socketToken = JSON.parse(
+                (request as any).handshake.query.token as string,
+              );
+              return socketToken?.accessToken || null;
+            } catch (error) {
+              return null;
+            }
+          }
+
+          return null;
         },
       ]),
       ignoreExpiration: false,
