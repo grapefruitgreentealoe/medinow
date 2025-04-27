@@ -110,7 +110,7 @@ export default function LocationSearchModal({
       />
       <Dialog open={open} onOpenChange={onClose} modal>
         <DialogOverlay className="bg-black/10 backdrop-brightness-80" />
-        <DialogContent className="!p-6 !max-w-2xl">
+        <DialogContent className="!max-w-2xl">
           <DialogHeader className="!mb-2 !gap-1">
             <DialogTitle className="text-lg">{title}</DialogTitle>
             <DialogDescription>{subtitle}</DialogDescription>
@@ -124,9 +124,7 @@ export default function LocationSearchModal({
               placeholder="장소 키워드를 입력하세요"
               className="text-black bg-white"
             />
-            <Button type="submit" className="!px-4 !py-2">
-              검색
-            </Button>
+            <Button type="submit">검색</Button>
           </form>
 
           {/* 지도 영역 - 반드시 사이즈 지정 */}
@@ -140,7 +138,7 @@ export default function LocationSearchModal({
             {places.map((place, i) => (
               <li
                 key={i}
-                className="!p-3 bg-white border-b-[1px] border-b-slate-100 border-solid cursor-pointer hover:bg-muted transition-colors text-sm list-none"
+                className="bg-white border-b-[1px] border-b-slate-100 border-solid cursor-pointer hover:bg-muted transition-colors text-sm list-none"
                 onClick={() => handleSelect(place)}
               >
                 <strong className="text-base">{place.place_name}</strong>

@@ -19,7 +19,7 @@ export function Sidebar({ navItems }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-2 !p-[20px]">
+    <nav className="flex flex-col gap-2 !p-[20px] fixed">
       {navItems.map(
         ({
           href,

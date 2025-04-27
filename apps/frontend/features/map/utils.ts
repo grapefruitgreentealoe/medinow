@@ -17,11 +17,17 @@ export const renderTodayTime = (unit: CareUnit) => {
     'friday',
     'saturday',
   ][new Date().getDay()];
+
   const open = unit[`${day}Open` as keyof CareUnit] as number | null;
   const close = unit[`${day}Close` as keyof CareUnit] as number | null;
 
+  if (open === null && close === null) {
+    return '휴무';
+  }
+
   return `${formatTime(open)} ~ ${formatTime(close)}`;
 };
+
 export const getCategoryIconSvg = (category: string) => {
   switch (category) {
     case 'emergency':
