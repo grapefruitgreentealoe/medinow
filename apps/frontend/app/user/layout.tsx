@@ -25,7 +25,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
           <Sidebar navItems={navItems} />
         </aside>
         <AnimatePresence mode="wait">
-          <main className="flex-1 p-8">
+          <main className="flex-1">
             <motion.section
               key={pathname}
               initial={{ opacity: 0, y: 10 }} // 처음에는 아래에 + 투명

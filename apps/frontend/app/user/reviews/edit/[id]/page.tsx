@@ -21,30 +21,11 @@ export default function EditReviewPage() {
     { id: string; name: string }[] | null
   >(null);
 
-  if (reviewAtomData == null) {
-    return <div>잘못된 접근입니다</div>;
-  }
-
-  const defaultValues = {
-    content: reviewAtomData.content,
-    thankMessage: reviewAtomData.thankMessage,
-    departmentId: reviewAtomData.departmentId,
-    rating: reviewAtomData.rating,
-    isPublic: reviewAtomData.isPublic,
-  };
-  const careUnit = {
-    name: reviewAtomData.careUnitName,
-    address: '',
-  };
-
   useEffect(() => {
-    getCareUnitById(reviewAtomData.careUnitId as string).then((unit) => {
+    getCareUnitById(reviewAtomData?.careUnitId as string).then((unit) => {
       setDepartments(unit.departments); // [{ id, name }]
     });
   }, [reviewAtomData]);
-
-  if (!defaultValues || !careUnit || !departments || !id || !reviewAtomData)
-    return <div>잘못된 접근입니다</div>;
 
   const handleSubmit = async (data: UpdateReviewInput) => {
     try {
@@ -55,6 +36,24 @@ export default function EditReviewPage() {
       toast.warning('실패!');
     }
   };
+
+  if (!departments || !id || !reviewAtomData)
+    return <div>잘못된 접근입니다</div>;
+  if (reviewAtomData == null) {
+    return <div>잘못된 접근입니다</div>;
+  }
+  const careUnit = {
+    name: reviewAtomData.careUnitName,
+    address: '',
+  };
+  const defaultValues = {
+    content: reviewAtomData.content,
+    thankMessage: reviewAtomData.thankMessage,
+    departmentId: reviewAtomData.departmentId,
+    rating: reviewAtomData.rating,
+    isPublic: reviewAtomData.isPublic,
+  };
+
   return (
     <main className="min-h-screen flex flex-col items-center !px-4 !py-10">
       <div className="w-full max-w-xl !space-y-10">

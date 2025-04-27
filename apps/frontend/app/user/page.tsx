@@ -36,7 +36,7 @@ export default function UserProfilePage() {
   }
 
   return (
-    <Card className="max-w-5xl !m-[20px]">
+    <Card className="max-w-5xl !m-[20px] !mx-auto max-md:!mx-[10px]">
       <CardContent>
         <div className="h-auto flex flex-col gap-[20px]">
           <div className="h-[60px] w-full">
