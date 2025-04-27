@@ -3,7 +3,7 @@
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
+  DialogTitle,
   DialogFooter,
   DialogOverlay,
 } from '@/components/ui/dialog';
@@ -35,9 +35,9 @@ export function ConfirmDialog({
       <DialogOverlay className="bg-black/10 backdrop-blur-sm" />
 
       <DialogContent>
-        <DialogHeader>
+        <DialogTitle>
           <p className="text-lg font-semibold">{title}</p>
-        </DialogHeader>
+        </DialogTitle>
 
         <p className="text-sm text-muted-foreground mt-2">{description}</p>
 

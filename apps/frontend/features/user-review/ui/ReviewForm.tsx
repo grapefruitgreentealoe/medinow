@@ -14,7 +14,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { StarRating } from './StarRating';
 import { useAtomValue } from 'jotai';
@@ -41,7 +41,7 @@ export function ReviewForm({
   careUnit?: { name: string; address: string };
   departments?: { id: string; name: string }[];
 }) {
-  const careUnit = careUnitProp ?? useAtomValue(selectedCareUnitAtom); // 새로 작성시 활용하는 atom임.
+  const careUnit = careUnitProp ?? useAtomValue(selectedCareUnitAtom);
   const departments = departmentsProp ?? useAtomValue(selectedDepartmentsAtom);
 
   const form = useForm<FormSchema>({
@@ -64,16 +64,19 @@ export function ReviewForm({
   } = form;
 
   return (
-    <div className="space-y-6 max-w-xl mx-auto py-6">
-      <div className="p-4 bg-muted rounded-md">
-        <p className="text-sm text-muted-foreground">리뷰 대상 병원</p>
-        <p className="font-medium text-lg">{careUnit?.name}</p>
-        <p className="text-sm text-muted-foreground">{careUnit?.address}</p>
-      </div>
+    <div className="!space-y-6 max-w-xl mx-auto py-6">
+      {/* 병원정보 */}
+      <Card className="bg-muted/50 border">
+        <CardContent className="!space-y-1">
+          <p className="text-xs text-muted-foreground">리뷰 대상 병원</p>
+          <h3 className="text-base font-bold">{careUnit?.name}</h3>
+          <p className="text-sm text-muted-foreground">{careUnit?.address}</p>
+        </CardContent>
+      </Card>
 
+      {/* 리뷰 작성 */}
       <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* 진료과 선택 */}
+        <form onSubmit={handleSubmit(onSubmit)} className="!space-y-4">
           <FormField
             control={control}
             name="departmentId"
@@ -88,7 +91,7 @@ export function ReviewForm({
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="진료 과를 선택하세요" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent aria-disabled>
                       {departments.map((d) => (
                         <SelectItem key={d.id} value={d.id}>
                           {d.name}
@@ -102,7 +105,6 @@ export function ReviewForm({
             )}
           />
 
-          {/* 별점 */}
           <FormField
             control={control}
             name="rating"
@@ -110,7 +112,7 @@ export function ReviewForm({
               <FormItem>
                 <FormLabel>별점</FormLabel>
                 <FormControl>
-                  <Card className="p-4">
+                  <div>
                     <StarRating
                       value={field.value}
                       onChange={(val) => setValue('rating', val)}
@@ -118,13 +120,12 @@ export function ReviewForm({
                     <p className="text-sm mt-2 text-muted-foreground">
                       선택한 별점: {field.value}점
                     </p>
-                  </Card>
+                  </div>
                 </FormControl>
               </FormItem>
             )}
           />
 
-          {/* 리뷰 내용 */}
           <FormField
             control={control}
             name="content"
@@ -143,7 +144,6 @@ export function ReviewForm({
             )}
           />
 
-          {/* 감사 메시지 */}
           <FormField
             control={control}
             name="thankMessage"
@@ -161,7 +161,6 @@ export function ReviewForm({
             )}
           />
 
-          {/* 공개 여부 */}
           <FormField
             control={control}
             name="isPublic"
@@ -178,7 +177,7 @@ export function ReviewForm({
             )}
           />
 
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting} className="w-full">
             {isSubmitting
               ? '처리 중...'
               : defaultValues
