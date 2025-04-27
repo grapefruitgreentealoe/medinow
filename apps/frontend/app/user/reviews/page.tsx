@@ -22,6 +22,8 @@ import { ReviewList } from '@/features/review/ui/ReviewList';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { ContentDialog } from '@/shared/ui/ContentDialog';
 import { ReviewItem } from '@/features/user-review/ui/ReviewItem';
+import { SimplePagination } from '@/shared/ui/SimplePagination';
+import { ReviewBody } from '@/features/review/ui/ReviewBody';
 
 export default function ReviewPaginationPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,34 +73,12 @@ export default function ReviewPaginationPage() {
         ))}
       </div>
 
-      <Pagination>
-        <PaginationContent>
-          {currentPage > 1 && (
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => setCurrentPage((p) => p - 1)}
-              />
-            </PaginationItem>
-          )}
-
-          {Array.from({ length: totalPages }, (_, i) => (
-            <PaginationItem key={i}>
-              <PaginationLink
-                isActive={currentPage === i + 1}
-                onClick={() => setCurrentPage(i + 1)}
-              >
-                {i + 1}
-              </PaginationLink>
-            </PaginationItem>
-          ))}
-
-          {currentPage < totalPages && (
-            <PaginationItem>
-              <PaginationNext onClick={() => setCurrentPage((p) => p + 1)} />
-            </PaginationItem>
-          )}
-        </PaginationContent>
-      </Pagination>
+      {/* 페이지네이션 */}
+      <SimplePagination
+        page={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page) => setCurrentPage(page)}
+      />
 
       <ConfirmDialog
         open={!!confirmDeleteId}
@@ -129,18 +109,12 @@ export default function ReviewPaginationPage() {
         ctaText="확인"
         onCtaClick={() => setDetailReview(null)}
       >
-        <div>
-          <h3 className="text-lg font-bold mb-2">
-            {detailReview?.careUnitName}
-          </h3>
-          <p className="text-sm text-muted-foreground mb-1">
-            {detailReview?.departmentName}
-          </p>
-          <p className="text-sm text-muted-foreground mb-1">
-            ⭐ {detailReview?.rating}
-          </p>
-          <p className="mt-4 whitespace-pre-line">{detailReview?.content}</p>
-        </div>
+        <ReviewBody
+          rating={detailReview?.rating!}
+          content={detailReview?.content!}
+          createdAt={detailReview?.createdAt!}
+          thankMessage={detailReview?.thankMessage}
+        />
       </ContentDialog>
 
       {isFetching && (
