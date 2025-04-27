@@ -42,7 +42,7 @@ export function HospitalDetailDialog() {
       title="병원 상세 정보"
       hideFooter
     >
-      <div className="space-y-4 text-sm leading-relaxed">
+      <div className="!space-y-4 text-sm leading-relaxed">
         {/* 병원명 + 운영 상태 */}
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-lg font-bold">{unit.name}</h2>
