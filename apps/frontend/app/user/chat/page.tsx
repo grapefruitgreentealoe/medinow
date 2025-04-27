@@ -1,7 +1,14 @@
+import { ChatLayout } from '@/features/user-chat/ui/ChatLayout';
+import { ChatRoomList } from '@/features/user-chat/ui/ChatRoomList';
+import { ChatMessages } from '@/features/user-chat/ui/ChatMessages';
+import { HospitalInfoCard } from '@/features/user-chat/ui/HospitalInfoCard';
+
 export default function ChatPage() {
   return (
-    <div className="flex items-center justify-center h-full text-gray-400">
-      대화를 시작하려면 방을 선택하세요
-    </div>
+    <ChatLayout
+      left={<ChatRoomList />}
+      center={<ChatMessages />}
+      right={<HospitalInfoCard />}
+    />
   );
 }

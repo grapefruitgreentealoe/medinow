@@ -1,7 +1,7 @@
 'use client';
 
 import { useAtom, useAtomValue } from 'jotai';
-import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
+import { chatModalAtom } from '@/features/user-chat/atoms/chatModalAtom';
 import { useSetAtom } from 'jotai';
 import { cn } from '@/lib/utils';
 import {
