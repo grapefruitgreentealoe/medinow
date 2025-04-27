@@ -51,6 +51,7 @@ export function SimplePagination({
           </div>
         </div>
       )}
+      <div className="h-[20px]" />
     </>
   );
 }

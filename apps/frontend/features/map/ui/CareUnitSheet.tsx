@@ -50,8 +50,6 @@ export default function CareUnitSheet({
       OpenStatus: JSON.parse(openFilter),
     });
 
-  if (!open) return null;
-
   const getTitle = () => (page === 'list' ? '의료기관 목록' : '상세 정보');
 
   const getDescription = () =>
@@ -59,8 +57,8 @@ export default function CareUnitSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="right" className="w-[90vw] sm:w-[400px] !p-0 ">
-        <SheetHeader className="!p-4 border-b">
+      <SheetContent side="right" className="w-[90vw] sm:w-[400px]">
+        <SheetHeader className="border-b">
           <div className="relative flex justify-center items-center">
             {page === 'detail' && (
               <button

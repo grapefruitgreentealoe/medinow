@@ -36,15 +36,17 @@ export function ContentDialog({
     <Dialog open={open} onOpenChange={onClose} modal>
       <DialogOverlay className="bg-black/10 backdrop-blur-sm" />
 
-      <DialogContent className="w-fit !p-8 gap-0 bg-background text-foreground text-sm leading-relaxed">
-        <DialogTitle className="mb-2 gap-1">
+      <DialogContent className="w-fit min-w-[300px] gap-0 bg-background text-foreground text-sm leading-relaxed">
+        <DialogTitle className="mb-2 !gap-1 text-primary">
           <p className="text-xl font-bold">{title}</p>
         </DialogTitle>
 
-        <div className="mt-4 space-y-4 text-sm text-foreground">{children}</div>
+        <div className="!mt-4 !space-y-4 text-sm text-foreground">
+          {children}
+        </div>
 
         {!hideFooter && (
-          <DialogFooter className="mt-6 flex gap-2 justify-end">
+          <DialogFooter className="!mt-6 flex gap-2 justify-end">
             {showCtaButton && onCtaClick && (
               <Button onClick={onCtaClick}>{ctaText}</Button>
             )}

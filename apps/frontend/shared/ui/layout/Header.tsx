@@ -107,13 +107,13 @@ export default function Header() {
                 <>
                   {role === 'admin' ? (
                     <Link href={ROUTES.ADMIN.DASHBOARD}>
-                      <Button variant="ghost" className="text-sm !px-4">
+                      <Button variant="ghost" className="text-sm ">
                         관리자 대시보드
                       </Button>
                     </Link>
                   ) : (
                     <Link href={ROUTES.USER.ROOT}>
-                      <Button variant="ghost" className="text-sm !px-4">
+                      <Button variant="ghost" className="text-sm ">
                         마이페이지
                       </Button>
                     </Link>
@@ -121,7 +121,7 @@ export default function Header() {
                   <Button
                     variant="ghost"
                     onClick={handleLogout}
-                    className="text-sm font-medium text-foreground !px-4"
+                    className="text-sm font-medium text-foreground "
                   >
                     로그아웃
                   </Button>
@@ -129,17 +129,17 @@ export default function Header() {
               ) : (
                 <>
                   <Link href={ROUTES.SIGN_UP.ADMIN}>
-                    <Button variant="ghost" className="text-sm !px-4">
+                    <Button variant="ghost" className="text-sm ">
                       관리자 회원가입
                     </Button>
                   </Link>
                   <Link href={ROUTES.SIGN_UP.USER}>
-                    <Button variant="ghost" className="text-sm !px-4">
+                    <Button variant="ghost" className="text-sm ">
                       회원가입
                     </Button>
                   </Link>
                   <Link href={ROUTES.LOGIN}>
-                    <Button className="text-sm bg-primary text-white !px-4">
+                    <Button className="text-sm bg-primary text-white ">
                       로그인
                     </Button>
                   </Link>

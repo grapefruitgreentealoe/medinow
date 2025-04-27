@@ -37,8 +37,8 @@ export default function UserProfilePage() {
 
   return (
     <Card className="max-w-5xl !m-[20px]">
-      <CardContent className="p-6">
-        <div className="h-auto flex flex-col gap-[20px] !p-[20px]">
+      <CardContent>
+        <div className="h-auto flex flex-col gap-[20px]">
           <div className="h-[60px] w-full">
             <p className="text-sm text-muted-foreground">이메일</p>
             <p className="font-medium">{user.email}</p>

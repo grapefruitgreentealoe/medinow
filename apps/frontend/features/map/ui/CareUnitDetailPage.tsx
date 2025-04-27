@@ -84,13 +84,13 @@ export default function CareUnitDetailPage() {
           </div>
 
           <div className="flex justify-start">
-            <span className="bg-muted text-muted-foreground text-xs !px-2 !py-0.5 rounded-full">
+            <Badge className="bg-muted text-muted-foreground text-xs">
               {categoryLabel}
-            </span>
+            </Badge>
             {unit.isBadged && (
-              <span className="bg-yellow-100 text-yellow-700 text-xs !px-2 !py-0.5 rounded-full">
+              <Badge className="bg-yellow-100 text-yellow-700 text-xs">
                 감사병원
-              </span>
+              </Badge>
             )}
           </div>
         </div>
@@ -163,9 +163,7 @@ export default function CareUnitDetailPage() {
             {renderTodayTime(unit)}
           </span>
           <span className="inline-block !px-2"></span>
-          <Badge
-            className={'!p-1 rounded-xl  text-muted-foreground bg-muted border'}
-          >
+          <Badge className={'text-muted-foreground bg-muted border'}>
             {unit.nowOpen ? '운영 중' : '운영 종료'}
           </Badge>
         </div>
@@ -198,11 +196,7 @@ export default function CareUnitDetailPage() {
             <AccordionContent className="!my-3">
               <div className="flex flex-wrap gap-2 mt-2">
                 {unit.departments.map((dept, index) => (
-                  <Badge
-                    key={index}
-                    variant="secondary"
-                    className="text-xs !px-2 rounded-2xl"
-                  >
+                  <Badge key={index} variant="secondary" className="text-xs">
                     {dept?.name ?? dept}
                   </Badge>
                 ))}

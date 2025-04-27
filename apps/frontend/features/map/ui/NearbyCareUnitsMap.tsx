@@ -346,7 +346,7 @@ export default function NearbyCareUnitsMap() {
           <Button
             variant="outline"
             size="sm"
-            className="text-xs !px-3"
+            className="text-xs "
             onClick={handleFirstLocationButton}
           >
             현재 위치로
@@ -354,7 +354,7 @@ export default function NearbyCareUnitsMap() {
           <Button
             variant="outline"
             size="sm"
-            className="text-xs !px-3"
+            className="text-xs "
             onClick={() => setHospitalSearchModal(true)}
           >
             위치 검색
