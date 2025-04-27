@@ -131,7 +131,6 @@ export class AuthController {
     });
   }
 
-
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '로그아웃' })
   @ApiOkResponse({
