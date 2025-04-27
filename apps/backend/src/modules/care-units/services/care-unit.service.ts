@@ -78,7 +78,9 @@ export class CareUnitService {
     //   }
     // }
 
-    // 사용자가 제공된 경우 즐겨찾기 정보 추가
+    const isOpen = await this.checkNowOpen(careUnit.id);
+
+    const adminUser = await this.usersService.getUserByCareUnitId(careUnit.id);
 
     let isFavorite = false;
     if (user && user.id) {
@@ -95,9 +97,6 @@ export class CareUnitService {
     } else {
       this.logger.log('사용자 정보 없음 - 즐겨찾기 확인 건너뜀');
     }
-
-    const isOpen = await this.checkNowOpen(careUnit.id);
-    const adminUser = await this.usersService.getUserByCareUnitId(careUnit.id);
 
     const { favorites, reviews, ...restCareUnit } = careUnit;
     return {
@@ -301,6 +300,7 @@ export class CareUnitService {
     try {
       const careUnitsWithStatus = await Promise.all(
         careUnits.map(async (careUnit) => {
+          // 자동 모드인 경우 운영 시간에 따라 계산
           const isOpen = await this.checkNowOpen(careUnit.id);
           const adminUser = await this.usersService
             .getUserByCareUnitId(careUnit.id)
@@ -464,8 +464,20 @@ export class CareUnitService {
   async checkNowOpen(id: string) {
     const careUnit = await this.careUnitRepository.findOne({ where: { id } });
     if (!careUnit) {
-      throw new NotFoundException('Care unit not found');
+      throw new NotFoundException('의료기관을 찾을 수 없습니다.');
     }
+
+    // isReverse 필드가 있고 true인 경우 수동 설정값을 반환
+    if (careUnit.isReverse) {
+      return careUnit.nowOpen;
+    }
+
+    // 자동 모드인 경우 운영 시간에 따라 계산
+    return this.calculateOpenStatus(careUnit);
+  }
+
+  // 운영 상태 계산 (자동 모드)
+  private async calculateOpenStatus(careUnit: CareUnit): Promise<boolean> {
     let open;
     let close;
     const date = new Date();
@@ -507,6 +519,49 @@ export class CareUnitService {
     careUnit.nowOpen = false;
     await this.careUnitRepository.save(careUnit);
     return false;
+  }
+
+  // 운영 모드 토글
+  async toggleOperationMode(userId: string, isReverse: boolean) {
+    const user = await this.usersService.findUserByIdWithRelations(userId);
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+    const careUnit = await this.careUnitRepository.findOne({
+      where: { id: user.userProfile?.careUnit?.id },
+    });
+    if (!careUnit) {
+      throw new NotFoundException('의료기관을 찾을 수 없습니다.');
+    }
+    if (isReverse) {
+      // 수동 모드로 전환하고 현재 상태를 반전
+      careUnit.nowOpen = !careUnit.nowOpen;
+      careUnit.isReverse = true;
+    } else {
+      // 자동 모드로 전환
+      careUnit.isReverse = false;
+      careUnit.nowOpen = await this.checkNowOpen(careUnit.id);
+    }
+
+    // 변경사항 저장
+    await this.careUnitRepository.save(careUnit);
+    // 저장 후 다시 조회하여 최신 상태 확인
+    const updatedCareUnit = await this.careUnitRepository.findOne({
+      where: { id: careUnit.id },
+    });
+    if (!updatedCareUnit) {
+      throw new Error('업데이트된 의료기관을 찾을 수 없습니다.');
+    }
+
+    return {
+      message: isReverse
+        ? updatedCareUnit.nowOpen
+          ? '수동으로 운영 중으로 설정되었습니다.'
+          : '수동으로 운영 종료로 설정되었습니다.'
+        : '자동 운영 모드로 전환되었습니다.',
+      isOpen: updatedCareUnit.nowOpen,
+      isReverse: updatedCareUnit.isReverse,
+    };
   }
 
   // careUnit을 hpId와 카테고리로 조회하여 가져오기 (department 조회 시 사용)
