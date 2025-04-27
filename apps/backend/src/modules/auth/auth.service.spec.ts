@@ -4,7 +4,7 @@ import { UsersService } from '../users/users.service';
 import { AppConfigService } from 'src/config/app/config.service';
 import { JwtService } from '@nestjs/jwt';
 import { CustomLoggerService } from 'src/shared/logger/logger.service';
-import { CareUnitService } from '../care-unit/care-unit.service';
+import { CareUnitService } from '../care-units/services/care-unit.service';
 
 // UsersService 모킹
 const mockUsersService = {
