@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ROUTES } from '@/shared/constants/routes';
 import axiosInstance from '@/lib/axios';
 
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 type Role = 'user' | 'admin';
 
 interface User {
@@ -84,30 +85,26 @@ export default function Header() {
           className="text-lg font-semibold tracking-tight"
         >
           <span className="text-primary text-2xl flex items-center gap-1">
-            <HeartPulseIcon /> Medinow
+            <HeartPulseIcon className="text-accent" /> Medinow
           </span>
         </Link>
 
         {isLoggedIn !== null ? (
           <nav className="flex items-center gap-2">
-            {/* 모바일: 햄버거 버튼 */}
-            <div className="md:hidden">
-              <Button
-                variant="ghost"
-                className="p-2 w-[2rem]"
-                onClick={() => setMenuOpen((prev) => !prev)}
-              >
-                <Menu size={24} />
-              </Button>
-            </div>
-
+            <Button
+              variant="ghost"
+              className="!p-2 w-[2rem] md:hidden"
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              <Menu size={24} />
+            </Button>
             {/* 데스크탑: 로그인 상태에 따라 버튼 분기 */}
             <div className="hidden md:flex gap-[20px]">
               {isLoggedIn ? (
                 <>
                   {role === 'admin' ? (
                     <Link href={ROUTES.ADMIN.DASHBOARD}>
-                      <Button variant="ghost" className="text-sm ">
+                      <Button variant="ghost" className="text-sm">
                         관리자 대시보드
                       </Button>
                     </Link>
@@ -150,19 +147,14 @@ export default function Header() {
         ) : null}
       </div>
 
-      {/* 모바일: 햄버거 메뉴 펼침 */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="md:hidden absolute top-full left-0 w-full bg-background border-t border-border shadow-xl flex flex-col"
-          >
+      {/* 모바일 햄버거 버튼 */}
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent
+          side="top"
+          className="!p-0 !pt-[61px] border-b border-border"
+        >
+          <nav className="flex flex-col">
             {getMenuItems().map(({ href, label, onClick }) => {
-              const isReviewWrite = href === ROUTES.USER.WRITE_REVIEW;
-
               if (onClick) {
                 return (
                   <button
@@ -170,21 +162,6 @@ export default function Header() {
                     onClick={() => {
                       setMenuOpen(false);
                       onClick();
-                    }}
-                    className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:text-white transition-colors"
-                  >
-                    {label}
-                  </button>
-                );
-              }
-
-              if (isReviewWrite) {
-                return (
-                  <button
-                    key={label}
-                    onClick={() => {
-                      setMenuOpen(false);
-                      window.location.href = href; // ✅ 새로고침 이동
                     }}
                     className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:text-white transition-colors"
                   >
@@ -204,9 +181,9 @@ export default function Header() {
                 </Link>
               );
             })}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </nav>
+        </SheetContent>
+      </Sheet>
     </header>
   );
 }

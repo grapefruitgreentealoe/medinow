@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { StarRating } from './StarRating';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import {
   selectedCareUnitAtom,
   selectedDepartmentsAtom,
@@ -43,6 +43,8 @@ export function ReviewForm({
 }) {
   const careUnit = careUnitProp ?? useAtomValue(selectedCareUnitAtom);
   const departments = departmentsProp ?? useAtomValue(selectedDepartmentsAtom);
+  const setCareUnit = useSetAtom(selectedCareUnitAtom);
+  const setDepartments = useSetAtom(selectedDepartmentsAtom);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -55,7 +57,6 @@ export function ReviewForm({
       ...defaultValues,
     },
   });
-
   const {
     handleSubmit,
     control,
@@ -63,14 +64,20 @@ export function ReviewForm({
     formState: { isSubmitting },
   } = form;
 
+  const handleResetButton = () => {
+    setCareUnit(null);
+    setDepartments([]);
+  };
+
   return (
     <div className="!space-y-6 max-w-xl mx-auto py-6">
       {/* 병원정보 */}
       <Card className="bg-muted/50 border">
         <CardContent className="!space-y-1">
-          <p className="text-xs text-muted-foreground">리뷰 대상 병원</p>
+          <p className="text-xs text-muted-foreground">리뷰 대상 의료기관</p>
           <h3 className="text-base font-bold">{careUnit?.name}</h3>
           <p className="text-sm text-muted-foreground">{careUnit?.address}</p>
+          <Button onClick={handleResetButton}>다시 선택</Button>
         </CardContent>
       </Card>
 

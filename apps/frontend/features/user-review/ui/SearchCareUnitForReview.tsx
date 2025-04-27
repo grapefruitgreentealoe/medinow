@@ -93,14 +93,15 @@ export function SearchCareUnitForReview() {
           </Card>
         )}
       </div>
-
-      <LocationSearchModal
-        title="병원 위치 검색"
-        subtitle="병원명을 입력하세요"
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSelect={handleSelect}
-      />
+      {modalOpen ? (
+        <LocationSearchModal
+          title="병원 위치 검색"
+          subtitle="병원명을 입력하세요"
+          open={true}
+          onClose={() => setModalOpen(false)}
+          onSelect={handleSelect}
+        />
+      ) : null}
     </div>
   );
 }
