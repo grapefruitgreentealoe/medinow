@@ -2,7 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import { useCareUnitReviews } from './model/useCareUnitReviews';
-import { ReviewContent } from './ReviewContent';
 import { ReviewBody } from './ReviewBody';
 
 interface Props {
@@ -28,6 +27,7 @@ export function ReviewList({ careUnitId }: Props) {
           {reviews.map((review) => (
             <li key={review.reviewId}>
               <ReviewBody
+                nickname={review.nickname}
                 createdAt={review.createdAt}
                 content={review.content}
                 thankMessage={review.thankMessage}

@@ -61,7 +61,7 @@ export default function EditReviewPage() {
           <CardContent className="!space-y-6">
             {/* 제목 */}
             <div className="text-center !space-y-2">
-              <h1 className="text-2xl font-bold tracking-tight">
+              <h1 className="text-2xl font-bold tracking-tight !text-primary">
                 리뷰 작성하기
               </h1>
               <p className="text-muted-foreground text-sm">
