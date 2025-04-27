@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { CareUnit } from '@/shared/type';
 
 interface ChatRoomUIProps {
@@ -16,9 +17,7 @@ export const ChatRoomUI = ({ careUnit }: ChatRoomUIProps) => {
           className="flex-1 border px-2 py-1 rounded"
           placeholder="메시지를 입력하세요"
         />
-        <button className="px-4 py-1 bg-blue-500 text-white rounded">
-          전송
-        </button>
+        <Button className="bg-blue-500 text-white rounded">전송</Button>
       </div>
     </div>
   );

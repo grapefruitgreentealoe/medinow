@@ -25,7 +25,7 @@ export function CareUnitCardLayout({
       )}
       style={{ contentVisibility: 'auto', containIntrinsicSize: '64px' }}
     >
-      <CardContent className="!p-5 flex flex-col justify-between h-full space-y-4">
+      <CardContent className="flex flex-col justify-between h-full space-y-4">
         {/* 타이틀 */}
         <div className="space-y-1">
           <h3 className="text-base font-bold text-primary truncate">{title}</h3>

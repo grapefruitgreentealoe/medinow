@@ -46,10 +46,10 @@ export function HospitalDetailDialog() {
         {/* 병원명 + 운영 상태 */}
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-lg font-bold">{unit.name}</h2>
-          <Badge className="!p-1 rounded-2xl bg-muted text-muted-foreground">
+          <Badge className="bg-muted text-muted-foreground">
             {CATEGORY_LABEL[unit.category]}
           </Badge>
-          <Badge className="!p-1 rounded-xl bg-muted text-muted-foreground border">
+          <Badge className="bg-muted text-muted-foreground">
             {unit.nowOpen ? '운영 중' : '운영 종료'}
           </Badge>
         </div>
@@ -97,7 +97,7 @@ export function HospitalDetailDialog() {
                 <Badge
                   key={idx}
                   variant="secondary"
-                  className="text-xs !px-2 rounded-2xl"
+                  className="text-xs rounded-2xl"
                 >
                   {dept?.name ?? dept}
                 </Badge>

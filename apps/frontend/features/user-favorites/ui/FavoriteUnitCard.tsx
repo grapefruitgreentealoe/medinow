@@ -59,13 +59,13 @@ export function CareUnitCard({
 
       {/* 태그들 */}
       <div className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="bg-muted text-muted-foreground !px-2 !py-0.5 rounded-full">
+        <Badge className="bg-muted text-muted-foreground">
           {CATEGORY_LABEL[unit.category]}
-        </span>
+        </Badge>
         {unit?.congestion?.congestionLevel && (
           <span className={congestionClassMap[level]}>혼잡도: {level}</span>
         )}
-        <Badge className="!p-1 rounded-xl text-muted-foreground bg-muted">
+        <Badge className="text-muted-foreground bg-muted">
           {unit.nowOpen ? '운영 중' : '운영 종료'}
         </Badge>
       </div>
@@ -85,7 +85,7 @@ export function CareUnitCard({
           <Button
             variant="ghost"
             size="sm"
-            className="text-primary text-xs !px-0"
+            className="text-primary text-xs "
             onClick={handleUrlButton}
           >
             길찾기
@@ -93,7 +93,7 @@ export function CareUnitCard({
           <Button
             variant="ghost"
             size="sm"
-            className="text-primary text-xs !px-0"
+            className="text-primary text-xs "
             onClick={() => onSelect(unit)}
           >
             상세보기
