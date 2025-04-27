@@ -59,7 +59,7 @@ export class ReviewsService {
     if (findCareUnit) {
       review.careUnit = findCareUnit;
     }
-    const savedReview = await this.reviewRepository.save(review);
+    await this.reviewRepository.save(review);
     if (findCareUnit) {
       const reviewCount = await this.reviewRepository.count({
         where: { careUnit: { id: findCareUnit.id } },
@@ -71,7 +71,16 @@ export class ReviewsService {
       // 평균 평점 업데이트
       await this.updateAverageRating(findCareUnit.id);
     }
-    return savedReview;
+    return {
+      message: '리뷰가 성공적으로 생성되었습니다.',
+      reviewId: review.id,
+      content: review.content,
+      thankMessage: review.thankMessage,
+      rating: review.rating,
+      isPublic: review.isPublic,
+      departmentId: review.department ? review.department.id : null,
+      createdAt: review.createdAt,
+    };
   }
 
   async getReviewsByCareUnitId(
@@ -82,16 +91,31 @@ export class ReviewsService {
     const skip = (page - 1) * limit;
     const [reviews, total] = await this.reviewRepository.findAndCount({
       where: { careUnit: { id: careUnitId } },
-      relations: ['careUnit', 'department'],
+      relations: ['careUnit', 'department', 'user', 'user.userProfile'],
       skip,
       take: limit,
       order: { createdAt: 'DESC' },
     });
     return {
-      reviews,
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
+      message: '리뷰가 성공적으로 조회되었습니다.',
+      reviews: reviews.map((review) => ({
+        reviewId: review.id,
+        content: review.content,
+        thankMessage: review.thankMessage,
+        rating: review.rating,
+        isPublic: review.isPublic,
+        careUnitId: review.careUnit?.name,
+        departmentId: review.department?.name,
+        createdAt: review.createdAt,
+        userId: review.user?.id,
+        author: review.user?.userProfile?.name,
+        nickname: review.user?.userProfile?.nickname,
+      })),
+      pagination: {
+        total: total,
+        page: page,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 
@@ -118,31 +142,61 @@ export class ReviewsService {
       // 케어유닛이 있는 경우 해당 케어유닛의 리뷰만 반환
       const [reviews, total] = await this.reviewRepository.findAndCount({
         where: { careUnit: { id: userProfile.careUnit.id } },
-        relations: ['user', 'careUnit', 'department'],
+        relations: ['user', 'careUnit', 'department', 'user.userProfile'],
         skip,
         take: limit,
         order: { createdAt: 'DESC' },
       });
       return {
-        reviews,
-        total,
-        page,
-        totalPages: Math.ceil(total / limit),
+        message: '리뷰가 성공적으로 조회되었습니다.',
+        reviews: reviews.map((review) => ({
+          reviewId: review.id,
+          content: review.content,
+          thankMessage: review.thankMessage,
+          rating: review.rating,
+          isPublic: review.isPublic,
+          careUnitId: review.careUnit?.name,
+          departmentId: review.department?.name,
+          createdAt: review.createdAt,
+          userId: review.user?.id,
+          author: review.user?.userProfile?.name,
+          nickname: review.user?.userProfile?.nickname,
+        })),
+        pagination: {
+          total: total,
+          page: page,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     } else {
       // 케어유닛이 없는 경우 유저가 작성한 모든 리뷰 반환
       const [reviews, total] = await this.reviewRepository.findAndCount({
         where: { user: { id: userId } },
-        relations: ['user', 'careUnit', 'department'],
+        relations: ['user', 'careUnit', 'department', 'user.userProfile'],
         skip,
         take: limit,
         order: { createdAt: 'DESC' },
       });
       return {
-        reviews,
-        total,
-        page,
-        totalPages: Math.ceil(total / limit),
+        message: '리뷰가 성공적으로 조회되었습니다.',
+        reviews: reviews.map((review) => ({
+          reviewId: review.id,
+          content: review.content,
+          thankMessage: review.thankMessage,
+          rating: review.rating,
+          isPublic: review.isPublic,
+          careUnitId: review.careUnit?.name,
+          departmentId: review.department?.name,
+          createdAt: review.createdAt,
+          userId: review.user?.id,
+          author: review.user?.userProfile?.name,
+          nickname: review.user?.userProfile?.nickname,
+        })),
+        pagination: {
+          total: total,
+          page: page,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     }
   }
@@ -150,9 +204,25 @@ export class ReviewsService {
   async getReviewById(id: string) {
     const review = await this.reviewRepository.findOne({
       where: { id },
-      relations: ['user', 'careUnit', 'department'],
+      relations: ['user', 'careUnit', 'department', 'user.userProfile'],
     });
-    return review;
+    if (!review) {
+      throw new NotFoundException('리뷰를 찾을 수 없습니다.');
+    }
+    return {
+      message: '리뷰가 성공적으로 조회되었습니다.',
+      reviewId: review.id,
+      content: review.content,
+      thankMessage: review.thankMessage,
+      rating: review.rating,
+      isPublic: review.isPublic,
+      careUnitId: review.careUnit?.name,
+      departmentId: review.department?.name,
+      createdAt: review.createdAt,
+      userId: review.user?.id,
+      author: review.user?.userProfile?.name,
+      nickname: review.user?.userProfile?.nickname,
+    };
   }
 
   async updateReview(id: string, updateReviewDto: UpdateReviewDto, user: User) {
@@ -165,7 +235,7 @@ export class ReviewsService {
       throw new NotFoundException('리뷰를 찾을 수 없습니다.');
     }
 
-    if (review.user.id !== user.id) {
+    if (review.userId !== user.id) {
       throw new ForbiddenException('리뷰를 수정할 권한이 없습니다.');
     }
 
@@ -188,7 +258,9 @@ export class ReviewsService {
     if (findCareUnit) {
       await this.updateAverageRating(findCareUnit.id);
     }
-    return this.getReviewById(id);
+    return {
+      message: '리뷰가 성공적으로 수정되었습니다.',
+    };
   }
 
   async deleteReview(id: string, user: User) {
@@ -196,21 +268,23 @@ export class ReviewsService {
     if (!review) {
       throw new NotFoundException('리뷰를 찾을 수 없습니다.');
     }
-    if (review.user.id !== user.id) {
+    if (review.userId !== user.id) {
       throw new ForbiddenException('리뷰를 삭제할 권한이 없습니다.');
     }
     const deletedReview = await this.reviewRepository.delete(id);
-    if (review.careUnit) {
+    if (review.careUnitId) {
       const reviewCount = await this.reviewRepository.count({
-        where: { careUnit: { id: review.careUnit.id } },
+        where: { careUnit: { id: review.careUnitId } },
       });
       await this.careUnitService.updateBadgeByReviewCount(
-        review.careUnit.id,
+        review.careUnitId,
         reviewCount,
       );
-      await this.updateAverageRating(review.careUnit.id);
+      await this.updateAverageRating(review.careUnitId);
     }
-    return deletedReview;
+    return {
+      message: '리뷰가 성공적으로 삭제되었습니다.',
+    };
   }
 
   async updateAverageRating(careUnitId: string) {

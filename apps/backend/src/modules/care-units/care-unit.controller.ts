@@ -487,22 +487,6 @@ export class CareUnitController {
       page,
       limit,
     );
-    return {
-      message: '리뷰가 성공적으로 조회되었습니다.',
-      reviews: reviews.reviews.map((review) => ({
-        reviewId: review.id,
-        content: review.content,
-        thankMessage: review.thankMessage,
-        rating: review.rating,
-        isPublic: review.isPublic,
-        careUnitId: review.careUnit?.name,
-        departmentId: review.department?.name,
-      })),
-      pagination: {
-        total: reviews.total,
-        page: reviews.page,
-        totalPages: reviews.totalPages,
-      },
-    };
+    return reviews;
   }
 }

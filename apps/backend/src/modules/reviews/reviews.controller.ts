@@ -41,20 +41,7 @@ export class ReviewsController {
     @Body() createReviewDto: CreateReviewDto,
     @RequestUser() user: User,
   ) {
-    const review = await this.reviewsService.createReview(
-      createReviewDto,
-      user,
-    );
-    return {
-      message: '리뷰가 성공적으로 생성되었습니다.',
-      reviewId: review.id,
-      content: review.content,
-      thankMessage: review.thankMessage,
-      rating: review.rating,
-      isPublic: review.isPublic,
-      departmentId: review.department ? review.department.id : null,
-      createdAt: review.createdAt,
-    };
+    return await this.reviewsService.createReview(createReviewDto, user);
   }
 
   @Get()
@@ -72,28 +59,7 @@ export class ReviewsController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ) {
-    const { reviews, total, totalPages } =
-      await this.reviewsService.getReviewsByUserId(userId, page, limit);
-    return {
-      message: '리뷰가 성공적으로 조회되었습니다.',
-      reviews: reviews.map((review) => ({
-        reviewId: review.id,
-        content: review.content,
-        thankMessage: review.thankMessage,
-        rating: review.rating,
-        isPublic: review.isPublic,
-        careUnitId: review.careUnit.id,
-        careUnitName: review.careUnit.name,
-        departmentId: review.department?.id,
-        departmentName: review.department?.name,
-        createdAt: review.createdAt,
-      })),
-      pagination: {
-        total,
-        page,
-        totalPages,
-      },
-    };
+    return await this.reviewsService.getReviewsByUserId(userId, page, limit);
   }
 
   @Get(':id')
@@ -103,23 +69,7 @@ export class ReviewsController {
     type: ResponseReviewDto,
   })
   async getReviewById(@Param('id') id: string) {
-    const review = await this.reviewsService.getReviewById(id);
-    if (!review) {
-      throw new NotFoundException('리뷰를 찾을 수 없습니다.');
-    }
-    return {
-      message: '리뷰가 성공적으로 조회되었습니다.',
-      reviewId: review.id,
-      content: review.content,
-      thankMessage: review.thankMessage,
-      rating: review.rating,
-      isPublic: review.isPublic,
-      careUnitId: review.careUnit.id,
-      careUnitName: review.careUnit.name,
-      departmentId: review.department?.id,
-      departmentName: review.department?.name,
-      createdAt: review.createdAt,
-    };
+    return await this.reviewsService.getReviewById(id);
   }
 
   @Patch(':id')
@@ -132,27 +82,7 @@ export class ReviewsController {
     @Body() updateReviewDto: UpdateReviewDto,
     @RequestUser() user: User,
   ) {
-    const review = await this.reviewsService.getReviewById(id);
-
-    if (!review) {
-      throw new NotFoundException('리뷰를 찾을 수 없습니다.');
-    }
-
-    await this.reviewsService.updateReview(id, updateReviewDto, user);
-    return {
-      message: '리뷰가 성공적으로 수정되었습니다.',
-      reviewId: review.id,
-      content: review.content,
-      thankMessage: review.thankMessage,
-      rating: review.rating,
-      isPublic: review.isPublic,
-      careUnitId: review.careUnit.id,
-      careUnitName: review.careUnit.name,
-      departmentId: review.department?.id,
-      departmentName: review.department?.name,
-      createdAt: review.createdAt,
-      updatedAt: review.updatedAt,
-    };
+    return await this.reviewsService.updateReview(id, updateReviewDto, user);
   }
 
   @Delete(':id')
@@ -161,9 +91,6 @@ export class ReviewsController {
     description: '리뷰가 성공적으로 삭제되었습니다.',
   })
   async deleteReview(@Param('id') id: string, @RequestUser() user: User) {
-    await this.reviewsService.deleteReview(id, user);
-    return {
-      message: '리뷰가 성공적으로 삭제되었습니다.',
-    };
+    return await this.reviewsService.deleteReview(id, user);
   }
 }
