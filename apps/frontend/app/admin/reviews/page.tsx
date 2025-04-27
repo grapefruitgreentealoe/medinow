@@ -114,6 +114,7 @@ export default function ReviewPaginationPage() {
       >
         {detailReview ? (
           <ReviewBody
+            nickname={detailReview.nickname}
             rating={detailReview.rating}
             content={detailReview.content}
             createdAt={detailReview.createdAt}

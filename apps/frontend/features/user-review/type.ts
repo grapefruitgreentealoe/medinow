@@ -27,6 +27,7 @@ export interface ReviewData {
   departmentName: string;
   departmentId: string;
   createdAt: string;
+  nickname: string;
 }
 
 export interface UpdateReviewInput {

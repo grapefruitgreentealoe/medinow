@@ -68,10 +68,10 @@ export default function WriteReviewPage() {
       <div className="w-full max-w-xl !space-y-10">
         <Card>
           <CardContent className="!space-y-6">
-            <div className="w-full max-w-xl space-y-10">
+            <div className="w-full max-w-xl !space-y-10">
               {/* 제목 */}
-              <div className="text-center space-y-2">
-                <h1 className="text-2xl font-bold tracking-tight">
+              <div className="text-center !space-y-2">
+                <h1 className="text-2xl font-bold tracking-tight !text-primary">
                   리뷰 작성하기
                 </h1>
                 <p className="text-muted-foreground text-sm">
