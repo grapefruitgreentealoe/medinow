@@ -261,13 +261,15 @@ export default function AdminSignupForm() {
         </form>
       </Form>
 
-      <LocationSearchModal
-        title="병원 위치 검색"
-        subtitle="병원명을 통해 검색하세요"
-        open={hospitalModalOpen}
-        onClose={() => setHospitalModalOpen(false)}
-        onSelect={handleHospitalSelect}
-      />
+      {hospitalModalOpen ? (
+        <LocationSearchModal
+          title="병원 위치 검색"
+          subtitle="병원명을 통해 검색하세요"
+          open={true}
+          onClose={() => setHospitalModalOpen(false)}
+          onSelect={handleHospitalSelect}
+        />
+      ) : null}
     </>
   );
 }
