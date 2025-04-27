@@ -111,11 +111,14 @@ export default function AdminUserProfilePage() {
             <ProfileField label="이메일" value={user.user.email} />
             <ProfileField label="이름" value={user.user.name} />
             <ProfileField
-              label="운영 여부"
+              label="시간표 기준 운영 상태"
               value={user.unitData.nowOpen ? '운영 중' : '운영 중 아님'}
             />
             <p className="text-sm text-muted-foreground !mb-[5px]">
-              운영 상태 변경
+              임시 운영/휴무 버튼
+            </p>
+            <p className="text-xs text-muted-foreground !mb-[5px]">
+              활성화 시, 운영시간표 기준과 반대되는 상태로 전환됩니다.
             </p>
             <Switch
               checked={user.unitData.nowOpen}
@@ -163,7 +166,7 @@ export default function AdminUserProfilePage() {
         }}
         onClose={() => setConfirmOpen(false)}
         title="운영 상태 변경"
-        description={`병원의 운영 상태를 ${user.unitData.nowOpen ? '운영 중지' : '운영 시작'}로 변경하시겠습니까?`}
+        description={`병원의 운영 상태를 ${user.unitData.nowOpen ? '"운영 중지"' : '"운영중" 으'}로 변경하시겠습니까?`}
       />
     </div>
   );
