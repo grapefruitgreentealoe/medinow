@@ -170,16 +170,18 @@ export default function SignupForm() {
           </Button>
         </form>
       </Form>
-      <LocationSearchModal
-        title="주소 검색"
-        subtitle="키워드를 통해 검색하세요"
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSelect={(data) => {
-          form.setValue('address', data.address);
-          setModalOpen(false);
-        }}
-      />
+      {modalOpen ? (
+        <LocationSearchModal
+          title="주소 검색"
+          subtitle="키워드를 통해 검색하세요"
+          open={true}
+          onClose={() => setModalOpen(false)}
+          onSelect={(data) => {
+            form.setValue('address', data.address);
+            setModalOpen(false);
+          }}
+        />
+      ) : null}
     </>
   );
 }
