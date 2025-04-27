@@ -56,7 +56,7 @@ export default function ReviewPaginationPage() {
     if (review) {
       setEditReview(review);
     }
-    router.push(ROUTES.USER.EDIT_REVIEW(confirmEditId ?? ''));
+    router.push(ROUTES.USER.EDIT_REVIEW(confirmEditId!));
   };
 
   return (
