@@ -77,7 +77,7 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed w-full min-h-[61px] !px-6 !py-3 border-b border-border bg-background text-foreground  z-50">
+    <header className="fixed min-md:w-[calc(100vw-15px)] w-full min-h-[61px] !px-6 !py-3 border-b border-border bg-background text-foreground  z-50 ">
       <div className="flex justify-between items-center">
         <Link
           href={ROUTES.HOME}
