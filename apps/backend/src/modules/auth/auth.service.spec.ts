@@ -4,6 +4,7 @@ import { UsersService } from '../users/users.service';
 import { AppConfigService } from 'src/config/app/config.service';
 import { JwtService } from '@nestjs/jwt';
 import { CustomLoggerService } from 'src/shared/logger/logger.service';
+import { CareUnitService } from '../care-unit/care-unit.service';
 
 // UsersService 모킹
 const mockUsersService = {
@@ -49,6 +50,14 @@ describe('AuthService', () => {
         {
           provide: CustomLoggerService,
           useValue: mockLoggerService,
+        },
+        {
+          provide: CareUnitService,
+          useValue: {
+            getCareUnitDetailById: jest.fn().mockResolvedValue({
+              // 필요한 목업 데이터
+            }),
+          },
         },
       ],
     }).compile();
