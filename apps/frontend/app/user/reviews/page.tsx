@@ -59,7 +59,7 @@ export default function ReviewPaginationPage() {
     router.push(ROUTES.USER.EDIT_REVIEW(confirmEditId!));
   };
 
-  if (!detailReview) return null;
+  if (!reviews) return null;
 
   return (
     <div className="!space-y-6 !mx-[20px] !mt-[30px]">
@@ -111,12 +111,14 @@ export default function ReviewPaginationPage() {
         ctaText="확인"
         onCtaClick={() => setDetailReview(null)}
       >
-        <ReviewBody
-          rating={detailReview.rating}
-          content={detailReview.content}
-          createdAt={detailReview.createdAt}
-          thankMessage={detailReview.thankMessage}
-        />
+        {detailReview ? (
+          <ReviewBody
+            rating={detailReview.rating}
+            content={detailReview.content}
+            createdAt={detailReview.createdAt}
+            thankMessage={detailReview.thankMessage}
+          />
+        ) : null}
       </ContentDialog>
 
       {isFetching && (
