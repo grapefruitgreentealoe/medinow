@@ -155,8 +155,6 @@ export default function Header() {
         >
           <nav className="flex flex-col">
             {getMenuItems().map(({ href, label, onClick }) => {
-              const isReviewWrite = href === ROUTES.USER.WRITE_REVIEW;
-
               if (onClick) {
                 return (
                   <button
@@ -164,21 +162,6 @@ export default function Header() {
                     onClick={() => {
                       setMenuOpen(false);
                       onClick();
-                    }}
-                    className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:text-white transition-colors"
-                  >
-                    {label}
-                  </button>
-                );
-              }
-
-              if (isReviewWrite) {
-                return (
-                  <button
-                    key={label}
-                    onClick={() => {
-                      setMenuOpen(false);
-                      window.location.href = href;
                     }}
                     className="w-full h-[3rem] flex justify-center items-center text-base border-b border-border hover:bg-primary hover:text-white transition-colors"
                   >
