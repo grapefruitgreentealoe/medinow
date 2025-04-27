@@ -46,6 +46,75 @@ export class CareUnitService {
     return this.careUnitRepository.findOne({ where: { id } });
   }
 
+  // careUnit 단일 조회 by id와 user (목록 조회와 같은 return 형식)
+  async getCareUnitDetailById(
+    id: string,
+    user?: User,
+  ): Promise<ExtendedCareUnit> {
+    const careUnit = await this.careUnitRepository.findOne({
+      where: { id },
+      relations: ['departments', 'reviews'],
+    });
+    if (!careUnit) {
+      throw new NotFoundException('조회된 의료기관이 없습니다');
+    }
+    // 응급실인 경우 혼잡도 데이터도 함께 반환
+    // let congestionData = null;
+    // if (careUnit.category === 'emergency') {
+    //   try {
+    //     congestionData = await this.congestionOneService
+    //       .getCongestion(careUnit.id)
+    //       .catch((error) => {
+    //         this.logger.error(
+    //           `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
+    //         );
+    //         return null;
+    //       });
+    //   } catch (error) {
+    //     const err = error as Error;
+    //     this.logger.error(
+    //       `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
+    //     );
+    //   }
+    // }
+
+    // 사용자가 제공된 경우 즐겨찾기 정보 추가
+
+    let isFavorite = false;
+    if (user && user.id) {
+      try {
+        isFavorite = await this.favoritesService.checkIsFavorite(
+          user.id,
+          careUnit.id,
+        );
+      } catch (error) {
+        const err = error as Error;
+        this.logger.error(`즐겨찾기 확인 중 오류: ${err.message}`);
+        isFavorite = false;
+      }
+    } else {
+      this.logger.log('사용자 정보 없음 - 즐겨찾기 확인 건너뜀');
+    }
+
+    const isOpen = await this.checkNowOpen(careUnit.id);
+    const adminUser = await this.usersService.getUserByCareUnitId(careUnit.id);
+
+    const { favorites, reviews, ...restCareUnit } = careUnit;
+    return {
+      ...restCareUnit,
+      nowOpen: isOpen,
+      isChatAvailable: !!adminUser,
+      // congestion: congestionData,
+      isFavorite: isFavorite,
+      averageRating: careUnit.averageRating,
+      reviewCount: careUnit.reviews.length || 0,
+      departments:
+        careUnit.departments.map((department) => {
+          return { id: department.id, name: department.name };
+        }) || [],
+    };
+  }
+
   // 상세 정보 조회 + department by id
   async getCareUnitDetailWithDepartment(id: string) {
     const careUnit = await this.careUnitRepository.findOne({
