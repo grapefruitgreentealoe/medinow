@@ -102,13 +102,7 @@ export class UsersController {
         address: userInfo?.userProfile?.address,
         age: userInfo?.userProfile?.age,
       },
-      unitData: userInfo.userProfile.careUnit
-        ? {
-            id: userInfo?.userProfile?.careUnit?.id,
-            name: userInfo?.userProfile?.careUnit?.name,
-            address: userInfo?.userProfile?.careUnit?.address,
-          }
-        : null,
+      unitData: 'careUnit' in userInfo ? userInfo.careUnit : null,
     };
   }
 

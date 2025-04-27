@@ -72,42 +72,16 @@ export class AuthService {
         );
       }
 
+      const careUnit = await this.usersService.findUserByIdWithRelations(
+        user.id,
+      );
+
+      if (!careUnit) {
+        throw new UnauthorizedException('병원 정보를 찾을 수 없습니다.');
+      }
+
       const { accessToken, refreshToken, accessOptions, refreshOptions } =
         await this.setJwtTokenBuilder(user, requestOrigin);
-
-      if (user.role === UserRole.ADMIN) {
-        const careUnit = await this.usersService.findUserByIdWithRelations(
-          user.id,
-        );
-
-        if (!careUnit) {
-          throw new UnauthorizedException('병원 정보를 찾을 수 없습니다.');
-        }
-
-        const careUnitId = careUnit.userProfile.careUnit?.id;
-        if (!careUnitId) {
-          throw new UnauthorizedException('병원 ID를 찾을 수 없습니다.');
-        }
-        const unitData = await this.careUnitService.getCareUnitDetailById(
-          careUnitId,
-          user,
-        );
-        return {
-          message: '로그인 성공!',
-          accessToken,
-          refreshToken,
-          accessOptions,
-          refreshOptions,
-          email: user.email,
-          role: user.role,
-          userProfile: {
-            name: user.userProfile?.name,
-            nickname: user.userProfile?.nickname,
-            address: user.userProfile?.address,
-          },
-          careUnit: unitData,
-        };
-      }
 
       return {
         message: '로그인 성공!',
@@ -122,6 +96,34 @@ export class AuthService {
           nickname: user.userProfile?.nickname,
           address: user.userProfile?.address,
         },
+        careUnit:
+          user.role === UserRole.ADMIN
+            ? {
+                name: careUnit.userProfile.careUnit?.name,
+                address: careUnit.userProfile.careUnit?.address,
+                tel: careUnit.userProfile.careUnit?.tel,
+                category: careUnit.userProfile.careUnit?.category,
+                mondayOpen: careUnit.userProfile.careUnit?.mondayOpen,
+                mondayClose: careUnit.userProfile.careUnit?.mondayClose,
+                tuesdayOpen: careUnit.userProfile.careUnit?.tuesdayOpen,
+                tuesdayClose: careUnit.userProfile.careUnit?.tuesdayClose,
+                wednesdayOpen: careUnit.userProfile.careUnit?.wednesdayOpen,
+                wednesdayClose: careUnit.userProfile.careUnit?.wednesdayClose,
+                thursdayOpen: careUnit.userProfile.careUnit?.thursdayOpen,
+                thursdayClose: careUnit.userProfile.careUnit?.thursdayClose,
+                fridayOpen: careUnit.userProfile.careUnit?.fridayOpen,
+                fridayClose: careUnit.userProfile.careUnit?.fridayClose,
+                saturdayOpen: careUnit.userProfile.careUnit?.saturdayOpen,
+                saturdayClose: careUnit.userProfile.careUnit?.saturdayClose,
+                sundayOpen: careUnit.userProfile.careUnit?.sundayOpen,
+                sundayClose: careUnit.userProfile.careUnit?.sundayClose,
+                holidayOpen: careUnit.userProfile.careUnit?.holidayOpen,
+                holidayClose: careUnit.userProfile.careUnit?.holidayClose,
+                isBadged: careUnit.userProfile.careUnit?.isBadged,
+                nowOpen: careUnit.userProfile.careUnit?.nowOpen,
+                departments: careUnit.userProfile.careUnit?.departments,
+              }
+            : null,
       };
     } catch (error: any) {
       const err = error as Error;
