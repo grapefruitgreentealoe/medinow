@@ -27,7 +27,7 @@ export default function UserProfilePage() {
 
   if (!user) {
     return (
-      <div className="space-y-4 flex flex-col w-full gap-[20px] !p-[20px] m-[20px]">
+      <div className="space-y-4 flex flex-col w-full gap-[20px] !p-[20px] !m-[20px]">
         <Skeleton className="h-[60px] w-full" />
         <Skeleton className="h-[60px] w-full" />
         <Skeleton className="h-[60px] w-full" />
