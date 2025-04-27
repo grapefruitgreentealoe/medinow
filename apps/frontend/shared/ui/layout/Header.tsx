@@ -81,7 +81,7 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed min-md:w-[calc(100vw-15px)] w-full min-h-[61px] !px-6 !py-3 border-b border-border bg-background text-foreground  z-50 ">
+    <header className="fixed w-full min-h-[61px] !px-6 !py-3 border-b border-border bg-background text-foreground  z-50 ">
       <div className="flex justify-between items-center">
         <Link
           href={ROUTES.HOME}
@@ -164,10 +164,7 @@ export default function Header() {
 
       {/* 모바일 햄버거 버튼 */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <SheetContent
-          side="top"
-          className="!p-0 !pt-[61px] border-b border-border"
-        >
+        <SheetContent side="top" className="!p-0  border-b border-border">
           <nav className="flex flex-col">
             {getMenuItems().map(({ href, label, onClick }) => {
               if (onClick) {
