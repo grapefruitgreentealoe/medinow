@@ -161,7 +161,12 @@ export class UsersService {
 
     const userProfile = await this.userProfileRepository.findOne({
       where: { user: { id } },
-      relations: ['careUnit'],
+      relations: [
+        'careUnit',
+        'careUnit.departments',
+        'careUnit.reviews',
+        'careUnit.favorites',
+      ],
     });
 
     if (!userProfile) {
@@ -169,13 +174,14 @@ export class UsersService {
     }
 
     if (userProfile.careUnit) {
-      const careUnit = await this.careUnitService.getCareUnitDetail(
+      const careUnitDetail = await this.careUnitService.getCareUnitDetailById(
         userProfile.careUnit.id,
+        user,
       );
       return {
         ...user,
         userProfile,
-        careUnit,
+        careUnit: careUnitDetail,
       };
     } else {
       return {
