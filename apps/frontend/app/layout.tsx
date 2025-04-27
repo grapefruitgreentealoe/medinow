@@ -4,6 +4,11 @@ import './globals.css';
 import Header from '@/shared/ui/layout/Header';
 import { Toaster } from '@/components/ui/sonner';
 
+export const metadata = {
+  title: 'MediNow',
+  description: '내 주변 의료기관 찾기',
+};
+
 export default async function RootLayout({
   children,
 }: {

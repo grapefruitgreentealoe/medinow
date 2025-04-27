@@ -5,7 +5,7 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { unfavoriteConfirmUnitAtom } from '../atoms/unfavoriteConfirmModalAtom';
 import { openKakaoMap, renderTodayTime } from '@/features/map/utils';
-import { CATEGORY_LABEL, congestionClassMap } from '@/features/map/const';
+import { CATEGORY_LABEL, congestionClassMap } from '@/shared/constants/const';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/shared/constants/routes';

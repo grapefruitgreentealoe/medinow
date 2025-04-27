@@ -34,7 +34,7 @@ export function Sidebar({ navItems }: SidebarProps) {
             <Button
               key={href}
               variant={pathname === href ? 'secondary' : 'ghost'}
-              className={cn('w-full justify-start')}
+              className={cn('w-[150px] justify-start')}
               onClick={() => {
                 // 강제로 리로드 (SSR처럼 새 상태로 진입)
                 window.location.href = href;
@@ -46,7 +46,7 @@ export function Sidebar({ navItems }: SidebarProps) {
             <Link href={href} key={href}>
               <Button
                 variant={pathname === href ? 'secondary' : 'ghost'}
-                className={cn('w-full justify-start')}
+                className={cn('w-[150px] justify-start')}
               >
                 {label}
               </Button>
