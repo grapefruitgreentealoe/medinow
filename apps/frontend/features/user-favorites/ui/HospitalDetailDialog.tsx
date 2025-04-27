@@ -55,7 +55,7 @@ export function HospitalDetailDialog() {
         </div>
 
         {/* 주소, 전화번호 */}
-        <div className="space-y-1">
+        <div className="space-y-1 flex flex-col">
           <div className="inline-flex items-center gap-1 text-muted-foreground">
             <MapPin size={16} />
             <span>{unit.address}</span>

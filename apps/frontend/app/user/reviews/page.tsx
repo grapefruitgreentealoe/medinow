@@ -58,8 +58,8 @@ export default function ReviewPaginationPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+    <div className="!space-y-6 !mx-[20px] !mt-[30px]">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {reviews.map((review) => (
           <ReviewItem
             key={review.reviewId}
