@@ -14,6 +14,8 @@ import { ReviewData } from '@/features/user-review/type';
 import { getReviews } from '@/features/user-review/api';
 import { ReviewBody } from '@/features/review/ui/ReviewBody';
 import { Label } from '@/components/ui/label';
+import { CATEGORY_LABEL } from '@/shared/constants/const';
+import { user as getUser } from '@/features/user/api';
 
 interface User {
   email: string;
@@ -100,8 +102,7 @@ export default function AdminUserProfilePage() {
   const [recentReveiw, setRecentReview] = useState<ReviewData | null>(null);
 
   useEffect(() => {
-    axiosInstance
-      .get('/users', { withCredentials: true })
+    getUser()
       .then((res) => {
         const userData = res.data.user;
         if (!userData.unitData) {
@@ -176,7 +177,10 @@ export default function AdminUserProfilePage() {
           <CardContent className="w-full flex flex-col">
             <ProfileField label="병원명" value={user.unitData.name} />
             <ProfileField label="전화번호" value={user.unitData.tel} />
-            <ProfileField label="카테고리" value={user.unitData.category} />
+            <ProfileField
+              label="카테고리"
+              value={CATEGORY_LABEL[user.unitData.category]}
+            />
             <ProfileField label="주소" value={user.unitData.address} />
           </CardContent>
         </Card>
