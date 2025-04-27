@@ -87,22 +87,12 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @RequestOrigin() requestOrigin: string,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<LoginResponseDto> {
+  ) {
     const login = await this.authService.login(loginDto, requestOrigin);
 
     response.cookie('accessToken', login.accessToken, login.accessOptions);
 
-    return plainToInstance(LoginResponseDto, {
-      message: '로그인 성공',
-      email: login.email,
-      role: login.role,
-      userProfile: {
-        name: login.userProfile?.name,
-        nickname: login.userProfile?.nickname,
-        address: login.userProfile?.address,
-      },
-      careUnit: login.careUnit ? login.careUnit : null,
-    });
+    return login;
   }
 
   @UseGuards(JwtAuthGuard)
