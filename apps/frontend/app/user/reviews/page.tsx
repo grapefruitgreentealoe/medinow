@@ -59,6 +59,8 @@ export default function ReviewPaginationPage() {
     router.push(ROUTES.USER.EDIT_REVIEW(confirmEditId!));
   };
 
+  if (!detailReview) return null;
+
   return (
     <div className="!space-y-6 !mx-[20px] !mt-[30px]">
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -110,10 +112,10 @@ export default function ReviewPaginationPage() {
         onCtaClick={() => setDetailReview(null)}
       >
         <ReviewBody
-          rating={detailReview?.rating!}
-          content={detailReview?.content!}
-          createdAt={detailReview?.createdAt!}
-          thankMessage={detailReview?.thankMessage}
+          rating={detailReview.rating}
+          content={detailReview.content}
+          createdAt={detailReview.createdAt}
+          thankMessage={detailReview.thankMessage}
         />
       </ContentDialog>
 
