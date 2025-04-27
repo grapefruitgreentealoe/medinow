@@ -18,59 +18,16 @@ import { CATEGORY_LABEL } from '@/shared/constants/const';
 import { user as getUser } from '@/features/user/api';
 
 interface User {
-  email: string;
-  name: string;
-  address: string;
-  age: number;
-  nickname: string;
+  user: {
+    email: string;
+    name: string;
+    address: string;
+    age: number;
+    nickname: string;
+  };
+
   unitData: CareUnit;
 }
-
-// Mock unitData
-const mockUnitData: CareUnit = {
-  id: 'mock-id',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  deletedAt: null,
-  name: '모킹 병원',
-  address: '서울특별시 어딘가 123',
-  tel: '02-123-4567',
-  category: 'hospital',
-  hpId: 'mock-hpid',
-  mondayOpen: 900,
-  mondayClose: 1800,
-  tuesdayOpen: 900,
-  tuesdayClose: 1800,
-  wednesdayOpen: 900,
-  wednesdayClose: 1800,
-  thursdayOpen: 900,
-  thursdayClose: 1800,
-  fridayOpen: 900,
-  fridayClose: 1800,
-  saturdayOpen: 900,
-  saturdayClose: 1300,
-  sundayOpen: null,
-  sundayClose: null,
-  holidayOpen: null,
-  holidayClose: null,
-  lat: 37.5665,
-  lng: 126.978,
-  isBadged: false,
-  nowOpen: true,
-  kakaoUrl: null,
-  isChatAvailable: true,
-  isFavorite: false,
-  departments: [],
-  congestion: {
-    hvec: 0,
-    congestionLevel: 'HIGH',
-    updatedAt: new Date().toISOString(),
-    hpid: 'mock-hpid',
-    name: '모킹 병원',
-  },
-  averageRating: 4.2,
-  reviewCount: 12,
-};
 
 // 운영여부 변경 API
 async function toggleHospitalOpenStatus(unitId: string) {
@@ -104,10 +61,7 @@ export default function AdminUserProfilePage() {
   useEffect(() => {
     getUser()
       .then((res) => {
-        const userData = res.data.user;
-        if (!userData.unitData) {
-          userData.unitData = mockUnitData;
-        }
+        const userData = res.data;
         setUser(userData);
       })
       .catch(() => setUser(null));
@@ -154,8 +108,8 @@ export default function AdminUserProfilePage() {
             <CardTitle>관리자 정보 및 운영상태</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col ">
-            <ProfileField label="이메일" value={user.email} />
-            <ProfileField label="이름" value={user.name} />
+            <ProfileField label="이메일" value={user.user.email} />
+            <ProfileField label="이름" value={user.user.name} />
             <ProfileField
               label="운영 여부"
               value={user.unitData.nowOpen ? '운영 중' : '운영 중 아님'}
