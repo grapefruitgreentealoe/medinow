@@ -40,11 +40,10 @@ export function ReviewBody({
     }
     return <div className="flex items-center gap-1">{stars}</div>;
   };
-  console.log(nickname);
   return (
     <div className="!space-y-2">
       {nickname ? (
-        <div className="text-sm text-muted-foreground">작성자: {nickname}</div>
+        <div className="text-sm text-muted-foreground">{nickname}</div>
       ) : null}
       {/* 작성일 */}
       <div className="text-xs text-muted-foreground mt-4">
