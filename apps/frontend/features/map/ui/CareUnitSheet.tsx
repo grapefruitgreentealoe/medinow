@@ -50,8 +50,6 @@ export default function CareUnitSheet({
       OpenStatus: JSON.parse(openFilter),
     });
 
-  if (!open) return null;
-
   const getTitle = () => (page === 'list' ? '의료기관 목록' : '상세 정보');
 
   const getDescription = () =>
