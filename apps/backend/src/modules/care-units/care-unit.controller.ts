@@ -2,10 +2,10 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   Param,
   Query,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { CareUnitService } from './services/care-unit.service';
 import { ResponseCareUnitDto } from './dto/response-care-unit.dto';
@@ -428,7 +428,7 @@ export class CareUnitController {
     return this.careUnitService.getCareUnitDetailWithDepartment(id);
   }
 
-  @Post('check-now-open')
+  @Get('check-now-open/:id')
   @Public()
   @ApiOperation({ summary: '기관관리자 : 실시간 운영 여부 확인' })
   @ApiParam({
@@ -488,5 +488,23 @@ export class CareUnitController {
       limit,
     );
     return reviews;
+  }
+
+  @Patch('update-now-open')
+  @ApiOperation({ summary: '기관관리자 : 실시간 운영 여부 수동 설정' })
+  @ApiQuery({
+    name: 'isReverse',
+    required: true,
+    type: Boolean,
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: String,
+  })
+  async updateNowOpen(
+    @RequestUser() user: User,
+    @Query('isReverse') isReverse: boolean,
+  ) {
+    return await this.careUnitService.toggleOperationMode(user.id, isReverse);
   }
 }
