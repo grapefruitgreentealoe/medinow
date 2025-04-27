@@ -64,6 +64,8 @@ export default function Header() {
     if (role === 'admin') {
       return [
         { href: ROUTES.ADMIN.DASHBOARD, label: '관리자 대시보드' },
+        { href: ROUTES.ADMIN.REVIEWS, label: '리뷰 보기' },
+        { href: ROUTES.ADMIN.CHAT, label: '채팅' },
         { href: '#', label: '로그아웃', onClick: handleLogout },
       ];
     }
@@ -73,6 +75,7 @@ export default function Header() {
       { href: ROUTES.USER.FAVORITES, label: '즐겨찾기' },
       { href: ROUTES.USER.WRITE_REVIEW, label: '리뷰 작성하기' },
       { href: ROUTES.USER.REVIEWS, label: '내 리뷰' },
+      { href: ROUTES.USER.CHAT, label: '채팅' },
       { href: '#', label: '로그아웃', onClick: handleLogout },
     ];
   };
@@ -109,11 +112,23 @@ export default function Header() {
                       </Button>
                     </Link>
                   ) : (
-                    <Link href={ROUTES.USER.ROOT}>
-                      <Button variant="ghost" className="text-sm ">
-                        마이페이지
-                      </Button>
-                    </Link>
+                    <>
+                      <Link href={ROUTES.USER.ROOT}>
+                        <Button variant="ghost" className="text-sm ">
+                          마이페이지
+                        </Button>
+                      </Link>
+                      <Link href={ROUTES.USER.WRITE_REVIEW}>
+                        <Button variant="ghost" className="text-sm ">
+                          리뷰작성
+                        </Button>
+                      </Link>
+                      <Link href={ROUTES.USER.CHAT}>
+                        <Button variant="ghost" className="text-sm ">
+                          채팅
+                        </Button>
+                      </Link>
+                    </>
                   )}
                   <Button
                     variant="ghost"
