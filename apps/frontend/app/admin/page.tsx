@@ -191,6 +191,7 @@ export default function AdminUserProfilePage() {
         <Card>
           <CardContent>
             <ReviewBody
+              nickname={recentReveiw.nickname}
               rating={recentReveiw.rating}
               content={recentReveiw.content}
               createdAt={recentReveiw.createdAt}

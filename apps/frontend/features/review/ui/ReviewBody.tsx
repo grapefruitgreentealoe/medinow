@@ -7,6 +7,7 @@ interface ReviewBodyProps {
   content: string;
   thankMessage?: string;
   createdAt: string;
+  nickname?: string;
 }
 
 export function ReviewBody({
@@ -14,6 +15,7 @@ export function ReviewBody({
   content,
   thankMessage,
   createdAt,
+  nickname = '',
 }: ReviewBodyProps) {
   const renderStars = (rating: number) => {
     const stars = [];
@@ -38,12 +40,18 @@ export function ReviewBody({
     }
     return <div className="flex items-center gap-1">{stars}</div>;
   };
-
+  console.log(nickname);
   return (
-    <div className="!space-y-3">
+    <div className="!space-y-2">
+      {nickname ? (
+        <div className="text-sm text-muted-foreground">작성자: {nickname}</div>
+      ) : null}
+      {/* 작성일 */}
+      <div className="text-xs text-muted-foreground mt-4">
+        {new Date(createdAt).toLocaleDateString('ko-KR')}
+      </div>
       {/* 별점 */}
       <div>{renderStars(rating)}</div>
-
       {/* 리뷰 내용 */}
       <div>
         <div className="text-xs font-semibold text-muted-foreground mb-1">
@@ -53,7 +61,6 @@ export function ReviewBody({
           {content}
         </p>
       </div>
-
       {/* 감사 메시지 */}
       {thankMessage && (
         <div>
@@ -65,11 +72,6 @@ export function ReviewBody({
           </p>
         </div>
       )}
-
-      {/* 작성일 */}
-      <div className="text-xs text-muted-foreground mt-4">
-        {new Date(createdAt).toLocaleDateString('ko-KR')}
-      </div>
     </div>
   );
 }
