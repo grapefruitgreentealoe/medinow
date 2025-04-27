@@ -101,33 +101,7 @@ export class AuthController {
         nickname: login.userProfile?.nickname,
         address: login.userProfile?.address,
       },
-      careUnit: login.careUnit
-        ? {
-            name: login.careUnit?.name,
-            address: login.careUnit?.address,
-            tel: login.careUnit?.tel,
-            category: login.careUnit?.category,
-            mondayOpen: login.careUnit?.mondayOpen,
-            mondayClose: login.careUnit?.mondayClose,
-            tuesdayOpen: login.careUnit?.tuesdayOpen,
-            tuesdayClose: login.careUnit?.tuesdayClose,
-            wednesdayOpen: login.careUnit?.wednesdayOpen,
-            wednesdayClose: login.careUnit?.wednesdayClose,
-            thursdayOpen: login.careUnit?.thursdayOpen,
-            thursdayClose: login.careUnit?.thursdayClose,
-            fridayOpen: login.careUnit?.fridayOpen,
-            fridayClose: login.careUnit?.fridayClose,
-            saturdayOpen: login.careUnit?.saturdayOpen,
-            saturdayClose: login.careUnit?.saturdayClose,
-            sundayOpen: login.careUnit?.sundayOpen,
-            sundayClose: login.careUnit?.sundayClose,
-            holidayOpen: login.careUnit?.holidayOpen,
-            holidayClose: login.careUnit?.holidayClose,
-            isBadged: login.careUnit?.isBadged,
-            nowOpen: login.careUnit?.nowOpen,
-            departments: login.careUnit?.departments,
-          }
-        : null,
+      careUnit: login.careUnit ? login.careUnit : null,
     });
   }
 
