@@ -9,7 +9,7 @@ import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { ImagesModule } from '../images/images.module';
-
+import { CareUnitModule } from '../care-units/care-unit.module';
 @Module({
   imports: [
     AppConfigModule,
@@ -24,6 +24,7 @@ import { ImagesModule } from '../images/images.module';
     UsersModule,
     ImagesModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
+    CareUnitModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtAccessStrategy, JwtRefreshStrategy],
