@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
-import { useSetAtom, useAtomValue, createStore, Provider } from 'jotai';
+import { useSetAtom, useAtomValue } from 'jotai';
 import {
   selectedCareUnitIdAtom,
   selectedCareUnitAtom,
@@ -15,6 +15,7 @@ import { SearchCareUnitForReview } from '@/features/user-review/ui/SearchCareUni
 import { ROUTES } from '@/shared/constants/routes';
 import { FormSchema } from '@/features/user-review/schema/reviewSchema';
 import { toast } from 'sonner';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function WriteReviewPage() {
   const searchParams = useSearchParams();
@@ -32,7 +33,9 @@ export default function WriteReviewPage() {
         setCareUnit(res);
         setDepartments(res.departments || []);
       });
-    } catch {}
+    } catch {
+      toast.warning('병원 정보를 불러오지 못했습니다.');
+    }
   };
 
   useEffect(() => {
@@ -56,16 +59,36 @@ export default function WriteReviewPage() {
       router.push(ROUTES.USER.REVIEWS);
       toast.success('리뷰가 등록되었습니다!');
     } catch {
-      toast.warning('문제발생');
+      toast.warning('리뷰 등록에 실패했습니다.');
     }
   };
 
   return (
-    <main className="min-h-screen px-4 py-6">
-      <h1 className="text-2xl font-semibold mb-6">리뷰 작성</h1>
+    <main className="min-h-screen flex flex-col items-center !px-4 !py-10">
+      <div className="w-full max-w-xl !space-y-10">
+        <Card>
+          <CardContent className="!space-y-6">
+            <div className="w-full max-w-xl space-y-10">
+              {/* 제목 */}
+              <div className="text-center space-y-2">
+                <h1 className="text-2xl font-bold tracking-tight">
+                  리뷰 작성하기
+                </h1>
+                <p className="text-muted-foreground text-sm">
+                  방문하신 병원에 대한 솔직한 후기를 남겨주세요.
+                </p>
+              </div>
 
-      {!careUnit && <SearchCareUnitForReview />}
-      {careUnit && <ReviewForm onSubmit={onSubmit} />}
+              {/* 병원 검색 or 리뷰 폼 */}
+              {!careUnit ? (
+                <SearchCareUnitForReview />
+              ) : (
+                <ReviewForm onSubmit={onSubmit} />
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </main>
   );
 }

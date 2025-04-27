@@ -27,7 +27,7 @@ export default function FilterMenu() {
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[250px] space-y-4" align="start">
+      <PopoverContent className="w-[250px] !space-y-4" align="start">
         {/* 기관 종류 */}
         <div>
           <span className="mb-1 text-xs text-muted-foreground">기관 종류</span>
