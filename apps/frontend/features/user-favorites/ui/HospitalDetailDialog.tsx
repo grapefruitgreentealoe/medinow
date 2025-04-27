@@ -5,7 +5,7 @@ import { selectedFavoriteCareUnitAtom } from '../atoms/selectedFavoriteCareUnitA
 import { Badge } from '@/components/ui/badge';
 import { MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { CATEGORY_LABEL } from '@/features/map/const';
+import { CATEGORY_LABEL } from '@/shared/constants/const';
 import { ContentDialog } from '@/shared/ui/ContentDialog';
 
 export function HospitalDetailDialog() {

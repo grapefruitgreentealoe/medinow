@@ -14,7 +14,10 @@ import { openKakaoMap, renderTodayTime } from '../utils';
 import { useOptimisticToggleFavorite } from '../model/useOptimisticToggleFavorite';
 import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
 import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
-import { CATEGORY_LABEL, congestionClassMap } from '../const';
+import {
+  CATEGORY_LABEL,
+  congestionClassMap,
+} from '../../../shared/constants/const';
 import { useQueryClient } from '@tanstack/react-query';
 import { ROUTES } from '@/shared/constants/routes';
 import { useRouter } from 'next/navigation';

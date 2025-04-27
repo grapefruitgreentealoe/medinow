@@ -10,27 +10,35 @@ export function ReviewItem({
   onEdit,
   onDelete,
   onDetail,
+  isAdmin = false,
 }: {
   review: ReviewData;
   onEdit: () => void;
   onDelete: () => void;
   onDetail: () => void;
+  isAdmin?: boolean;
 }) {
   return (
     <CareUnitCardLayout
       title={review.careUnitName}
       cta={
-        <div className="flex gap-2 !mt-1">
+        !isAdmin ? (
+          <div className="flex gap-2 !mt-1">
+            <Button size="sm" variant="link" onClick={onDetail}>
+              상세보기
+            </Button>
+            <Button size="sm" variant="outline" onClick={onEdit}>
+              수정
+            </Button>
+            <Button size="sm" variant="outline" onClick={onDelete}>
+              삭제
+            </Button>
+          </div>
+        ) : (
           <Button size="sm" variant="link" onClick={onDetail}>
             상세보기
           </Button>
-          <Button size="sm" variant="outline" onClick={onEdit}>
-            수정
-          </Button>
-          <Button size="sm" variant="outline" onClick={onDelete}>
-            삭제
-          </Button>
-        </div>
+        )
       }
     >
       {/* 본문 부분 */}
