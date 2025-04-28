@@ -1,11 +1,10 @@
+'use client';
 import { AdminChatRoom } from '@/features/admin-chat/ui/AdminChatRoom';
+import { useParams } from 'next/navigation';
 
-interface ChatRoomPageProps {
-  params: { id: string };
-}
+export default function ChatRoomPage() {
+  const params = useParams();
+  const roomId = params.id as string;
 
-export default async function ChatRoomPage({ params }: ChatRoomPageProps) {
-  const { id } = params;
-
-  return <AdminChatRoom roomId={id} />;
+  return <AdminChatRoom roomId={roomId} />;
 }
