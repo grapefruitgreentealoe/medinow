@@ -25,6 +25,7 @@ import { ReviewsModule } from '../reviews/reviews.module';
     forwardRef(() => FavoritesModule),
     forwardRef(() => DepartmentsModule),
     forwardRef(() => ReviewsModule),
+
   ],
   controllers: [CareUnitController],
   providers: [CareUnitService, CareUnitAdminService],
