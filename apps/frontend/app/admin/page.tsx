@@ -19,6 +19,7 @@ import { user as getUser } from '@/features/user/api';
 import { Badge } from '@/components/ui/badge';
 import { useRenderTimeRow } from '@/shared/model/useRenderTimeRow';
 import { ContentDialog } from '@/shared/ui/ContentDialog';
+import { HospitalTimeTable } from '@/shared/ui/HospitalTimeTable';
 
 interface User {
   user: {
@@ -198,48 +199,7 @@ export default function AdminUserProfilePage() {
         onClose={() => setIsTimeTableOpen(false)}
         title="운영시간표"
       >
-        <div className="grid grid-cols-[80px_1fr] gap-y-1 gap-x-4">
-          {useRenderTimeRow(
-            '월요일',
-            user.unitData.mondayOpen,
-            user.unitData.mondayClose
-          )}
-          {useRenderTimeRow(
-            '화요일',
-            user.unitData.tuesdayOpen,
-            user.unitData.tuesdayClose
-          )}
-          {useRenderTimeRow(
-            '수요일',
-            user.unitData.wednesdayOpen,
-            user.unitData.wednesdayClose
-          )}
-          {useRenderTimeRow(
-            '목요일',
-            user.unitData.thursdayOpen,
-            user.unitData.thursdayClose
-          )}
-          {useRenderTimeRow(
-            '금요일',
-            user.unitData.fridayOpen,
-            user.unitData.fridayClose
-          )}
-          {useRenderTimeRow(
-            '토요일',
-            user.unitData.saturdayOpen,
-            user.unitData.saturdayClose
-          )}
-          {useRenderTimeRow(
-            '일요일',
-            user.unitData.sundayOpen,
-            user.unitData.sundayClose
-          )}
-          {useRenderTimeRow(
-            '공휴일',
-            user.unitData.holidayOpen,
-            user.unitData.holidayClose
-          )}
-        </div>
+        <HospitalTimeTable unit={user.unitData} />
       </ContentDialog>
     </div>
   );

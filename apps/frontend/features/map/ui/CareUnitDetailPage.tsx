@@ -29,6 +29,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { renderTodayTime } from '../utils';
+import { useRenderTimeRow } from '@/shared/model/useRenderTimeRow';
+import { HospitalTimeTable } from '@/shared/ui/HospitalTimeTable';
 export default function CareUnitDetailPage() {
   const router = useRouter();
   const [unit] = useAtom(selectedCareUnitAtom);
@@ -37,27 +39,6 @@ export default function CareUnitDetailPage() {
   const { mutate: toggleFavorite } = useOptimisticToggleFavorite(queryKey);
 
   if (!unit) return null;
-
-  const timeToStr = (time: number | null) => {
-    if (time === 0) return '00:00';
-    if (!time) return '휴무';
-    const h = String(Math.floor(time / 100)).padStart(2, '0');
-    const m = String(time % 100).padStart(2, '0');
-    return `${h}:${m}`;
-  };
-
-  const renderTimeRow = (
-    label: string,
-    open: number | null,
-    close: number | null
-  ) => (
-    <>
-      <div className="text-muted-foreground">{label}</div>
-      <div>
-        {timeToStr(open)} - {timeToStr(close)}
-      </div>
-    </>
-  );
 
   const handleFavorite = () => {
     toggleFavorite({ unitId: unit.id });
@@ -210,16 +191,7 @@ export default function CareUnitDetailPage() {
             운영 시간
           </AccordionTrigger>
           <AccordionContent className="!my-3">
-            <div className="mt-2 grid grid-cols-[80px_1fr] gap-y-1 gap-x-4 text-sm max-w-[280px]">
-              {renderTimeRow('월요일', unit.mondayOpen, unit.mondayClose)}
-              {renderTimeRow('화요일', unit.tuesdayOpen, unit.tuesdayClose)}
-              {renderTimeRow('수요일', unit.wednesdayOpen, unit.wednesdayClose)}
-              {renderTimeRow('목요일', unit.thursdayOpen, unit.thursdayClose)}
-              {renderTimeRow('금요일', unit.fridayOpen, unit.fridayClose)}
-              {renderTimeRow('토요일', unit.saturdayOpen, unit.saturdayClose)}
-              {renderTimeRow('일요일', unit.sundayOpen, unit.sundayClose)}
-              {renderTimeRow('공휴일', unit.holidayOpen, unit.holidayClose)}
-            </div>
+            <HospitalTimeTable unit={unit} />
           </AccordionContent>
         </AccordionItem>
         {/* 리뷰 */}
