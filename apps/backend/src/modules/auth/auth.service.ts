@@ -35,7 +35,7 @@ export class AuthService {
     } catch (error: any) {
       const err = error as Error;
       this.logger.error(`회원가입 실패: ${err.message}`);
-      throw new BadRequestException('회원가입 실패');
+      throw new BadRequestException(err.message);
     }
   }
 
@@ -49,7 +49,7 @@ export class AuthService {
     } catch (error: any) {
       const err = error as Error;
       this.logger.error(`관리자 회원가입 실패: ${err.message}`);
-      throw new BadRequestException(error.message);
+      throw new BadRequestException(err.message);
     }
   }
 
