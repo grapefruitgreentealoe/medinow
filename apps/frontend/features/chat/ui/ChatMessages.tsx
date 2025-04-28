@@ -34,14 +34,14 @@ export function ChatMessages({
             key={msg.id}
             className={cn(
               'flex',
-              msg.senderId === 'me' ? 'justify-end' : 'justify-start' // ✅ 나면 오른쪽, 상대면 왼쪽
+              msg.senderId === 'me' ? 'justify-end' : 'justify-start' //  나면 오른쪽, 상대면 왼쪽
             )}
           >
             <div
               className={cn(
                 'p-3 rounded-lg max-w-xs',
                 msg.senderId === 'me'
-                  ? 'bg-primary text-primary-foreground' // ✅ 내가 보낸건 파란색 등 강조
+                  ? 'bg-primary text-primary-foreground' //  내가 보낸건 파란색 등 강조
                   : 'bg-muted text-muted-foreground' // 상대방은 회색
               )}
             >
