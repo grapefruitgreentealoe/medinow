@@ -21,13 +21,14 @@ export function ChatMessages({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    console.log('inner', messages);
+    // bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {messages.map((msg) => (
+        {(messages.messages ?? []).map((msg) => (
           <div key={msg.id} className="flex">
             <div className="bg-muted p-3 rounded-lg max-w-xs">
               <div>{msg.content}</div>

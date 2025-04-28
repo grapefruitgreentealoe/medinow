@@ -1,112 +1,65 @@
 'use client';
 
-import { ChatLayout } from '@/features/chat/ui/ChatLayout';
-import { ChatRoomList } from '@/features/chat/ui/ChatRoomList';
-import { ChatMessages } from '@/features/chat/ui/ChatMessages';
-import { HospitalInfoCard } from '@/features/chat/ui/HospitalInfoCard';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { socket } from '@/lib/socket';
-import { useSearchParams } from 'next/navigation';
-import axiosInstance from '@/lib/axios'; // 🚨 axios 세팅된 인스턴스 필요해!
-import { RoomInfo } from '@/features/chat/type';
-
-interface Message {
-  id: string;
-  senderId: string;
-  content: string;
-  createdAt: string;
-  roomId: string;
-}
+import { ChatMessages } from '@/features/chat/ui/ChatMessages';
+import { Message } from '@/features/chat/type';
+import { getChatRooms } from '@/features/chat/api';
+import { ROUTES } from '@/shared/constants/routes';
 
 export default function ChatPage() {
   const searchParams = useSearchParams();
   const careUnitId = searchParams.get('id');
-
-  const [roomList, setRoomList] = useState<RoomInfo[]>([]);
+  console.log(careUnitId);
+  const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
   const [messagesMap, setMessagesMap] = useState<Map<string, Message[]>>(
     new Map()
   );
-  const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
+  const router = useRouter();
+
   const [input, setInput] = useState('');
 
   useEffect(() => {
-    if (!careUnitId) return;
-
     socket.connect();
 
-    const fetchRoomsAndJoin = async () => {
-      try {
-        const res = await axiosInstance.get('/chats/rooms');
+    const fetchAndJoinRoom = async () => {
+      const rooms = await getChatRooms();
 
-        // ✅ 여기서 변환
-        const parsedRooms: RoomInfo[] = res.data.map((room: any) => ({
-          roomId: room.id,
-          careUnitId: room.careUnit.id,
-          careUnitName: room.careUnit.name,
-          lastMessageAt: room.lastMessageAt,
-          unreadCount: room.unreadCount,
-        }));
+      const matchedRoom = rooms.find((room) => room.careUnit.id === careUnitId);
 
-        setRoomList(parsedRooms);
+      if (matchedRoom) {
+        router.push(ROUTES.USER.CHAT(matchedRoom.id as string));
+      } else {
+        console.log('notmatched');
 
-        const matchedRoom = parsedRooms.find(
-          (r) => r.careUnitId === careUnitId
+        socket.emit('joinRoom', { careUnitId });
+
+        socket.once(
+          'roomCreated',
+          (data: { roomId: string; careUnitId: string }) => {
+            console.log('hihi');
+            setCurrentRoomId(data.roomId);
+            router.push(ROUTES.USER.CHAT(data.roomId as string));
+          }
         );
-
-        if (matchedRoom) {
-          socket.emit('joinRoom', { roomId: matchedRoom.roomId });
-          setCurrentRoomId(matchedRoom.roomId);
-        } else {
-          socket.emit('joinRoom', { careUnitId });
-        }
-      } catch (err) {
-        console.error('채팅방 목록 가져오기 실패', err);
       }
     };
 
-    fetchRoomsAndJoin();
+    fetchAndJoinRoom();
+    if (!careUnitId) return;
 
     socket.on('roomMessages', (messages: Message[]) => {
       if (!messages.length) return;
-
       const roomId = messages[0].roomId;
-      const matchedRoom = roomList.find((r) => r.careUnitId === careUnitId);
-      const careUnitName = matchedRoom?.careUnitName || '병원 이름 없음';
-
-      // 새로 추가
-      setRoomList((prev) => {
-        const alreadyExists = prev.some((r) => r.roomId === roomId);
-        if (alreadyExists) return prev;
-        return [
-          ...prev,
-          {
-            roomId,
-            careUnitId,
-            careUnitName,
-            lastMessageAt: new Date().toISOString(),
-            unreadCount: 0,
-          } as RoomInfo,
-        ];
-      });
-
-      // 메시지도 세팅
       setMessagesMap((prev) => new Map(prev).set(roomId, messages));
-
-      // 현재 방 세팅
-      setCurrentRoomId(roomId);
     });
 
     socket.on('newMessage', (message: Message) => {
       setMessagesMap((prev) => {
         const newMap = new Map(prev);
-        const existing = newMap.get(message.roomId) || [];
-
-        // ✨ temp- 로 시작하는 optimistic 메시지는 제거
-        const withoutTemp = existing.filter(
-          (msg) => !msg.id.startsWith('temp-')
-        );
-
-        newMap.set(message.roomId, [...withoutTemp, message]);
+        const existingMessages = newMap.get(message.roomId) || [];
+        newMap.set(message.roomId, [...existingMessages, message]);
         return newMap;
       });
     });
@@ -115,46 +68,40 @@ export default function ChatPage() {
       socket.disconnect();
       socket.off('roomMessages');
       socket.off('newMessage');
+      socket.off('roomCreated');
     };
   }, [careUnitId]);
 
   const handleSendMessage = () => {
     if (!input.trim() || !currentRoomId) return;
 
-    const tempMessage = {
+    const tempMessage: Message = {
       id: `temp-${Date.now()}`,
-      content: input.trim(),
       senderId: 'me',
-      roomId: currentRoomId,
+      content: input,
       createdAt: new Date().toISOString(),
+      roomId: currentRoomId,
     };
 
     setMessagesMap((prev) => {
       const newMap = new Map(prev);
-      const existingMessages = newMap.get(currentRoomId) || [];
-      newMap.set(currentRoomId, [...existingMessages, tempMessage]);
+      const existing = newMap.get(currentRoomId) || [];
+      newMap.set(currentRoomId, [...existing, tempMessage]);
       return newMap;
     });
 
-    socket.emit('sendMessage', {
-      roomId: currentRoomId,
-      content: input.trim(),
-    });
+    socket.emit('sendMessage', { roomId: currentRoomId, content: input });
     setInput('');
   };
 
+  if (!careUnitId) return <div>잘못된 접근입니다!</div>;
+
   return (
-    <ChatLayout
-      left={<ChatRoomList rooms={roomList} onSelectRoom={setCurrentRoomId} />}
-      center={
-        <ChatMessages
-          messages={messagesMap.get(currentRoomId!) || []}
-          onSendMessage={handleSendMessage}
-          input={input}
-          setInput={setInput}
-        />
-      }
-      right={<HospitalInfoCard />}
+    <ChatMessages
+      messages={messagesMap.get(currentRoomId!) || []}
+      input={input}
+      setInput={setInput}
+      onSendMessage={handleSendMessage}
     />
   );
 }
