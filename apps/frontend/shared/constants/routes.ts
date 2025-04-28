@@ -14,7 +14,7 @@ export const ROUTES = {
     REVIEW_DETAIL: (id: string | number) => `/user/reviews/${id}`,
     WRITE_REVIEW: '/user/reviews/post',
     EDIT_REVIEW: (id: string | number) => `/user/reviews/edit/${id}`,
-    CHAT: '/user/chat',
+    CHAT: (id: string) => `/user/chat${id ? '?id=' + id : ''}`,
   },
 
   ADMIN: {

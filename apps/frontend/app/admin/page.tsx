@@ -16,6 +16,7 @@ import { ReviewBody } from '@/features/review/ui/ReviewBody';
 import { Label } from '@/components/ui/label';
 import { CATEGORY_LABEL } from '@/shared/constants/const';
 import { user as getUser } from '@/features/user/api';
+import { Badge } from '@/components/ui/badge';
 
 interface User {
   user: {
@@ -30,9 +31,9 @@ interface User {
 }
 
 // 운영여부 변경 API
-async function toggleHospitalOpenStatus(unitId: string) {
-  return axiosInstance.post(`/care-units/check-now-open`, {
-    id: unitId,
+async function toggleHospitalOpenStatus(isReverse: boolean) {
+  return axiosInstance.patch(`/care-units/update-now-open`, {
+    isReverse,
   });
 }
 
@@ -45,7 +46,7 @@ function ProfileField({
   value: string | number;
 }) {
   return (
-    <div className="h-[60px] w-full">
+    <div className="h-[60px]">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="font-medium break-words">{value}</p>
     </div>
@@ -55,20 +56,23 @@ function ProfileField({
 export default function AdminUserProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pendingStatus, setPendingStatus] = useState<boolean>(false);
   const [recentReveiw, setRecentReview] = useState<ReviewData | null>(null);
+  const [isReverse, setIsReverse] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
     getUser()
       .then((res) => {
         const userData = res.data;
         setUser(userData);
+        setIsOpen(userData.unitData.nowOpen);
+        setIsReverse(userData.unitData.isReverse); // 먼저 데이터를 가져온다.
       })
       .catch(() => setUser(null));
 
     getReviews({ pageParam: 1, limit: 1 }).then((res) => {
       const reviews = res.reviews;
-      setRecentReview(reviews[0]);
+      setRecentReview(reviews?.[0] ?? []);
     });
   }, []);
 
@@ -85,18 +89,18 @@ export default function AdminUserProfilePage() {
   const handleConfirmToggle = async () => {
     if (!user) return;
     try {
-      await toggleHospitalOpenStatus(user.unitData.id);
-      setUser({
-        ...user,
-        unitData: {
-          ...user.unitData,
-          nowOpen: !user.unitData.nowOpen,
-        },
-      });
-      toast.success('운영 여부가 변경되었습니다.');
+      const { data } = await toggleHospitalOpenStatus(!isReverse);
+      toast.success(data.message);
+      setIsReverse(data.isReverse);
+      setIsOpen(data.isOpen);
     } catch (error) {
       toast.warning('변경 실패. 다시 시도해주세요.');
     }
+  };
+
+  const handleConfirmIsReverse = () => {
+    setConfirmOpen(false);
+    handleConfirmToggle();
   };
 
   return (
@@ -110,16 +114,29 @@ export default function AdminUserProfilePage() {
           <CardContent className="flex flex-col ">
             <ProfileField label="이메일" value={user.user.email} />
             <ProfileField label="이름" value={user.user.name} />
-            <ProfileField
-              label="운영 여부"
-              value={user.unitData.nowOpen ? '운영 중' : '운영 중 아님'}
-            />
+            <div className="flex items-center justify-start ">
+              <ProfileField
+                label="현재 운영 상태"
+                value={isOpen ? '운영 중' : '운영 중 아님'}
+              />
+              <Badge
+                variant={isReverse ? 'secondary' : 'default'}
+                className="inline-block"
+              >
+                {isReverse ? '수동 운영 중' : '정상 운영 중'}
+              </Badge>
+            </div>
             <p className="text-sm text-muted-foreground !mb-[5px]">
-              운영 상태 변경
+              수동 전환 버튼
+            </p>
+            <p className="text-xs text-muted-foreground !mb-[5px]">
+              활성화 시, 운영시간표 기준과 반대 상태로 전환됩니다.
             </p>
             <Switch
-              checked={user.unitData.nowOpen}
-              onCheckedChange={() => setConfirmOpen(true)}
+              checked={isReverse} //
+              onCheckedChange={() => {
+                setConfirmOpen(true); //모달을 연다
+              }}
             />
           </CardContent>
         </Card>
@@ -157,13 +174,10 @@ export default function AdminUserProfilePage() {
       {/* Confirm Modal */}
       <ConfirmDialog
         open={confirmOpen}
-        onConfirm={() => {
-          setConfirmOpen(false);
-          handleConfirmToggle();
-        }}
+        onConfirm={handleConfirmIsReverse} //확인시 핸들러 실행
         onClose={() => setConfirmOpen(false)}
         title="운영 상태 변경"
-        description={`병원의 운영 상태를 ${user.unitData.nowOpen ? '운영 중지' : '운영 시작'}로 변경하시겠습니까?`}
+        description={`임시 ${!isOpen ? '"운영"' : '"휴무"'}로 변경하시겠습니까?`}
       />
     </div>
   );
