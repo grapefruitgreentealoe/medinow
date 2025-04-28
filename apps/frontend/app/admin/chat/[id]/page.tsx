@@ -4,7 +4,7 @@ interface ChatRoomPageProps {
   params: { id: string };
 }
 
-export default function ChatRoomPage({ params }: ChatRoomPageProps) {
+export default async function ChatRoomPage({ params }: ChatRoomPageProps) {
   const { id } = params;
 
   return <AdminChatRoom roomId={id} />;
