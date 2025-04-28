@@ -123,7 +123,7 @@ export default function AdminUserProfilePage() {
                 variant={isReverse ? 'secondary' : 'default'}
                 className="inline-block"
               >
-                {isReverse ? '수동 운영 중' : '정상 운영 중'}
+                {isReverse ? '수동 전환 됨' : '정상 운영 중'}
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground !mb-[5px]">
