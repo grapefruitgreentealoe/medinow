@@ -11,10 +11,15 @@ export interface RoomInfo {
 
 export interface Message {
   id: string;
-  senderId: string;
   content: string;
   createdAt: string;
-  roomId: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+  isRead: boolean;
+  sender: {
+    role: 'user' | 'admin';
+  };
+  senderId: string;
 }
 
 export interface ChatRoomListProps {
