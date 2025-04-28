@@ -96,13 +96,13 @@ export default function Header() {
           <nav className="flex items-center gap-2">
             <Button
               variant="ghost"
-              className="!p-2 w-[2rem] md:hidden"
+              className="!p-2 w-[2rem] lg:hidden"
               onClick={() => setMenuOpen((prev) => !prev)}
             >
               <Menu size={24} />
             </Button>
             {/* 데스크탑: 로그인 상태에 따라 버튼 분기 */}
-            <div className="hidden md:flex gap-[20px]">
+            <div className="hidden lg:flex gap-[20px]">
               {isLoggedIn ? (
                 <>
                   {role === 'admin' ? (
