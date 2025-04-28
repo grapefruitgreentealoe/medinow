@@ -16,7 +16,13 @@ interface Message {
   isRead: boolean;
 }
 
-export function ChatRoom({ roomId }: { roomId: string }) {
+export function ChatRoom({
+  careUnitId,
+  roomId,
+}: {
+  careUnitId: string;
+  roomId: string;
+}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isOtherTyping, setIsOtherTyping] = useState(false);

@@ -1,9 +1,12 @@
-import { ChatRoomPageClient } from '@/features/user-chat/ui/ChatRoomPageClient';
+import { ChatRoom } from '@/features/chat/ui/ChatRoom';
 
 interface ChatRoomPageProps {
-  params: { id: string };
+  params: {
+    id: string;
+    roomId: string;
+  };
 }
 
 export default async function ChatRoomPage({ params }: ChatRoomPageProps) {
-  return <ChatRoomPageClient id={params.id} />;
+  return <ChatRoom careUnitId={params.id} roomId={params.roomId} />;
 }

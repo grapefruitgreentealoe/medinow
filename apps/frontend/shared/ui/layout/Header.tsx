@@ -75,7 +75,7 @@ export default function Header() {
       { href: ROUTES.USER.FAVORITES, label: '즐겨찾기' },
       { href: ROUTES.USER.WRITE_REVIEW, label: '리뷰 작성하기' },
       { href: ROUTES.USER.REVIEWS, label: '내 리뷰' },
-      { href: ROUTES.USER.CHAT, label: '채팅' },
+      { href: ROUTES.USER.CHAT(''), label: '채팅' },
       { href: '#', label: '로그아웃', onClick: handleLogout },
     ];
   };
@@ -123,7 +123,7 @@ export default function Header() {
                           리뷰작성
                         </Button>
                       </Link>
-                      <Link href={ROUTES.USER.CHAT}>
+                      <Link href={ROUTES.USER.CHAT('')}>
                         <Button variant="ghost" className="text-sm ">
                           채팅
                         </Button>

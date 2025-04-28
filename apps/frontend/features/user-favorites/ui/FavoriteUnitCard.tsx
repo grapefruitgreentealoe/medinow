@@ -2,7 +2,7 @@
 
 import { CareUnit, CongestionLevel } from '@/shared/type';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { chatModalAtom } from '@/features/user-chat/atoms/chatModalAtom';
+import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { unfavoriteConfirmUnitAtom } from '../atoms/unfavoriteConfirmModalAtom';
 import { openKakaoMap, renderTodayTime } from '@/features/map/utils';
 import { CATEGORY_LABEL, congestionClassMap } from '@/shared/constants/const';
