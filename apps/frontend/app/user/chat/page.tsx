@@ -1,59 +1,61 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { socket } from '@/lib/socket';
+import { getChatRooms } from '@/features/chat/api';
 import { ChatMessages } from '@/features/chat/ui/ChatMessages';
 import { Message } from '@/features/chat/type';
-import { getChatRooms } from '@/features/chat/api';
-import { ROUTES } from '@/shared/constants/routes';
 
 export default function ChatPage() {
   const searchParams = useSearchParams();
-  const careUnitId = searchParams.get('id');
-  console.log(careUnitId);
-  const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
+  const roomIdFromUrl = searchParams.get('id'); // ✅ roomId
+  const careUnitId = searchParams.get('careUnitId'); // ✅ careUnitId
+
+  const [roomId, setRoomId] = useState<string | null>(roomIdFromUrl);
   const [messagesMap, setMessagesMap] = useState<Map<string, Message[]>>(
     new Map()
   );
-  const router = useRouter();
-
   const [input, setInput] = useState('');
+  const [isRoomReady, setIsRoomReady] = useState(false);
 
   useEffect(() => {
+    if (!roomIdFromUrl && !careUnitId) return;
+
     socket.connect();
 
-    const fetchAndJoinRoom = async () => {
-      const rooms = await getChatRooms();
+    if (roomIdFromUrl) {
+      socket.emit('joinRoom', { roomId: roomIdFromUrl });
+      setRoomId(roomIdFromUrl);
+    } else if (careUnitId) {
+      socket.emit('joinRoom', { careUnitId });
+    }
 
-      const matchedRoom = rooms.find((room) => room.careUnit.id === careUnitId);
-
-      if (matchedRoom) {
-        router.push(ROUTES.USER.CHAT(matchedRoom.id as string));
-      } else {
-        console.log('notmatched');
-
-        socket.emit('joinRoom', { careUnitId });
-
-        socket.once(
-          'roomCreated',
-          (data: { roomId: string; careUnitId: string }) => {
-            console.log('hihi');
-            setCurrentRoomId(data.roomId);
-            router.push(ROUTES.USER.CHAT(data.roomId as string));
-          }
-        );
-      }
-    };
-
-    fetchAndJoinRoom();
-    if (!careUnitId) return;
-
-    socket.on('roomMessages', (messages: Message[]) => {
-      if (!messages.length) return;
-      const roomId = messages[0].roomId;
-      setMessagesMap((prev) => new Map(prev).set(roomId, messages));
+    socket.on('roomCreated', (data: { roomId: string }) => {
+      console.log('roomCreated', data.roomId);
+      setRoomId(data.roomId); // ✅ 여기서 상태를 갱신해준다
     });
+
+    socket.on(
+      'roomMessages',
+      (payload: { messages: Message[]; roomId: string }) => {
+        const { messages, roomId: receivedRoomId } = payload;
+        console.log('roomMessage', payload);
+        // ✅ 여기서 시간 기준 정렬 추가
+        const sortedMessages = messages.sort((a, b) => {
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        });
+
+        setMessagesMap((prev) => {
+          const newMap = new Map(prev);
+          newMap.set(receivedRoomId, sortedMessages);
+          return newMap;
+        });
+        setIsRoomReady(true);
+      }
+    );
 
     socket.on('newMessage', (message: Message) => {
       setMessagesMap((prev) => {
@@ -66,39 +68,92 @@ export default function ChatPage() {
 
     return () => {
       socket.disconnect();
+      socket.off('roomCreated');
       socket.off('roomMessages');
       socket.off('newMessage');
-      socket.off('roomCreated');
     };
-  }, [careUnitId]);
+  }, [roomIdFromUrl, careUnitId]);
 
   const handleSendMessage = () => {
-    if (!input.trim() || !currentRoomId) return;
+    if (!input.trim()) return;
 
-    const tempMessage: Message = {
-      id: `temp-${Date.now()}`,
-      senderId: 'me',
-      content: input,
-      createdAt: new Date().toISOString(),
-      roomId: currentRoomId,
-    };
+    const messageToSend = input; // ✅ 미리 복사해둔다
+    setInput(''); // ✅ 입력창은 바로 비워줘
 
-    setMessagesMap((prev) => {
-      const newMap = new Map(prev);
-      const existing = newMap.get(currentRoomId) || [];
-      newMap.set(currentRoomId, [...existing, tempMessage]);
-      return newMap;
-    });
+    if (roomId) {
+      // ✅ roomId 있으면 바로 보내기
+      socket.emit('sendMessage', { roomId, content: messageToSend });
 
-    socket.emit('sendMessage', { roomId: currentRoomId, content: input });
-    setInput('');
+      const tempMessage: Message = {
+        id: `temp-${Date.now()}`,
+        senderId: 'me',
+        content: messageToSend,
+        createdAt: new Date().toISOString(),
+        roomId,
+      };
+
+      setMessagesMap((prev) => {
+        const newMap = new Map(prev);
+        const existingMessages = newMap.get(roomId) || [];
+        newMap.set(roomId, [...existingMessages, tempMessage]);
+        return newMap;
+      });
+    } else if (careUnitId) {
+      // ✅ roomId 없으면 joinRoom 먼저
+      socket.connect();
+      socket.emit('joinRoom', { careUnitId });
+
+      socket.once(
+        'roomCreated',
+        (data: { roomId: string; careUnitId: string }) => {
+          const newRoomId = data.roomId;
+          setRoomId(newRoomId);
+
+          socket.emit('sendMessage', {
+            roomId: newRoomId,
+            content: messageToSend,
+          });
+
+          const tempMessage: Message = {
+            id: `temp-${Date.now()}`,
+            senderId: 'me',
+            content: messageToSend,
+            createdAt: new Date().toISOString(),
+            roomId: newRoomId,
+          };
+
+          setMessagesMap((prev) => {
+            const newMap = new Map(prev);
+            const existingMessages = newMap.get(newRoomId) || [];
+            newMap.set(newRoomId, [...existingMessages, tempMessage]);
+            return newMap;
+          });
+        }
+      );
+    }
   };
 
-  if (!careUnitId) return <div>잘못된 접근입니다!</div>;
+  if (!roomIdFromUrl && !careUnitId) {
+    return (
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        채팅방을 선택하거나 병원을 선택하세요
+      </div>
+    );
+  }
+
+  if (!roomId && !careUnitId) {
+    return (
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        채팅방을 선택하거나 병원을 선택하세요
+      </div>
+    );
+  }
+
+  const currentMessages = messagesMap.get(roomId!) || [];
 
   return (
     <ChatMessages
-      messages={messagesMap.get(currentRoomId!) || []}
+      messages={currentMessages}
       input={input}
       setInput={setInput}
       onSendMessage={handleSendMessage}
