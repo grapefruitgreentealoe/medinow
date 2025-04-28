@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen bg-muted">
+      <div className="flex min-h-[calc(100vh-61px)] bg-muted">
         <aside className="hidden md:block w-[200px] border-r border-border p-6 bg-background">
           <Sidebar navItems={navItems} />
         </aside>
