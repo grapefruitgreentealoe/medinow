@@ -6,6 +6,7 @@ import {
   Query,
   UseGuards,
   Patch,
+  Body,
 } from '@nestjs/common';
 import { CareUnitService } from './services/care-unit.service';
 import { ResponseCareUnitDto } from './dto/response-care-unit.dto';
@@ -492,10 +493,13 @@ export class CareUnitController {
 
   @Patch('update-now-open')
   @ApiOperation({ summary: '기관관리자 : 실시간 운영 여부 수동 설정' })
-  @ApiQuery({
-    name: 'isReverse',
-    required: true,
-    type: Boolean,
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        isReverse: { type: 'boolean' },
+      },
+    },
   })
   @ApiOkResponse({
     description: '성공',
@@ -503,7 +507,7 @@ export class CareUnitController {
   })
   async updateNowOpen(
     @RequestUser() user: User,
-    @Query('isReverse') isReverse: boolean,
+    @Body('isReverse') isReverse: boolean,
   ) {
     return await this.careUnitService.toggleOperationMode(user.id, isReverse);
   }
