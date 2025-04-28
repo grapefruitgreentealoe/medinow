@@ -21,7 +21,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex bg-muted">
-        <aside className="hidden md:block w-[240px] border-r border-border p-6 bg-background">
+        <aside className="hidden lg:block w-[240px] border-r border-border p-6 bg-background">
           <Sidebar navItems={navItems} />
         </aside>
         <AnimatePresence mode="wait">
