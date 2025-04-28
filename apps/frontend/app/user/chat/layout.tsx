@@ -1,29 +1,29 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { socket } from '@/lib/socket';
 import { ChatRoomList } from '@/features/chat/ui/ChatRoomList';
 import { HospitalInfoCard } from '@/features/chat/ui/HospitalInfoCard';
-import { ChatMessages } from '@/features/chat/ui/ChatMessages';
-import { RoomInfo, Message } from '@/features/chat/type';
-import axiosInstance from '@/lib/axios';
-import { ChatRoom, getChatRooms } from '@/features/chat/api';
+import { RoomInfo } from '@/features/chat/type';
+import { getChatRooms } from '@/features/chat/api';
+import { SearchCareUnitForReview } from '@/features/user-review/ui/SearchCareUnitForReview'; // 추가
+import { SearchCareUnitForChat } from '@/features/chat/ui/SearchCareUnitForChat';
 
-interface ChatLayoutProps {
+export default function ChatLayout({
+  children,
+}: {
   children?: React.ReactNode;
-}
-
-export default function ChatLayout({ children }: ChatLayoutProps) {
+}) {
   const [roomList, setRoomList] = useState<RoomInfo[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // 처음 방 리스트 가져오기
     const fetchRooms = async () => {
       try {
         const res = await getChatRooms();
-        const parsedRooms: RoomInfo[] = res.map((room: ChatRoom) => ({
+        const parsedRooms: RoomInfo[] = res.map((room) => ({
           roomId: room.id,
           careUnitId: room.careUnit.id,
           careUnitName: room.careUnit.name,
@@ -31,26 +31,35 @@ export default function ChatLayout({ children }: ChatLayoutProps) {
           unreadCount: room.unreadCount,
         }));
 
-        //방 목록
         setRoomList(parsedRooms);
       } catch (error) {
         console.error('방 목록 불러오기 실패', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchRooms();
   }, []);
-  //룸아이디를 선택 시, 룸 아이디로 접근
+
   const handleSelectRoom = (roomId: string) => {
     router.push(`/user/chat/${roomId}`);
   };
 
+  if (loading) return <div>로딩중...</div>;
+
   return (
     <div className="flex h-[calc(100vh-61px)] !overflow-y-hidden">
       <div className="w-1/4 border-r">
-        <ChatRoomList rooms={roomList} onSelectRoom={handleSelectRoom} />
+        {roomList.length > 0 ? (
+          <ChatRoomList rooms={roomList} onSelectRoom={handleSelectRoom} />
+        ) : (
+          <SearchCareUnitForChat />
+        )}
       </div>
+
       <div className="w-2/4 flex flex-col">{children}</div>
+
       <div className="w-1/4 border-l">
         <HospitalInfoCard />
       </div>
