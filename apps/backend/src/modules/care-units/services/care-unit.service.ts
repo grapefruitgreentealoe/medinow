@@ -473,7 +473,7 @@ export class CareUnitService {
     }
 
     // 자동 모드인 경우 운영 시간에 따라 계산
-    return this.calculateOpenStatus(careUnit);
+    return await this.calculateOpenStatus(careUnit);
   }
 
   // 운영 상태 계산 (자동 모드)
@@ -540,27 +540,20 @@ export class CareUnitService {
     } else {
       // 자동 모드로 전환
       careUnit.isReverse = false;
-      careUnit.nowOpen = await this.checkNowOpen(careUnit.id);
+      careUnit.nowOpen = await this.calculateOpenStatus(careUnit);
     }
 
     // 변경사항 저장
     await this.careUnitRepository.save(careUnit);
-    // 저장 후 다시 조회하여 최신 상태 확인
-    const updatedCareUnit = await this.careUnitRepository.findOne({
-      where: { id: careUnit.id },
-    });
-    if (!updatedCareUnit) {
-      throw new Error('업데이트된 의료기관을 찾을 수 없습니다.');
-    }
 
     return {
       message: isReverse
-        ? updatedCareUnit.nowOpen
+        ? careUnit.nowOpen
           ? '수동으로 운영 중으로 설정되었습니다.'
           : '수동으로 운영 종료로 설정되었습니다.'
         : '자동 운영 모드로 전환되었습니다.',
-      isOpen: updatedCareUnit.nowOpen,
-      isReverse: updatedCareUnit.isReverse,
+      isOpen: careUnit.nowOpen,
+      isReverse: careUnit.isReverse,
     };
   }
 
