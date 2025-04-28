@@ -196,6 +196,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.emit('roomMessages', {
         messages,
         roomId: room.id,
+        senderId: user.id,
       });
       this.logger.log(
         `채팅방 ${room.id}의 메시지 전송 완료 (${messages.length}개)`,
