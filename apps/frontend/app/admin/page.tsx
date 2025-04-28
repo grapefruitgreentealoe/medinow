@@ -119,12 +119,14 @@ export default function AdminUserProfilePage() {
                 label="현재 운영 상태"
                 value={isOpen ? '운영 중' : '운영 중 아님'}
               />
-              <Badge
-                variant={isReverse ? 'secondary' : 'default'}
-                className="inline-block"
-              >
-                {isReverse ? '수동 전환 됨' : '정상 운영 중'}
-              </Badge>
+              {isReverse ? (
+                <Badge
+                  variant={isReverse ? 'secondary' : 'default'}
+                  className="inline-block"
+                >
+                  {'수동 전환 됨'}
+                </Badge>
+              ) : null}
             </div>
             <p className="text-sm text-muted-foreground !mb-[5px]">
               수동 전환 버튼
@@ -177,7 +179,7 @@ export default function AdminUserProfilePage() {
         onConfirm={handleConfirmIsReverse} //확인시 핸들러 실행
         onClose={() => setConfirmOpen(false)}
         title="운영 상태 변경"
-        description={`임시 ${!isOpen ? '"운영"' : '"휴무"'}로 변경하시겠습니까?`}
+        description={`운영 상태를 변경하시겠습니까?`}
       />
     </div>
   );
