@@ -6,6 +6,7 @@ WORKDIR /app
 COPY . .
 
 ENV NEXT_PUBLIC_API_URL=https://kdt-node-2-team02.elicecoding.com/api/v1
+ENV NEXT_PUBLIC_SOCKET_URL=https://kdt-node-2-team02.elicecoding.com/chat
 
 # pnpm 준비
 RUN corepack enable && corepack prepare pnpm@latest --activate

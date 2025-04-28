@@ -138,7 +138,7 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
               variant="ghost"
               onClick={(e) => {
                 e.stopPropagation();
-                setChat({ isOpen: true, target: unit });
+                router.push(ROUTES.USER.CHAT(unit.id));
               }}
               className="w-8 h-8"
             >
