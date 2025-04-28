@@ -154,6 +154,9 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           throw new BadRequestException('careUnitId는 필수입니다');
         }
         room = await this.chatsService.createRoom(user.id, careUnitId);
+        client.emit('roomCreated', {
+          roomId: room.id,
+        });
         this.logger.log(`새 채팅방 ${room.id} 생성 성공`);
       }
 
