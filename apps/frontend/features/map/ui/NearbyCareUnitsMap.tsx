@@ -164,8 +164,10 @@ export default function NearbyCareUnitsMap() {
       const center = new kakao.maps.LatLng(37.5665, 126.978);
       const map = new kakao.maps.Map(mapRef.current!, {
         center,
-        level: level ?? 5,
+        level: level ?? 1,
+        
       });
+
       mapInstance.current = map;
       setIsMapReady(true);
 
@@ -338,7 +340,35 @@ export default function NearbyCareUnitsMap() {
     setLevel(newLevel); // 상태 갱신
     map.setLevel(newLevel); // 지도에 적용
   };
+  const handleSelectAddress = ({
+    name,
+    address,
+    lat,
+    lng,
+  }: {
+    name: string;
+    address: string;
+    lat: string;
+    lng: string;
+  }) => {
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+    setLat(latNum);
+    setLng(lngNum);
+    setInitialLocation({ lat: latNum, lng: lngNum });
+    setLocation(address);
+    setLevel(1);
 
+    // 저장
+    sessionStorage.setItem('user_lat', lat);
+    sessionStorage.setItem('user_lng', lng);
+    sessionStorage.setItem('user_address', address);
+
+    if (mapInstance.current) {
+      mapInstance.current.setCenter(new kakao.maps.LatLng(latNum, lngNum));
+      mapInstance.current.setLevel(1);
+    }
+  };
   return (
     <div>
       <div className="flex justify-between flex-wrap items-center gap-[10px] !m-2 !overscroll-none">
@@ -421,25 +451,7 @@ export default function NearbyCareUnitsMap() {
         subtitle="위치정보가 허용되어 있지 않습니다. 현재 위치를 입력해주세요."
         open={showSearchFallback}
         onClose={() => setShowSearchFallback(false)}
-        onSelect={({ name, address, lat, lng }) => {
-          const latNum = parseFloat(lat);
-          const lngNum = parseFloat(lng);
-          setLat(latNum);
-          setLng(lngNum);
-          setInitialLocation({ lat: latNum, lng: lngNum });
-          setLocation(address);
-
-          // 저장
-          sessionStorage.setItem('user_lat', lat);
-          sessionStorage.setItem('user_lng', lng);
-          sessionStorage.setItem('user_address', address);
-
-          if (mapInstance.current) {
-            mapInstance.current.setCenter(
-              new kakao.maps.LatLng(latNum, lngNum)
-            );
-          }
-        }}
+        onSelect={handleSelectAddress}
       />
 
       <LocationSearchModal
