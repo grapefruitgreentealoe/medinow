@@ -46,12 +46,12 @@ export default function ChatLayout({ children }: ChatLayoutProps) {
   };
 
   return (
-    <div className="flex h-screen">
-      <div className="w-1/4 border-r overflow-y-auto">
+    <div className="flex h-[calc(100vh-61px)] !overflow-y-hidden">
+      <div className="w-1/4 border-r">
         <ChatRoomList rooms={roomList} onSelectRoom={handleSelectRoom} />
       </div>
       <div className="w-2/4 flex flex-col">{children}</div>
-      <div className="w-1/4 border-l overflow-y-auto">
+      <div className="w-1/4 border-l">
         <HospitalInfoCard />
       </div>
     </div>
