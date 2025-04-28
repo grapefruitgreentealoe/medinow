@@ -37,13 +37,12 @@ export default function ChatPage() {
 
     socket.on(
       'roomMessages',
-      (payload: { messages: any[]; roomId: string }) => {
+      (payload: { messages: Message[]; roomId: string }) => {
         const { messages, roomId: receivedRoomId } = payload;
 
-        //  sender.id를 senderId로 매핑
         const normalizedMessages = messages.map((msg) => ({
           ...msg,
-          senderId: msg.sender?.id ?? 'unknown', // sender가 없을 수도 있으니 안전하게
+          senderId: msg.senderId ?? 'unknown', // sender가 없을 수도 있으니 안전하게
         }));
 
         const sortedMessages = normalizedMessages.sort((a, b) => {
