@@ -190,9 +190,9 @@ export default function NearbyCareUnitsMap() {
 
   useEffect(() => {
     const fallbackToLocalStorage = () => {
-      const storedLat = localStorage.getItem('user_lat');
-      const storedLng = localStorage.getItem('user_lng');
-      const storedAddress = localStorage.getItem('user_address');
+      const storedLat = sessionStorage.getItem('user_lat');
+      const storedLng = sessionStorage.getItem('user_lng');
+      const storedAddress = sessionStorage.getItem('user_address');
 
       if (storedLat && storedLng) {
         const lat = parseFloat(storedLat);
@@ -218,9 +218,9 @@ export default function NearbyCareUnitsMap() {
 
         convertCoordsToDong(latitude, longitude).then((address) => {
           setLocation(address);
-          localStorage.setItem('user_lat', latitude.toString());
-          localStorage.setItem('user_lng', longitude.toString());
-          localStorage.setItem('user_address', address);
+          sessionStorage.setItem('user_lat', latitude.toString());
+          sessionStorage.setItem('user_lng', longitude.toString());
+          sessionStorage.setItem('user_address', address);
         });
       },
       (err) => {
@@ -299,9 +299,11 @@ export default function NearbyCareUnitsMap() {
     const { lat, lng } = initialLocation;
     setLat(lat);
     setLng(lng);
+    setLevel(1); // 상태 갱신
     mapInstance.current?.setCenter(new kakao.maps.LatLng(lat, lng));
     if (mapInstance.current) {
       fitMapToBounds(mapInstance.current, lat, lng);
+      mapInstance.current?.setLevel(1); // 지도에 적용
     }
     convertCoordsToDong(lat, lng).then(setLocation);
   };
@@ -314,9 +316,9 @@ export default function NearbyCareUnitsMap() {
 
     convertCoordsToDong(lat, lng).then((address) => {
       setLocation(address);
-      localStorage.setItem('user_lat', lat.toString());
-      localStorage.setItem('user_lng', lng.toString());
-      localStorage.setItem('user_address', address);
+      sessionStorage.setItem('user_lat', lat.toString());
+      sessionStorage.setItem('user_lng', lng.toString());
+      sessionStorage.setItem('user_address', address);
     });
 
     if (mapInstance.current) {
@@ -427,9 +429,9 @@ export default function NearbyCareUnitsMap() {
           setLocation(address);
 
           // 저장
-          localStorage.setItem('user_lat', lat);
-          localStorage.setItem('user_lng', lng);
-          localStorage.setItem('user_address', address);
+          sessionStorage.setItem('user_lat', lat);
+          sessionStorage.setItem('user_lng', lng);
+          sessionStorage.setItem('user_address', address);
 
           if (mapInstance.current) {
             mapInstance.current.setCenter(
