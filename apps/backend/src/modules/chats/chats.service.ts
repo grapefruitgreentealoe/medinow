@@ -555,11 +555,45 @@ export class ChatsService {
 
       return rooms.map((room) => ({
         id: room.id,
-        careUnit: room.careUnit.id,
-        user: room.user.id,
+        createdAt: room.createdAt,
+        updatedAt: room.updatedAt,
         lastMessageAt: room.lastMessageAt,
         unreadCount: room.unreadCount,
+        lastReadAt: room.lastReadAt,
         isActive: room.isActive,
+        user: {
+          id: room.user.id,
+          nickName: room.user.userProfile.nickname,
+        },
+        careUnit: {
+          id: room.careUnit.id,
+          name: room.careUnit.name,
+          address: room.careUnit.address,
+          tel: room.careUnit.tel,
+          category: room.careUnit.category,
+          hpId: room.careUnit.hpId,
+          mondayOpen: room.careUnit.mondayOpen,
+          mondayClose: room.careUnit.mondayClose,
+          tuesdayOpen: room.careUnit.tuesdayOpen,
+          tuesdayClose: room.careUnit.tuesdayClose,
+          wednesdayOpen: room.careUnit.wednesdayOpen,
+          wednesdayClose: room.careUnit.wednesdayClose,
+          thursdayOpen: room.careUnit.thursdayOpen,
+          thursdayClose: room.careUnit.thursdayClose,
+          fridayOpen: room.careUnit.fridayOpen,
+          fridayClose: room.careUnit.fridayClose,
+          saturdayOpen: room.careUnit.saturdayOpen,
+          saturdayClose: room.careUnit.saturdayClose,
+          sundayOpen: room.careUnit.sundayOpen,
+          sundayClose: room.careUnit.sundayClose,
+          holidayOpen: room.careUnit.holidayOpen,
+          holidayClose: room.careUnit.holidayClose,
+          lat: room.careUnit.lat,
+          lng: room.careUnit.lng,
+          isBadged: room.careUnit.isBadged,
+          nowOpen: room.careUnit.nowOpen,
+          kakaoUrl: room.careUnit.kakaoUrl,
+        },
       }));
     } else {
       // 일반 사용자인 경우: 해당 사용자가 속한 채팅방 조회
@@ -568,17 +602,26 @@ export class ChatsService {
           user: { id: userId },
           isActive: true,
         },
-        relations: ['user', 'user.userProfile', 'careUnit'],
+        relations: ['user', 'user.userProfile'],
         order: { updatedAt: 'DESC' },
       });
 
       return rooms.map((room) => ({
         id: room.id,
-        careUnit: room.careUnit.id,
-        user: room.user.id,
+        createdAt: room.createdAt,
+        updatedAt: room.updatedAt,
         lastMessageAt: room.lastMessageAt,
         unreadCount: room.unreadCount,
+        lastReadAt: room.lastReadAt,
         isActive: room.isActive,
+        user: {
+          id: room.user.id,
+          nickName: room.user.userProfile.nickname,
+        },
+        careUnit: {
+          id: room.careUnit.id,
+          name: room.careUnit.name,
+        },
       }));
     }
   }
@@ -782,7 +825,8 @@ export class ChatsService {
 
     const result = await Promise.all(
       rooms.map(async (room) => {
-        const senderToMark = room.user === userId ? room.careUnit : room.user;
+        const senderToMark =
+          room.user.id === userId ? room.careUnit.id : room.user.id;
         const count = await this.chatMessageRepository.count({
           where: {
             room: { id: room.id },
