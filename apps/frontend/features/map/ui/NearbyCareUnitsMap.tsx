@@ -97,7 +97,7 @@ export default function NearbyCareUnitsMap() {
     data.forEach((unit, index) => {
       const position = new kakao.maps.LatLng(unit.lat, unit.lng);
 
-      const isOpen = !unit.nowOpen;
+      const isOpen = unit.nowOpen;
       const isEmergency = unit.category === 'emergency';
       const hvec = unit.congestion?.hvec ?? -1;
 
