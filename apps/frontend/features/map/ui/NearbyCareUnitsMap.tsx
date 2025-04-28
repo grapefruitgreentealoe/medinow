@@ -71,6 +71,19 @@ export default function NearbyCareUnitsMap() {
     store.set(detailSheetPageAtom, 'detail');
   }, []);
 
+  function getCategoryColor(category: string) {
+    switch (category) {
+      case 'hospital':
+        return '#3B82F6'; // 파랑
+      case 'pharmacy':
+        return '#10B981'; // 초록
+      case 'emergency':
+        return '#EF4444'; // 빨강
+      default:
+        return '#6B7280'; // 회색
+    }
+  }
+
   function createMarkersWithOverlay({
     map,
     data,
@@ -83,11 +96,18 @@ export default function NearbyCareUnitsMap() {
 
     data.forEach((unit, index) => {
       const position = new kakao.maps.LatLng(unit.lat, unit.lng);
-      const iconHtml = getCategoryIconSvg(unit.category);
-      const overlayId = `custom-overlay-${index}`;
+
+      const isOpen = !unit.nowOpen;
+      const isEmergency = unit.category === 'emergency';
       const hvec = unit.congestion?.hvec ?? -1;
+
+      const categoryColor = getCategoryColor(unit.category); // 진한 원색
+      const backgroundColor = isOpen ? categoryColor : '#6B7280';
+      const iconHtml = getCategoryIconSvg(unit.category); // 아이콘 선은 항상 흰색
+
+      // hvec 표시 (응급실만)
       const hvecDots =
-        unit.nowOpen && unit.category === 'emergency'
+        isOpen && isEmergency
           ? `<div style="position:absolute;top:-4px;right:-4px;display:flex;gap:1px;">${[
               ...Array(Math.min(Math.max(hvec, 0), 5)),
             ]
@@ -98,11 +118,20 @@ export default function NearbyCareUnitsMap() {
               .join('')}</div>`
           : '';
 
-      const backgroundColor = unit.nowOpen ? '#ffffff' : '#d1d5db';
+      const overlayId = `custom-overlay-${index}`;
 
       const overlay = new kakao.maps.CustomOverlay({
         position,
-        content: `<div id="${overlayId}" style="position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:100%;background:${backgroundColor};border:1px solid #e5e7eb;box-shadow:0 2px 6px rgba(0,0,0,0.08);cursor:pointer;">${iconHtml}${hvecDots}</div>`,
+        content: `
+        <div id="${overlayId}"
+          style="position:relative;width:36px;height:36px;
+          display:flex;align-items:center;justify-content:center;
+          border-radius:100%;background:${backgroundColor};
+          border:1px solid #e5e7eb;
+          box-shadow:0 2px 6px rgba(0,0,0,0.08);
+          cursor:pointer;">
+          ${iconHtml}${hvecDots}
+        </div>`,
         yAnchor: 1,
       });
 
@@ -226,7 +255,7 @@ export default function NearbyCareUnitsMap() {
       return;
     fitMapToBounds(map, lat, lng);
   }, [isMapReady, lat, lng, isManualZoom]);
-  
+
   //3. 사용자위치
   const currentLocationOverlayRef = useRef<kakao.maps.CustomOverlay | null>(
     null
