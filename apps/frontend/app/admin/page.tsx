@@ -17,6 +17,8 @@ import { Label } from '@/components/ui/label';
 import { CATEGORY_LABEL } from '@/shared/constants/const';
 import { user as getUser } from '@/features/user/api';
 import { Badge } from '@/components/ui/badge';
+import { useRenderTimeRow } from '@/shared/model/useRenderTimeRow';
+import { ContentDialog } from '@/shared/ui/ContentDialog';
 
 interface User {
   user: {
@@ -59,7 +61,7 @@ export default function AdminUserProfilePage() {
   const [recentReveiw, setRecentReview] = useState<ReviewData | null>(null);
   const [isReverse, setIsReverse] = useState(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
+  const [isTimeTableOpen, setIsTimeTableOpen] = useState<boolean>(false);
   useEffect(() => {
     getUser()
       .then((res) => {
@@ -114,6 +116,7 @@ export default function AdminUserProfilePage() {
           <CardContent className="flex flex-col ">
             <ProfileField label="이메일" value={user.user.email} />
             <ProfileField label="이름" value={user.user.name} />
+
             <div className="flex items-center justify-start ">
               <ProfileField
                 label="현재 운영 상태"
@@ -155,6 +158,15 @@ export default function AdminUserProfilePage() {
               value={CATEGORY_LABEL[user.unitData.category]}
             />
             <ProfileField label="주소" value={user.unitData.address} />
+            {/* ✨ 여기 추가하면 좋아 */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4 w-fit self-end"
+              onClick={() => setIsTimeTableOpen(true)}
+            >
+              운영시간 보기
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -181,6 +193,54 @@ export default function AdminUserProfilePage() {
         title="운영 상태 변경"
         description={`운영 상태를 변경하시겠습니까?`}
       />
+      <ContentDialog
+        open={isTimeTableOpen}
+        onClose={() => setIsTimeTableOpen(false)}
+        title="운영시간표"
+      >
+        <div className="grid grid-cols-[80px_1fr] gap-y-1 gap-x-4">
+          {useRenderTimeRow(
+            '월요일',
+            user.unitData.mondayOpen,
+            user.unitData.mondayClose
+          )}
+          {useRenderTimeRow(
+            '화요일',
+            user.unitData.tuesdayOpen,
+            user.unitData.tuesdayClose
+          )}
+          {useRenderTimeRow(
+            '수요일',
+            user.unitData.wednesdayOpen,
+            user.unitData.wednesdayClose
+          )}
+          {useRenderTimeRow(
+            '목요일',
+            user.unitData.thursdayOpen,
+            user.unitData.thursdayClose
+          )}
+          {useRenderTimeRow(
+            '금요일',
+            user.unitData.fridayOpen,
+            user.unitData.fridayClose
+          )}
+          {useRenderTimeRow(
+            '토요일',
+            user.unitData.saturdayOpen,
+            user.unitData.saturdayClose
+          )}
+          {useRenderTimeRow(
+            '일요일',
+            user.unitData.sundayOpen,
+            user.unitData.sundayClose
+          )}
+          {useRenderTimeRow(
+            '공휴일',
+            user.unitData.holidayOpen,
+            user.unitData.holidayClose
+          )}
+        </div>
+      </ContentDialog>
     </div>
   );
 }
