@@ -44,8 +44,9 @@ export default async function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <Header />
-        <main className="!pt-[61px]">{children}</main>
-
+        <main className="!pt-[61px]" style={{ marginBottom: '-100px' }}>
+          {children}
+        </main>
         <Toaster position="bottom-center" duration={1000} />
       </body>
     </html>

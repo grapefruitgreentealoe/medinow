@@ -156,8 +156,9 @@ export class ReviewsService {
           thankMessage: review.thankMessage,
           rating: review.rating,
           isPublic: review.isPublic,
-          careUnitName: review.careUnit?.name,
           careUnitId: review.careUnit?.id,
+          careUnitName: review.careUnit?.name,
+          departmentId: review.department?.id,
           departmentName: review.department?.name,
           createdAt: review.createdAt,
           userId: review.user?.id,
@@ -187,12 +188,11 @@ export class ReviewsService {
           thankMessage: review.thankMessage,
           rating: review.rating,
           isPublic: review.isPublic,
-          careUnitName: review.careUnit?.name,
           careUnitId: review.careUnit?.id,
-          departmentName: review.department?.name,
-          createdAt: review.createdAt,
+          careUnitName: review.careUnit?.name,
+
+          departmentId: review.department?.id,
           userId: review.user?.id,
-          author: review.user?.userProfile?.name,
           nickname: review.user?.userProfile?.nickname,
         })),
         pagination: {
@@ -219,33 +219,10 @@ export class ReviewsService {
       thankMessage: review.thankMessage,
       rating: review.rating,
       isPublic: review.isPublic,
+      careUnitId: review.careUnit?.id,
       careUnitName: review.careUnit?.name,
-      careUnitId: review.careUnit?.id,
-      departmentName: review.department?.name,
-      createdAt: review.createdAt,
-      userId: review.user?.id,
-      author: review.user?.userProfile?.name,
-      nickname: review.user?.userProfile?.nickname,
-    };
-  }
-
-  async getReviewByIdWithCareUnitId(id: string) {
-    const review = await this.reviewRepository.findOne({
-      where: { id },
-      relations: ['user', 'careUnit', 'department', 'user.userProfile'],
-    });
-    if (!review) {
-      throw new NotFoundException('리뷰를 찾을 수 없습니다.');
-    }
-    return {
-      message: '리뷰가 성공적으로 조회되었습니다.',
-      reviewId: review.id,
-      content: review.content,
-      thankMessage: review.thankMessage,
-      rating: review.rating,
-      isPublic: review.isPublic,
-      careUnitId: review.careUnit?.id,
       departmentId: review.department?.id,
+      departmentName: review.department?.name,
       createdAt: review.createdAt,
       userId: review.user?.id,
       author: review.user?.userProfile?.name,
@@ -292,7 +269,7 @@ export class ReviewsService {
   }
 
   async deleteReview(id: string, user: User) {
-    const review = await this.getReviewByIdWithCareUnitId(id);
+    const review = await this.getReviewById(id);
     if (!review) {
       throw new NotFoundException('리뷰를 찾을 수 없습니다.');
     }

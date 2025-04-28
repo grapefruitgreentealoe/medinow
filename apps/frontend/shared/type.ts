@@ -54,6 +54,7 @@ export interface CareUnit {
 
   isBadged: boolean;
   nowOpen: boolean;
+  isReverse: boolean;
   kakaoUrl: string | null;
 
   isChatAvailable: boolean;
