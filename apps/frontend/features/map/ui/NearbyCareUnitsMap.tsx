@@ -59,26 +59,6 @@ export default function NearbyCareUnitsMap() {
     OpenStatus: JSON.parse(openFilter) as boolean,
   });
 
-  function drawRadiusCircle(
-    map: kakao.maps.Map,
-    lat: number,
-    lng: number,
-    radius: number
-  ) {
-    if (circleRef.current) circleRef.current.setMap(null);
-    const circle = new kakao.maps.Circle({
-      center: new kakao.maps.LatLng(lat, lng),
-      radius: radius * 111000,
-      strokeWeight: 1,
-      strokeColor: '#6366F1',
-      strokeOpacity: 0.8,
-      fillColor: '#6366F140',
-      fillOpacity: 0.3,
-    });
-    circle.setMap(map);
-    circleRef.current = circle;
-  }
-
   function getDotColor(hvec: number): string {
     if (hvec <= 0) return '#ef4444';
     if (hvec < 10) return '#f97316';
@@ -232,30 +212,22 @@ export default function NearbyCareUnitsMap() {
 
     return () => clearTimeout(timer);
   }, []);
-
-  // 1. Circle (반경 표시)
-  useEffect(() => {
-    const map = mapInstance.current;
-    if (!isMapReady || !map || lat == null || lng == null) return;
-    drawRadiusCircle(map, lat, lng, radius);
-  }, [isMapReady, lat, lng, radius, data]);
-
-  // 2. 마커 그리기
+  // 1. 마커 그리기
   useEffect(() => {
     const map = mapInstance.current;
     if (!isMapReady || !map || !data) return;
     createMarkersWithOverlay({ map, data });
   }, [isMapReady, data]);
 
-  // 3. bounds 설정
+  // 2. bounds 설정
   useEffect(() => {
     const map = mapInstance.current;
     if (!isMapReady || !map || lat == null || lng == null || isManualZoom)
       return;
     fitMapToBounds(map, lat, lng);
   }, [isMapReady, lat, lng, isManualZoom]);
-  //4. 사용자위치
-
+  
+  //3. 사용자위치
   const currentLocationOverlayRef = useRef<kakao.maps.CustomOverlay | null>(
     null
   );
