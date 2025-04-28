@@ -528,7 +528,7 @@ export class ChatsService {
   }
 
   // 사용자의 모든 채팅방 조회
-  async getUserRooms(userId: string): Promise<ChatRoom[]> {
+  async getUserRooms(userId: string) {
     const user = await this.usersService.findUserById(userId);
 
     if (!user) {
@@ -544,24 +544,42 @@ export class ChatsService {
         return [];
       }
 
-      return this.chatRoomRepository.find({
+      const rooms = await this.chatRoomRepository.find({
         where: {
           careUnit: { id: careUnitId },
           isActive: true,
         },
-        relations: ['user', 'careUnit'],
+        relations: ['user', 'user.userProfile', 'careUnit'],
         order: { updatedAt: 'DESC' },
       });
+
+      return rooms.map((room) => ({
+        id: room.id,
+        careUnit: room.careUnit.id,
+        user: room.user.id,
+        lastMessageAt: room.lastMessageAt,
+        unreadCount: room.unreadCount,
+        isActive: room.isActive,
+      }));
     } else {
       // 일반 사용자인 경우: 해당 사용자가 속한 채팅방 조회
-      return this.chatRoomRepository.find({
+      const rooms = await this.chatRoomRepository.find({
         where: {
           user: { id: userId },
           isActive: true,
         },
-        relations: ['user', 'careUnit'],
+        relations: ['user', 'user.userProfile', 'careUnit'],
         order: { updatedAt: 'DESC' },
       });
+
+      return rooms.map((room) => ({
+        id: room.id,
+        careUnit: room.careUnit.id,
+        user: room.user.id,
+        lastMessageAt: room.lastMessageAt,
+        unreadCount: room.unreadCount,
+        isActive: room.isActive,
+      }));
     }
   }
 
@@ -570,25 +588,24 @@ export class ChatsService {
     adminUserId: string,
   ): Promise<string | null> {
     try {
-      const user = await this.usersService.findUserById(adminUserId);
-      if (!user || !user.userProfile) {
+      const user =
+        await this.usersService.findUserByIdWithRelations(adminUserId);
+      if (!user) {
+        this.logger.error(
+          `관리자 ${adminUserId}의 사용자 정보를 찾을 수 없습니다`,
+        );
         return null;
       }
 
+      const userProfile = user.userProfile;
+
       // userProfile.careUnitId가 있으면 그 값을 반환
-      if (user.userProfile.careUnit) {
-        this.logger.log(
-          `관리자 ${adminUserId}의 의료기관 ID: ${user.userProfile.careUnit.id}`,
-        );
-        return user.userProfile.careUnit.id;
+      if (!userProfile.careUnit) {
+        this.logger.error(`관리자 ${adminUserId}의 의료기관 ID가 없습니다`);
+        return null;
       }
 
-      // careUnit 객체가 로드된 경우
-      if (user.userProfile.careUnit) {
-        return user.userProfile.careUnit;
-      }
-
-      return null;
+      return userProfile.careUnit.id;
     } catch (error) {
       const err = error as Error;
       this.logger.error(`관리자의 의료기관 조회 실패: ${err.message}`);
@@ -708,6 +725,7 @@ export class ChatsService {
 
     return this.chatMessageRepository.find({
       where: { room: { id: roomId } },
+      relations: ['sender'],
       order: { createdAt: 'DESC' },
       take: limit,
     });
@@ -764,8 +782,7 @@ export class ChatsService {
 
     const result = await Promise.all(
       rooms.map(async (room) => {
-        const senderToMark =
-          room.user.id === userId ? room.careUnit.id : room.user.id;
+        const senderToMark = room.user === userId ? room.careUnit : room.user;
         const count = await this.chatMessageRepository.count({
           where: {
             room: { id: room.id },
