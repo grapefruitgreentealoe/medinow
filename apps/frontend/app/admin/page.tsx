@@ -17,6 +17,9 @@ import { Label } from '@/components/ui/label';
 import { CATEGORY_LABEL } from '@/shared/constants/const';
 import { user as getUser } from '@/features/user/api';
 import { Badge } from '@/components/ui/badge';
+import { useRenderTimeRow } from '@/shared/model/useRenderTimeRow';
+import { ContentDialog } from '@/shared/ui/ContentDialog';
+import { HospitalTimeTable } from '@/shared/ui/HospitalTimeTable';
 
 interface User {
   user: {
@@ -59,7 +62,7 @@ export default function AdminUserProfilePage() {
   const [recentReveiw, setRecentReview] = useState<ReviewData | null>(null);
   const [isReverse, setIsReverse] = useState(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
+  const [isTimeTableOpen, setIsTimeTableOpen] = useState<boolean>(false);
   useEffect(() => {
     getUser()
       .then((res) => {
@@ -114,17 +117,20 @@ export default function AdminUserProfilePage() {
           <CardContent className="flex flex-col ">
             <ProfileField label="이메일" value={user.user.email} />
             <ProfileField label="이름" value={user.user.name} />
+
             <div className="flex items-center justify-start ">
               <ProfileField
                 label="현재 운영 상태"
                 value={isOpen ? '운영 중' : '운영 중 아님'}
               />
-              <Badge
-                variant={isReverse ? 'secondary' : 'default'}
-                className="inline-block"
-              >
-                {isReverse ? '수동 운영 중' : '정상 운영 중'}
-              </Badge>
+              {isReverse ? (
+                <Badge
+                  variant={isReverse ? 'secondary' : 'default'}
+                  className="inline-block"
+                >
+                  {'수동 전환 됨'}
+                </Badge>
+              ) : null}
             </div>
             <p className="text-sm text-muted-foreground !mb-[5px]">
               수동 전환 버튼
@@ -153,6 +159,15 @@ export default function AdminUserProfilePage() {
               value={CATEGORY_LABEL[user.unitData.category]}
             />
             <ProfileField label="주소" value={user.unitData.address} />
+            {/* ✨ 여기 추가하면 좋아 */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4 w-fit self-end"
+              onClick={() => setIsTimeTableOpen(true)}
+            >
+              운영시간 보기
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -177,8 +192,15 @@ export default function AdminUserProfilePage() {
         onConfirm={handleConfirmIsReverse} //확인시 핸들러 실행
         onClose={() => setConfirmOpen(false)}
         title="운영 상태 변경"
-        description={`임시 ${!isOpen ? '"운영"' : '"휴무"'}로 변경하시겠습니까?`}
+        description={`운영 상태를 변경하시겠습니까?`}
       />
+      <ContentDialog
+        open={isTimeTableOpen}
+        onClose={() => setIsTimeTableOpen(false)}
+        title="운영시간표"
+      >
+        <HospitalTimeTable unit={user.unitData} />
+      </ContentDialog>
     </div>
   );
 }
