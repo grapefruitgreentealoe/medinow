@@ -35,5 +35,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/application  # EC2 서버의 docker-compose.yml 위치로 이동!
+            docker-compose down
             docker-compose pull
             docker-compose up -d

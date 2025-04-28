@@ -78,7 +78,8 @@ export class ReviewsService {
       thankMessage: review.thankMessage,
       rating: review.rating,
       isPublic: review.isPublic,
-      departmentId: review.department ? review.department.id : null,
+      careUnitName: review.careUnit ? review.careUnit.name : null,
+      departmentName: review.department ? review.department.name : null,
       createdAt: review.createdAt,
     };
   }
@@ -104,8 +105,8 @@ export class ReviewsService {
         thankMessage: review.thankMessage,
         rating: review.rating,
         isPublic: review.isPublic,
-        careUnitId: review.careUnit?.name,
-        departmentId: review.department?.name,
+        careUnitName: review.careUnit?.name,
+        departmentName: review.department?.name,
         createdAt: review.createdAt,
         userId: review.user?.id,
         author: review.user?.userProfile?.name,
@@ -155,8 +156,8 @@ export class ReviewsService {
           thankMessage: review.thankMessage,
           rating: review.rating,
           isPublic: review.isPublic,
-          careUnitId: review.careUnit?.name,
-          departmentId: review.department?.name,
+          careUnitName: review.careUnit?.name,
+          departmentName: review.department?.name,
           createdAt: review.createdAt,
           userId: review.user?.id,
           author: review.user?.userProfile?.name,
@@ -185,8 +186,8 @@ export class ReviewsService {
           thankMessage: review.thankMessage,
           rating: review.rating,
           isPublic: review.isPublic,
-          careUnitId: review.careUnit?.name,
-          departmentId: review.department?.name,
+          careUnitName: review.careUnit?.name,
+          departmentName: review.department?.name,
           createdAt: review.createdAt,
           userId: review.user?.id,
           author: review.user?.userProfile?.name,
@@ -216,8 +217,32 @@ export class ReviewsService {
       thankMessage: review.thankMessage,
       rating: review.rating,
       isPublic: review.isPublic,
-      careUnitId: review.careUnit?.name,
-      departmentId: review.department?.name,
+      careUnitName: review.careUnit?.name,
+      departmentName: review.department?.name,
+      createdAt: review.createdAt,
+      userId: review.user?.id,
+      author: review.user?.userProfile?.name,
+      nickname: review.user?.userProfile?.nickname,
+    };
+  }
+
+  async getReviewByIdWithCareUnitId(id: string) {
+    const review = await this.reviewRepository.findOne({
+      where: { id },
+      relations: ['user', 'careUnit', 'department', 'user.userProfile'],
+    });
+    if (!review) {
+      throw new NotFoundException('리뷰를 찾을 수 없습니다.');
+    }
+    return {
+      message: '리뷰가 성공적으로 조회되었습니다.',
+      reviewId: review.id,
+      content: review.content,
+      thankMessage: review.thankMessage,
+      rating: review.rating,
+      isPublic: review.isPublic,
+      careUnitId: review.careUnit?.id,
+      departmentId: review.department?.id,
       createdAt: review.createdAt,
       userId: review.user?.id,
       author: review.user?.userProfile?.name,
@@ -264,14 +289,14 @@ export class ReviewsService {
   }
 
   async deleteReview(id: string, user: User) {
-    const review = await this.getReviewById(id);
+    const review = await this.getReviewByIdWithCareUnitId(id);
     if (!review) {
       throw new NotFoundException('리뷰를 찾을 수 없습니다.');
     }
     if (review.userId !== user.id) {
       throw new ForbiddenException('리뷰를 삭제할 권한이 없습니다.');
     }
-    const deletedReview = await this.reviewRepository.delete(id);
+    await this.reviewRepository.delete(id);
     if (review.careUnitId) {
       const reviewCount = await this.reviewRepository.count({
         where: { careUnit: { id: review.careUnitId } },
