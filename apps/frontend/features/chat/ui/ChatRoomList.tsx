@@ -1,10 +1,11 @@
 'use client';
 
 import { RoomInfo } from '@/features/chat/type';
+import { CareUnit } from '@/shared/type';
 
 interface ChatRoomListProps {
   rooms: RoomInfo[];
-  onSelectRoom: (careUnitId: string) => void;
+  onSelectRoom: (payload: { roomId: string; selectedUnitId: string }) => void;
 }
 
 export function ChatRoomList({ rooms, onSelectRoom }: ChatRoomListProps) {
@@ -13,7 +14,12 @@ export function ChatRoomList({ rooms, onSelectRoom }: ChatRoomListProps) {
       {rooms.map((room) => (
         <button
           key={room.roomId}
-          onClick={() => onSelectRoom(room.roomId)}
+          onClick={() =>
+            onSelectRoom({
+              roomId: room.roomId!,
+              selectedUnitId: room.careUnitId!,
+            })
+          }
           className="w-full p-3 bg-muted rounded text-left hover:bg-accent"
         >
           <div className="font-semibold">{room.careUnitName}</div>

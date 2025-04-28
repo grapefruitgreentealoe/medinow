@@ -20,7 +20,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen bg-muted">
+      <div className="flex bg-muted">
         <aside className="hidden md:block w-[240px] border-r border-border p-6 bg-background">
           <Sidebar navItems={navItems} />
         </aside>
@@ -32,7 +32,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, y: 0 }} // 부드럽게 올라오면서 보임
               exit={{ opacity: 0, y: -10 }} // 나갈 때 위로 사라짐
               transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="min-h-screen"
+              className="min-h-[calc(100vh-61px)]"
             >
               {children}
             </motion.section>
