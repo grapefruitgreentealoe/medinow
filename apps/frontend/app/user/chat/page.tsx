@@ -94,8 +94,6 @@ export default function ChatPage() {
     setInput('');
   };
 
-  if (!careUnitId) return <div>잘못된 접근입니다!</div>;
-
   return (
     <ChatMessages
       messages={messagesMap.get(currentRoomId!) || []}
