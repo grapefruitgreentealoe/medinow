@@ -1,29 +1,32 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { socket } from '@/lib/socket';
+import { useSearchParams } from 'next/navigation';
 import { ChatRoomList } from '@/features/chat/ui/ChatRoomList';
-import { HospitalInfoCard } from '@/features/chat/ui/HospitalInfoCard';
-import { ChatMessages } from '@/features/chat/ui/ChatMessages';
-import { RoomInfo, Message } from '@/features/chat/type';
-import axiosInstance from '@/lib/axios';
-import { ChatRoom, getChatRooms } from '@/features/chat/api';
+import { HospitalSimpleCard } from '@/shared/ui/HospitalSimpleCard';
+import { RoomInfo } from '@/features/chat/type';
+import { getChatRooms } from '@/features/chat/api';
+import { getCareUnitById } from '@/shared/api';
+import { CareUnit } from '@/shared/type';
 
-interface ChatLayoutProps {
-  children?: React.ReactNode;
-}
-
-export default function ChatLayout({ children }: ChatLayoutProps) {
+export default function ChatLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [roomList, setRoomList] = useState<RoomInfo[]>([]);
-  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [selectedUnit, setSelectedUnit] = useState<CareUnit | null>(null);
+  const searchParams = useSearchParams();
+
+  const id = searchParams.get('id');
+  const careUnitId = searchParams.get('careUnitId');
 
   useEffect(() => {
-    // 처음 방 리스트 가져오기
     const fetchRooms = async () => {
       try {
         const res = await getChatRooms();
-        const parsedRooms: RoomInfo[] = res.map((room: ChatRoom) => ({
+        const parsedRooms: RoomInfo[] = res.map((room) => ({
           roomId: room.id,
           careUnitId: room.careUnit.id,
           careUnitName: room.careUnit.name,
@@ -31,28 +34,58 @@ export default function ChatLayout({ children }: ChatLayoutProps) {
           unreadCount: room.unreadCount,
         }));
 
-        //방 목록
         setRoomList(parsedRooms);
       } catch (error) {
         console.error('방 목록 불러오기 실패', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchRooms();
   }, []);
-  //룸아이디를 선택 시, 룸 아이디로 접근
-  const handleSelectRoom = (roomId: string) => {
-    router.push(`/user/chat/${roomId}`);
-  };
+
+  useEffect(() => {
+    const fetchSelectedUnit = async () => {
+      try {
+        if (careUnitId && !id) {
+          // id 없고 careUnitId만 있을 때만 병원 조회
+          const careUnit = await getCareUnitById(careUnitId);
+          setSelectedUnit(careUnit);
+        }
+      } catch (error) {
+        console.error('병원 정보 조회 실패', error);
+        setSelectedUnit(null);
+      }
+    };
+
+    fetchSelectedUnit();
+  }, [id, careUnitId]);
+
+  if (loading) return <div>로딩중...</div>;
 
   return (
-    <div className="flex h-screen">
-      <div className="w-1/4 border-r overflow-y-auto">
-        <ChatRoomList rooms={roomList} onSelectRoom={handleSelectRoom} />
+    <div className="flex h-[calc(100vh-61px)] !overflow-y-hidden">
+      <div className="w-1/4 border-r">
+        {roomList.length > 0 ? (
+          <ChatRoomList rooms={roomList} onSelectRoom={() => {}} />
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            채팅방이 없습니다
+          </div>
+        )}
       </div>
+
       <div className="w-2/4 flex flex-col">{children}</div>
-      <div className="w-1/4 border-l overflow-y-auto">
-        <HospitalInfoCard />
+
+      <div className="w-1/4 border-l">
+        {selectedUnit ? (
+          <HospitalSimpleCard unit={selectedUnit} />
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            병원을 선택하세요
+          </div>
+        )}
       </div>
     </div>
   );

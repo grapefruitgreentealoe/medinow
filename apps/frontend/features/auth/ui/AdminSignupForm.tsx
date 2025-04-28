@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { SelectSeparator } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 export default function AdminSignupForm() {
   const router = useRouter();
@@ -92,9 +93,17 @@ export default function AdminSignupForm() {
       } else {
         toast.warning('등록되지 않은 병원입니다.');
         setValue('isCareUnitVerified', false);
+        setValue('careUnitName', '');
+        setValue('careUnitAddress', '');
       }
-    } catch (e) {
-      toast.warning('등록되지 않은 병원입니다.');
+    } catch (e: any) {
+      console.log(e);
+      if (e.status == 500) {
+        toast.warning('등록되지 않은 병원입니다.');
+        setValue('isCareUnitVerified', false);
+        setValue('careUnitName', '');
+        setValue('careUnitAddress', '');
+      }
     }
   };
 

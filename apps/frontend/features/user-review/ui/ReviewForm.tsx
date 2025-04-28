@@ -29,6 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { useState } from 'react';
 
 export function ReviewForm({
   defaultValues,
@@ -45,7 +47,7 @@ export function ReviewForm({
   const departments = departmentsProp ?? useAtomValue(selectedDepartmentsAtom);
   const setCareUnit = useSetAtom(selectedCareUnitAtom);
   const setDepartments = useSetAtom(selectedDepartmentsAtom);
-
+  const [open, setOpen] = useState<boolean>(false);
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -64,9 +66,13 @@ export function ReviewForm({
     formState: { isSubmitting },
   } = form;
 
-  const handleResetButton = () => {
+  const onResetHospital = () => {
     setCareUnit(null);
     setDepartments([]);
+  };
+
+  const onClickReChoiceButton = () => {
+    setOpen(true);
   };
 
   return (
@@ -77,7 +83,7 @@ export function ReviewForm({
           <p className="text-xs text-muted-foreground">리뷰 대상 의료기관</p>
           <h3 className="text-base font-bold">{careUnit?.name}</h3>
           <p className="text-sm text-muted-foreground">{careUnit?.address}</p>
-          <Button onClick={handleResetButton}>다시 선택</Button>
+          <Button onClick={onClickReChoiceButton}>다시 선택</Button>
         </CardContent>
       </Card>
 
@@ -193,6 +199,18 @@ export function ReviewForm({
           </Button>
         </form>
       </Form>
+      <ConfirmDialog
+        confirmVariant="destructive"
+        open={open}
+        onClose={() => {
+          setOpen(false);
+        }}
+        title="다시 선택하시겠습니까?"
+        onConfirm={() => {
+          onResetHospital();
+        }}
+        description="아래 작성한 내용들이 사라질 수 있습니다"
+      />
     </div>
   );
 }
