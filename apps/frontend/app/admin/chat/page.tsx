@@ -37,13 +37,13 @@ export default function ChatPage() {
 
     socket.on(
       'roomMessages',
-      (payload: { messages: any[]; roomId: string }) => {
+      (payload: { messages: Message[]; roomId: string }) => {
         const { messages, roomId: receivedRoomId } = payload;
 
         // sender.id를 senderId로 매핑
         const normalizedMessages = messages.map((msg) => ({
           ...msg,
-          senderId: msg.sender?.id ?? 'unknown', // sender가 없을 수도 있으니 안전하게
+          senderId: msg.senderId ?? 'unknown', // sender가 없을 수도 있으니 안전하게
         }));
 
         const sortedMessages = normalizedMessages.sort((a, b) => {
@@ -64,8 +64,8 @@ export default function ChatPage() {
     socket.on('newMessage', (message: Message) => {
       setMessagesMap((prev) => {
         const newMap = new Map(prev);
-        const existingMessages = newMap.get(message.roomId) || [];
-        newMap.set(message.roomId, [...existingMessages, message]);
+        const existingMessages = newMap.get(message.id) || [];
+        newMap.set(message.id, [...existingMessages, message]);
         return newMap;
       });
     });
@@ -83,18 +83,20 @@ export default function ChatPage() {
 
     const messageToSend = input; // 미리 복사해둔다
     setInput(''); // 입력창은 바로 비워줘
+    const tempMessage: Message = {
+      id: `temp-${Date.now()}`,
+      senderId: 'me',
+      content: messageToSend,
+      createdAt: new Date().toISOString(),
+      sender: {
+        role: 'admin',
+      },
+      isRead: false,
+    };
 
     if (roomId) {
       //  roomId 있으면 바로 보내기
       socket.emit('sendMessage', { roomId, content: messageToSend });
-
-      const tempMessage: Message = {
-        id: `temp-${Date.now()}`,
-        senderId: 'me',
-        content: messageToSend,
-        createdAt: new Date().toISOString(),
-        roomId,
-      };
 
       setMessagesMap((prev) => {
         const newMap = new Map(prev);
@@ -117,14 +119,6 @@ export default function ChatPage() {
             roomId: newRoomId,
             content: messageToSend,
           });
-
-          const tempMessage: Message = {
-            id: `temp-${Date.now()}`,
-            senderId: 'me',
-            content: messageToSend,
-            createdAt: new Date().toISOString(),
-            roomId: newRoomId,
-          };
 
           setMessagesMap((prev) => {
             const newMap = new Map(prev);
@@ -157,6 +151,7 @@ export default function ChatPage() {
 
   return (
     <ChatMessages
+      isAdmin={true}
       messages={currentMessages}
       input={input}
       setInput={setInput}

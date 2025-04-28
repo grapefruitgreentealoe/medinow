@@ -64,8 +64,8 @@ export default function ChatPage() {
     socket.on('newMessage', (message: Message) => {
       setMessagesMap((prev) => {
         const newMap = new Map(prev);
-        const existingMessages = newMap.get(message.roomId) || [];
-        newMap.set(message.roomId, [...existingMessages, message]);
+        const existingMessages = newMap.get(message.id) || [];
+        newMap.set(message.id, [...existingMessages, message]);
         return newMap;
       });
     });
@@ -84,17 +84,20 @@ export default function ChatPage() {
     const messageToSend = input; //  미리 복사해둔다
     setInput(''); //  입력창은 바로 비워줘
 
+    const tempMessage: Message = {
+      id: `temp-${Date.now()}`,
+      senderId: 'me',
+      content: messageToSend,
+      createdAt: new Date().toISOString(),
+      sender: {
+        role: 'user',
+      },
+      isRead: false,
+    };
+
     if (roomId) {
       //  roomId 있으면 바로 보내기
       socket.emit('sendMessage', { roomId, content: messageToSend });
-
-      const tempMessage: Message = {
-        id: `temp-${Date.now()}`,
-        senderId: 'me',
-        content: messageToSend,
-        createdAt: new Date().toISOString(),
-        roomId,
-      };
 
       setMessagesMap((prev) => {
         const newMap = new Map(prev);
@@ -117,14 +120,6 @@ export default function ChatPage() {
             roomId: newRoomId,
             content: messageToSend,
           });
-
-          const tempMessage: Message = {
-            id: `temp-${Date.now()}`,
-            senderId: 'me',
-            content: messageToSend,
-            createdAt: new Date().toISOString(),
-            roomId: newRoomId,
-          };
 
           setMessagesMap((prev) => {
             const newMap = new Map(prev);
