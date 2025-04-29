@@ -33,7 +33,6 @@ export class DepartmentsService {
 
   @Cron('0 45 22 * * *')
   async syncHospitalDepartments() {
-    
     try {
       // 1. API에서 최신 데이터 가져오기
       const url = `${this.HOSPITAL_BASIC_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=1000000&_type=json`;
