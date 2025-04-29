@@ -1,5 +1,6 @@
 import { CareUnit } from '../../modules/care-units/entities/care-unit.entity';
 import { CareUnitCategory } from '../enums/careUnits.enum';
+import { CustomLoggerService } from '../../shared/logger/logger.service';
 
 export const parseTime = (
   value: string | number | null | undefined,
@@ -75,6 +76,36 @@ export const hasChanges = (existing: any, updated: CareUnit): boolean => {
 export const createCareUnit = (item: any): CareUnit => {
   if (!item?.hpid) throw new Error('Invalid item: missing hpid');
 
+  // 응급실인 경우 24시간 운영으로 설정
+  if (item.dutyTel3) {
+    return {
+      name: item.dutyName || '',
+      address: item.dutyAddr || '',
+      tel: String(item.dutyTel3 || ''),
+      hpId: item.hpid,
+      lat: parseFloat(item.wgs84Lat || '0'),
+      lng: parseFloat(item.wgs84Lon || '0'),
+      mondayOpen: 0,
+      mondayClose: 2400,
+      tuesdayOpen: 0,
+      tuesdayClose: 2400,
+      wednesdayOpen: 0,
+      wednesdayClose: 2400,
+      thursdayOpen: 0,
+      thursdayClose: 2400,
+      fridayOpen: 0,
+      fridayClose: 2400,
+      saturdayOpen: 0,
+      saturdayClose: 2400,
+      sundayOpen: 0,
+      sundayClose: 2400,
+      holidayOpen: 0,
+      holidayClose: 2400,
+      category: CareUnitCategory.EMERGENCY,
+    } as CareUnit;
+  }
+
+  // 일반 병원이나 약국의 경우 기존 로직 유지
   return {
     name: item.dutyName || '',
     address: item.dutyAddr || '',

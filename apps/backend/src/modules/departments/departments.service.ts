@@ -29,10 +29,47 @@ export class DepartmentsService {
     private readonly logger: CustomLoggerService,
     private readonly careUnitService: CareUnitService,
     private readonly redisService: RedisService,
-  ) {}
+  ) {
+    this.MAX_RETRIES = 3;
+    this.RETRY_DELAY = 5000;
+  }
 
-  @Cron('0 45 22 * * *')
+  private readonly MAX_RETRIES: number;
+  private readonly RETRY_DELAY: number;
+
+  @Cron('0 40 00 * * *')
   async syncHospitalDepartments() {
+    let retryCount = 0;
+    let lastError: Error | null = null;
+
+    while (retryCount < this.MAX_RETRIES) {
+      try {
+        if (retryCount > 0) {
+          await new Promise((resolve) => setTimeout(resolve, this.RETRY_DELAY));
+        }
+
+        const result = await this.executeSyncHospitalDepartments();
+        if (retryCount > 0 && result) {
+          this.logger.log(`🔄 동기화 성공: ${result}`);
+        }
+        return result;
+      } catch (error) {
+        lastError = error as Error;
+        this.logger.error(
+          `❌ 동기화 실패 (시도 ${retryCount + 1}/${this.MAX_RETRIES}):`,
+          lastError.message,
+        );
+        retryCount++;
+      }
+    }
+
+    if (lastError) {
+      this.logger.error(`🔄 최종 동기화 실패: ${lastError.message}`);
+      throw lastError;
+    }
+  }
+
+  private async executeSyncHospitalDepartments() {
     try {
       // 1. API에서 최신 데이터 가져오기
       const url = `${this.HOSPITAL_BASIC_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=1000000&_type=json`;
@@ -143,7 +180,7 @@ export class DepartmentsService {
               3600 * 48, // TTL 48시간 (2일) - Cron 작업 실패 대비
             );
             updatedCount++;
-            this.logger.log(
+            console.log(
               `🔄 ${hospital.dutyName} 진료과목 업데이트:`,
               `삭제(${departmentsToDelete.length}),`,
               `추가(${uniqueDepartments.length})`,
