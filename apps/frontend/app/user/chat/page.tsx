@@ -77,7 +77,6 @@ export default function ChatPage() {
     );
 
     console.log('roomMEssage', payload);
-    // roomIdRef.current = receivedRoomId;
     setMessagesMap(sortedMessages);
   };
 
