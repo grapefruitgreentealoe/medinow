@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { getCareUnitById } from '@/shared/api';
 import HomePageClient from '@/features/map/ui/HomePage';
-// eslint-disable @typescript-eslint/no-explicit-any
-
+// eslint-disable
 export async function generateMetadata({
   searchParams,
 }: any): Promise<Metadata> {
