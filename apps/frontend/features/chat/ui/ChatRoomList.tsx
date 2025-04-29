@@ -5,14 +5,18 @@ import { cn } from '@/lib/utils';
 import { CareUnit } from '@/shared/type';
 
 interface ChatRoomListProps {
-  selectedUnitId: string;
+  selectedRoomId: string;
   rooms: RoomInfo[];
-  onSelectRoom: (payload: { roomId: string; selectedUnitId: string }) => void;
+  onSelectRoom: (payload: {
+    roomId: string;
+    selectedUnitId: string;
+    userId: string;
+  }) => void;
   isAdmin?: boolean;
 }
 
 export function ChatRoomList({
-  selectedUnitId,
+  selectedRoomId,
   rooms,
   onSelectRoom,
   isAdmin = false,
@@ -21,20 +25,21 @@ export function ChatRoomList({
     <div className="p-4 space-y-2">
       {rooms.map((room) => (
         <button
-          key={room.roomId}
+          key={room.id}
           onClick={() =>
             onSelectRoom({
-              roomId: room.roomId!,
-              selectedUnitId: room.careUnitId!,
+              roomId: room.id!,
+              selectedUnitId: room.careUnit.id!,
+              userId: room.user.id,
             })
           }
           className={cn(
             'w-full p-3 bg-muted rounded text-left hover:bg-accent',
-            selectedUnitId === room.careUnitId ? 'bg-accent' : 'bg-muted'
+            selectedRoomId === room.id ? 'bg-accent' : 'bg-muted'
           )}
         >
           <div className="font-semibold">
-            {isAdmin ? room.user.nickName : room.careUnitName}
+            {isAdmin ? room.user.nickName : room.careUnit.name}
           </div>
           <div className="text-xs text-gray-500">
             {room.lastMessageAt
