@@ -4,9 +4,7 @@ import HomePageClient from '@/features/map/ui/HomePage';
 
 export async function generateMetadata({
   searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}): Promise<Metadata> {
+}: any): Promise<Metadata> {
   const careUnitId = searchParams?.careUnitId;
 
   if (careUnitId && typeof careUnitId === 'string') {
@@ -39,7 +37,7 @@ export async function generateMetadata({
         },
       };
     } catch (e) {
-      console.error('careUnitId 메타데이터 실패:', e);
+      console.error('메타데이터 생성 실패', e);
     }
   }
 
@@ -48,7 +46,6 @@ export async function generateMetadata({
     description: '내 주변 병원, 약국, 응급실을 쉽게 찾고 소통하세요.',
   };
 }
-
 export default function Page() {
   return <HomePageClient />;
 }
