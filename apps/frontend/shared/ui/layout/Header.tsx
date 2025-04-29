@@ -8,7 +8,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ROUTES } from '@/shared/constants/routes';
 import axiosInstance from '@/lib/axios';
 
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 type Role = 'user' | 'admin';
 
 interface User {
@@ -164,7 +170,12 @@ export default function Header() {
 
       {/* 모바일 햄버거 버튼 */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <SheetContent side="top" className="!pt-[61px]  border-b border-border">
+        <SheetContent side="top" className="border-b border-border">
+          <SheetHeader>
+            <SheetTitle></SheetTitle>
+            <SheetDescription> </SheetDescription>
+          </SheetHeader>
+
           <nav className="flex flex-col">
             {getMenuItems().map(({ href, label, onClick }) => {
               if (onClick) {

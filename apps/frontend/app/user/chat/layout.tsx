@@ -31,8 +31,6 @@ export default function ChatLayout({
   const [roomList, setRoomList] = useState<RoomInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUnit, setSelectedUnit] = useState<CareUnit | null>(null);
-  const [isLargeScreen, setIsLargeScreen] = useState(false);
-
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const careUnitId = searchParams.get('careUnitId');
@@ -90,22 +88,12 @@ export default function ChatLayout({
     router.push(`/user/chat?id=${roomId}`);
   };
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsLargeScreen(window.innerWidth >= 1624);
-    };
-
-    handleResize(); // 초기 체크
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   if (loading) return <div>로딩중...</div>;
 
   return (
     <div className="relative flex h-[calc(100vh-61px)] !overflow-y-hidden">
       {/* 왼쪽 - 채팅방 목록 */}
-      <div className={cn('w-1/4 border-r', !isLargeScreen && 'w-1/3')}>
+      <div className={cn('w-1/4 border-r', 'max-[1624px]:w-1/3')}>
         {roomList.length > 0 ? (
           <ChatRoomList rooms={roomList} onSelectRoom={onSelectRoom} />
         ) : (
@@ -116,53 +104,51 @@ export default function ChatLayout({
       </div>
 
       {/* 가운데 - 채팅 메시지 */}
-      <div className={cn('w-2/4 border-r', !isLargeScreen && 'w-2/3')}>
+      <div className={cn('w-2/4 border-r', 'max-[1624px]:w-2/3')}>
         {children}
       </div>
 
       {/* 오른쪽 - 병원 정보 */}
-      {isLargeScreen ? (
-        <div className="w-1/4 border-l">
-          {selectedUnit ? (
-            <HospitalSimpleCard unit={selectedUnit} />
-          ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              병원을 선택하세요
-            </div>
-          )}
-        </div>
-      ) : (
-        <Sheet open={openSheet} onOpenChange={setOpenSheet}>
-          {/* 오른쪽 위 버튼 */}
-          <SheetTrigger asChild>
-            <button
-              className="absolute top-4 right-4 z-50 bg-background border rounded-full p-2 shadow-md"
-              onClick={() => setOpenSheet(true)}
-            >
-              <Button variant="outline" className="hover:bg-primary">
-                <ArrowBigLeftDashIcon /> 기관 정보 보기
-              </Button>
-            </button>
-          </SheetTrigger>
 
-          {/* 열리는 컨텐츠 */}
-          <SheetContent side="right" className="w-3/4 p-0">
-            <SheetHeader className="p-4">
-              <SheetTitle>병원 정보</SheetTitle>
-            </SheetHeader>
+      <div className="w-1/4 border-l max-[1624px]:hidden">
+        {selectedUnit ? (
+          <HospitalSimpleCard unit={selectedUnit} />
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground ">
+            병원을 선택하세요
+          </div>
+        )}
+      </div>
 
-            <div className="h-[calc(100%-64px)] overflow-y-auto p-4">
-              {selectedUnit ? (
-                <HospitalSimpleCard unit={selectedUnit} />
-              ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground">
-                  병원을 선택하세요
-                </div>
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
-      )}
+      <Sheet open={openSheet} onOpenChange={setOpenSheet}>
+        {/* 오른쪽 위 버튼 */}
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            className="absolute top-4 right-4 z-50 border rounded-full p-2 shadow-md opacity-70 hover:opacity-100  min-[1624px]:hidden"
+            onClick={() => setOpenSheet(true)}
+          >
+            <ArrowBigLeftDashIcon /> 기관 정보 보기
+          </Button>
+        </SheetTrigger>
+
+        {/* 열리는 컨텐츠 */}
+        <SheetContent side="right" className="w-3/4 p-0">
+          <SheetHeader className="p-4">
+            <SheetTitle>병원 정보</SheetTitle>
+          </SheetHeader>
+
+          <div className="h-[calc(100%-64px)] overflow-y-auto p-4">
+            {selectedUnit ? (
+              <HospitalSimpleCard unit={selectedUnit} />
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                병원을 선택하세요
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
