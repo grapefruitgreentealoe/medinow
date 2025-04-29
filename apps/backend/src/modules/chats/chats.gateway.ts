@@ -139,20 +139,30 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
+      const careUnitId = data.careUnitId;
+      if (!careUnitId) {
+        throw new BadRequestException('careUnitId는 필수입니다');
+      }
+
+      const isRoom = await this.chatsService.getRoomByCareUnitId(
+        careUnitId,
+        user.id,
+      );
+
+      client.emit('joinRoom', {
+        roomId: isRoom.id,
+      });
+
       const roomId = data.roomId;
       this.logger.log(`사용자 ${user.id}가 채팅방 ${roomId} 참여 요청!`);
 
-      let room: ChatRoom;
+      let room: any;
       if (roomId) {
         // 채팅방이 ID가 주어진 경우
         room = await this.chatsService.getRoomById(roomId);
         this.logger.log(`기존 채팅방 ${roomId} 조회 성공`);
       } else {
         // 채팅방 ID가 없는 경우: 새 채팅방 생성
-        const { careUnitId } = data;
-        if (!careUnitId) {
-          throw new BadRequestException('careUnitId는 필수입니다');
-        }
         room = await this.chatsService.createRoom(user.id, careUnitId);
         client.emit('roomCreated', {
           roomId: room.id,
