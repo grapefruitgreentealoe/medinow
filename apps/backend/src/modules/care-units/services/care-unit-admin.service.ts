@@ -11,12 +11,13 @@ import { CareUnitCategory } from 'src/common/enums/careUnits.enum';
 import { AppConfigService } from 'src/config/app/config.service';
 import { Department } from 'src/modules/departments/entities/department.entity';
 import { RedisService } from '../../redis/redis.service';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import {
   createCareUnit,
   hasChanges,
   parseTime,
 } from '../../../common/utils/care-unit.util';
+import { CustomLoggerService } from 'src/shared/logger/logger.service';
 
 @Injectable()
 export class CareUnitAdminService {
@@ -28,15 +29,13 @@ export class CareUnitAdminService {
   constructor(
     @InjectRepository(CareUnit)
     private readonly careUnitRepository: Repository<CareUnit>,
-    @InjectRepository(Department)
-    private readonly departmentRepository: Repository<Department>,
     private readonly appConfigService: AppConfigService,
     private readonly redisService: RedisService,
+    private readonly logger: CustomLoggerService,
   ) {}
 
   @Cron('0 53 22 * * *')
   async syncCareUnits() {
-    console.log('🔄 의료기관 동기화 시작');
     try {
       const url1 = `${this.API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
       const url2 = `${this.API_URL2}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
@@ -55,12 +54,12 @@ export class CareUnitAdminService {
 
       const text1 = await response1.text();
       if (text1.startsWith('<')) {
-        console.error('❌ XML/HTML 응답 감지');
+        this.logger.error('❌ XML/HTML 응답 감지');
         throw new BadRequestException('API가 XML/HTML을 반환했습니다.');
       }
       const text2 = await response2.text();
       if (text2.startsWith('<')) {
-        console.error('❌ XML/HTML 응답 감지');
+        this.logger.error('❌ XML/HTML 응답 감지');
         throw new BadRequestException('API가 XML/HTML을 반환했습니다.');
       }
 
@@ -118,7 +117,7 @@ export class CareUnitAdminService {
               await this.redisService.set(
                 redisKey,
                 JSON.stringify(careUnit),
-                3600 * 24, // ttl 하루 기준
+                3600 * 48, // ttl 48시간 기준
               );
               updatedCount++;
             }
@@ -136,8 +135,7 @@ export class CareUnitAdminService {
         }
       }
 
-      console.log('🎉 의료기관 동기화 완료');
-      console.log(
+      this.logger.log(
         `📊 통계:`,
         `추가(${addedCount}),`,
         `업데이트(${updatedCount}),`,
@@ -154,7 +152,8 @@ export class CareUnitAdminService {
         },
       };
     } catch (error) {
-      console.error('❌ 동기화 에러 발생:', error);
+      const err = error as Error;
+      this.logger.error('❌ 동기화 에러 발생:', err.message);
       throw error;
     }
   }
@@ -162,11 +161,8 @@ export class CareUnitAdminService {
   // 서버 시작 시 초기 데이터 저장
   async saveAllCareUnits() {
     try {
-      console.log('▶️ API 호출 시작');
       const url1 = `${this.API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
       const url2 = `${this.API_URL2}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
-      console.log('▶️  API URL:', url1);
-      console.log('▶️  API URL:', url2);
 
       const response1 = await fetch(url1, {
         headers: {
@@ -182,17 +178,15 @@ export class CareUnitAdminService {
         },
       });
 
-      console.log('▶️  API 응답 상태:', response1.status);
       const text1 = await response1.text();
-      console.log('▶️  API 응답 상태:', response2.status);
       const text2 = await response2.text();
 
       if (text1.startsWith('<')) {
-        console.error('❌ XML/HTML 응답 감지');
+        this.logger.error('❌ XML/HTML 응답 감지');
         return;
       }
       if (text2.startsWith('<')) {
-        console.error('❌ XML/HTML 응답 감지');
+        this.logger.error('❌ XML/HTML 응답 감지');
         return;
       }
 
@@ -209,15 +203,10 @@ export class CareUnitAdminService {
 
       const items = [...items1, ...items2];
 
-      console.log('▶️  처리할 아이템 수:', items.length);
-
       const batchSize = 100;
-      let hospitalCount = 0;
-      let pharmacyCount = 0;
-      let emergencyCount = 0;
+      let successCount = 0;
 
       // 한 번에 모든 데이터 처리 (약국, 병원, 응급실)
-
       for (let i = 0; i < items.length; i += batchSize) {
         const batch = items.slice(i, i + batchSize);
         const careUnits: CareUnit[] = [];
@@ -288,7 +277,7 @@ export class CareUnitAdminService {
             const existing = existingMap.get(key);
 
             if (!existing) {
-              console.log(
+              this.logger.log(
                 `➕ 새로운 데이터: ${unit.name} (${unit.hpId}) - ${unit.category}`,
               );
               return true;
@@ -296,7 +285,7 @@ export class CareUnitAdminService {
 
             const isChanged = hasChanges(existing, unit);
             if (isChanged) {
-              console.log(
+              this.logger.log(
                 `🔄 변경된 데이터: ${unit.name} (${unit.hpId}) - ${unit.category}`,
               );
             }
@@ -315,56 +304,31 @@ export class CareUnitAdminService {
               await this.redisService.set(
                 redisKey,
                 JSON.stringify(careUnit),
-                3600 * 24,
-              ); // ttl 하루 기준
+                3600 * 48, // ttl 48시간 기준
+              );
             }
 
-            // 카테고리별 카운팅
-            const hospitalBatch = unitsToSave.filter(
-              (unit) =>
-                (unit.category as CareUnitCategory) ===
-                CareUnitCategory.HOSPITAL,
-            ).length;
-            const pharmacyBatch = unitsToSave.filter(
-              (unit) =>
-                (unit.category as CareUnitCategory) ===
-                CareUnitCategory.PHARMACY,
-            ).length;
-            const emergencyBatch = unitsToSave.filter(
-              (unit) =>
-                (unit.category as CareUnitCategory) ===
-                CareUnitCategory.EMERGENCY,
-            ).length;
-
-            hospitalCount += hospitalBatch;
-            pharmacyCount += pharmacyBatch;
-            emergencyCount += emergencyBatch;
-
-            console.log(
-              `✅ ${i + 1}~${i + unitsToSave.length}번째 데이터 저장 완료 ` +
-                `(병원: ${hospitalBatch}, 약국: ${pharmacyBatch}, 응급실: ${emergencyBatch})`,
+            successCount += unitsToSave.length;
+            this.logger.log(
+              `✅ ${i + 1}~${i + unitsToSave.length}번째 데이터 저장 완료`,
             );
           }
         }
       }
 
-      console.log('🎉 모든 의료기관 정보 저장 완료');
       return {
         status: 'success',
         message: '모든 의료기관 정보 저장 완료',
         stats: {
-          hospitalCount,
-          pharmacyCount,
-          emergencyCount,
+          totalCount: successCount,
         },
       };
     } catch (error) {
       const err = error as Error;
-      console.error('❌ 에러 발생:', {
-        name: err.name,
-        message: err.message,
-        stack: err.stack,
-      });
+      this.logger.error(
+        '❌ 에러 발생:',
+        `${err.name}: ${err.message}\n${err.stack}`,
+      );
       throw new NotFoundException('Failed to save care units');
     }
   }

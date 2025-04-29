@@ -24,10 +24,10 @@ export class CongestionTotalService {
   // }
 
   // //1️⃣ 전체 응급실 혼잡도 저장 (30분마다 갱신)
-  // @Cron('0 30 11 * * *')
+  // @Cron('0 30 01 * * *')
   // async updateCongestion(): Promise<void> {
   //   try {
-  //     console.log('🔄 혼잡도 업데이트 시작');
+  //
   //     const response = await fetch(
   //       `${this.appConfigService.emergencyCongestionApiUrl}?serviceKey=${this.appConfigService.serviceKey}&pageNo=1&numOfRows=600&_type=json`,
   //       {
@@ -38,20 +38,13 @@ export class CongestionTotalService {
   //     );
   //     const data = await response.json();
 
-  //     // API 응답 구조 확인을 위한 로깅
-  //     console.log('API 응답 구조:', {
-  //       response: !!data.response,
-  //       body: !!data.response?.body,
-  //       items: !!data.response?.body?.items,
-  //       item: !!data.response?.body?.items?.item,
-  //       fullResponse: data,
-  //     });
+  //
 
   //     const congestionData = Array.isArray(data.response.body.items.item)
   //       ? data.response.body.items.item
   //       : [data.response.body.items.item];
 
-  //     console.log(`📊 API 응답 데이터 수: ${congestionData.length}`);
+  //
 
   //     //Redis에 데이터 저장
   //     for (const item of congestionData) {
@@ -69,9 +62,9 @@ export class CongestionTotalService {
   //         this.CACHE_TTL,
   //       );
   //     }
-  //     console.log('✅ 혼잡도 업데이트 완료');
+  //
   //   } catch (error) {
-  //     console.error('❌ 혼잡도 업데이트 실패:', error);
+  //     this.logger.error('❌ 혼잡도 업데이트 실패:', error);
   //   }
   // }
 

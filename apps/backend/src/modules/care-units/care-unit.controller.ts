@@ -9,7 +9,6 @@ import {
   Body,
 } from '@nestjs/common';
 import { CareUnitService } from './services/care-unit.service';
-import { ResponseCareUnitDto } from './dto/response-care-unit.dto';
 import {
   ApiBody,
   ApiOperation,
