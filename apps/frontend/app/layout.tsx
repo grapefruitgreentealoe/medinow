@@ -31,9 +31,10 @@ export default async function RootLayout({
           <Script
             id="initial-is-logged-in"
             dangerouslySetInnerHTML={{
-              __html: `window.__INITIAL_IS_LOGGED_IN__ = ${JSON.stringify(isLoggedIn)};
-              window.__USER_ROLE__ = '${role}';
-              `,
+              __html: `window.__INITIAL_IS_LOGGED_IN__ = ${JSON.stringify(
+                isLoggedIn
+              )};
+              window.__USER_ROLE__ = '${role}';`,
             }}
           />
           <Script
@@ -42,11 +43,15 @@ export default async function RootLayout({
           />
         </>
       </head>
-      <body suppressHydrationWarning>
+      <body className="flex min-h-screen flex-col">
         <Header />
-        <main className="!pt-[61px]" style={{ marginBottom: '-100px' }}>
-          {children}
-        </main>
+        <main className="flex-1 !pt-[61px]">{children}</main>
+
+        {/* 푸터 추가 */}
+        <footer className="fixed bottom-0 left-0 w-full border-t text-center text-sm text-muted-foreground !py-6 bg-white z-50 shadow-md">
+          © 2025 MediNow. All rights reserved.
+        </footer>
+
         <Toaster position="bottom-center" duration={1000} />
       </body>
     </html>

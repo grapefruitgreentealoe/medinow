@@ -165,7 +165,6 @@ export default function NearbyCareUnitsMap() {
       const map = new kakao.maps.Map(mapRef.current!, {
         center,
         level: level ?? 1,
-        
       });
 
       mapInstance.current = map;
@@ -395,11 +394,8 @@ export default function NearbyCareUnitsMap() {
         </div>
       </div>
 
-      <div className="relative h-[90vh]">
-        <div
-          ref={mapRef}
-          className="w-full h-full rounded-xl bg-gray-100 z-0"
-        />
+      <div className="relative h-[calc(100vh-64px)] !pb-[72px]">
+        <div ref={mapRef} className="w-full h-full  bg-gray-100 z-0" />
         <div className="absolute top-4 right-4 flex flex-col gap-2">
           <Button
             size="icon"
