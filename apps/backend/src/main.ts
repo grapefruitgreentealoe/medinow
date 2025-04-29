@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from './config/logger/winston.config';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
   // Create App
@@ -78,6 +79,8 @@ async function bootstrap() {
 
   // Use Cors
   app.enableCors(corsOptions);
+
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   // Start Server
   await app.listen(process.env.PORT ?? 4000);

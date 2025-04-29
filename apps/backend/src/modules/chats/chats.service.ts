@@ -602,7 +602,7 @@ export class ChatsService {
           user: { id: userId },
           isActive: true,
         },
-        relations: ['user', 'user.userProfile'],
+        relations: ['user', 'user.userProfile', 'careUnit'],
         order: { updatedAt: 'DESC' },
       });
 

@@ -6,10 +6,10 @@ import {
   DialogHeader,
   DialogFooter,
   DialogOverlay,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ReactNode } from 'react';
-import { DialogTitle } from '@radix-ui/react-dialog';
 
 interface ContentDialogProps {
   open: boolean;
