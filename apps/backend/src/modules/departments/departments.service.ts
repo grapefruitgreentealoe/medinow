@@ -50,7 +50,7 @@ export class DepartmentsService {
 
         const result = await this.executeSyncHospitalDepartments();
         if (retryCount > 0 && result) {
-          this.logger.log(`🔄 동기화 성공: ${result}`);
+          this.logger.log(`🔄 동기화 성공: ${JSON.stringify(result)}`);
         }
         return result;
       } catch (error) {
