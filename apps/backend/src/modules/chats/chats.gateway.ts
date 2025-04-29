@@ -18,7 +18,6 @@ import {
 import { CustomLoggerService } from '../../shared/logger/logger.service';
 import { UserRole } from '../../common/enums/roles.enum';
 import { JoinRoomDto } from './dto/join-room.dto';
-import { ChatRoom } from './entities/chat-room.entity';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
 
 @UseGuards(WsJwtGuard)
@@ -28,8 +27,8 @@ import { WsJwtGuard } from './guards/ws-jwt.guard';
       'http://localhost:3000',
       'https://localhost:3001',
       'http://localhost:3001',
+      'https://medinow.co.kr',
       'https://www.medinow.co.kr',
-      'https://kdt-node-2-team02.elicecoding.com',
     ],
   },
   namespace: 'chat',
