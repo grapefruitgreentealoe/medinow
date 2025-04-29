@@ -45,7 +45,7 @@ export default function CareUnitDetailPage() {
   };
 
   const handleChat = () => {
-    setChat({ isOpen: true, target: unit });
+    router.push(ROUTES.USER.CHAT(unit.id));
   };
 
   const categoryLabel =
