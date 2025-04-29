@@ -122,6 +122,7 @@ export function CareUnitCard({
               onClick={(e) => {
                 e.stopPropagation();
                 setChat({ isOpen: true, target: unit });
+                router.push(ROUTES.USER.CHAT(unit.id));
               }}
               className="w-8 h-8"
             >
