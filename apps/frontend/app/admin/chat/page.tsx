@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { socket } from '@/lib/socket';
 import { ChatMessages } from '@/features/chat/ui/ChatMessages';
-import { Message } from '@/features/chat/type';
+import { Message, RoomMessagesFromServer } from '@/features/chat/type';
 
 export default function ChatPage() {
   const searchParams = useSearchParams();
@@ -37,27 +37,29 @@ export default function ChatPage() {
 
     socket.on(
       'roomMessages',
-      (payload: { messages: Message[]; roomId: string }) => {
+      (payload: { messages: RoomMessagesFromServer[]; roomId: string }) => {
         const { messages, roomId: receivedRoomId } = payload;
 
-        // sender.id를 senderId로 매핑
         const normalizedMessages = messages.map((msg) => ({
-          ...msg,
-          senderId: msg.senderId ?? 'unknown', // sender가 없을 수도 있으니 안전하게
+          id: msg.id,
+          content: msg.content,
+          senderId: msg.sender.id,
+          senderName: msg.sender?.email || 'Unknown',
+          isAdmin: msg.sender?.role === 'admin', // ✅ admin 여부
+          timestamp: msg.createdAt, // ✅ createdAt → timestamp 변환
+          isRead: msg.isRead,
         }));
 
-        const sortedMessages = normalizedMessages.sort((a, b) => {
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        });
+        const sortedMessages = normalizedMessages.sort(
+          (a, b) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
 
         setMessagesMap((prev) => {
           const newMap = new Map(prev);
           newMap.set(receivedRoomId, sortedMessages);
           return newMap;
         });
-        setIsRoomReady(true);
       }
     );
 
@@ -65,8 +67,12 @@ export default function ChatPage() {
       console.log('message', message);
       setMessagesMap((prev) => {
         const newMap = new Map(prev);
-        const existingMessages = newMap.get(message.id) || [];
-        newMap.set(message.id, [...existingMessages, message]);
+        const existingMessages = newMap.get(roomId!) || [];
+        const updatedMessages = [...existingMessages, message].sort(
+          (a, b) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+        newMap.set(roomId!, updatedMessages);
         return newMap;
       });
     });
@@ -84,27 +90,10 @@ export default function ChatPage() {
 
     const messageToSend = input; // 미리 복사해둔다
     setInput(''); // 입력창은 바로 비워줘
-    const tempMessage: Message = {
-      id: `temp-${Date.now()}`,
-      senderId: 'me',
-      content: messageToSend,
-      createdAt: new Date().toISOString(),
-      sender: {
-        role: 'admin',
-      },
-      isRead: false,
-    };
 
     if (roomId) {
       //  roomId 있으면 바로 보내기
       socket.emit('sendMessage', { roomId, content: messageToSend });
-
-      setMessagesMap((prev) => {
-        const newMap = new Map(prev);
-        const existingMessages = newMap.get(roomId) || [];
-        newMap.set(roomId, [...existingMessages, tempMessage]);
-        return newMap;
-      });
     } else if (careUnitId) {
       //  roomId 없으면 joinRoom 먼저
       socket.connect();
@@ -119,13 +108,6 @@ export default function ChatPage() {
           socket.emit('sendMessage', {
             roomId: newRoomId,
             content: messageToSend,
-          });
-
-          setMessagesMap((prev) => {
-            const newMap = new Map(prev);
-            const existingMessages = newMap.get(newRoomId) || [];
-            newMap.set(newRoomId, [...existingMessages, tempMessage]);
-            return newMap;
           });
         }
       );
