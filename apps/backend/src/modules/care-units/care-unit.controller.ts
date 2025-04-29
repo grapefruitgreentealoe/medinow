@@ -425,7 +425,7 @@ export class CareUnitController {
     type: CareUnit,
   })
   async getCareUnitDetail(@Param('id') id: string) {
-    return this.careUnitService.getCareUnitDetailWithDepartment(id);
+    return this.careUnitService.getCareUnitDetailById(id);
   }
 
   @Get('check-now-open/:id')
