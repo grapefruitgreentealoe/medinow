@@ -1,68 +1,80 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { socket } from '@/lib/socket';
 import { ChatMessages } from '@/features/chat/ui/ChatMessages';
 import { Message } from '@/features/chat/type';
 
-export default function ChatPage() {
+export default function AdminChatPage() {
   const searchParams = useSearchParams();
-  const roomId = searchParams.get('id'); // URL에서 가져오는 roomId
+  const roomId = searchParams.get('id');
+  const roomIdRef = useRef(roomId); // 안정성 확보
 
-  const [messagesMap, setMessagesMap] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isComposing, setIsComposing] = useState(false);
 
+  // 1. connect 이벤트 후 방 입장
+  const handleConnect = useCallback(() => {
+    if (roomIdRef.current) {
+      socket.emit('joinRoom', { roomId: roomIdRef.current });
+    }
+  }, []);
+
+  // 2. 방 전체 메시지 수신
+  const handleRoomMessages = useCallback(
+    (payload: { messages: Message[]; roomId: string }) => {
+      if (payload.roomId !== roomIdRef.current) return;
+      const sorted = [...payload.messages].sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+      setMessages(sorted);
+    },
+    []
+  );
+
+  // 3. 새 메시지 수신
+  const handleNewMessage = useCallback(
+    (message: Message & { roomId: string }) => {
+      if (message.roomId !== roomIdRef.current) return;
+      setMessages((prev) => [...prev, message]);
+    },
+    []
+  );
+
+  // 4. 소켓 이벤트 등록
   useEffect(() => {
-    if (!roomId) return;
-
-    socket.connect();
-
-    const handleConnect = () => {
-      console.log('Socket connected!');
-      socket.emit('joinRoom', { roomId });
-    };
+    if (!roomIdRef.current) return;
 
     if (socket.connected) {
       handleConnect();
     } else {
-      socket.on('connect', handleConnect);
+      socket.off('connect', handleConnect).on('connect', handleConnect);
     }
 
-    socket.on(
-      'roomMessages',
-      (payload: { messages: Message[]; roomId: string }) => {
-        console.log('admin roomMessages', payload.messages);
-        const sortedMessages = [...payload.messages].sort(
-          (a, b) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-        );
-        setMessagesMap(sortedMessages);
-      }
-    );
-
-    socket.on('newMessage', (message: Message) => {
-      console.log('newMessage', message);
-      setMessagesMap((prev) => [...prev, message]);
-    });
+    socket
+      .off('roomMessages', handleRoomMessages)
+      .on('roomMessages', handleRoomMessages);
+    socket
+      .off('newMessage', handleNewMessage)
+      .on('newMessage', handleNewMessage);
 
     return () => {
-      socket.disconnect();
       socket.off('connect', handleConnect);
-      socket.off('roomMessages');
-      socket.off('newMessage');
+      socket.off('roomMessages', handleRoomMessages);
+      socket.off('newMessage', handleNewMessage);
     };
-  }, [roomId]);
+  }, [handleConnect, handleRoomMessages, handleNewMessage]);
 
+  // 5. 메시지 전송
   const handleSendMessage = () => {
-    if (!input.trim()) return;
-    if (!roomId) {
-      console.warn('roomId가 없습니다.');
-      return;
-    }
-
-    socket.emit('sendMessage', { roomId, content: input });
+    if (!input.trim() || !roomIdRef.current) return;
+    socket.emit('sendMessage', {
+      roomId: roomIdRef.current,
+      content: input,
+    });
     setInput('');
   };
 
@@ -83,8 +95,8 @@ export default function ChatPage() {
 
   return (
     <ChatMessages
-      isAdmin={true}
-      messages={messagesMap}
+      isAdmin
+      messages={messages}
       input={input}
       setInput={setInput}
       onSendMessage={handleSendMessage}
