@@ -11,6 +11,9 @@ interface ChatMessagesProps {
   setInput: (value: string) => void;
   onSendMessage: () => void;
   isAdmin?: boolean;
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onCompositionStart: () => void;
+  onCompositionEnd: () => void;
 }
 
 export function ChatMessages({
@@ -19,6 +22,9 @@ export function ChatMessages({
   input,
   setInput,
   onSendMessage,
+  onKeyDown,
+  onCompositionStart,
+  onCompositionEnd,
 }: ChatMessagesProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -58,9 +64,9 @@ export function ChatMessages({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="메시지를 입력하세요"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onSendMessage();
-          }}
+          onKeyDown={onKeyDown}
+          onCompositionStart={onCompositionStart}
+          onCompositionEnd={onCompositionEnd}
         />
         <Button onClick={onSendMessage}>전송</Button>
       </div>
