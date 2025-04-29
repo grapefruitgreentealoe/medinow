@@ -545,7 +545,11 @@ export class ChatsService {
   // 채팅방 상세 조회
   async getRoomByCareUnitId(careUnitId: string, userId: string) {
     const room = await this.chatRoomRepository.findOne({
-      where: { careUnit: { id: careUnitId }, user: { id: userId } },
+      where: {
+        careUnit: { id: careUnitId },
+        user: { id: userId },
+        isActive: true,
+      },
       relations: ['user', 'careUnit', 'messages', 'user.userProfile'],
     });
 
