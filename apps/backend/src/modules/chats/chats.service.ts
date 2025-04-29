@@ -22,8 +22,8 @@ import { RedisService } from '../redis/redis.service';
 export class ChatsService {
   // 온라인 사용자 소켓 매핑
   private readonly userSockets = new Map<string, Set<string>>();
-  // 채팅방 비활성화 시간 (30분 = 1800000 밀리초)
-  private readonly CHAT_INACTIVITY_TIMEOUT = 30 * 60 * 1000;
+  // 채팅방 비활성화 시간 (하루 = 1000 * 60 * 60 * 24 밀리초)
+  private readonly CHAT_INACTIVITY_TIMEOUT = 1000 * 60 * 60 * 24;
   // Redis 채널 접두사
   private readonly REDIS_ROOM_CHANNEL = 'chat:room:';
   // Redis 사용자 상태 키 접두사
@@ -93,7 +93,7 @@ export class ChatsService {
     await this.redisService.set(
       key,
       Date.now().toString(),
-      this.CHAT_INACTIVITY_TIMEOUT / 1000,
+      this.CHAT_INACTIVITY_TIMEOUT,
     );
   }
 
@@ -104,11 +104,7 @@ export class ChatsService {
     try {
       if (isOnline) {
         // 온라인 상태는 30분 자동 만료 (활동이 없으면 오프라인으로 간주)
-        await this.redisService.set(
-          key,
-          '1',
-          this.CHAT_INACTIVITY_TIMEOUT / 1000,
-        );
+        await this.redisService.set(key, '1', this.CHAT_INACTIVITY_TIMEOUT);
         this.logger.log(`Redis 온라인 상태 저장 성공: ${userId}`);
       } else {
         // 오프라인 상태로 설정 (키 삭제)
@@ -458,7 +454,7 @@ export class ChatsService {
   }
 
   // 채팅방 생성
-  async createRoom(userId: string, careUnitId: string): Promise<ChatRoom> {
+  async createRoom(userId: string, careUnitId: string) {
     this.logger.log(
       `채팅방 생성 시도: 사용자 ${userId}, 의료기관 ${careUnitId}`,
     );
@@ -476,36 +472,40 @@ export class ChatsService {
 
       this.logger.log(`관리자 찾음: ${adminUser.id}, 의료기관: ${careUnitId}`);
 
-      // 이미 존재하는 채팅방 확인
-      const existingRoom = await this.chatRoomRepository.findOne({
-        where: {
-          careUnit: { id: careUnitId },
-          user: { id: userId },
-          isActive: true,
+      return await this.chatRoomRepository.manager.transaction(
+        async (manager) => {
+          // 이미 존재하는 채팅방 확인
+          const existingRoom = await manager.findOne(ChatRoom, {
+            where: {
+              careUnit: { id: careUnitId },
+              user: { id: userId },
+              isActive: true,
+            },
+            relations: ['user', 'careUnit'],
+            lock: { mode: 'pessimistic_write' },
+          });
+
+          if (existingRoom) {
+            this.logger.log(`기존 채팅방 찾음: ${existingRoom.id}`);
+            return existingRoom;
+          }
+          // 새 채팅방 생성
+          const room = this.chatRoomRepository.create({
+            user: { id: userId },
+            careUnit: { id: careUnitId },
+            isActive: true,
+          });
+
+          this.logger.log(
+            `새 채팅방 생성: ${room.id}, 관리자: ${adminUser.id}, 사용자: ${userId}, 의료기관: ${careUnitId}`,
+          );
+
+          const savedRoom = await this.chatRoomRepository.save(room);
+          this.logger.log(`채팅방 저장 완료: ${savedRoom.id}`);
+
+          return savedRoom;
         },
-        relations: ['user', 'careUnit'],
-      });
-
-      if (existingRoom) {
-        this.logger.log(`기존 채팅방 찾음: ${existingRoom.id}`);
-        return existingRoom;
-      }
-
-      // 새 채팅방 생성
-      const room = this.chatRoomRepository.create({
-        user: { id: userId },
-        careUnit: { id: careUnitId },
-        isActive: true,
-      });
-
-      this.logger.log(
-        `채팅방 생성: 사용자 ${userId}와 병원 ${careUnitId}(관리자: ${adminUser.id}) 간의 채팅방 생성 시작`,
       );
-
-      const savedRoom = await this.chatRoomRepository.save(room);
-      this.logger.log(`채팅방 저장 완료: ${savedRoom.id}`);
-
-      return savedRoom;
     } catch (error) {
       const err = error as Error;
       this.logger.error(`채팅방 생성 중 오류 발생: ${err.message}`);
