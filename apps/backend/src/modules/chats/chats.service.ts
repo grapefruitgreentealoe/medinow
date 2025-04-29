@@ -5,7 +5,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ChatRoom } from './entities/chat-room.entity';
 import { ChatMessage } from './entities/chat-message.entity';
 import { Socket } from 'socket.io';
@@ -22,8 +22,8 @@ import { RedisService } from '../redis/redis.service';
 export class ChatsService {
   // 온라인 사용자 소켓 매핑
   private readonly userSockets = new Map<string, Set<string>>();
-  // 채팅방 비활성화 시간 (하루 = 1000 * 60 * 60 * 24 밀리초)
-  private readonly CHAT_INACTIVITY_TIMEOUT = 1000 * 60 * 60 * 24;
+  // 채팅방 비활성화 시간 (하루 = 60 * 60 * 24 초)
+  private readonly CHAT_INACTIVITY_TIMEOUT = 60 * 60 * 24;
   // Redis 채널 접두사
   private readonly REDIS_ROOM_CHANNEL = 'chat:room:';
   // Redis 사용자 상태 키 접두사
@@ -500,10 +500,7 @@ export class ChatsService {
             `새 채팅방 생성: ${room.id}, 관리자: ${adminUser.id}, 사용자: ${userId}, 의료기관: ${careUnitId}`,
           );
 
-          const savedRoom = await this.chatRoomRepository.save(room);
-          this.logger.log(`채팅방 저장 완료: ${savedRoom.id}`);
-
-          return savedRoom;
+          return await manager.save(room);
         },
       );
     } catch (error) {
