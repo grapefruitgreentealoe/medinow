@@ -8,8 +8,8 @@ import { CustomLoggerService } from 'src/shared/logger/logger.service';
 
 @Injectable()
 export class CongestionTotalService implements OnModuleInit {
-// export class CongestionTotalService {
-  private readonly CACHE_TTL = 1800; // 30분 (초 단위)
+  // export class CongestionTotalService {
+  private readonly CACHE_TTL = 2400; // 40분 (초 단위)
 
   constructor(
     private readonly redisService: RedisService,
@@ -26,10 +26,9 @@ export class CongestionTotalService implements OnModuleInit {
   }
 
   //1️⃣ 전체 응급실 혼잡도 저장 (30분마다 갱신)
-  @Cron('0 30 01 * * *')
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async updateCongestion(): Promise<void> {
     try {
-  
       const response = await fetch(
         `${this.appConfigService.emergencyCongestionApiUrl}?serviceKey=${this.appConfigService.serviceKey}&pageNo=1&numOfRows=600&_type=json`,
         {
@@ -40,13 +39,9 @@ export class CongestionTotalService implements OnModuleInit {
       );
       const data = await response.json();
 
-  
-
       const congestionData = Array.isArray(data.response.body.items.item)
         ? data.response.body.items.item
         : [data.response.body.items.item];
-
-  
 
       //Redis에 데이터 저장
       for (const item of congestionData) {
@@ -64,7 +59,6 @@ export class CongestionTotalService implements OnModuleInit {
           this.CACHE_TTL,
         );
       }
-  
     } catch (error) {
       this.logger.error('❌ 혼잡도 업데이트 실패:', `${error}`);
     }
