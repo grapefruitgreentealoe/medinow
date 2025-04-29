@@ -15,6 +15,7 @@ import { FilterIcon } from 'lucide-react';
 import { memo } from 'react';
 import { useAtom } from 'jotai';
 import { categoryAtom, openStatusAtom } from '../atoms/filterAtom';
+import { cn } from '@/lib/utils';
 
 export default function FilterMenu() {
   const [category, setCategory] = useAtom(categoryAtom);
@@ -22,7 +23,15 @@ export default function FilterMenu() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="icon" className="bg-primary text-white">
+        <Button
+          variant="outline"
+          size="icon"
+          className={cn(
+            category == '전체' && openStatus == 'false'
+              ? 'bg-white text-black'
+              : 'bg-primary text-white'
+          )}
+        >
           <FilterIcon className="w-5 h-5 " />
         </Button>
       </PopoverTrigger>
