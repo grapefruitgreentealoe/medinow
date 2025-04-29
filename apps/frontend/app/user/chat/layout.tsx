@@ -58,20 +58,20 @@ export default function ChatLayout({
     fetchRooms();
   }, []);
 
+  const fetchSelectedUnit = async (careUnitId: string) => {
+    try {
+      const careUnit = await getCareUnitById(careUnitId);
+      console.log(careUnit);
+      setSelectedUnit(careUnit);
+    } catch (error) {
+      console.error('병원 정보 조회 실패', error);
+      setSelectedUnit(null);
+    }
+  };
   useEffect(() => {
-    const fetchSelectedUnit = async () => {
-      try {
-        if (careUnitId && !id) {
-          const careUnit = await getCareUnitById(careUnitId);
-          setSelectedUnit(careUnit);
-        }
-      } catch (error) {
-        console.error('병원 정보 조회 실패', error);
-        setSelectedUnit(null);
-      }
-    };
-
-    fetchSelectedUnit();
+    if (careUnitId && !id) {
+      fetchSelectedUnit(careUnitId);
+    }
   }, [id, careUnitId]);
 
   const onSelectRoom = ({
@@ -81,6 +81,7 @@ export default function ChatLayout({
     roomId: string;
     selectedUnitId: string;
   }) => {
+    fetchSelectedUnit(selectedUnitId);
     router.push(`/user/chat?id=${roomId}`);
   };
 
@@ -141,7 +142,7 @@ export default function ChatLayout({
           </SheetHeader>
 
           <div className="h-[calc(100%-64px)] overflow-y-auto p-4">
-            {selectedUnit ? (
+            {(id || careUnitId) && selectedUnit ? (
               <HospitalSimpleCard unit={selectedUnit} />
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground">
