@@ -63,7 +63,7 @@ export function CareUnitCard({
           {CATEGORY_LABEL[unit.category]}
         </Badge>
         {unit?.congestion?.congestionLevel && (
-          <span className={congestionClassMap[level]}>혼잡도: {level}</span>
+          <Badge className={congestionClassMap[level]}>혼잡도: {level}</Badge>
         )}
         <Badge className="text-muted-foreground bg-muted">
           {unit.nowOpen ? '운영 중' : '운영 종료'}

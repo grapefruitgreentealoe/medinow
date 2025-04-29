@@ -64,7 +64,7 @@ export function HospitalDetailDialog() {
                     : 'text-green-600'
               )}
             >
-              {unit.congestion.congestionLevel} ({unit.congestion.hvec} 병상)
+              {unit.congestion.congestionLevel} (병상 수: {unit.congestion.hvec})
             </div>
           </div>
         )}
