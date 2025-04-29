@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getCareUnitById } from '@/shared/api';
 import HomePageClient from '@/features/map/ui/HomePage';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 export async function generateMetadata({
   searchParams,
