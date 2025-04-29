@@ -1,14 +1,22 @@
-import type { Metadata } from 'next';
+import type { Metadata, ResolvingMetadata } from 'next';
 import { getCareUnitById } from '@/shared/api';
 import HomePageClient from '@/features/map/ui/HomePage';
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export async function generateMetadata(props: any): Promise<Metadata> {
-  const searchParams = await props.searchParams;
-  const careUnitId = searchParams?.careUnitId;
+
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export async function generateMetadata(
+  { searchParams }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const resolvedSearchParams = await searchParams;
+  const careUnitId = resolvedSearchParams?.careUnitId;
 
   if (careUnitId && typeof careUnitId === 'string') {
     try {
       const unit = await getCareUnitById(careUnitId);
+
       return {
         title: `MediNow - ${unit.name} 주변 의료기관 찾기`,
         description: `${unit.name} 근처의 병원, 약국, 응급실을 쉽게 찾고 소통하세요.`,
@@ -45,6 +53,7 @@ export async function generateMetadata(props: any): Promise<Metadata> {
     description: '내 주변 병원, 약국, 응급실을 쉽게 찾고 소통하세요.',
   };
 }
+
 export default function Page() {
   return <HomePageClient />;
 }
