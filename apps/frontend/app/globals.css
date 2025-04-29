@@ -101,7 +101,7 @@ a {
   --cottoncandy: oklch(88.77% 0.064 226.86);
   --radius: 0.625rem;
 
-  /* ✅ 브랜드톤 적용 */
+  /* 브랜드톤 적용 */
   --background: oklch(98.7% 0.007 90); /* 상아 */
   --foreground: oklch(30% 0.01 250);
 

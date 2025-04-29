@@ -3,17 +3,18 @@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useEffect, useRef } from 'react';
-import type { Message } from '@/features/chat/type';
-import { cn } from '@/lib/utils';
+import type { ChatMessage, Message } from '@/features/chat/type';
 
 interface ChatMessagesProps {
   messages: Message[];
   input: string;
   setInput: (value: string) => void;
   onSendMessage: () => void;
+  isAdmin?: boolean;
 }
 
 export function ChatMessages({
+  isAdmin = false,
   messages,
   input,
   setInput,
@@ -22,37 +23,35 @@ export function ChatMessages({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('inner', messages);
-    // bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={cn(
-              'flex',
-              msg.senderId === 'me' ? 'justify-end' : 'justify-start' // ✅ 나면 오른쪽, 상대면 왼쪽
-            )}
-          >
+        {messages.map((msg) => {
+          const isRight = isAdmin
+            ? msg.sender?.role === 'admin'
+            : msg.sender?.role !== 'admin';
+
+          return (
             <div
-              className={cn(
-                'p-3 rounded-lg max-w-xs',
-                msg.senderId === 'me'
-                  ? 'bg-primary text-primary-foreground' // ✅ 내가 보낸건 파란색 등 강조
-                  : 'bg-muted text-muted-foreground' // 상대방은 회색
-              )}
+              key={msg.id}
+              className={`flex ${isRight ? 'justify-end' : 'justify-start'}`}
             >
-              <div>{msg.content}</div>
-              <div className="text-[10px] text-right mt-1 opacity-60">
-                {new Date(msg.createdAt).toLocaleTimeString()}
+              <div
+                className={`p-3 rounded-lg max-w-xs ${
+                  isRight ? 'bg-primary text-white' : 'bg-muted text-foreground'
+                }`}
+              >
+                <div>{msg.content}</div>
+                <div className="text-[10px] text-right mt-1 opacity-60">
+                  {new Date(msg.createdAt).toLocaleTimeString()}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-
+          );
+        })}
         <div ref={bottomRef} />
       </div>
 

@@ -59,26 +59,6 @@ export default function NearbyCareUnitsMap() {
     OpenStatus: JSON.parse(openFilter) as boolean,
   });
 
-  function drawRadiusCircle(
-    map: kakao.maps.Map,
-    lat: number,
-    lng: number,
-    radius: number
-  ) {
-    if (circleRef.current) circleRef.current.setMap(null);
-    const circle = new kakao.maps.Circle({
-      center: new kakao.maps.LatLng(lat, lng),
-      radius: radius * 111000,
-      strokeWeight: 1,
-      strokeColor: '#6366F1',
-      strokeOpacity: 0.8,
-      fillColor: '#6366F140',
-      fillOpacity: 0.3,
-    });
-    circle.setMap(map);
-    circleRef.current = circle;
-  }
-
   function getDotColor(hvec: number): string {
     if (hvec <= 0) return '#ef4444';
     if (hvec < 10) return '#f97316';
@@ -90,6 +70,19 @@ export default function NearbyCareUnitsMap() {
     store.set(detailSheetOpenAtom, true);
     store.set(detailSheetPageAtom, 'detail');
   }, []);
+
+  function getCategoryColor(category: string) {
+    switch (category) {
+      case 'hospital':
+        return '#3B82F6'; // 파랑
+      case 'pharmacy':
+        return '#10B981'; // 초록
+      case 'emergency':
+        return '#EF4444'; // 빨강
+      default:
+        return '#6B7280'; // 회색
+    }
+  }
 
   function createMarkersWithOverlay({
     map,
@@ -103,11 +96,18 @@ export default function NearbyCareUnitsMap() {
 
     data.forEach((unit, index) => {
       const position = new kakao.maps.LatLng(unit.lat, unit.lng);
-      const iconHtml = getCategoryIconSvg(unit.category);
-      const overlayId = `custom-overlay-${index}`;
+
+      const isOpen = unit.nowOpen;
+      const isEmergency = unit.category === 'emergency';
       const hvec = unit.congestion?.hvec ?? -1;
+
+      const categoryColor = getCategoryColor(unit.category); // 진한 원색
+      const backgroundColor = isOpen ? categoryColor : '#6B7280';
+      const iconHtml = getCategoryIconSvg(unit.category); // 아이콘 선은 항상 흰색
+
+      // hvec 표시 (응급실만)
       const hvecDots =
-        unit.nowOpen && unit.category === 'emergency'
+        isOpen && isEmergency
           ? `<div style="position:absolute;top:-4px;right:-4px;display:flex;gap:1px;">${[
               ...Array(Math.min(Math.max(hvec, 0), 5)),
             ]
@@ -118,11 +118,20 @@ export default function NearbyCareUnitsMap() {
               .join('')}</div>`
           : '';
 
-      const backgroundColor = unit.nowOpen ? '#ffffff' : '#d1d5db';
+      const overlayId = `custom-overlay-${index}`;
 
       const overlay = new kakao.maps.CustomOverlay({
         position,
-        content: `<div id="${overlayId}" style="position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:100%;background:${backgroundColor};border:1px solid #e5e7eb;box-shadow:0 2px 6px rgba(0,0,0,0.08);cursor:pointer;">${iconHtml}${hvecDots}</div>`,
+        content: `
+        <div id="${overlayId}"
+          style="position:relative;width:36px;height:36px;
+          display:flex;align-items:center;justify-content:center;
+          border-radius:100%;background:${backgroundColor};
+          border:1px solid #e5e7eb;
+          box-shadow:0 2px 6px rgba(0,0,0,0.08);
+          cursor:pointer;">
+          ${iconHtml}${hvecDots}
+        </div>`,
         yAnchor: 1,
       });
 
@@ -155,8 +164,10 @@ export default function NearbyCareUnitsMap() {
       const center = new kakao.maps.LatLng(37.5665, 126.978);
       const map = new kakao.maps.Map(mapRef.current!, {
         center,
-        level: level ?? 5,
+        level: level ?? 1,
+        
       });
+
       mapInstance.current = map;
       setIsMapReady(true);
 
@@ -190,9 +201,9 @@ export default function NearbyCareUnitsMap() {
 
   useEffect(() => {
     const fallbackToLocalStorage = () => {
-      const storedLat = localStorage.getItem('user_lat');
-      const storedLng = localStorage.getItem('user_lng');
-      const storedAddress = localStorage.getItem('user_address');
+      const storedLat = sessionStorage.getItem('user_lat');
+      const storedLng = sessionStorage.getItem('user_lng');
+      const storedAddress = sessionStorage.getItem('user_address');
 
       if (storedLat && storedLng) {
         const lat = parseFloat(storedLat);
@@ -218,9 +229,9 @@ export default function NearbyCareUnitsMap() {
 
         convertCoordsToDong(latitude, longitude).then((address) => {
           setLocation(address);
-          localStorage.setItem('user_lat', latitude.toString());
-          localStorage.setItem('user_lng', longitude.toString());
-          localStorage.setItem('user_address', address);
+          sessionStorage.setItem('user_lat', latitude.toString());
+          sessionStorage.setItem('user_lng', longitude.toString());
+          sessionStorage.setItem('user_address', address);
         });
       },
       (err) => {
@@ -232,30 +243,22 @@ export default function NearbyCareUnitsMap() {
 
     return () => clearTimeout(timer);
   }, []);
-
-  // 1. Circle (반경 표시)
-  useEffect(() => {
-    const map = mapInstance.current;
-    if (!isMapReady || !map || lat == null || lng == null) return;
-    drawRadiusCircle(map, lat, lng, radius);
-  }, [isMapReady, lat, lng, radius, data]);
-
-  // 2. 마커 그리기
+  // 1. 마커 그리기
   useEffect(() => {
     const map = mapInstance.current;
     if (!isMapReady || !map || !data) return;
     createMarkersWithOverlay({ map, data });
   }, [isMapReady, data]);
 
-  // 3. bounds 설정
+  // 2. bounds 설정
   useEffect(() => {
     const map = mapInstance.current;
     if (!isMapReady || !map || lat == null || lng == null || isManualZoom)
       return;
     fitMapToBounds(map, lat, lng);
   }, [isMapReady, lat, lng, isManualZoom]);
-  //4. 사용자위치
 
+  //3. 사용자위치
   const currentLocationOverlayRef = useRef<kakao.maps.CustomOverlay | null>(
     null
   );
@@ -299,9 +302,11 @@ export default function NearbyCareUnitsMap() {
     const { lat, lng } = initialLocation;
     setLat(lat);
     setLng(lng);
+    setLevel(1); // 상태 갱신
     mapInstance.current?.setCenter(new kakao.maps.LatLng(lat, lng));
     if (mapInstance.current) {
       fitMapToBounds(mapInstance.current, lat, lng);
+      mapInstance.current?.setLevel(1); // 지도에 적용
     }
     convertCoordsToDong(lat, lng).then(setLocation);
   };
@@ -314,9 +319,9 @@ export default function NearbyCareUnitsMap() {
 
     convertCoordsToDong(lat, lng).then((address) => {
       setLocation(address);
-      localStorage.setItem('user_lat', lat.toString());
-      localStorage.setItem('user_lng', lng.toString());
-      localStorage.setItem('user_address', address);
+      sessionStorage.setItem('user_lat', lat.toString());
+      sessionStorage.setItem('user_lng', lng.toString());
+      sessionStorage.setItem('user_address', address);
     });
 
     if (mapInstance.current) {
@@ -335,7 +340,35 @@ export default function NearbyCareUnitsMap() {
     setLevel(newLevel); // 상태 갱신
     map.setLevel(newLevel); // 지도에 적용
   };
+  const handleSelectAddress = ({
+    name,
+    address,
+    lat,
+    lng,
+  }: {
+    name: string;
+    address: string;
+    lat: string;
+    lng: string;
+  }) => {
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+    setLat(latNum);
+    setLng(lngNum);
+    setInitialLocation({ lat: latNum, lng: lngNum });
+    setLocation(address);
+    setLevel(1);
 
+    // 저장
+    sessionStorage.setItem('user_lat', lat);
+    sessionStorage.setItem('user_lng', lng);
+    sessionStorage.setItem('user_address', address);
+
+    if (mapInstance.current) {
+      mapInstance.current.setCenter(new kakao.maps.LatLng(latNum, lngNum));
+      mapInstance.current.setLevel(1);
+    }
+  };
   return (
     <div>
       <div className="flex justify-between flex-wrap items-center gap-[10px] !m-2 !overscroll-none">
@@ -418,25 +451,7 @@ export default function NearbyCareUnitsMap() {
         subtitle="위치정보가 허용되어 있지 않습니다. 현재 위치를 입력해주세요."
         open={showSearchFallback}
         onClose={() => setShowSearchFallback(false)}
-        onSelect={({ name, address, lat, lng }) => {
-          const latNum = parseFloat(lat);
-          const lngNum = parseFloat(lng);
-          setLat(latNum);
-          setLng(lngNum);
-          setInitialLocation({ lat: latNum, lng: lngNum });
-          setLocation(address);
-
-          // 저장
-          localStorage.setItem('user_lat', lat);
-          localStorage.setItem('user_lng', lng);
-          localStorage.setItem('user_address', address);
-
-          if (mapInstance.current) {
-            mapInstance.current.setCenter(
-              new kakao.maps.LatLng(latNum, lngNum)
-            );
-          }
-        }}
+        onSelect={handleSelectAddress}
       />
 
       <LocationSearchModal

@@ -1,17 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { getReviewById, updateReview } from '@/features/user-review/api';
+import { useParams } from 'next/navigation';
+import { updateReview } from '@/features/user-review/api';
 import { getCareUnitById } from '@/shared/api';
 import { ReviewForm } from '@/features/user-review/ui/ReviewForm';
-import { FormSchema } from '@/features/user-review/schema/reviewSchema';
 import { editReviewAtom } from '@/features/user-review/atoms/editReviewAtom';
-import { createStore, Provider, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { ReviewData, UpdateReviewInput } from '@/features/user-review/type';
 import { toast } from 'sonner';
 import { ROUTES } from '@/shared/constants/routes';
-import { SearchCareUnitForReview } from '@/features/user-review/ui/SearchCareUnitForReview';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function EditReviewPage() {
@@ -37,10 +35,8 @@ export default function EditReviewPage() {
     }
   };
 
-  if (!departments || !id || !reviewAtomData)
-    return <div>잘못된 접근입니다</div>;
-  if (reviewAtomData == null) {
-    return <div>잘못된 접근입니다</div>;
+  if (!departments || !id || !reviewAtomData) {
+    return null;
   }
   const careUnit = {
     name: reviewAtomData.careUnitName,
@@ -70,6 +66,7 @@ export default function EditReviewPage() {
             </div>
 
             <ReviewForm
+              isEditing={true}
               defaultValues={defaultValues}
               onSubmit={handleSubmit}
               careUnit={careUnit}
