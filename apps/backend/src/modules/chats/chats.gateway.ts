@@ -194,8 +194,15 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         user.id,
       );
       client.emit('roomMessages', {
-        messages,
-        roomId: room.id,
+        messages: messages.map((message) => ({
+          id: message.id,
+          content: message.content,
+          senderId: message.sender.id,
+          senderName: message.sender.userProfile?.nickname || 'Unknown',
+          isAdmin: message.sender.role === UserRole.ADMIN,
+          timestamp: message.createdAt,
+          isRead: message.isRead,
+        })),
       });
       this.logger.log(
         `채팅방 ${room.id}의 메시지 전송 완료 (${messages.length}개)`,
@@ -228,7 +235,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         id: message.id,
         content: message.content,
         senderId: message.sender.id,
-        senderName: user.userProfile?.name || 'Unknown',
+        senderName: user.userProfile?.nickname || 'Unknown',
         isAdmin: user.role === UserRole.ADMIN,
         timestamp: message.createdAt,
         isRead: message.isRead,
