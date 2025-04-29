@@ -4,6 +4,7 @@ import './globals.css';
 import Header from '@/shared/ui/layout/Header';
 import { Toaster } from '@/components/ui/sonner';
 import Footer from '@/shared/ui/Footer';
+import HeaderWithSocket from '@/shared/ui/layout/HeaderWithSocket';
 
 export const metadata = {
   title: 'MediNow',
@@ -45,7 +46,7 @@ export default async function RootLayout({
         </>
       </head>
       <body className="flex min-h-screen flex-col" suppressHydrationWarning>
-        <Header />
+        <HeaderWithSocket />
         <main className="flex-1 !pt-[61px]">{children}</main>
         <Footer />
         <Toaster position="bottom-center" duration={1000} />
