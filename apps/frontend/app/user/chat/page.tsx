@@ -29,6 +29,7 @@ export default function ChatPage() {
   const handleRoomResolved = useCallback((data: { roomId: string }) => {
     roomIdRef.current = data.roomId;
     setIsRoomReady(true);
+    router.push(`/user/chat?id=${data.roomId}`);
   }, []);
 
   /** 방 전체 메시지 받아서 저장 */
