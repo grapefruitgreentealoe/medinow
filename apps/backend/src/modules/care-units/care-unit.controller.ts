@@ -9,7 +9,6 @@ import {
   Body,
 } from '@nestjs/common';
 import { CareUnitService } from './services/care-unit.service';
-import { ResponseCareUnitDto } from './dto/response-care-unit.dto';
 import {
   ApiBody,
   ApiOperation,
@@ -426,7 +425,7 @@ export class CareUnitController {
     type: CareUnit,
   })
   async getCareUnitDetail(@Param('id') id: string) {
-    return this.careUnitService.getCareUnitDetailWithDepartment(id);
+    return this.careUnitService.getCareUnitDetailById(id);
   }
 
   @Get('check-now-open/:id')

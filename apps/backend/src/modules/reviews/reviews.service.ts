@@ -14,6 +14,11 @@ import { Department } from '../departments/entities/department.entity';
 import { CareUnit } from '../care-units/entities/care-unit.entity';
 import { DepartmentsService } from '../departments/departments.service';
 import { CareUnitService } from '../care-units/services/care-unit.service';
+import {
+  ResponseReviewDto,
+  ResponseReviewsDto,
+} from './dto/response-review.dto';
+
 @Injectable()
 export class ReviewsService {
   constructor(
@@ -24,7 +29,10 @@ export class ReviewsService {
     private departmentsService: DepartmentsService,
   ) {}
 
-  async createReview(createReviewDto: CreateReviewDto, user: User) {
+  async createReview(
+    createReviewDto: CreateReviewDto,
+    user: User,
+  ): Promise<ResponseReviewDto> {
     const findUser = await this.usersService.findUserById(user.id);
 
     if (!findUser) {
@@ -78,9 +86,14 @@ export class ReviewsService {
       thankMessage: review.thankMessage,
       rating: review.rating,
       isPublic: review.isPublic,
+      careUnitId: review.careUnit ? review.careUnit.id : null,
       careUnitName: review.careUnit ? review.careUnit.name : null,
+      departmentId: review.department ? review.department.id : null,
       departmentName: review.department ? review.department.name : null,
       createdAt: review.createdAt,
+      userId: review.user?.id,
+      author: review.user?.userProfile?.name,
+      nickname: review.user?.userProfile?.nickname,
     };
   }
 
@@ -88,7 +101,7 @@ export class ReviewsService {
     careUnitId: string,
     page: number = 1,
     limit: number = 10,
-  ) {
+  ): Promise<ResponseReviewsDto> {
     const skip = (page - 1) * limit;
     const [reviews, total] = await this.reviewRepository.findAndCount({
       where: { careUnit: { id: careUnitId } },
@@ -105,7 +118,9 @@ export class ReviewsService {
         thankMessage: review.thankMessage,
         rating: review.rating,
         isPublic: review.isPublic,
+        careUnitId: review.careUnit?.id,
         careUnitName: review.careUnit?.name,
+        departmentId: review.department?.id,
         departmentName: review.department?.name,
         createdAt: review.createdAt,
         userId: review.user?.id,
@@ -124,7 +139,7 @@ export class ReviewsService {
     userId: string,
     page: number = 1,
     limit: number = 10,
-  ) {
+  ): Promise<ResponseReviewsDto> {
     const user = await this.usersService.findUserByIdWithRelations(userId);
 
     if (!user) {
@@ -206,7 +221,7 @@ export class ReviewsService {
     }
   }
 
-  async getReviewById(id: string) {
+  async getReviewById(id: string): Promise<ResponseReviewDto> {
     const review = await this.reviewRepository.findOne({
       where: { id },
       relations: ['user', 'careUnit', 'department', 'user.userProfile'],

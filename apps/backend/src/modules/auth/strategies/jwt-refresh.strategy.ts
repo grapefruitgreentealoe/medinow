@@ -51,10 +51,9 @@ export class JwtRefreshStrategy extends PassportStrategy(
       }
 
       return plainToInstance(User, user);
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : '알 수 없는 오류';
-      throw error;
+    } catch (error: any) {
+      const err = error as Error;
+      throw new UnauthorizedException(err.message);
     }
   }
 }

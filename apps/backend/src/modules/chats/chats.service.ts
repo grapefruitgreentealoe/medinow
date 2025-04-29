@@ -511,17 +511,71 @@ export class ChatsService {
   }
 
   // 채팅방 상세 조회
-  async getRoomById(roomId: string): Promise<ChatRoom> {
+  async getRoomById(roomId: string) {
     const room = await this.chatRoomRepository.findOne({
       where: { id: roomId },
-      relations: ['user', 'careUnit'],
+      relations: ['user', 'careUnit', 'messages', 'user.userProfile'],
     });
 
     if (!room) {
       throw new NotFoundException('채팅방을 찾을 수 없습니다');
     }
 
-    return room;
+    return {
+      id: room.id,
+      createdAt: room.createdAt,
+      updatedAt: room.updatedAt,
+      deletedAt: room.deletedAt || null,
+      lastMessageAt: room.lastMessageAt,
+      unreadCount: room.unreadCount,
+      lastReadAt: room.lastReadAt,
+      isActive: room.isActive,
+      messages: room.messages,
+      user: {
+        id: room.user.id,
+        nickName: room.user.userProfile.nickname,
+      },
+      careUnit: {
+        id: room.careUnit.id,
+        name: room.careUnit.name,
+      },
+    };
+  }
+
+  // 채팅방 상세 조회
+  async getRoomByCareUnitId(careUnitId: string, userId: string) {
+    const room = await this.chatRoomRepository.findOne({
+      where: {
+        careUnit: { id: careUnitId },
+        user: { id: userId },
+        isActive: true,
+      },
+      relations: ['user', 'careUnit', 'messages', 'user.userProfile'],
+    });
+
+    if (!room) {
+      return false;
+    }
+
+    return {
+      id: room.id,
+      createdAt: room.createdAt,
+      updatedAt: room.updatedAt,
+      deletedAt: room.deletedAt || null,
+      lastMessageAt: room.lastMessageAt,
+      unreadCount: room.unreadCount,
+      lastReadAt: room.lastReadAt,
+      isActive: room.isActive,
+      messages: room.messages,
+      user: {
+        id: room.user.id,
+        nickName: room.user.userProfile.nickname,
+      },
+      careUnit: {
+        id: room.careUnit.id,
+        name: room.careUnit.name,
+      },
+    };
   }
 
   // 사용자의 모든 채팅방 조회
