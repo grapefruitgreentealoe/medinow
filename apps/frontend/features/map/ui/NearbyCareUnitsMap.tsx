@@ -17,9 +17,10 @@ import CareUnitSheet from './CareUnitSheet';
 import FilterMenu from './FilterMenu';
 import { ListIcon } from 'lucide-react';
 import LocationSearchModal from '@/shared/ui/LocationSearchModal';
-import { CareUnit } from '../../../shared/type';
+import { CareUnit, CongestionLevel } from '../../../shared/type';
 import { useSearchParams } from 'next/navigation';
 import { getCareUnitById } from '@/shared/api';
+import { congestionClassMap } from '@/shared/constants/const';
 
 const store = getDefaultStore();
 
@@ -115,7 +116,8 @@ export default function NearbyCareUnitsMap() {
       case 'pharmacy':
         return '#10B981'; // 초록
       case 'emergency':
-        return '#EF4444'; // 빨강
+        return '#F77D8A'; // 옅은 파스텔 분홍색
+
       default:
         return '#6B7280'; // 회색
     }
@@ -137,23 +139,17 @@ export default function NearbyCareUnitsMap() {
       const isOpen = unit.nowOpen;
       const isEmergency = unit.category === 'emergency';
       const hvec = unit.congestion?.hvec ?? -1;
+      const level: CongestionLevel = unit.congestion?.level ?? 'LOW';
 
       const categoryColor = getCategoryColor(unit.category); // 진한 원색
       const backgroundColor = isOpen ? categoryColor : '#6B7280';
       const iconHtml = getCategoryIconSvg(unit.category); // 아이콘 선은 항상 흰색
 
       // hvec 표시 (응급실만)
-      const hvecDots =
-        isOpen && isEmergency
-          ? `<div style="position:absolute;top:-4px;right:-4px;display:flex;gap:1px;">${[
-              ...Array(Math.min(Math.max(hvec, 0), 5)),
-            ]
-              .map(
-                () =>
-                  `<span style="color:${getDotColor(hvec)};font-size:8px;">●</span>`
-              )
-              .join('')}</div>`
-          : '';
+      const hvecDots = isEmergency
+        ? `<div style="position:absolute;top:-4px;right:-4px;display:flex;gap:1px;">${`<span style="color:${getDotColor(hvec)};font-size:12px;"
+              className="${congestionClassMap[level]}">●</span>`}</div>`
+        : '';
 
       const overlayId = `custom-overlay-${index}`;
 
