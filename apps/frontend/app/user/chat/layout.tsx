@@ -8,11 +8,7 @@ import { RoomInfo } from '@/features/chat/type';
 import { getChatRooms } from '@/features/chat/api';
 import { getCareUnitById } from '@/shared/api';
 import { CareUnit } from '@/shared/type';
-import {
-  ArrowBigLeftDashIcon,
-  ArrowBigLeftIcon,
-  ChevronLeft,
-} from 'lucide-react';
+import { SearchIcon } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -105,7 +101,13 @@ export default function ChatLayout({
 
       {/* 가운데 - 채팅 메시지 */}
       <div className={cn('w-2/4 border-r', 'max-[1624px]:w-2/3')}>
-        {children}
+        {id ? (
+          <div key={id} className="h-full !p-[20px]">
+            {children}
+          </div>
+        ) : (
+          <div className="h-full !p-[20px]">{children}</div>
+        )}
       </div>
 
       {/* 오른쪽 - 병원 정보 */}
@@ -125,10 +127,10 @@ export default function ChatLayout({
         <SheetTrigger asChild>
           <Button
             variant="ghost"
-            className="absolute top-4 right-4 z-50 border rounded-full p-2 shadow-md opacity-70 hover:opacity-100  min-[1624px]:hidden"
+            className="absolute top-4 right-4 z-50 border p-2 shadow-md opacity-70 hover:opacity-100  min-[1624px]:hidden"
             onClick={() => setOpenSheet(true)}
           >
-            <ArrowBigLeftDashIcon /> 기관 정보 보기
+            <SearchIcon /> 기관 정보 보기
           </Button>
         </SheetTrigger>
 
