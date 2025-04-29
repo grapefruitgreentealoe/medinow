@@ -18,6 +18,8 @@ import FilterMenu from './FilterMenu';
 import { ListIcon } from 'lucide-react';
 import LocationSearchModal from '@/shared/ui/LocationSearchModal';
 import { CareUnit } from '../../../shared/type';
+import { useSearchParams } from 'next/navigation';
+import { getCareUnitById } from '@/shared/api';
 
 const store = getDefaultStore();
 
@@ -50,6 +52,41 @@ export default function NearbyCareUnitsMap() {
   const debouncedLevel = useDebounce(level, 300);
   const debouncedLat = useDebounce(roundedLat, 300);
   const debouncedLng = useDebounce(roundedLng, 300);
+
+  const searchParams = useSearchParams();
+  const careUnitId = searchParams.get('careUnitId');
+
+  const setSelectedCareUnit = useSetAtom(selectedCareUnitAtom);
+  const setSheetOpen = useSetAtom(detailSheetOpenAtom);
+  const setSheetPage = useSetAtom(detailSheetPageAtom);
+  useEffect(() => {
+    if (!careUnitId) return;
+
+    const fetchAndOpen = async () => {
+      try {
+        const unit = await getCareUnitById(careUnitId);
+        setSelectedCareUnit(unit);
+        setLat(unit.lat);
+        setLng(unit.lng);
+        setInitialLocation({ lat: unit.lat, lng: unit.lng });
+        setLevel(1);
+        setIsManualZoom(false);
+        mapInstance.current?.setLevel(1);
+        mapInstance.current?.setCenter(
+          new kakao.maps.LatLng(unit.lat, unit.lng)
+        );
+
+        // 2. 시트 열기
+        setSelectedCareUnit(unit);
+        setSheetOpen(true);
+        setSheetPage('detail');
+      } catch (e) {
+        console.error('careUnitId로 병원 조회 실패', e);
+      }
+    };
+
+    fetchAndOpen();
+  }, [careUnitId]);
 
   const { data = [] } = useCareUnitsQuery({
     lat: debouncedLat,
