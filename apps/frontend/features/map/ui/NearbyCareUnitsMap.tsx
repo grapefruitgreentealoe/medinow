@@ -351,9 +351,9 @@ export default function NearbyCareUnitsMap() {
 
     convertCoordsToDong(lat, lng).then((address) => {
       setLocation(address);
-      sessionStorage.setItem('user_lat', lat.toString());
-      sessionStorage.setItem('user_lng', lng.toString());
-      sessionStorage.setItem('user_address', address);
+
+      setLevel(1);
+      mapInstance.current?.setLevel(1);
     });
 
     if (mapInstance.current) {
