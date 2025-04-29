@@ -20,6 +20,7 @@ async function bootstrap() {
       'https://localhost:3001',
       'http://localhost:3001',
       'https://medinow.co.kr',
+      'https://www.medinow.co.kr',
     ],
     credentials: true,
     allowedHeaders: ['content-type', 'Authorization', 'cookies', 'set-cookie'],
