@@ -22,7 +22,7 @@ async function bootstrap() {
       'https://kdt-node-2-team02.elicecoding.com',
     ],
     credentials: true,
-    allowedHeaders: ['content-type', 'Authorization'],
+    allowedHeaders: ['content-type', 'Authorization', 'cookies', 'set-cookie'],
   };
 
   // Use Cookie Parser

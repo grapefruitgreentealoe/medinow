@@ -30,9 +30,7 @@ export function ChatMessages({
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {messages.map((msg) => {
-          const isRight = isAdmin
-            ? msg.sender?.role === 'admin'
-            : msg.sender?.role !== 'admin';
+          const isRight = isAdmin ? msg.isAdmin : !msg.isAdmin;
 
           return (
             <div
@@ -46,7 +44,7 @@ export function ChatMessages({
               >
                 <div>{msg.content}</div>
                 <div className="text-[10px] text-right mt-1 opacity-60">
-                  {new Date(msg.createdAt).toLocaleTimeString()}
+                  {new Date(msg.timestamp).toLocaleTimeString()}
                 </div>
               </div>
             </div>
