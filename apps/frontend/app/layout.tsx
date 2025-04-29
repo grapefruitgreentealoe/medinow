@@ -47,9 +47,7 @@ export default async function RootLayout({
       <body className="flex min-h-screen flex-col" suppressHydrationWarning>
         <Header />
         <main className="flex-1 !pt-[61px]">{children}</main>
-
         <Footer />
-
         <Toaster position="bottom-center" duration={1000} />
       </body>
     </html>
