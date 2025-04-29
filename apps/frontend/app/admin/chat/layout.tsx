@@ -93,7 +93,15 @@ export default function ChatLayout({
         )}
       </div>
 
-      <div className="w-2/3 flex flex-col">{children}</div>
+      <div className="w-2/3 flex flex-col">
+        {id ? (
+          <div className="h-full !p-[20px]" key={id}>
+            {children}
+          </div>
+        ) : (
+          children
+        )}
+      </div>
     </div>
   );
 }
