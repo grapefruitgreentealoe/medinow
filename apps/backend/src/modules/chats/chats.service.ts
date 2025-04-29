@@ -553,27 +553,23 @@ export class ChatsService {
       relations: ['user', 'careUnit', 'messages', 'user.userProfile'],
     });
 
-    if (!room) {
-      throw new NotFoundException('채팅방을 찾을 수 없습니다');
-    }
-
     return {
-      id: room.id,
-      createdAt: room.createdAt,
-      updatedAt: room.updatedAt,
-      deletedAt: room.deletedAt || null,
-      lastMessageAt: room.lastMessageAt,
-      unreadCount: room.unreadCount,
-      lastReadAt: room.lastReadAt,
-      isActive: room.isActive,
-      messages: room.messages,
+      id: room?.id,
+      createdAt: room?.createdAt,
+      updatedAt: room?.updatedAt,
+      deletedAt: room?.deletedAt || null,
+      lastMessageAt: room?.lastMessageAt,
+      unreadCount: room?.unreadCount,
+      lastReadAt: room?.lastReadAt,
+      isActive: room?.isActive,
+      messages: room?.messages,
       user: {
-        id: room.user.id,
-        nickName: room.user.userProfile.nickname,
+        id: room?.user?.id,
+        nickName: room?.user?.userProfile?.nickname,
       },
       careUnit: {
-        id: room.careUnit.id,
-        name: room.careUnit.name,
+        id: room?.careUnit?.id,
+        name: room?.careUnit?.name,
       },
     };
   }
