@@ -1,5 +1,5 @@
 import axiosInstance from '@/lib/axios';
-import { CareUnit } from '../../shared/type';
+import { CareUnit, User } from '@/shared/type';
 
 export interface ChatRoom {
   id: string;
@@ -10,16 +10,7 @@ export interface ChatRoom {
   unreadCount: number;
   lastReadAt: string | null;
   isActive: boolean;
-  user: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    deletedAt: string | null;
-    email: string;
-    password: string;
-    role: 'user' | 'admin';
-    refreshToken: string;
-  };
+  user: User;
   careUnit: CareUnit;
 }
 

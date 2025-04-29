@@ -33,11 +33,13 @@ import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { useState } from 'react';
 
 export function ReviewForm({
+  isEditing = false,
   defaultValues,
   onSubmit,
   careUnit: careUnitProp,
   departments: departmentsProp,
 }: {
+  isEditing?: boolean;
   defaultValues?: Partial<FormSchema>;
   onSubmit: (data: any) => void;
   careUnit?: { name: string; address: string };
@@ -83,7 +85,9 @@ export function ReviewForm({
           <p className="text-xs text-muted-foreground">리뷰 대상 의료기관</p>
           <h3 className="text-base font-bold">{careUnit?.name}</h3>
           <p className="text-sm text-muted-foreground">{careUnit?.address}</p>
-          <Button onClick={onClickReChoiceButton}>다시 선택</Button>
+          {!isEditing ? (
+            <Button onClick={onClickReChoiceButton}>다시 선택</Button>
+          ) : null}
         </CardContent>
       </Card>
 
