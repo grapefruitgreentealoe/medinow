@@ -513,7 +513,7 @@ export class ChatsService {
   // 채팅방 상세 조회
   async getRoomById(roomId: string) {
     const room = await this.chatRoomRepository.findOne({
-      where: { id: roomId },
+      where: { id: roomId, isActive: true },
       relations: ['user', 'careUnit', 'messages', 'user.userProfile'],
     });
 
@@ -816,6 +816,9 @@ export class ChatsService {
     limit: number = 50,
   ): Promise<ChatMessage[]> {
     const room = await this.getRoomById(roomId);
+    if (!room) {
+      throw new NotFoundException('채팅방을 찾을 수 없습니다');
+    }
 
     return this.chatMessageRepository.find({
       where: { room: { id: roomId } },

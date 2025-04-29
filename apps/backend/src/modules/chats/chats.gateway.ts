@@ -18,7 +18,6 @@ import {
 import { CustomLoggerService } from '../../shared/logger/logger.service';
 import { UserRole } from '../../common/enums/roles.enum';
 import { JoinRoomDto } from './dto/join-room.dto';
-import { ChatRoom } from './entities/chat-room.entity';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
 
 @UseGuards(WsJwtGuard)
@@ -29,6 +28,7 @@ import { WsJwtGuard } from './guards/ws-jwt.guard';
       'https://localhost:3001',
       'http://localhost:3001',
       'https://medinow.co.kr',
+      'https://www.medinow.co.kr',
     ],
   },
   namespace: 'chat',
@@ -136,102 +136,119 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.chatsService.getUserFromSocket(client);
       if (!user) {
         client.emit('error', { message: '인증된 사용자를 찾을 수 없습니다' });
-        return;
-      }
-
-      // 관리자인 경우: roomId로 직접 접근
-      if (user.role === UserRole.ADMIN) {
-        if (!data.roomId) {
-          throw new BadRequestException('관리자는 roomId로 접근해야 합니다');
-        }
-        const room = await this.chatsService.getRoomById(data.roomId);
-        if (!room) {
-          throw new NotFoundException('채팅방을 찾을 수 없습니다');
-        }
-        return;
+        throw new UnauthorizedException('인증된 사용자를 찾을 수 없습니다');
       }
 
       // 사용자인 경우: careUnitId로 접근
       const careUnitId = data.careUnitId;
       const roomId = data.roomId;
 
-      // roomId가 있으면 해당 채팅방으로 접근
-      if (roomId) {
+      if (user.role === UserRole.USER) {
+        if (!roomId) {
+          // roomId가 없으면 새로운 방 생성 시도
+          if (!careUnitId) {
+            throw new BadRequestException('의료기관 ID는 필수입니다');
+          }
+
+          // careUnitId로 채팅방 조회
+          const existingRoom = await this.chatsService.getRoomByCareUnitId(
+            careUnitId,
+            user.id,
+          );
+
+          if (existingRoom) {
+            // 이미 채팅방이 있으면 roomId를 클라이언트에 전송
+            this.logger.log(`채팅방 ${existingRoom.id} 조회 성공`);
+            client.emit('roomCreated', { roomId: existingRoom.id });
+            return;
+          }
+
+          // 채팅방이 없으면 새로 생성
+          const newRoom = await this.chatsService.createRoom(
+            user.id,
+            careUnitId,
+          );
+          client.emit('roomCreated', { roomId: newRoom.id });
+          this.logger.log(`새 채팅방 ${newRoom.id} 생성 성공`);
+          return;
+        }
+
+        // roomId가 있는 경우 기존 채팅방 접근
         const room = await this.chatsService.getRoomById(roomId);
         if (!room) {
           throw new NotFoundException('채팅방을 찾을 수 없습니다');
         }
-        return;
+
+        // 채팅방 접근 권한 확인
+        const hasAccess = await this.chatsService.checkRoomAccess(
+          user.id,
+          room.id,
+        );
+        if (!hasAccess) {
+          throw new UnauthorizedException('채팅방에 접근할 권한이 없습니다');
+        }
+
+        // 채팅방 참여
+        client.join(room.id);
+        this.logger.log(`사용자 ${user.id}가 채팅방 ${room.id}에 참여 완료`);
+
+        // 채팅방 내 사용자가 아닌 경우에만 읽음 처리 수행
+        if (room.user && room.user.id !== user.id) {
+          await this.chatsService.markMessagesAsRead(room.id, user.id);
+          this.logger.log(`채팅방 ${room.id}의 메시지 읽음 처리 완료`);
+        }
+
+        // 채팅 내역 가져오기
+        const messages = await this.chatsService.getRoomMessages(
+          room.id,
+          user.id,
+        );
+        client.emit('roomMessages', {
+          messages: messages.map((message) => ({
+            id: message.id,
+            content: message.content,
+            senderId: message.sender.id,
+            senderName: message.sender.userProfile?.nickname || 'Unknown',
+            isAdmin: message.sender.role === UserRole.ADMIN,
+            timestamp: message.createdAt,
+            isRead: message.isRead,
+          })),
+        });
+        this.logger.log(
+          `채팅방 ${room.id}의 메시지 전송 완료 (${messages.length}개)`,
+        );
+      } else if (user.role === UserRole.ADMIN) {
+        // 관리자의 경우 roomId로 직접 접근
+        if (!roomId) {
+          throw new BadRequestException('채팅방 ID는 필수입니다');
+        }
+
+        const room = await this.chatsService.getRoomById(roomId);
+        if (!room) {
+          throw new NotFoundException('채팅방을 찾을 수 없습니다');
+        }
+
+        // 채팅방 참여
+        client.join(room.id);
+        this.logger.log(`관리자 ${user.id}가 채팅방 ${room.id}에 참여 완료`);
+
+        // 채팅 내역 가져오기
+        const messages = await this.chatsService.getRoomMessages(
+          room.id,
+          user.id,
+        );
+        client.emit('roomMessages', {
+          messages: messages.map((message) => ({
+            id: message.id,
+            content: message.content,
+            senderId: message.sender.id,
+            senderName: message.sender.userProfile?.nickname || 'Unknown',
+            isAdmin: message.sender.role === UserRole.ADMIN,
+            timestamp: message.createdAt,
+            isRead: message.isRead,
+          })),
+        });
       }
-
-      // roomId가 없고 careUnitId도 없으면 에러
-      if (!careUnitId) {
-        throw new BadRequestException('careUnitId 또는 roomId는 필수입니다');
-      }
-
-      // careUnitId로 채팅방 조회
-      const existingRoom = await this.chatsService.getRoomByCareUnitId(
-        careUnitId,
-        user.id,
-      );
-
-      if (existingRoom) {
-        // 이미 채팅방이 있으면 roomId를 클라이언트에 전송
-        this.logger.log(`채팅방 ${existingRoom.id} 조회 성공`);
-        return;
-      }
-
-      // 채팅방이 없으면 새로 생성
-      const newRoom = await this.chatsService.createRoom(user.id, careUnitId);
-      client.emit('roomCreated', { roomId: newRoom.id });
-      this.logger.log(`새 채팅방 ${newRoom.id} 생성 성공`);
-
-      // 채팅방 참여 처리
-      const room = newRoom;
-
-      // 채팅방 접근 권한 확인 - 주의: 매개변수는 (roomId, userId) 순서가 아닌 (userId, roomId) 순서임
-      this.logger.log(`채팅방 ${room.id} 접근 권한 확인 시작`);
-      const hasAccess = await this.chatsService.checkRoomAccess(
-        user.id,
-        room.id,
-      );
-      if (!hasAccess) {
-        throw new UnauthorizedException('채팅방에 접근할 권한이 없습니다');
-      }
-
-      // 채팅방 참여
-      client.join(room.id);
-      this.logger.log(`사용자 ${user.id}가 채팅방 ${room.id}에 참여 완료`);
-
-      // 채팅방 내 사용자가 아닌 경우에만 읽음 처리 수행
-      if (
-        room.user &&
-        room.user.id !== user.id &&
-        room.user.role === UserRole.ADMIN
-      ) {
-        await this.chatsService.markMessagesAsRead(room.id, user.id);
-        this.logger.log(`채팅방 ${room.id}의 메시지 읽음 처리 완료`);
-      }
-
-      // 채팅 내역 가져오기
-      const messages = await this.chatsService.getRoomMessages(
-        room.id,
-        user.id,
-      );
-      client.emit('roomMessages', {
-        messages: messages.map((message) => ({
-          id: message.id,
-          content: message.content,
-          senderId: message.sender.id,
-          senderName: message.sender.userProfile?.nickname || 'Unknown',
-          isAdmin: message.sender.role === UserRole.ADMIN,
-          timestamp: message.createdAt,
-          isRead: message.isRead,
-        })),
-      });
-      this.logger.log(
-        `채팅방 ${room.id}의 메시지 전송 완료 (${messages.length}개)`,
-      );
     } catch (error) {
       const err = error as Error;
       this.logger.error(`채팅방 참여 중 오류: ${err.message}`);
