@@ -94,7 +94,7 @@ export default function Header() {
           className="text-lg font-semibold tracking-tight"
         >
           <span className="text-primary text-2xl flex items-center gap-1">
-            <HeartPulseIcon className="text-accent" /> Medinow
+            <HeartPulseIcon className="text-accent" /> MediNow
           </span>
         </Link>
 

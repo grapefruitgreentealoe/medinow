@@ -126,13 +126,15 @@ export default function ChatLayout({
       <Sheet open={openSheet} onOpenChange={setOpenSheet}>
         {/* 오른쪽 위 버튼 */}
         <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            className="absolute top-4 right-4 z-50 border p-2 shadow-md opacity-70 hover:opacity-100  min-[1624px]:hidden"
-            onClick={() => setOpenSheet(true)}
-          >
-            <SearchIcon /> 기관 정보 보기
-          </Button>
+          {id || careUnitId ? (
+            <Button
+              variant="ghost"
+              className="absolute top-4 right-4 z-50 border p-2 shadow-md opacity-70 hover:opacity-100  min-[1624px]:hidden"
+              onClick={() => setOpenSheet(true)}
+            >
+              <SearchIcon /> 기관 정보 보기
+            </Button>
+          ) : null}
         </SheetTrigger>
 
         {/* 열리는 컨텐츠 */}
