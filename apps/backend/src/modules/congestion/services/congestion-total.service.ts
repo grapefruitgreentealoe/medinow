@@ -60,7 +60,10 @@ export class CongestionTotalService implements OnModuleInit {
         );
       }
     } catch (error) {
-      this.logger.error('❌ 혼잡도 업데이트 실패:', `${error}`);
+      this.logger.error(
+        '❌ 혼잡도 업데이트 실패:',
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 

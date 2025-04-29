@@ -7,5 +7,11 @@ export interface ExtendedCareUnit
   reviewCount: number;
   departments: { id: string; name: string }[] | null;
   averageRating: number;
-  congestion: any | null;
+  congestion: {
+    hvec: number;
+    congestionLevel: string;
+    updatedAt: string;
+    hpid: string;
+    name: string;
+  } | null;
 }
