@@ -2,9 +2,8 @@ import type { Metadata } from 'next';
 import { getCareUnitById } from '@/shared/api';
 import HomePageClient from '@/features/map/ui/HomePage';
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export async function generateMetadata({
-  searchParams,
-}: any): Promise<Metadata> {
+export async function generateMetadata(props: any): Promise<Metadata> {
+  const searchParams = await props.searchParams;
   const careUnitId = searchParams?.careUnitId;
 
   if (careUnitId && typeof careUnitId === 'string') {
