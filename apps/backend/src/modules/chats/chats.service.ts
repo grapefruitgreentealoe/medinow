@@ -554,7 +554,7 @@ export class ChatsService {
     });
 
     if (!room) {
-      throw new NotFoundException('채팅방을 찾을 수 없습니다');
+      return false;
     }
 
     return {

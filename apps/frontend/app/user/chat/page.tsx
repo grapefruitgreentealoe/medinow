@@ -15,9 +15,7 @@ export default function ChatPage() {
   const careUnitId = searchParams.get('careUnitId');
   const router = useRouter();
 
-  const [messagesMap, setMessagesMap] = useState<Map<string, Message[]>>(
-    new Map()
-  );
+  const [messagesMap, setMessagesMap] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isComposing, setIsComposing] = useState(false);
   const [isRoomReady, setIsRoomReady] = useState(false);
@@ -72,35 +70,21 @@ export default function ChatPage() {
   }) => {
     console.log('roomMessages', payload);
 
-    const { messages, roomId: receivedRoomId } = payload;
+    const { messages } = payload;
     const sortedMessages = [...messages].sort(
       (a, b) =>
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
 
-    setMessagesMap((prev) => {
-      const newMap = new Map(prev);
-      newMap.set(receivedRoomId, sortedMessages);
-      return newMap;
-    });
-
-    // 메시지 수신 시에도 상태 동기화
-    if (!roomIdRef.current) {
-      roomIdRef.current = receivedRoomId;
-      setIsRoomReady(true);
-    }
+    console.log('roomMEssage', payload);
+    // roomIdRef.current = receivedRoomId;
+    setMessagesMap(sortedMessages);
   };
 
   const handleNewMessage = (message: Message) => {
     const currentRoomId = roomIdRef.current;
     if (!currentRoomId) return;
-
-    setMessagesMap((prev) => {
-      const newMap = new Map(prev);
-      const existing = newMap.get(currentRoomId) || [];
-      newMap.set(currentRoomId, [...existing, message]);
-      return newMap;
-    });
+    setMessagesMap((o) => [...o, message]);
   };
 
   const handleSendMessage = () => {
@@ -131,10 +115,6 @@ export default function ChatPage() {
     );
   }
 
-  const currentMessages = roomIdRef.current
-    ? messagesMap.get(roomIdRef.current) || []
-    : [];
-
   return (
     <div className="!pt-[40px] h-full">
       <Button
@@ -147,8 +127,9 @@ export default function ChatPage() {
         <ArrowLeftFromLineIcon />
         나가기
       </Button>
+
       <ChatMessages
-        messages={currentMessages}
+        messages={messagesMap}
         input={input}
         setInput={setInput}
         onSendMessage={handleSendMessage}
