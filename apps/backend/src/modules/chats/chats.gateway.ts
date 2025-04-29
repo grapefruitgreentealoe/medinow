@@ -148,7 +148,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (!room) {
           throw new NotFoundException('채팅방을 찾을 수 없습니다');
         }
-        client.emit('foundRoom', { roomId: room.id });
         return;
       }
 
@@ -166,7 +165,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       if (existingRoom) {
         // 이미 채팅방이 있으면 roomId를 클라이언트에 전송
-        client.emit('foundRoom', { roomId: existingRoom.id });
+        this.logger.log(`채팅방 ${existingRoom.id} 조회 성공`);
         return;
       }
 
