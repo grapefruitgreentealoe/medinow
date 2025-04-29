@@ -82,6 +82,7 @@ export default function ChatLayout({
       <div className="w-1/3 border-r">
         {roomList.length > 0 ? (
           <ChatRoomList
+            selectedUnitId={selectedUnit?.id!}
             isAdmin={true}
             rooms={roomList}
             onSelectRoom={onSelectRoom}

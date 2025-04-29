@@ -92,7 +92,11 @@ export default function ChatLayout({
       {/* 왼쪽 - 채팅방 목록 */}
       <div className={cn('w-1/4 border-r', 'max-[1624px]:w-1/3')}>
         {roomList.length > 0 ? (
-          <ChatRoomList rooms={roomList} onSelectRoom={onSelectRoom} />
+          <ChatRoomList
+            selectedUnitId={selectedUnit?.id!}
+            rooms={roomList}
+            onSelectRoom={onSelectRoom}
+          />
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             채팅방이 없습니다
@@ -143,7 +147,7 @@ export default function ChatLayout({
             <SheetTitle>병원 정보</SheetTitle>
           </SheetHeader>
 
-          <div className="h-[calc(100%-64px)] overflow-y-auto p-4">
+          <div className="h-[calc(100%-64px)] overflow-y-hidden p-4">
             {(id || careUnitId) && selectedUnit ? (
               <HospitalSimpleCard unit={selectedUnit} />
             ) : (
