@@ -60,33 +60,35 @@ export default function NearbyCareUnitsMap() {
   const setSelectedCareUnit = useSetAtom(selectedCareUnitAtom);
   const setSheetOpen = useSetAtom(detailSheetOpenAtom);
   const setSheetPage = useSetAtom(detailSheetPageAtom);
-  useEffect(() => {
-    if (!careUnitId) return;
+  const isFetchedRef = useRef(false);
 
-    const fetchAndOpen = async () => {
+  useEffect(() => {
+    if (!careUnitId || isFetchedRef.current) return;
+
+    (async () => {
       try {
         const unit = await getCareUnitById(careUnitId);
-        setSelectedCareUnit(unit);
+
         setLat(unit.lat);
         setLng(unit.lng);
         setInitialLocation({ lat: unit.lat, lng: unit.lng });
         setLevel(1);
         setIsManualZoom(false);
+
         mapInstance.current?.setLevel(1);
         mapInstance.current?.setCenter(
           new kakao.maps.LatLng(unit.lat, unit.lng)
         );
 
-        // 2. 시트 열기
         setSelectedCareUnit(unit);
         setSheetOpen(true);
         setSheetPage('detail');
-      } catch (e) {
-        console.error('careUnitId로 병원 조회 실패', e);
-      }
-    };
 
-    fetchAndOpen();
+        isFetchedRef.current = true;
+      } catch (e) {
+        console.error('careUnitId 병원 정보 가져오기 실패', e);
+      }
+    })();
   }, [careUnitId]);
 
   const { data = [] } = useCareUnitsQuery({
