@@ -32,10 +32,47 @@ export class CareUnitAdminService {
     private readonly appConfigService: AppConfigService,
     private readonly redisService: RedisService,
     private readonly logger: CustomLoggerService,
-  ) {}
+  ) {
+    this.MAX_RETRIES = 3;
+    this.RETRY_DELAY = 5000;
+  }
 
-  @Cron('0 53 22 * * *')
+  private readonly MAX_RETRIES: number;
+  private readonly RETRY_DELAY: number;
+
+  @Cron('0 20 00 * * *')
   async syncCareUnits() {
+    let retryCount = 0;
+    let lastError: Error | null = null;
+
+    while (retryCount < this.MAX_RETRIES) {
+      try {
+        if (retryCount > 0) {
+          await new Promise((resolve) => setTimeout(resolve, this.RETRY_DELAY));
+        }
+
+        const result = await this.executeSyncCareUnits();
+        if (retryCount > 0 && result) {
+          this.logger.log(`🔄 동기화 성공: ${result}`);
+        }
+        return result;
+      } catch (error) {
+        lastError = error as Error;
+        this.logger.error(
+          `❌ 동기화 실패 (시도 ${retryCount + 1}/${this.MAX_RETRIES}):`,
+          lastError.message,
+        );
+        retryCount++;
+      }
+    }
+
+    if (lastError) {
+      this.logger.error(`🔄 최종 동기화 실패: ${lastError.message}`);
+      throw lastError;
+    }
+  }
+
+  private async executeSyncCareUnits() {
     try {
       const url1 = `${this.API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
       const url2 = `${this.API_URL2}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=100000&_type=json`;
@@ -232,22 +269,22 @@ export class CareUnitAdminService {
                 hpId: item.hpid,
                 lat: parseFloat(item.wgs84Lat),
                 lng: parseFloat(item.wgs84Lon),
-                mondayOpen: parseTime(item.dutyTime1s),
-                mondayClose: parseTime(item.dutyTime1c),
-                tuesdayOpen: parseTime(item.dutyTime2s),
-                tuesdayClose: parseTime(item.dutyTime2c),
-                wednesdayOpen: parseTime(item.dutyTime3s),
-                wednesdayClose: parseTime(item.dutyTime3c),
-                thursdayOpen: parseTime(item.dutyTime4s),
-                thursdayClose: parseTime(item.dutyTime4c),
-                fridayOpen: parseTime(item.dutyTime5s),
-                fridayClose: parseTime(item.dutyTime5c),
-                saturdayOpen: parseTime(item.dutyTime6s),
-                saturdayClose: parseTime(item.dutyTime6c),
-                sundayOpen: parseTime(item.dutyTime7s),
-                sundayClose: parseTime(item.dutyTime7c),
-                holidayOpen: parseTime(item.dutyTime8s),
-                holidayClose: parseTime(item.dutyTime8c),
+                mondayOpen: 0,
+                mondayClose: 2400,
+                tuesdayOpen: 0,
+                tuesdayClose: 2400,
+                wednesdayOpen: 0,
+                wednesdayClose: 2400,
+                thursdayOpen: 0,
+                thursdayClose: 2400,
+                fridayOpen: 0,
+                fridayClose: 2400,
+                saturdayOpen: 0,
+                saturdayClose: 2400,
+                sundayOpen: 0,
+                sundayClose: 2400,
+                holidayOpen: 0,
+                holidayClose: 2400,
                 category: CareUnitCategory.EMERGENCY,
               });
               careUnits.push(emergency);
