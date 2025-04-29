@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ChatRoomList } from '@/features/chat/ui/ChatRoomList';
 import { HospitalSimpleCard } from '@/shared/ui/HospitalSimpleCard';
 import { RoomInfo } from '@/features/chat/type';
@@ -21,6 +21,7 @@ export default function ChatLayout({
 
   const id = searchParams.get('id');
   const careUnitId = searchParams.get('careUnitId');
+  const router = useRouter();
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -33,6 +34,7 @@ export default function ChatLayout({
           careUnitName: room.careUnit.name,
           lastMessageAt: room.lastMessageAt,
           unreadCount: room.unreadCount,
+          user: room.user,
         }));
 
         setRoomList(parsedRooms);
@@ -63,13 +65,27 @@ export default function ChatLayout({
     fetchSelectedUnit();
   }, [id, careUnitId]);
 
+  const onSelectRoom = ({
+    roomId,
+    selectedUnitId,
+  }: {
+    roomId: string;
+    selectedUnitId: string;
+  }) => {
+    router.push(`/admin/chat?id=${roomId}`);
+  };
+
   if (loading) return <div>로딩중...</div>;
 
   return (
     <div className="flex h-[calc(100vh-61px)] !overflow-y-hidden">
-      <div className="w-1/4 border-r">
+      <div className="w-1/3 border-r">
         {roomList.length > 0 ? (
-          <ChatRoomList rooms={roomList} onSelectRoom={() => {}} />
+          <ChatRoomList
+            isAdmin={true}
+            rooms={roomList}
+            onSelectRoom={onSelectRoom}
+          />
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             채팅방이 없습니다
@@ -77,17 +93,7 @@ export default function ChatLayout({
         )}
       </div>
 
-      <div className="w-2/4 flex flex-col">{children}</div>
-
-      <div className="w-1/4 border-l">
-        {selectedUnit ? (
-          <HospitalSimpleCard unit={selectedUnit} />
-        ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            병원을 선택하세요
-          </div>
-        )}
-      </div>
+      <div className="w-2/3 flex flex-col">{children}</div>
     </div>
   );
 }

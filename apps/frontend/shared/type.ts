@@ -70,3 +70,15 @@ export interface CareUnit {
 export type CareUnitCategory = 'hospital' | 'pharmacy' | 'emergency';
 
 export type CongestionLevel = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export interface User {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  email: string;
+  password: string;
+  role: 'user' | 'admin';
+  refreshToken: string;
+  nickName: string;
+}

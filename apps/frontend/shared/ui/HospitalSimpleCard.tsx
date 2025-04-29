@@ -52,7 +52,7 @@ export function HospitalSimpleCard({ unit }: HospitalSimpleCardProps) {
         : '병원';
 
   return (
-    <Card className="m-4 p-6 space-y-6 bg-background text-foreground text-sm leading-relaxed">
+    <Card className="!p-6 bg-background text-foreground text-sm leading-relaxed rounded-none border-r-none">
       {/* 병원명 + 버튼들 */}
       <div className="flex justify-between items-start gap-x-3 gap-y-3">
         <div className="flex flex-col items-start justify-start gap-2">

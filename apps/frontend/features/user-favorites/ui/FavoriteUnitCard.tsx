@@ -111,7 +111,7 @@ export function CareUnitCard({
             {unit.isFavorite ? (
               <Star className="text-yellow-500 fill-yellow-500" size={18} />
             ) : (
-              <StarOff size={18} />
+              <Star size={18} />
             )}
           </Button>
 
