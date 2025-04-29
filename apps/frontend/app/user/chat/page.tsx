@@ -61,6 +61,7 @@ export default function ChatPage() {
     );
 
     socket.on('newMessage', (message: Message) => {
+      console.log('message', message);
       setMessagesMap((prev) => {
         const newMap = new Map(prev);
         const existingMessages = newMap.get(message.id) || [];
