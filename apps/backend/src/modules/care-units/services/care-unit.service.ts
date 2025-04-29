@@ -8,7 +8,6 @@ import {
 import { CareUnit } from '../entities/care-unit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, Raw, Like } from 'typeorm';
-import { ResponseCareUnitDto } from '../dto/response-care-unit.dto';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
 import {
   PaginatedResponse,
@@ -59,24 +58,24 @@ export class CareUnitService {
       throw new NotFoundException('조회된 의료기관이 없습니다');
     }
     // 응급실인 경우 혼잡도 데이터도 함께 반환
-    // let congestionData = null;
-    // if (careUnit.category === 'emergency') {
-    //   try {
-    //     congestionData = await this.congestionOneService
-    //       .getCongestion(careUnit.id)
-    //       .catch((error) => {
-    //         this.logger.error(
-    //           `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
-    //         );
-    //         return null;
-    //       });
-    //   } catch (error) {
-    //     const err = error as Error;
-    //     this.logger.error(
-    //       `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
-    //     );
-    //   }
-    // }
+    let congestionData = null;
+    if (careUnit.category === 'emergency') {
+      try {
+        congestionData = await this.congestionOneService
+          .getCongestion(careUnit.id)
+          .catch((error) => {
+            this.logger.error(
+              `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
+            );
+            return null;
+          });
+      } catch (error) {
+        const err = error as Error;
+        this.logger.error(
+          `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
+        );
+      }
+    }
 
     const isOpen = await this.checkNowOpen(careUnit.id);
 
@@ -103,7 +102,7 @@ export class CareUnitService {
       ...restCareUnit,
       nowOpen: isOpen,
       isChatAvailable: !!adminUser,
-      // congestion: congestionData,
+      congestion: congestionData,
       isFavorite: isFavorite,
       averageRating: careUnit.averageRating,
       reviewCount: careUnit.reviews.length || 0,
@@ -307,24 +306,24 @@ export class CareUnitService {
             .catch(() => null);
 
           // 응급실인 경우 혼잡도 데이터도 함께 반환
-          // let congestionData = null;
-          // if (category === 'emergency' || careUnit.category === 'emergency') {
-          //   try {
-          //     congestionData = await this.congestionOneService
-          //       .getCongestion(careUnit.id)
-          //       .catch((error) => {
-          //         this.logger.error(
-          //           `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
-          //         );
-          //         return null;
-          //       });
-          //   } catch (error) {
-          //     const err = error as Error;
-          //     this.logger.error(
-          //       `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
-          //     );
-          //   }
-          // }
+          let congestionData = null;
+          if (category === 'emergency' || careUnit.category === 'emergency') {
+            try {
+              congestionData = await this.congestionOneService
+                .getCongestion(careUnit.id)
+                .catch((error) => {
+                  this.logger.error(
+                    `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
+                  );
+                  return null;
+                });
+            } catch (error) {
+              const err = error as Error;
+              this.logger.error(
+                `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
+              );
+            }
+          }
 
           // 사용자가 제공된 경우 즐겨찾기 정보 추가
           let isFavorite = false;
@@ -353,7 +352,7 @@ export class CareUnitService {
             ...restCareUnit,
             nowOpen: isOpen,
             isChatAvailable: !!adminUser,
-            // congestion: congestionData,
+            congestion: congestionData,
             isFavorite: isFavorite,
             averageRating: careUnit.averageRating,
             reviewCount: careUnit.reviews.length || 0,
