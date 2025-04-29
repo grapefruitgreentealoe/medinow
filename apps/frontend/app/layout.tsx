@@ -43,7 +43,7 @@ export default async function RootLayout({
           />
         </>
       </head>
-      <body className="flex min-h-screen flex-col">
+      <body className="flex min-h-screen flex-col" suppressHydrationWarning>
         <Header />
         <main className="flex-1 !pt-[61px]">{children}</main>
 
