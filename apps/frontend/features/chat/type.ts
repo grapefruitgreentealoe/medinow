@@ -12,14 +12,30 @@ export interface RoomInfo {
 export interface Message {
   id: string;
   content: string;
-  createdAt: string;
-  updatedAt?: string;
-  deletedAt?: string | null;
+  senderId: string;
+  senderName: string;
+  isAdmin: boolean;
+  timestamp: string;
+  isRead: boolean;
+}
+
+export interface RoomMessagesFromServer {
+  id: string;
+  createdAt: string; // 보낸 시간
+  updatedAt: string;
+  deletedAt: string | null;
+  content: string;
   isRead: boolean;
   sender: {
-    role: 'user' | 'admin';
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
+    email: string;
+    password: string;
+    role: 'user' | 'admin'; // ❗ 이걸로 user/admin 구분
+    refreshToken: string;
   };
-  senderId: string;
 }
 
 export interface ChatRoomListProps {
