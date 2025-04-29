@@ -17,7 +17,10 @@ import CareUnitSheet from './CareUnitSheet';
 import FilterMenu from './FilterMenu';
 import { ListIcon } from 'lucide-react';
 import LocationSearchModal from '@/shared/ui/LocationSearchModal';
-import { CareUnit } from '../../../shared/type';
+import { CareUnit, CongestionLevel } from '../../../shared/type';
+import { useSearchParams } from 'next/navigation';
+import { getCareUnitById } from '@/shared/api';
+import { congestionClassMap } from '@/shared/constants/const';
 
 const store = getDefaultStore();
 
@@ -51,6 +54,41 @@ export default function NearbyCareUnitsMap() {
   const debouncedLat = useDebounce(roundedLat, 300);
   const debouncedLng = useDebounce(roundedLng, 300);
 
+  const searchParams = useSearchParams();
+  const careUnitId = searchParams.get('careUnitId');
+
+  const setSelectedCareUnit = useSetAtom(selectedCareUnitAtom);
+  const setSheetOpen = useSetAtom(detailSheetOpenAtom);
+  const setSheetPage = useSetAtom(detailSheetPageAtom);
+  useEffect(() => {
+    if (!careUnitId) return;
+
+    const fetchAndOpen = async () => {
+      try {
+        const unit = await getCareUnitById(careUnitId);
+        setSelectedCareUnit(unit);
+        setLat(unit.lat);
+        setLng(unit.lng);
+        setInitialLocation({ lat: unit.lat, lng: unit.lng });
+        setLevel(1);
+        setIsManualZoom(false);
+        mapInstance.current?.setLevel(1);
+        mapInstance.current?.setCenter(
+          new kakao.maps.LatLng(unit.lat, unit.lng)
+        );
+
+        // 2. 시트 열기
+        setSelectedCareUnit(unit);
+        setSheetOpen(true);
+        setSheetPage('detail');
+      } catch (e) {
+        console.error('careUnitId로 병원 조회 실패', e);
+      }
+    };
+
+    fetchAndOpen();
+  }, [careUnitId]);
+
   const { data = [] } = useCareUnitsQuery({
     lat: debouncedLat,
     lng: debouncedLng,
@@ -78,7 +116,8 @@ export default function NearbyCareUnitsMap() {
       case 'pharmacy':
         return '#10B981'; // 초록
       case 'emergency':
-        return '#EF4444'; // 빨강
+        return '#F77D8A'; // 옅은 파스텔 분홍색
+
       default:
         return '#6B7280'; // 회색
     }
@@ -100,23 +139,17 @@ export default function NearbyCareUnitsMap() {
       const isOpen = unit.nowOpen;
       const isEmergency = unit.category === 'emergency';
       const hvec = unit.congestion?.hvec ?? -1;
+      const level: CongestionLevel = unit.congestion?.level ?? 'LOW';
 
       const categoryColor = getCategoryColor(unit.category); // 진한 원색
       const backgroundColor = isOpen ? categoryColor : '#6B7280';
       const iconHtml = getCategoryIconSvg(unit.category); // 아이콘 선은 항상 흰색
 
       // hvec 표시 (응급실만)
-      const hvecDots =
-        isOpen && isEmergency
-          ? `<div style="position:absolute;top:-4px;right:-4px;display:flex;gap:1px;">${[
-              ...Array(Math.min(Math.max(hvec, 0), 5)),
-            ]
-              .map(
-                () =>
-                  `<span style="color:${getDotColor(hvec)};font-size:8px;">●</span>`
-              )
-              .join('')}</div>`
-          : '';
+      const hvecDots = isEmergency
+        ? `<div style="position:absolute;top:-4px;right:-4px;display:flex;gap:1px;">${`<span style="color:${getDotColor(hvec)};font-size:12px;"
+              className="${congestionClassMap[level]}">●</span>`}</div>`
+        : '';
 
       const overlayId = `custom-overlay-${index}`;
 
@@ -165,7 +198,6 @@ export default function NearbyCareUnitsMap() {
       const map = new kakao.maps.Map(mapRef.current!, {
         center,
         level: level ?? 1,
-        
       });
 
       mapInstance.current = map;
@@ -395,11 +427,8 @@ export default function NearbyCareUnitsMap() {
         </div>
       </div>
 
-      <div className="relative h-[90vh]">
-        <div
-          ref={mapRef}
-          className="w-full h-full rounded-xl bg-gray-100 z-0"
-        />
+      <div className="relative h-[calc(100vh-64px)] !pb-[72px]">
+        <div ref={mapRef} className="w-full h-full  bg-gray-100 z-0" />
         <div className="absolute top-4 right-4 flex flex-col gap-2">
           <Button
             size="icon"

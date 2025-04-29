@@ -80,7 +80,9 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
           {CATEGORY_LABEL[unit.category]}
         </Badge>
         {unit?.congestion?.congestionLevel && (
-          <span className={congestionClassMap[level]}>혼잡도: {level}</span>
+          <Badge className={congestionClassMap[level]}>
+            {unit.congestion.congestionLevel} (병상 수: {unit.congestion.hvec} )
+          </Badge>
         )}
         <Badge className="rounded-xl text-muted-foreground bg-muted border">
           {unit.nowOpen ? '운영 중' : '운영 종료'}
