@@ -9,7 +9,7 @@ type PageProps = {
 export async function generateMetadata({
   searchParams,
 }: PageProps): Promise<Metadata> {
-  const careUnitId = searchParams?.careUnitId;
+  const careUnitId = searchParams?.careUnitId ?? '';
 
   if (careUnitId && typeof careUnitId === 'string') {
     try {
