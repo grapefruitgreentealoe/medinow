@@ -153,8 +153,20 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // 사용자인 경우: careUnitId로 접근
       const careUnitId = data.careUnitId;
+      const roomId = data.roomId;
+
+      // roomId가 있으면 해당 채팅방으로 접근
+      if (roomId) {
+        const room = await this.chatsService.getRoomById(roomId);
+        if (!room) {
+          throw new NotFoundException('채팅방을 찾을 수 없습니다');
+        }
+        return;
+      }
+
+      // roomId가 없고 careUnitId도 없으면 에러
       if (!careUnitId) {
-        throw new BadRequestException('careUnitId는 필수입니다');
+        throw new BadRequestException('careUnitId 또는 roomId는 필수입니다');
       }
 
       // careUnitId로 채팅방 조회
