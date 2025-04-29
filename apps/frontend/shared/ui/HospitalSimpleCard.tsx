@@ -40,7 +40,7 @@ export function HospitalSimpleCard({ unit }: HospitalSimpleCardProps) {
     // 여기서 바로 toggleFavorite API 호출 가능 (필요 시 추가)
   };
 
-  const handleChat = (e: Event) => {
+  const handleChat = (e: React.MouseEvent<HTMLButtonElement>) => {
     // 병원 채팅 연결 로직 (필요 시 추가)
     e.stopPropagation();
     router.push(ROUTES.USER.CHAT(unit.id));
