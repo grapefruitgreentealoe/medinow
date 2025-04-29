@@ -38,16 +38,7 @@ export default function ChatLayout({
     const fetchRooms = async () => {
       try {
         const res = await getChatRooms();
-        const parsedRooms: RoomInfo[] = res.map((room) => ({
-          roomId: room.id,
-          careUnitId: room.careUnit.id,
-          careUnitName: room.careUnit.name,
-          lastMessageAt: room.lastMessageAt,
-          unreadCount: room.unreadCount,
-          user: room.user,
-        }));
-
-        setRoomList(parsedRooms);
+        setRoomList(res);
       } catch (error) {
         console.error('방 목록 불러오기 실패', error);
       } finally {
@@ -61,7 +52,6 @@ export default function ChatLayout({
   const fetchSelectedUnit = async (careUnitId: string) => {
     try {
       const careUnit = await getCareUnitById(careUnitId);
-      console.log(careUnit);
       setSelectedUnit(careUnit);
     } catch (error) {
       console.error('병원 정보 조회 실패', error);
@@ -71,6 +61,11 @@ export default function ChatLayout({
   useEffect(() => {
     if (careUnitId && !id) {
       fetchSelectedUnit(careUnitId);
+    } else if (id) {
+      const selectedRoom = roomList.find((room) => room.id === id);
+      if (selectedRoom) {
+        fetchSelectedUnit(selectedRoom.careUnit.id);
+      }
     }
   }, [id, careUnitId]);
 
@@ -92,7 +87,11 @@ export default function ChatLayout({
       {/* 왼쪽 - 채팅방 목록 */}
       <div className={cn('w-1/4 border-r', 'max-[1624px]:w-1/3')}>
         {roomList.length > 0 ? (
-          <ChatRoomList rooms={roomList} onSelectRoom={onSelectRoom} />
+          <ChatRoomList
+            selectedRoomId={id!}
+            rooms={roomList}
+            onSelectRoom={onSelectRoom}
+          />
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             채팅방이 없습니다
@@ -143,7 +142,7 @@ export default function ChatLayout({
             <SheetTitle>병원 정보</SheetTitle>
           </SheetHeader>
 
-          <div className="h-[calc(100%-64px)] overflow-y-auto p-4">
+          <div className="h-[calc(100%-64px)] overflow-y-hidden p-4">
             {(id || careUnitId) && selectedUnit ? (
               <HospitalSimpleCard unit={selectedUnit} />
             ) : (
