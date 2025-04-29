@@ -12,9 +12,8 @@ export default function ChatPage() {
   const careUnitId = searchParams.get('careUnitId'); // careUnitId
 
   const [roomId, setRoomId] = useState<string | null>(roomIdFromUrl);
-  const [messagesMap, setMessagesMap] = useState<Map<string, Message[]>>(
-    new Map()
-  );
+  const [messagesMap, setMessagesMap] = useState<Message[]>([]);
+
   const [input, setInput] = useState('');
   const [isComposing, setIsComposing] = useState(false); // 한글 조합 중 여부
   const [isRoomReady, setIsRoomReady] = useState(false); // 방 준비 여부
@@ -33,18 +32,14 @@ export default function ChatPage() {
     socket.on(
       'roomMessages',
       (payload: { messages: Message[]; roomId: string }) => {
-        const { messages, roomId: receivedRoomId } = payload;
+        const { messages } = payload;
         console.log('admin roomMessages', messages);
         const sortedMessages = [...messages].sort(
           (a, b) =>
             new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
         );
 
-        setMessagesMap((prev) => {
-          const newMap = new Map(prev);
-          newMap.set(receivedRoomId, sortedMessages);
-          return newMap;
-        });
+        setMessagesMap(sortedMessages);
 
         setIsRoomReady(true);
       }
@@ -53,16 +48,7 @@ export default function ChatPage() {
     socket.on('newMessage', (message: Message) => {
       console.log('newMessage', message);
 
-      setMessagesMap((prev) => {
-        const newMap = new Map(prev);
-        const existingMessages = newMap.get(roomId!) || [];
-        const updatedMessages = [...existingMessages, message].sort(
-          (a, b) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-        );
-        newMap.set(roomId!, updatedMessages);
-        return newMap;
-      });
+      setMessagesMap((o) => [...o, message]);
     });
 
     return () => {
@@ -105,12 +91,10 @@ export default function ChatPage() {
     );
   }
 
-  const currentMessages = messagesMap.get(roomId!) || [];
-
   return (
     <ChatMessages
       isAdmin={true}
-      messages={currentMessages}
+      messages={messagesMap}
       input={input}
       setInput={setInput}
       onSendMessage={handleSendMessage}
