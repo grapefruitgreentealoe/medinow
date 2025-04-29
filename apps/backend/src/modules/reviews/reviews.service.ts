@@ -190,11 +190,9 @@ export class ReviewsService {
           isPublic: review.isPublic,
           careUnitId: review.careUnit?.id,
           careUnitName: review.careUnit?.name,
+
           departmentId: review.department?.id,
-          departmentName: review.department?.name,
-          createdAt: review.createdAt,
           userId: review.user?.id,
-          author: review.user?.userProfile?.name,
           nickname: review.user?.userProfile?.nickname,
         })),
         pagination: {

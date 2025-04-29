@@ -9,10 +9,10 @@ import {
 import { CareUnitService } from '../../care-units/services/care-unit.service';
 import { RedisService } from 'src/modules/redis/redis.service';
 import { CongestionTotalService } from './congestion-total.service';
-
+import { CustomLoggerService } from 'src/shared/logger/logger.service';
 @Injectable()
 export class CongestionOneService {
-  private readonly CACHE_TTL = 600;
+  private readonly CACHE_TTL = 1800; // 30분
 
   constructor(
     private readonly redisService: RedisService,
@@ -20,6 +20,7 @@ export class CongestionOneService {
     @Inject(forwardRef(() => CareUnitService))
     private readonly careUnitService: CareUnitService,
     private readonly congestionTotalService: CongestionTotalService,
+    private readonly logger: CustomLoggerService,
   ) {}
 
   //특정 응급실 혼잡도 조회 (careUnit의 uuid)
@@ -34,7 +35,6 @@ export class CongestionOneService {
       const cacheKey = `congestion:${careUnit.hpId}`;
       const cachedData = await this.redisService.get(cacheKey);
       if (cachedData) {
-        console.log('캐시된 데이터:', cachedData);
         return JSON.parse(cachedData);
       }
       // 캐시된 데이터가 없으면 API 호출하여 새로운 데이터 가져오기
@@ -63,10 +63,11 @@ export class CongestionOneService {
       await this.redisService.set(cacheKey, congestionDataObj, this.CACHE_TTL);
 
       // 동일한 데이터 리턴
-      console.log(congestionDataObj);
+
       return congestionDataObj;
     } catch (error) {
-      console.error('혼잡도 조회 실패:', error);
+      const err = error as Error;
+      this.logger.error('혼잡도 조회 실패:', err.message);
       throw new InternalServerErrorException('혼잡도 조회 실패');
     }
   }
