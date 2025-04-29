@@ -19,7 +19,7 @@ async function bootstrap() {
       'http://localhost:3000',
       'https://localhost:3001',
       'http://localhost:3001',
-      'https://kdt-node-2-team02.elicecoding.com',
+      'https://medinow.co.kr',
     ],
     credentials: true,
     allowedHeaders: ['content-type', 'Authorization', 'cookies', 'set-cookie'],
