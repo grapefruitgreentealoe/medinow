@@ -1,17 +1,25 @@
+import { User } from '@/shared/type';
+
 export interface RoomInfo {
   roomId: string;
   careUnitId: string;
   careUnitName: string;
   lastMessageAt: string | null;
   unreadCount: number;
+  user: User;
 }
 
 export interface Message {
   id: string;
-  senderId: string;
   content: string;
   createdAt: string;
-  roomId: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+  isRead: boolean;
+  sender: {
+    role: 'user' | 'admin';
+  };
+  senderId: string;
 }
 
 export interface ChatRoomListProps {
