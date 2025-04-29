@@ -139,30 +139,44 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
-      const roomId = data.roomId;
-      this.logger.log(`사용자 ${user.id}가 채팅방 ${roomId} 참여 요청!`);
-
-      let room: ChatRoom;
-      if (roomId) {
-        // 채팅방이 ID가 주어진 경우
-        room = await this.chatsService.getRoomById(roomId);
-        this.logger.log(`기존 채팅방 ${roomId} 조회 성공`);
-      } else {
-        // 채팅방 ID가 없는 경우: 새 채팅방 생성
-        const { careUnitId } = data;
-        if (!careUnitId) {
-          throw new BadRequestException('careUnitId는 필수입니다');
+      // 관리자인 경우: roomId로 직접 접근
+      if (user.role === UserRole.ADMIN) {
+        if (!data.roomId) {
+          throw new BadRequestException('관리자는 roomId로 접근해야 합니다');
         }
-        room = await this.chatsService.createRoom(user.id, careUnitId);
-        client.emit('roomCreated', {
-          roomId: room.id,
-        });
-        this.logger.log(`새 채팅방 ${room.id} 생성 성공`);
+        const room = await this.chatsService.getRoomById(data.roomId);
+        if (!room) {
+          throw new NotFoundException('채팅방을 찾을 수 없습니다');
+        }
+        client.emit('foundRoom', { roomId: room.id });
+        return;
       }
 
-      if (!room) {
-        throw new NotFoundException('채팅방을 찾을 수 없습니다');
+      // 사용자인 경우: careUnitId로 접근
+      const careUnitId = data.careUnitId;
+      if (!careUnitId) {
+        throw new BadRequestException('careUnitId는 필수입니다');
       }
+
+      // careUnitId로 채팅방 조회
+      const existingRoom = await this.chatsService.getRoomByCareUnitId(
+        careUnitId,
+        user.id,
+      );
+
+      if (existingRoom) {
+        // 이미 채팅방이 있으면 roomId를 클라이언트에 전송
+        client.emit('foundRoom', { roomId: existingRoom.id });
+        return;
+      }
+
+      // 채팅방이 없으면 새로 생성
+      const newRoom = await this.chatsService.createRoom(user.id, careUnitId);
+      client.emit('roomCreated', { roomId: newRoom.id });
+      this.logger.log(`새 채팅방 ${newRoom.id} 생성 성공`);
+
+      // 채팅방 참여 처리
+      const room = newRoom;
 
       // 채팅방 접근 권한 확인 - 주의: 매개변수는 (roomId, userId) 순서가 아닌 (userId, roomId) 순서임
       this.logger.log(`채팅방 ${room.id} 접근 권한 확인 시작`);
