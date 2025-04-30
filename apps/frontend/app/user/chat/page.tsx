@@ -147,7 +147,7 @@ export default function ChatPage() {
       <Button
         variant="destructive"
         className="absolute top-4 z-50 border p-2 shadow-md opacity-70 hover:opacity-100"
-        onClick={() => router.push(ROUTES.USER.CHAT(''))}
+        onClick={() => router.push(ROUTES.USER.CHAT_LIST)}
       >
         <ArrowLeftFromLineIcon />
         나가기
