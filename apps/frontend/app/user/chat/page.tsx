@@ -143,7 +143,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="!pt-[40px] h-full">
+    <div className="!pt-[100px] h-full overflow-y-hidden">
       <Button
         variant="destructive"
         className="absolute top-4 z-50 border p-2 shadow-md opacity-70 hover:opacity-100"

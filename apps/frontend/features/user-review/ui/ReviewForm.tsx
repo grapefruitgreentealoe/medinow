@@ -52,6 +52,7 @@ export function ReviewForm({
   const [open, setOpen] = useState<boolean>(false);
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
+
     defaultValues: {
       content: '',
       thankMessage: '',

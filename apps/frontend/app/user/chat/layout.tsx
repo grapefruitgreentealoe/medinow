@@ -85,7 +85,12 @@ export default function ChatLayout({
   return (
     <div className="relative flex h-[calc(100vh-61px)] !overflow-y-hidden">
       {/* 왼쪽 - 채팅방 목록 */}
-      <div className={cn('w-1/4 border-r', 'max-[1624px]:w-1/3')}>
+      <div
+        className={cn(
+          'w-1/4 border-r',
+          id ? 'max-[1624px]:hidden' : 'max-[1624px]:w-full'
+        )}
+      >
         {roomList.length > 0 ? (
           <ChatRoomList
             selectedRoomId={id!}
@@ -100,7 +105,12 @@ export default function ChatLayout({
       </div>
 
       {/* 가운데 - 채팅 메시지 */}
-      <div className={cn('w-2/4 border-r', 'max-[1624px]:w-2/3')}>
+      <div
+        className={cn(
+          'w-2/4 border-r',
+          id ? 'max-[1624px]:w-full' : 'max-[1624px]:hidden'
+        )}
+      >
         {id ? (
           <div key={id} className="h-full !p-[20px]">
             {children}
