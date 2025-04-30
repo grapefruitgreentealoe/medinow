@@ -20,11 +20,11 @@ export function HospitalDetailDialog() {
     <ContentDialog
       open={!!unit}
       onClose={() => setSelected(null)}
-      title="병원 상세 정보"
+      title="의료기관 상세 정보"
       hideFooter
     >
       <div className="!space-y-4 text-sm leading-relaxed">
-        {/* 병원명 + 운영 상태 */}
+        {/* 의료기관명 + 운영 상태 */}
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-lg font-bold">{unit.name}</h2>
           <Badge className="bg-muted text-muted-foreground">
@@ -64,7 +64,8 @@ export function HospitalDetailDialog() {
                     : 'text-green-600'
               )}
             >
-              {unit.congestion.congestionLevel} (병상 수: {unit.congestion.hvec})
+              {unit.congestion.congestionLevel} (병상 수: {unit.congestion.hvec}
+              )
             </div>
           </div>
         )}

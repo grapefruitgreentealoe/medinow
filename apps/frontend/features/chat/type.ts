@@ -62,7 +62,7 @@ export interface ChatMessage {
   content: string; // 메시지 본문
   senderId: string; // 보낸 사람 ID
   senderName: string; // 보낸 사람 이름
-  isAdmin: boolean; // 관리자 여부 (true: 병원측, false: 유저)
+  isAdmin: boolean; // 관리자 여부 (true: 의료기관측, false: 유저)
   roomId: string; // 채팅방 ID
   createdAt: string; // 보낸 시간 (ISO 문자열)
   isRead: boolean; // 읽음 여부

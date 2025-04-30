@@ -86,7 +86,7 @@ export default function NearbyCareUnitsMap() {
 
         isFetchedRef.current = true;
       } catch (e) {
-        console.error('careUnitId 병원 정보 가져오기 실패', e);
+        console.error('careUnitId 의료기관 정보 가져오기 실패', e);
       }
     })();
   }, [careUnitId]);

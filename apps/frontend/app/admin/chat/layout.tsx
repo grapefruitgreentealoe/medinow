@@ -8,6 +8,7 @@ import { RoomInfo } from '@/features/chat/type';
 import { getChatRooms } from '@/features/chat/api';
 import { getCareUnitById } from '@/shared/api';
 import { CareUnit } from '@/shared/type';
+import { cn } from '@/lib/utils';
 
 export default function ChatLayout({
   children,
@@ -55,7 +56,12 @@ export default function ChatLayout({
 
   return (
     <div className="flex h-[calc(100vh-61px)] !overflow-y-hidden">
-      <div className="w-1/3 border-r">
+      <div
+        className={cn(
+          'w-1/3 border-r',
+          id ? 'max-[1624px]:hidden' : 'max-[1624px]:w-full'
+        )}
+      >
         {roomList.length > 0 ? (
           <ChatRoomList
             selectedRoomId={selectedRoomId!}
@@ -70,7 +76,12 @@ export default function ChatLayout({
         )}
       </div>
 
-      <div className="w-2/3 flex flex-col">
+      <div
+        className={cn(
+          'w-2/3 flex flex-col',
+          id ? 'max-[1624px]:w-full' : 'max-[1624px]:hidden'
+        )}
+      >
         {id ? (
           <div className="h-full !p-[20px]" key={id}>
             {children}

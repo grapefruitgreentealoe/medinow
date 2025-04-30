@@ -48,7 +48,7 @@ export function useCareUnitsQuery({
         category:
           selectedCategory === '응급실'
             ? 'emergency'
-            : selectedCategory === '병원'
+            : selectedCategory === '의료기관'
               ? 'hospital'
               : selectedCategory === '약국'
                 ? 'pharmacy'

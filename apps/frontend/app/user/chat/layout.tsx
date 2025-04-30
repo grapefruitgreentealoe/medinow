@@ -54,7 +54,7 @@ export default function ChatLayout({
       const careUnit = await getCareUnitById(careUnitId);
       setSelectedUnit(careUnit);
     } catch (error) {
-      console.error('병원 정보 조회 실패', error);
+      console.error('의료기관 정보 조회 실패', error);
       setSelectedUnit(null);
     }
   };
@@ -85,7 +85,12 @@ export default function ChatLayout({
   return (
     <div className="relative flex h-[calc(100vh-61px)] !overflow-y-hidden">
       {/* 왼쪽 - 채팅방 목록 */}
-      <div className={cn('w-1/4 border-r', 'max-[1624px]:w-1/3')}>
+      <div
+        className={cn(
+          'w-1/4 border-r',
+          id ? 'max-[1624px]:hidden' : 'max-[1624px]:w-full'
+        )}
+      >
         {roomList.length > 0 ? (
           <ChatRoomList
             selectedRoomId={id!}
@@ -100,7 +105,12 @@ export default function ChatLayout({
       </div>
 
       {/* 가운데 - 채팅 메시지 */}
-      <div className={cn('w-2/4 border-r', 'max-[1624px]:w-2/3')}>
+      <div
+        className={cn(
+          'w-2/4 border-r',
+          id ? 'max-[1624px]:w-full' : 'max-[1624px]:hidden'
+        )}
+      >
         {id ? (
           <div key={id} className="h-full !p-[20px]">
             {children}
@@ -110,14 +120,14 @@ export default function ChatLayout({
         )}
       </div>
 
-      {/* 오른쪽 - 병원 정보 */}
+      {/* 오른쪽 - 의료기관 정보 */}
 
       <div className="w-1/4 border-l max-[1624px]:hidden overflow-hidden">
         {selectedUnit ? (
           <HospitalSimpleCard unit={selectedUnit} />
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground ">
-            병원을 선택하세요
+            의료기관을 선택하세요
           </div>
         )}
       </div>
@@ -139,7 +149,7 @@ export default function ChatLayout({
         {/* 열리는 컨텐츠 */}
         <SheetContent side="right" className="w-3/4 p-0">
           <SheetHeader className="p-4">
-            <SheetTitle>병원 정보</SheetTitle>
+            <SheetTitle>의료기관 정보</SheetTitle>
           </SheetHeader>
 
           <div className="h-[calc(100%-64px)] overflow-y-hidden p-4">
@@ -147,7 +157,7 @@ export default function ChatLayout({
               <HospitalSimpleCard unit={selectedUnit} />
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground">
-                병원을 선택하세요
+                의료기관을 선택하세요
               </div>
             )}
           </div>

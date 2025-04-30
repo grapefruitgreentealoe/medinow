@@ -65,9 +65,9 @@ export default function FilterMenu() {
               </SelectItem>
               <SelectItem
                 className="border-muted text-sm bg-white hover:bg-muted"
-                value="병원"
+                value="의료기관"
               >
-                병원
+                의료기관
               </SelectItem>
             </SelectContent>
           </Select>
