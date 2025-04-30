@@ -45,10 +45,9 @@ export default function AdminSignupForm() {
   const form = useForm<AdminSignupData & { isCareUnitVerified: boolean }>({
     resolver: zodResolver(adminSignupSchema),
     defaultValues: {
-      email: 'test@clinic.com',
-      password: 'Test1234!',
-      name: '홍길동',
-
+      email: '',
+      password: '',
+      name: '',
       careUnitName: '',
       careUnitAddress: '',
       careUnitCategory: '',
@@ -251,7 +250,7 @@ export default function AdminSignupForm() {
                 <FormControl>
                   <Input
                     type="password"
-                    placeholder="비밀번호 입력"
+                    placeholder="8자 이상,대소문자,숫자,특수문자 포함"
                     {...field}
                   />
                 </FormControl>
