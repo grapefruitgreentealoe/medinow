@@ -80,7 +80,7 @@ export function ReviewForm({
 
   return (
     <div className="!space-y-6 max-w-xl mx-auto py-6">
-      {/* 병원정보 */}
+      {/* 의료기관정보 */}
       <Card className="bg-muted/50 border">
         <CardContent className="!space-y-1">
           <p className="text-xs text-muted-foreground">리뷰 대상 의료기관</p>

@@ -90,7 +90,7 @@ export default function AdminSignupForm() {
       if (exists) {
         setValue('isCareUnitVerified', true, { shouldDirty: true });
       } else {
-        toast.warning('등록되지 않은 병원입니다.');
+        toast.warning('등록되지 않은 의료기관입니다.');
         setValue('isCareUnitVerified', false);
         setValue('careUnitName', '');
         setValue('careUnitAddress', '');
@@ -98,7 +98,7 @@ export default function AdminSignupForm() {
     } catch (e: any) {
       console.log(e);
       if (e.status == 500) {
-        toast.warning('등록되지 않은 병원입니다.');
+        toast.warning('등록되지 않은 의료기관입니다.');
         setValue('isCareUnitVerified', false);
         setValue('careUnitName', '');
         setValue('careUnitAddress', '');
@@ -109,7 +109,7 @@ export default function AdminSignupForm() {
   const onSubmit = async (data: AdminSignupData) => {
     const isCareUnitVerified = form.getValues('isCareUnitVerified');
     if (!isCareUnitVerified) {
-      toast.warning('병원 확인을 완료해주세요.');
+      toast.warning('의료기관 확인을 완료해주세요.');
       return;
     }
 
@@ -154,7 +154,7 @@ export default function AdminSignupForm() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="emergency">응급실</SelectItem>
-                      <SelectItem value="hospital">병원</SelectItem>
+                      <SelectItem value="hospital">의료기관</SelectItem>
                       <SelectItem value="pharmacy">약국</SelectItem>
                     </SelectContent>
                   </Select>
@@ -208,7 +208,7 @@ export default function AdminSignupForm() {
           />
 
           {form.watch('isCareUnitVerified') && (
-            <p className="text-green-600 text-sm">가입 가능한 병원입니다</p>
+            <p className="text-green-600 text-sm">가입 가능한 의료기관입니다</p>
           )}
 
           <input type="hidden" {...form.register('isCareUnitVerified')} />
@@ -271,8 +271,8 @@ export default function AdminSignupForm() {
 
       {hospitalModalOpen ? (
         <LocationSearchModal
-          title="병원 위치 검색"
-          subtitle="병원명을 통해 검색하세요"
+          title="의료기관 위치 검색"
+          subtitle="의료기관명을 통해 검색하세요"
           open={true}
           onClose={() => setHospitalModalOpen(false)}
           onSelect={handleHospitalSelect}

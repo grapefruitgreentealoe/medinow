@@ -61,7 +61,7 @@ export default function EditReviewPage() {
                 리뷰 작성하기
               </h1>
               <p className="text-muted-foreground text-sm">
-                방문하신 병원에 대한 솔직한 후기를 남겨주세요.
+                방문하신 의료기관에 대한 솔직한 후기를 남겨주세요.
               </p>
             </div>
 

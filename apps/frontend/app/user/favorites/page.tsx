@@ -73,7 +73,7 @@ export default function FavoritePage() {
           setConfirmUnit(null);
         }}
         title="즐겨찾기 해제"
-        description={`정말 ${confirmUnit?.name} 병원을 즐겨찾기 해제하시겠어요?`}
+        description={`정말 ${confirmUnit?.name} 의료기관을 즐겨찾기 해제하시겠어요?`}
         confirmText="해제하기"
         cancelText="취소"
         confirmVariant="destructive"

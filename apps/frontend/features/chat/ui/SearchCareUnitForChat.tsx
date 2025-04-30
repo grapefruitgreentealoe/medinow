@@ -41,36 +41,36 @@ export function SearchCareUnitForChat() {
       setSelectedCareUnit(result as CareUnit);
       setModalOpen(false);
 
-      // 병원 선택 완료 → 채팅 페이지 이동
+      // 의료기관 선택 완료 → 채팅 페이지 이동
       router.push(`/user/chat?id=${result.id}`);
     } else {
-      toast.error('병원을 찾을 수 없습니다.');
+      toast.error('의료기관을 찾을 수 없습니다.');
     }
   };
 
   return (
     <div className="!space-y-6 max-w-full mx-auto py-6">
       <div className="">
-        <h2 className="text-lg font-bold">채팅할 병원 선택</h2>
+        <h2 className="text-lg font-bold">채팅할 의료기관 선택</h2>
         <div className="!space-y-1">
-          <label className="text-sm font-medium">병원 카테고리</label>
+          <label className="text-sm font-medium">의료기관 카테고리</label>
           <Select onValueChange={setCategory} value={category}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="카테고리를 선택하세요" />
             </SelectTrigger>
             <SelectContent position="popper">
               <SelectItem value="emergency">응급실</SelectItem>
-              <SelectItem value="hospital">병원</SelectItem>
+              <SelectItem value="hospital">의료기관</SelectItem>
               <SelectItem value="pharmacy">약국</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="!space-y-1">
-          <label className="text-sm font-medium">병원명 검색</label>
+          <label className="text-sm font-medium">의료기관명 검색</label>
           <Input
             value={selectedCareUnit?.name || ''}
-            placeholder="병원명을 선택하세요"
+            placeholder="의료기관명을 선택하세요"
             readOnly
             onClick={() => {
               if (category) {
@@ -85,7 +85,7 @@ export function SearchCareUnitForChat() {
         {selectedCareUnit && (
           <Card className="bg-muted/50 border">
             <CardContent className="!space-y-1">
-              <p className="text-xs text-muted-foreground">선택된 병원</p>
+              <p className="text-xs text-muted-foreground">선택된 의료기관</p>
               <h3 className="text-base font-bold">{selectedCareUnit.name}</h3>
               <p className="text-sm text-muted-foreground">
                 {selectedCareUnit.address}
@@ -97,8 +97,8 @@ export function SearchCareUnitForChat() {
 
       {modalOpen && (
         <LocationSearchModal
-          title="병원 위치 검색"
-          subtitle="병원명을 입력하세요"
+          title="의료기관 위치 검색"
+          subtitle="의료기관명을 입력하세요"
           open={true}
           onClose={() => setModalOpen(false)}
           onSelect={handleSelect}
