@@ -28,12 +28,6 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, 'jwt') {
             return request.cookies.accessToken;
           }
 
-          // Authorization 헤더에서 토큰 추출
-          const authHeader = request?.headers?.authorization;
-          if (authHeader && authHeader.startsWith('Bearer ')) {
-            return authHeader.substring(7);
-          }
-
           // WebSocket 연결에서 토큰 추출
           if ((request as any)?.handshake?.query?.token) {
             try {

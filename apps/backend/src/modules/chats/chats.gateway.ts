@@ -132,13 +132,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: JoinRoomDto,
   ): Promise<void> {
     try {
-      console.log('joinRoom 호출');
-      const user = await this.chatsService.getUserFromSocket(client);
-      if (!user) {
-        client.emit('error', { message: '인증된 사용자를 찾을 수 없습니다' });
-        throw new UnauthorizedException('인증된 사용자를 찾을 수 없습니다');
-      }
-
+      const user = client.data.user;
       // 사용자인 경우: careUnitId로 접근
       const careUnitId = data.careUnitId;
       const roomId = data.roomId;
