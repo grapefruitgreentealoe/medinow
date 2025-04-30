@@ -23,21 +23,19 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          // 쿠키에서 토큰 추출
+          // 1. 쿠키
           if (request?.cookies?.accessToken) {
             return request.cookies.accessToken;
           }
 
-          // WebSocket 연결에서 토큰 추출
+          // 2. WebSocket handshake - auth 방식 (Socket.IO 권장)
+          if ((request as any)?.handshake?.auth?.token) {
+            return (request as any).handshake.auth.token;
+          }
+
+          // 3. WebSocket handshake - query 방식 (비권장)
           if ((request as any)?.handshake?.query?.token) {
-            try {
-              const socketToken = JSON.parse(
-                (request as any).handshake.query.token as string,
-              );
-              return socketToken?.accessToken || null;
-            } catch (error) {
-              return null;
-            }
+            return (request as any).handshake.query.token;
           }
 
           return null;
