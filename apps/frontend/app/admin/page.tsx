@@ -75,11 +75,11 @@ export default function AdminUserProfilePage() {
 
     getReviews({ pageParam: 1, limit: 1 }).then((res) => {
       const reviews = res.reviews;
-      setRecentReview(reviews?.[0] ?? []);
+      setRecentReview(reviews?.[0] ?? null);
     });
   }, []);
 
-  if (!user || !recentReveiw) {
+  if (!user) {
     return (
       <div className="space-y-4 flex flex-col w-full gap-[20px] !p-[20px] !m-[20px]">
         <Skeleton className="h-[60px] w-full" />
@@ -174,17 +174,27 @@ export default function AdminUserProfilePage() {
 
       <div className="!m-[20px] !mx-auto">
         <Label className="text-xl text-bold !mb-3">최근 리뷰</Label>
-        <Card>
-          <CardContent>
-            <ReviewBody
-              nickname={recentReveiw.nickname}
-              rating={recentReveiw.rating}
-              content={recentReveiw.content}
-              createdAt={recentReveiw.createdAt}
-              thankMessage={recentReveiw.thankMessage}
-            />
-          </CardContent>
-        </Card>
+        {recentReveiw ? (
+          <Card>
+            <CardContent>
+              <ReviewBody
+                nickname={recentReveiw.nickname}
+                rating={recentReveiw.rating}
+                content={recentReveiw.content}
+                createdAt={recentReveiw.createdAt}
+                thankMessage={recentReveiw.thankMessage}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent>
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                리뷰가 없습니다
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
       {/* Confirm Modal */}
       <ConfirmDialog

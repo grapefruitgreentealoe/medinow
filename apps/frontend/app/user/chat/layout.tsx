@@ -112,7 +112,7 @@ export default function ChatLayout({
 
       {/* 오른쪽 - 병원 정보 */}
 
-      <div className="w-1/4 border-l max-[1624px]:hidden">
+      <div className="w-1/4 border-l max-[1624px]:hidden overflow-hidden">
         {selectedUnit ? (
           <HospitalSimpleCard unit={selectedUnit} />
         ) : (
