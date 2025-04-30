@@ -342,7 +342,10 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       };
 
       // 상대방에게 읽음 상태 업데이트 알림
-      this.server.to(data.roomId).emit('messagesRead', readStatus);
+      this.server.to(data.roomId).emit('messagesRead', {
+        roomId: data.roomId,
+        readStatus,
+      });
 
       // 상대방이 온라인 상태인지 확인
       const isRecipientOnline =
