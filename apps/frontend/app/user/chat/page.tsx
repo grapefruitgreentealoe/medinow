@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { socket } from '@/lib/socket';
 import { ChatMessages } from '@/features/chat/ui/ChatMessages';
 import { Message } from '@/features/chat/type';
 import { Button } from '@/components/ui/button';
-import { ArrowBigLeftDashIcon, ArrowLeftFromLineIcon } from 'lucide-react';
+import { ArrowLeftFromLineIcon } from 'lucide-react';
 import { ROUTES } from '@/shared/constants/routes';
 
 export default function ChatPage() {
@@ -15,32 +15,80 @@ export default function ChatPage() {
   const careUnitId = searchParams.get('careUnitId');
   const router = useRouter();
 
-  const [messagesMap, setMessagesMap] = useState<Message[]>([]);
+  const [messagesMap, setMessagesMap] = useState<Map<string, Message[]>>(
+    new Map()
+  );
   const [input, setInput] = useState('');
   const [isComposing, setIsComposing] = useState(false);
   const [isRoomReady, setIsRoomReady] = useState(false);
 
   const roomIdRef = useRef<string | null>(null);
-  const hasConnectedRef = useRef(false);
   const hasJoinedRef = useRef(false);
 
-  useEffect(() => {
-    if (!socket.connected && !hasConnectedRef.current) {
-      socket.connect();
-      hasConnectedRef.current = true;
-    }
-
-    socket.on('roomCreated', handleRoomResolved);
-    socket.on('roomMessages', handleRoomMessages);
-    socket.on('newMessage', handleNewMessage);
-
-    return () => {
-      socket.off('roomCreated', handleRoomResolved);
-      socket.off('roomMessages', handleRoomMessages);
-      socket.off('newMessage', handleNewMessage);
-    };
+  /** 방 입장 후 받은 roomId 저장 */
+  const handleRoomResolved = useCallback((data: { roomId: string }) => {
+    roomIdRef.current = data.roomId;
+    setIsRoomReady(true);
+    router.push(`/user/chat?id=${data.roomId}`);
   }, []);
 
+  /** 방 전체 메시지 받아서 저장 */
+  const handleRoomMessages = useCallback(
+    (payload: { messages: Message[]; roomId: string }) => {
+      console.log('handleRoomMessages', payload);
+      const { roomId, messages } = payload;
+      const sorted = [...messages].sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+
+      setMessagesMap((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(roomId, sorted);
+        return newMap;
+      });
+    },
+    []
+  );
+
+  /** 새로운 단일 메시지 추가 */
+  const handleNewMessage = useCallback(
+    (message: Message & { roomId: string }) => {
+      if (!roomIdRef.current || message.roomId !== roomIdRef.current) {
+        console.warn(`다른 방(${message.roomId}) 메시지 무시`);
+        return;
+      }
+
+      setMessagesMap((prev) => {
+        const newMap = new Map(prev);
+        const currentMessages = newMap.get(message.roomId) || [];
+        newMap.set(message.roomId, [...currentMessages, message]);
+        return newMap;
+      });
+    },
+    []
+  );
+
+  useEffect(() => {
+    // emit보다 항상 먼저 등록되도록 보장
+    socket
+      .off('roomMessages', handleRoomMessages)
+      .on('roomMessages', handleRoomMessages);
+    socket
+      .off('newMessage', handleNewMessage)
+      .on('newMessage', handleNewMessage);
+    socket
+      .off('roomCreated', handleRoomResolved)
+      .on('roomCreated', handleRoomResolved);
+
+    return () => {
+      socket.off('roomMessages', handleRoomMessages);
+      socket.off('newMessage', handleNewMessage);
+      socket.off('roomCreated', handleRoomResolved);
+    };
+  }, [handleRoomMessages, handleNewMessage, handleRoomResolved]);
+
+  /** 소켓 이벤트 등록 및 해제 */
   useEffect(() => {
     if (!roomIdFromUrl && !careUnitId) return;
     if (hasJoinedRef.current) return;
@@ -48,49 +96,27 @@ export default function ChatPage() {
     hasJoinedRef.current = true;
 
     if (roomIdFromUrl) {
-      console.log('roomIdFromUrl로 입장');
       socket.emit('joinRoom', { roomId: roomIdFromUrl });
       roomIdRef.current = roomIdFromUrl;
       setIsRoomReady(true);
     } else if (careUnitId) {
-      console.log('careUnitId로 joinRoom 요청');
       socket.emit('joinRoom', { careUnitId });
     }
-  }, [roomIdFromUrl, careUnitId]);
-
-  const handleRoomResolved = (data: { roomId: string }) => {
-    console.log('resolvedRoom', data.roomId);
-    roomIdRef.current = data.roomId;
-    setIsRoomReady(true);
-  };
-
-  const handleRoomMessages = (payload: {
-    messages: Message[];
-    roomId: string;
-  }) => {
-    console.log('roomMessages', payload);
-
-    const { messages } = payload;
-    const sortedMessages = [...messages].sort(
-      (a, b) =>
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-    );
-
-    console.log('roomMEssage', payload);
-    setMessagesMap(sortedMessages);
-  };
-
-  const handleNewMessage = (message: Message) => {
-    const currentRoomId = roomIdRef.current;
-    if (!currentRoomId) return;
-    setMessagesMap((o) => [...o, message]);
-  };
+  }, [
+    roomIdFromUrl,
+    careUnitId,
+    handleRoomResolved,
+    handleRoomMessages,
+    handleNewMessage,
+  ]);
 
   const handleSendMessage = () => {
     if (!roomIdRef.current || !isRoomReady) {
       console.warn('❌ 방 준비 안 됨');
       return;
     }
+
+    if (!input.trim()) return;
 
     socket.emit('sendMessage', {
       roomId: roomIdRef.current,
@@ -106,6 +132,8 @@ export default function ChatPage() {
     }
   };
 
+  const currentMessages = messagesMap.get(roomIdRef.current || '') || [];
+
   if (!roomIdFromUrl && !careUnitId) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -119,16 +147,14 @@ export default function ChatPage() {
       <Button
         variant="destructive"
         className="absolute top-4 z-50 border p-2 shadow-md opacity-70 hover:opacity-100"
-        onClick={() => {
-          router.push(ROUTES.USER.CHAT(''));
-        }}
+        onClick={() => router.push(ROUTES.USER.CHAT(''))}
       >
         <ArrowLeftFromLineIcon />
         나가기
       </Button>
 
       <ChatMessages
-        messages={messagesMap}
+        messages={currentMessages}
         input={input}
         setInput={setInput}
         onSendMessage={handleSendMessage}

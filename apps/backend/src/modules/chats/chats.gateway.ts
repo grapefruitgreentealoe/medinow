@@ -198,6 +198,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           user.id,
         );
         client.emit('roomMessages', {
+          roomId: room.id,
           messages: messages.map((message) => ({
             id: message.id,
             content: message.content,
@@ -232,6 +233,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           user.id,
         );
         client.emit('roomMessages', {
+          roomId: room.id,
           messages: messages.map((message) => ({
             id: message.id,
             content: message.content,
@@ -268,6 +270,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // 메시지 브로드캐스트
       this.server.to(data.roomId).emit('newMessage', {
+        roomId: data.roomId, // 추가
         id: message.id,
         content: message.content,
         senderId: message.sender.id,

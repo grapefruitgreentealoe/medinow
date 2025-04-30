@@ -1,12 +1,21 @@
 import { User } from '@/shared/type';
 
 export interface RoomInfo {
-  roomId: string;
-  careUnitId: string;
-  careUnitName: string;
+  id: string;
+  createdAt: string;
+  updatedAt: string;
   lastMessageAt: string | null;
   unreadCount: number;
-  user: User;
+  lastReadAt: string | null;
+  isActive: boolean;
+  user: {
+    id: string;
+    nickName: string;
+  };
+  careUnit: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface Message {
