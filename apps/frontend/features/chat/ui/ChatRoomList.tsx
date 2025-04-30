@@ -22,7 +22,7 @@ export function ChatRoomList({
   isAdmin = false,
 }: ChatRoomListProps) {
   return (
-    <div className="p-4 space-y-2">
+    <div className="!p-4 !space-y-2">
       {rooms.map((room) => (
         <button
           key={room.id}
@@ -34,8 +34,10 @@ export function ChatRoomList({
             })
           }
           className={cn(
-            'w-full p-3 bg-muted rounded text-left hover:bg-accent',
-            selectedRoomId === room.id ? 'bg-accent' : 'bg-muted'
+            'w-full !p-3 bg-muted rounded text-left hover:bg-emerald-50',
+            selectedRoomId === room.id
+              ? 'bg-blue-200 hover:bg-blue-200'
+              : 'bg-muted'
           )}
         >
           <div className="font-semibold">
