@@ -44,9 +44,15 @@ export function ChatMessages({
               className={`flex ${isRight ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`!p-3 rounded-lg max-w-xs ${
-                  isRight ? 'bg-primary text-white' : 'bg-muted text-foreground'
-                }`}
+                className={`relative !p-3 rounded-lg max-w-xs text-sm
+                  ${isRight ? 'bg-primary text-white !mr-2' : 'bg-amber-50 text-foreground !ml-2'}
+                  before:absolute before:top-2.5 before:w-0 before:h-0
+                  ${
+                    isRight
+                      ? 'before:right-[-6px] before:border-l-[6px] before:border-l-primary before:border-t-[6px] before:border-t-transparent before:border-b-[6px] before:border-b-transparent'
+                      : 'before:left-[-6px] before:border-r-[6px] before:border-r-amber-50 before:border-t-[6px] before:border-t-transparent before:border-b-[6px] before:border-b-transparent'
+                  }
+                `}
               >
                 <div>{msg.content}</div>
                 <div className="text-[10px] text-right !mt-1 opacity-60">
@@ -59,7 +65,7 @@ export function ChatMessages({
         <div ref={bottomRef} />
       </div>
 
-      <div className="!p-2 border-t flex !gap-2">
+      <div className="!p-2 border-t flex gap-2">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
