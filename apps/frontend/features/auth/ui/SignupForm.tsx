@@ -29,12 +29,12 @@ export default function SignupForm() {
   const form = useForm<FormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      email: 'test@example.com',
-      password: 'Abcd1234!',
-      name: '테스터',
-      nickname: '테스트닉',
-      address: '서울시 강남구',
-      age: '29',
+      email: '',
+      password: '',
+      name: '',
+      nickname: '',
+      address: '',
+      age: '',
     },
   });
 
@@ -91,7 +91,7 @@ export default function SignupForm() {
                 <FormControl>
                   <Input
                     type="password"
-                    placeholder="비밀번호 입력"
+                    placeholder="8자 이상,대소문자,숫자,특수문자 포함"
                     {...field}
                   />
                 </FormControl>

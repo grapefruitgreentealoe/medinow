@@ -6,7 +6,7 @@ import { socket } from '@/lib/socket';
 import { ChatMessages } from '@/features/chat/ui/ChatMessages';
 import { Message } from '@/features/chat/type';
 import { Button } from '@/components/ui/button';
-import { ArrowLeftFromLineIcon } from 'lucide-react';
+import { ArrowLeft, ArrowLeftFromLineIcon } from 'lucide-react';
 import { ROUTES } from '@/shared/constants/routes';
 
 export default function ChatPage() {
@@ -137,20 +137,19 @@ export default function ChatPage() {
   if (!roomIdFromUrl && !careUnitId) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
-        채팅방을 선택하거나, 병원 목록으로부터 채팅을 시작하세요
+        채팅방을 선택하거나, 의료기관 목록으로부터 채팅을 시작하세요
       </div>
     );
   }
 
   return (
-    <div className="!pt-[40px] h-full">
+    <div className="!pt-[100px] h-full overflow-y-hidden">
       <Button
-        variant="destructive"
+        variant="outline"
         className="absolute top-4 z-50 border p-2 shadow-md opacity-70 hover:opacity-100"
-        onClick={() => router.push(ROUTES.USER.CHAT(''))}
+        onClick={() => router.push(ROUTES.USER.CHAT_LIST)}
       >
-        <ArrowLeftFromLineIcon />
-        나가기
+        <ArrowLeft />
       </Button>
 
       <ChatMessages

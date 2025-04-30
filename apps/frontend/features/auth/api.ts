@@ -25,3 +25,4 @@ export const checkEmail = async (email: string) => {
   const res = await axiosInstance.get(`/users/check-email?email=${email}`);
   return res.data.idDuplicate;
 };
+

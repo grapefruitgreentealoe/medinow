@@ -9,5 +9,5 @@ export const congestionClassMap: Record<CongestionLevel, string> = {
 export const CATEGORY_LABEL: Record<CareUnit['category'], string> = {
   emergency: '응급실',
   pharmacy: '약국',
-  hospital: '병원',
+  hospital: '의료기관',
 };

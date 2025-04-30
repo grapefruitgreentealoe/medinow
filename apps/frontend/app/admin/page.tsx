@@ -109,7 +109,7 @@ export default function AdminUserProfilePage() {
   return (
     <div className="!m-[30px]">
       <div className="flex flex-wrap gap-4 !mx-auto ">
-        {/* 병원 정보 카드 */}
+        {/* 의료기관 정보 카드 */}
         <Card className="!min-w-[300px] flex-1">
           <CardHeader>
             <CardTitle>관리자 정보 및 운영상태</CardTitle>
@@ -149,10 +149,10 @@ export default function AdminUserProfilePage() {
 
         <Card className="flex-1 !min-w-[300px]">
           <CardHeader>
-            <CardTitle>병원 정보</CardTitle>
+            <CardTitle>의료기관 정보</CardTitle>
           </CardHeader>
           <CardContent className="w-full flex flex-col">
-            <ProfileField label="병원명" value={user.unitData.name} />
+            <ProfileField label="의료기관명" value={user.unitData.name} />
             <ProfileField label="전화번호" value={user.unitData.tel} />
             <ProfileField
               label="카테고리"

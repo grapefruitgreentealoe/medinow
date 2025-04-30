@@ -34,7 +34,7 @@ export default function WriteReviewPage() {
         setDepartments(res.departments || []);
       });
     } catch {
-      toast.warning('병원 정보를 불러오지 못했습니다.');
+      toast.warning('의료기관 정보를 불러오지 못했습니다.');
     }
   };
 
@@ -75,11 +75,11 @@ export default function WriteReviewPage() {
                   리뷰 작성하기
                 </h1>
                 <p className="text-muted-foreground text-sm">
-                  방문하신 병원에 대한 솔직한 후기를 남겨주세요.
+                  방문하신 의료기관에 대한 솔직한 후기를 남겨주세요.
                 </p>
               </div>
 
-              {/* 병원 검색 or 리뷰 폼 */}
+              {/* 의료기관 검색 or 리뷰 폼 */}
               {!careUnit ? (
                 <SearchCareUnitForReview />
               ) : (

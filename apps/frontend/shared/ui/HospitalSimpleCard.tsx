@@ -41,7 +41,7 @@ export function HospitalSimpleCard({ unit }: HospitalSimpleCardProps) {
   };
 
   const handleChat = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // 병원 채팅 연결 로직 (필요 시 추가)
+    // 의료기관 채팅 연결 로직 (필요 시 추가)
     e.stopPropagation();
     router.push(ROUTES.USER.CHAT(unit.id));
   };
@@ -51,11 +51,11 @@ export function HospitalSimpleCard({ unit }: HospitalSimpleCardProps) {
       ? '응급실'
       : unit.category === 'pharmacy'
         ? '약국'
-        : '병원';
+        : '의료기관';
 
   return (
     <Card className="!p-6 bg-background text-foreground text-sm leading-relaxed rounded-none border-r-none overflow-y-auto">
-      {/* 병원명 + 버튼들 */}
+      {/* 의료기관명 + 버튼들 */}
       <div className="flex justify-between items-start gap-x-3 gap-y-3">
         <div className="flex flex-col items-start justify-start gap-2">
           <div className="text-lg font-bold text-primary w-full">
@@ -68,7 +68,7 @@ export function HospitalSimpleCard({ unit }: HospitalSimpleCardProps) {
             </Badge>
             {unit.isBadged && (
               <Badge className="bg-yellow-100 text-yellow-700 text-xs">
-                감사병원
+                감사기관
               </Badge>
             )}
           </div>

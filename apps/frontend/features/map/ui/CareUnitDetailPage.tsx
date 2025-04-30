@@ -53,11 +53,11 @@ export default function CareUnitDetailPage() {
       ? '응급실'
       : unit.category === 'pharmacy'
         ? '약국'
-        : '병원';
+        : '의료기관';
 
   return (
     <div className="!p-6 !pt-7 !pb-8 space-y-6 bg-background text-foreground text-sm leading-relaxed">
-      {/* 병원명, 뱃지, 즐겨찾기, 채팅 */}
+      {/* 의료기관명, 뱃지, 즐겨찾기, 채팅 */}
       <div className="flex justify-between items-start gap-x-3 gap-y-3">
         <div className="flex flex-col items-start justify-start gap-2">
           <div className="text-lg font-bold text-primary w-full">
@@ -70,7 +70,7 @@ export default function CareUnitDetailPage() {
             </Badge>
             {unit.isBadged && (
               <Badge className="bg-yellow-100 text-yellow-700 text-xs">
-                감사병원
+                감사기관
               </Badge>
             )}
           </div>
