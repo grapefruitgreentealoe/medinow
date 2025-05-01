@@ -142,7 +142,7 @@ export class AuthService {
 
     return {
       httpOnly: true,
-      secure: true,
+      secure: true, // 환경변수로 빼서 ,개발환경 구축하기. simulator에서 테스트할 때는 false로 설정
       maxAge,
       path: '/',
       sameSite: 'none',
