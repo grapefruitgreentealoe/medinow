@@ -60,7 +60,7 @@ export function SearchCareUnitForChat() {
             </SelectTrigger>
             <SelectContent position="popper">
               <SelectItem value="emergency">응급실</SelectItem>
-              <SelectItem value="hospital">의료기관</SelectItem>
+              <SelectItem value="hospital">병원</SelectItem>
               <SelectItem value="pharmacy">약국</SelectItem>
             </SelectContent>
           </Select>
