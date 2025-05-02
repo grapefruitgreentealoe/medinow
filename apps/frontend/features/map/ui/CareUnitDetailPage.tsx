@@ -53,7 +53,7 @@ export default function CareUnitDetailPage() {
       ? '응급실'
       : unit.category === 'pharmacy'
         ? '약국'
-        : '의료기관';
+        : '병원';
 
   return (
     <div className="!p-6 !pt-7 !pb-8 space-y-6 bg-background text-foreground text-sm leading-relaxed">

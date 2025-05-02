@@ -6,7 +6,7 @@ import { socket } from '@/lib/socket';
 import { ChatMessages } from '@/features/chat/ui/ChatMessages';
 import { Message } from '@/features/chat/type';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowLeftFromLineIcon } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { ROUTES } from '@/shared/constants/routes';
 
 export default function ChatPage() {

@@ -1,15 +1,19 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { socket } from '@/lib/socket';
 import { ChatMessages } from '@/features/chat/ui/ChatMessages';
 import { Message } from '@/features/chat/type';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import { ROUTES } from '@/shared/constants/routes';
 
 export default function AdminChatPage() {
   const searchParams = useSearchParams();
   const roomId = searchParams.get('id');
   const roomIdRef = useRef(roomId); // 안정성 확보
+  const router = useRouter();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -94,15 +98,24 @@ export default function AdminChatPage() {
   }
 
   return (
-    <ChatMessages
-      isAdmin
-      messages={messages}
-      input={input}
-      setInput={setInput}
-      onSendMessage={handleSendMessage}
-      onKeyDown={handleKeyDown}
-      onCompositionStart={() => setIsComposing(true)}
-      onCompositionEnd={() => setIsComposing(false)}
-    />
+    <div className="!pt-[100px] h-full overflow-y-hidden">
+      <Button
+        variant="outline"
+        className="absolute top-4 z-50 border p-2 shadow-md opacity-70 hover:opacity-100"
+        onClick={() => router.push(ROUTES.ADMIN.CHAT)}
+      >
+        <ArrowLeft />
+      </Button>
+      <ChatMessages
+        isAdmin
+        messages={messages}
+        input={input}
+        setInput={setInput}
+        onSendMessage={handleSendMessage}
+        onKeyDown={handleKeyDown}
+        onCompositionStart={() => setIsComposing(true)}
+        onCompositionEnd={() => setIsComposing(false)}
+      />
+    </div>
   );
 }
