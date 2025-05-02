@@ -83,7 +83,10 @@ export default function ChatLayout({
   if (loading) return <div>로딩중...</div>;
 
   return (
-    <div className="relative flex h-[calc(100vh-61px)] !overflow-y-hidden">
+    <div
+      className="relative flex !overflow-y-hidden"
+      style={{ height: 'calc(var(--vh, 1vh) * 100 - 61px)' }}
+    >
       {/* 왼쪽 - 채팅방 목록 */}
       <div
         className={cn(

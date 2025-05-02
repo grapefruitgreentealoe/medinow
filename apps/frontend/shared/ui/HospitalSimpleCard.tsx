@@ -51,7 +51,7 @@ export function HospitalSimpleCard({ unit }: HospitalSimpleCardProps) {
       ? '응급실'
       : unit.category === 'pharmacy'
         ? '약국'
-        : '의료기관';
+        : '병원';
 
   return (
     <Card className="!p-6 bg-background text-foreground text-sm leading-relaxed rounded-none border-r-none overflow-y-auto">
