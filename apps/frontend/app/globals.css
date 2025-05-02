@@ -3,10 +3,33 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  * {
+    margin: 0;
+
+    padding: 0;
+
+    box-sizing: border-box;
+  }
+
+  html {
+    /* color: #333; */
+  }
+}
+
+:root {
+  --vh: 1vh;
+}
+
 html,
 body {
   max-width: 100vw;
-  overflow-x: hidden;
 }
 
 body {
@@ -31,6 +54,14 @@ a {
   }
 }
 
+@layer utilities {
+  .scrollbar-hide {
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    scrollbar-width: none;
+  }
+}
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -73,7 +104,7 @@ a {
   --cottoncandy: oklch(88.77% 0.064 226.86);
   --radius: 0.625rem;
 
-  /* ✅ 브랜드톤 적용 */
+  /*  브랜드톤 적용 */
   --background: oklch(98.7% 0.007 90); /* 상아 */
   --foreground: oklch(30% 0.01 250);
 

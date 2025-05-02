@@ -40,6 +40,20 @@ services:
     networks:
       - backend-network
 
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    container_name: frontend-dev
+    ports:
+      - "3001:3000"
+    volumes:
+      - ../frontend/.next:/app/.next
+    networks:
+      - backend-network
+
 volumes:
   postgres_data:
   redis_data:

@@ -11,7 +11,7 @@ import { CareUnitModule } from '../care-units/care-unit.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, UserProfile]),
-    ImagesModule,
+    forwardRef(() => ImagesModule),
     forwardRef(() => CareUnitModule),
   ],
   controllers: [UsersController],

@@ -1,64 +1,51 @@
 'use client';
 
-import { useAtom } from 'jotai';
-import { selectedCareUnitAtom } from '@/features/map/atoms/detailSheetAtoms';
-import { useToggleFavorite } from '../model/useOnToggleFavorite';
+import { useAtom, useAtomValue } from 'jotai';
 import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
 import { useSetAtom } from 'jotai';
 import { cn } from '@/lib/utils';
-import { Star, StarOff, MessageSquare, PhoneCallIcon } from 'lucide-react';
+import {
+  Star,
+  StarOff,
+  MessageSquare,
+  PhoneCallIcon,
+  PencilIcon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useOptimisticToggleFavorite } from '../model/useOptimisticToggleFavorite';
+import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
+import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
+import { ReviewList } from '@/features/review/ui/ReviewList';
+import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/shared/constants/routes';
 
+import { Badge } from '@/components/ui/badge';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { renderTodayTime } from '../utils';
+import { useRenderTimeRow } from '@/shared/model/useRenderTimeRow';
+import { HospitalTimeTable } from '@/shared/ui/HospitalTimeTable';
 export default function CareUnitDetailPage() {
+  const router = useRouter();
   const [unit] = useAtom(selectedCareUnitAtom);
   const setChat = useSetAtom(chatModalAtom);
-  const [localFavorite, setLocalFavorite] = useState(unit?.isFavorite || false);
-
-  const { mutate: toggleFavoriteMutation } = useToggleFavorite();
+  const queryKey = useAtomValue(careUnitsQueryKeyAtom);
+  const { mutate: toggleFavorite } = useOptimisticToggleFavorite(queryKey);
 
   if (!unit) return null;
 
-  const timeToStr = (time: number | null) => {
-    if (time == 0) return '00:00';
-    if (!time) return '휴무';
-    const h = String(Math.floor(time / 100)).padStart(2, '0');
-    const m = String(time % 100).padStart(2, '0');
-    return `${h}:${m}`;
-  };
-
-  const renderTimeRow = (
-    label: string,
-    open: number | null,
-    close: number | null
-  ) => (
-    <>
-      <div className="text-muted-foreground">{label}</div>
-      <div>
-        {timeToStr(open)} - {timeToStr(close)}
-      </div>
-    </>
-  );
-
   const handleFavorite = () => {
-    toggleFavoriteMutation(
-      {
-        unitId: unit.id,
-        next: !unit.isFavorite,
-      },
-      {
-        onError: () => {
-          setLocalFavorite((o: boolean) => !o);
-        },
-        onSuccess: () => {
-          setLocalFavorite((o: boolean) => !o);
-        },
-      }
-    );
+    toggleFavorite({ unitId: unit.id });
   };
 
   const handleChat = () => {
-    setChat({ isOpen: true, target: unit });
+    router.push(ROUTES.USER.CHAT(unit.id));
   };
 
   const categoryLabel =
@@ -70,7 +57,7 @@ export default function CareUnitDetailPage() {
 
   return (
     <div className="!p-6 !pt-7 !pb-8 space-y-6 bg-background text-foreground text-sm leading-relaxed">
-      {/* 병원명, 뱃지, 즐겨찾기, 채팅 */}
+      {/* 의료기관명, 뱃지, 즐겨찾기, 채팅 */}
       <div className="flex justify-between items-start gap-x-3 gap-y-3">
         <div className="flex flex-col items-start justify-start gap-2">
           <div className="text-lg font-bold text-primary w-full">
@@ -78,13 +65,13 @@ export default function CareUnitDetailPage() {
           </div>
 
           <div className="flex justify-start">
-            <span className="bg-muted text-muted-foreground text-xs !px-2 !py-0.5 rounded-full">
+            <Badge className="bg-muted text-muted-foreground text-xs">
               {categoryLabel}
-            </span>
+            </Badge>
             {unit.isBadged && (
-              <span className="bg-yellow-100 text-yellow-700 text-xs !px-2 !py-0.5 rounded-full">
-                감사병원
-              </span>
+              <Badge className="bg-yellow-100 text-yellow-700 text-xs">
+                감사기관
+              </Badge>
             )}
           </div>
         </div>
@@ -95,10 +82,10 @@ export default function CareUnitDetailPage() {
             className="w-8 h-8"
             onClick={handleFavorite}
           >
-            {localFavorite ? (
+            {unit.isFavorite ? (
               <Star className="text-yellow-500 fill-yellow-500" size={18} />
             ) : (
-              <StarOff size={18} />
+              <Star size={18} />
             )}
           </Button>
           {unit.isChatAvailable && (
@@ -111,13 +98,22 @@ export default function CareUnitDetailPage() {
               <MessageSquare className="text-blue-500" size={18} />
             </Button>
           )}
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(ROUTES.USER.WRITE_REVIEW + `?careUnitId=${unit.id}`);
+            }}
+            className="w-8 h-8"
+          >
+            <PencilIcon className="text-blue-500" size={18} />
+          </Button>
           {unit.tel && (
             <Button
               size="icon"
               variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
+              onClick={(e) => e.stopPropagation()}
               className="w-8 h-8"
             >
               <a href={`tel:${unit.tel}`}>
@@ -127,6 +123,7 @@ export default function CareUnitDetailPage() {
           )}
         </div>
       </div>
+
       <div className="h-[1rem]" />
 
       {/* 기본 정보 */}
@@ -141,11 +138,17 @@ export default function CareUnitDetailPage() {
           </a>
         </div>
 
-        <div className="text-muted-foreground">운영</div>
-        <div>{unit.nowOpen ? '🟢 운영 중' : '🔴 운영 종료'}</div>
+        <div className="text-muted-foreground !mt-1">오늘 운영시간</div>
+        <div className=" !mt-1 text-muted-foreground">
+          <span className="text-foreground font-medium">
+            {renderTodayTime(unit)}
+          </span>
+          <span className="inline-block !px-2"></span>
+          <Badge className={'text-muted-foreground bg-muted border'}>
+            {unit.nowOpen ? '운영 중' : '운영 종료'}
+          </Badge>
+        </div>
       </div>
-
-      {/* 혼잡도 */}
       {unit.congestion && (
         <div className="space-y-1">
           <div className="font-medium">혼잡도</div>
@@ -159,27 +162,59 @@ export default function CareUnitDetailPage() {
                   : 'text-green-600'
             )}
           >
-            {unit.congestion.congestionLevel} ({unit.congestion.hvec} 병상)
+            {unit.congestion.congestionLevel} (병상 수: {unit.congestion.hvec})
           </div>
         </div>
       )}
 
-      {/* 운영시간 */}
-      <div className="!mt-5 max-w-[280px]">
-        <div className="text-md font-semibold !mb-2 text-left text-foreground">
-          운영시간
-        </div>
-        <div className="grid grid-cols-[80px_1fr] gap-y-1 gap-x-4 text-sm">
-          {renderTimeRow('월요일', unit.mondayOpen, unit.mondayClose)}
-          {renderTimeRow('화요일', unit.tuesdayOpen, unit.tuesdayClose)}
-          {renderTimeRow('수요일', unit.wednesdayOpen, unit.wednesdayClose)}
-          {renderTimeRow('목요일', unit.thursdayOpen, unit.thursdayClose)}
-          {renderTimeRow('금요일', unit.fridayOpen, unit.fridayClose)}
-          {renderTimeRow('토요일', unit.saturdayOpen, unit.saturdayClose)}
-          {renderTimeRow('일요일', unit.sundayOpen, unit.sundayClose)}
-          {renderTimeRow('공휴일', unit.holidayOpen, unit.holidayClose)}
+      <Accordion className="!mt-6 !space-y-4" type="single" collapsible>
+        {/* 진료과목 */}
+        {unit.departments?.length > 0 && (
+          <AccordionItem value="departments">
+            <AccordionTrigger className="cursor-pointer">
+              진료 과목
+            </AccordionTrigger>
+            <AccordionContent className="!my-3">
+              <div className="flex flex-wrap gap-2 mt-2">
+                {unit.departments.map((dept, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    {dept?.name ?? dept}
+                  </Badge>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+        {/* 운영시간 */}
+        <AccordionItem value="operation-hours">
+          <AccordionTrigger className="cursor-pointer">
+            운영 시간
+          </AccordionTrigger>
+          <AccordionContent className="!my-3">
+            <HospitalTimeTable unit={unit} />
+          </AccordionContent>
+        </AccordionItem>
+        {/* 리뷰 */}
+      </Accordion>
+
+      <Separator />
+      <div className="flex items-center gap-2 !pt-6">
+        <span>방문자 리뷰</span>
+
+        <div className="flex items-center text-sm mt-2">
+          <Star size={16} className="text-yellow-400 fill-yellow-400" />
+          <span className="font-medium text-muted-foreground">
+            {(unit.averageRating ?? 0).toFixed(1)}
+          </span>
+          <span className="text-muted-foreground">
+            ({unit.reviewCount ?? 0}건)
+          </span>
         </div>
       </div>
+      <ScrollArea className="h-[50vh] w-auto rounded-md border-none !py-3">
+        <ReviewList careUnitId={unit.id} />
+        <div className="h-[200px]" />
+      </ScrollArea>
     </div>
   );
 }

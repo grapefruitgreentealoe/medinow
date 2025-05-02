@@ -29,11 +29,47 @@ export class DepartmentsService {
     private readonly logger: CustomLoggerService,
     private readonly careUnitService: CareUnitService,
     private readonly redisService: RedisService,
-  ) {}
+  ) {
+    this.MAX_RETRIES = 3;
+    this.RETRY_DELAY = 5000;
+  }
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  private readonly MAX_RETRIES: number;
+  private readonly RETRY_DELAY: number;
+
+  @Cron('0 40 00 * * *')
   async syncHospitalDepartments() {
-    console.log('🔄 병원 진료과목 동기화 시작');
+    let retryCount = 0;
+    let lastError: Error | null = null;
+
+    while (retryCount < this.MAX_RETRIES) {
+      try {
+        if (retryCount > 0) {
+          await new Promise((resolve) => setTimeout(resolve, this.RETRY_DELAY));
+        }
+
+        const result = await this.executeSyncHospitalDepartments();
+        if (retryCount > 0 && result) {
+          this.logger.log(`🔄 동기화 성공: ${JSON.stringify(result)}`);
+        }
+        return result;
+      } catch (error) {
+        lastError = error as Error;
+        this.logger.error(
+          `❌ 동기화 실패 (시도 ${retryCount + 1}/${this.MAX_RETRIES}):`,
+          lastError.message,
+        );
+        retryCount++;
+      }
+    }
+
+    if (lastError) {
+      this.logger.error(`🔄 최종 동기화 실패: ${lastError.message}`);
+      throw lastError;
+    }
+  }
+
+  private async executeSyncHospitalDepartments() {
     try {
       // 1. API에서 최신 데이터 가져오기
       const url = `${this.HOSPITAL_BASIC_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=1000000&_type=json`;
@@ -141,7 +177,7 @@ export class DepartmentsService {
             await this.redisService.set(
               redisKey,
               JSON.stringify(updatedDepartments),
-              24 * 3600, // 24시간
+              3600 * 48, // TTL 48시간 (2일) - Cron 작업 실패 대비
             );
             updatedCount++;
             console.log(
@@ -172,8 +208,7 @@ export class DepartmentsService {
         }
       }
 
-      console.log('🎉 병원 진료과목 동기화 완료');
-      console.log(
+      this.logger.log(
         `📊 통계:`,
         `추가(${addedCount}),`,
         `삭제(${deletedCount}),`,
@@ -201,19 +236,18 @@ export class DepartmentsService {
   // 초기 DB세팅 - hospital 진료과목 데이터 저장
   async saveHospitalDepartments() {
     try {
-      console.log('▶️ 병원 진료과목 API 호출 시작');
       const url = `${this.HOSPITAL_BASIC_API_URL}?ServiceKey=${this.SERVICE_KEY}&pageNo=1&numOfRows=1000000&_type=json`;
-      console.log('▶️ API URL:', url);
+
       const response = await fetch(url, {
         headers: {
           Accept: 'application/json',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
         },
       });
-      console.log('▶️API 응답 상태:', response.status);
+
       const text = await response.text();
       if (text.startsWith('<')) {
-        console.error('❌ XML/HTML 응답 감지');
+        this.logger.error('❌ XML/HTML 응답 감지');
         throw new BadRequestException('API가 XML/HTML을 반환했습니다.');
       }
       const data = JSON.parse(text);
@@ -301,26 +335,26 @@ export class DepartmentsService {
           await this.redisService.set(
             redisKey,
             JSON.stringify(updatedDepartments),
-            3600 * 24, // TTL 24시간
+            3600 * 48, // TTL 48시간 (2일) - Cron 작업 실패 대비
           );
           successCount++;
 
           if (successCount % 1000 === 0) {
             console.log(
-              `✨ 진행 상황: ${successCount}/${hospitalItems.length} 처리 완료`,
+              `✨ 진행 상황: ${successCount}/${hospitalItems.length} 처리 완료!`,
             );
           }
         } catch (error) {
           const err = error as Error;
-          console.error(
+          this.logger.error(
             `❌ 병원 진료과목 저장 실패 (${hospital.hpid}):`,
             err.message,
           );
           errorCount++;
         }
       }
-      console.log('🎉 병원 진료과목 저장 완료');
-      console.log(
+
+      this.logger.log(
         `✅ 성공: ${successCount}, ⚠️ 건너뜀: ${skippedCount}, ❌ 실패: ${errorCount}`,
       );
 
@@ -337,11 +371,10 @@ export class DepartmentsService {
       };
     } catch (error) {
       const err = error as Error;
-      console.error('❌ 에러 발생:', {
-        name: err.name,
-        message: err.message,
-        stack: err.stack,
-      });
+      this.logger.error(
+        '❌ 에러 발생:',
+        `${err.name}: ${err.message}\n${err.stack}`,
+      );
       throw new NotFoundException('Failed to save hospital departments');
     }
   }

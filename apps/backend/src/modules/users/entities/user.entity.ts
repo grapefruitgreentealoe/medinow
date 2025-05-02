@@ -32,11 +32,6 @@ export class User extends BaseEntity {
   @OneToOne(() => UserProfile, (userProfile) => userProfile.user)
   userProfile: UserProfile;
 
-  @OneToMany(() => Image, (image) => image.user, {
-    cascade: true,
-  })
-  images: Image[];
-
   @OneToMany(() => Favorite, (favorite) => favorite.user, {
     cascade: true,
   })

@@ -1,16 +1,14 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { CareUnit } from '@/features/map/type';
+import { CareUnit } from '@/shared/type';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { CareUnitCard } from './CareUnitCard';
 
 import { useSetAtom } from 'jotai';
-import {
-  selectedCareUnitAtom,
-  detailSheetPageAtom,
-} from '@/features/map/atoms/detailSheetAtoms';
+import { detailSheetPageAtom } from '@/features/map/atoms/detailSheetAtoms';
+import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 
 interface CareUnitListPageProps {
   data: CareUnit[];

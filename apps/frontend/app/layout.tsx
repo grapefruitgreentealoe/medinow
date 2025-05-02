@@ -2,7 +2,14 @@ import Script from 'next/script';
 import { cookies } from 'next/headers';
 import './globals.css';
 import Header from '@/shared/ui/layout/Header';
-import { FloatingChatWidget } from '@/widgets/chat/FloatingChatWidget';
+import { Toaster } from '@/components/ui/sonner';
+import Footer from '@/shared/ui/Footer';
+import HeaderWithSocket from '@/shared/ui/layout/HeaderWithSocket';
+
+export const metadata = {
+  title: 'MediNow',
+  description: '내 주변 의료기관 찾기',
+};
 
 export default async function RootLayout({
   children,
@@ -11,7 +18,13 @@ export default async function RootLayout({
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get('accessToken')?.value;
+  const payload = token
+    ? JSON.parse(
+        Buffer.from(token?.split('.')[1] ?? '', 'base64').toString('utf-8')
+      )
+    : {};
   const isLoggedIn = !!token;
+  const role = payload?.role || '';
 
   return (
     <html lang="ko">
@@ -20,7 +33,10 @@ export default async function RootLayout({
           <Script
             id="initial-is-logged-in"
             dangerouslySetInnerHTML={{
-              __html: `window.__INITIAL_IS_LOGGED_IN__ = ${JSON.stringify(isLoggedIn)};`,
+              __html: `window.__INITIAL_IS_LOGGED_IN__ = ${JSON.stringify(
+                isLoggedIn
+              )};
+              window.__USER_ROLE__ = '${role}';`,
             }}
           />
           <Script
@@ -29,10 +45,11 @@ export default async function RootLayout({
           />
         </>
       </head>
-      <body suppressHydrationWarning>
-        <Header />
-        <main>{children}</main>
-        <FloatingChatWidget />
+      <body className="flex min-h-screen flex-col" suppressHydrationWarning>
+        <HeaderWithSocket />
+        <main className="flex-1 !pt-[61px]">{children}</main>
+        <Footer />
+        <Toaster position="bottom-center" duration={1000} />
       </body>
     </html>
   );

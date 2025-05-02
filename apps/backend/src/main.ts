@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from './config/logger/winston.config';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
   // Create App
@@ -18,10 +19,11 @@ async function bootstrap() {
       'http://localhost:3000',
       'https://localhost:3001',
       'http://localhost:3001',
-      'https://kdt-node-2-team02.elicecoding.com',
+      'https://medinow.co.kr',
+      'https://www.medinow.co.kr',
     ],
     credentials: true,
-    allowedHeaders: ['content-type', 'Authorization'],
+    allowedHeaders: ['content-type', 'Authorization', 'cookies', 'set-cookie'],
   };
 
   // Use Cookie Parser
@@ -35,7 +37,7 @@ async function bootstrap() {
         directives: {
           defaultSrc: ["'self'"], // 기본 소스 제한
           scriptSrc: ["'self'"], // 스크립트 소스 제한
-          styleSrc: ["'self'", 'https:'], // 스타일 소스 제한
+          styleSrc: ["'self'", 'https:', "'unsafe-inline'"], // 스타일 소스 제한
           imgSrc: ["'self'", 'data:', 'https:'], // 이미지 소스 제한
           connectSrc: ["'self'", 'https:'], // 연결 소스 제한
           fontSrc: ["'self'", 'https:'], // 폰트 소스 제한
@@ -69,10 +71,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document, {
-    customCssUrl:
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
-  });
+  SwaggerModule.setup('swagger', app, document);
 
   // Set Global Prefix
   app.setGlobalPrefix('api/v1', {
@@ -81,6 +80,8 @@ async function bootstrap() {
 
   // Use Cors
   app.enableCors(corsOptions);
+
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   // Start Server
   await app.listen(process.env.PORT ?? 4000);

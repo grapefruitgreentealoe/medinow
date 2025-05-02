@@ -3,192 +3,281 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { adminSignupSchema } from '@/features/auth/schema/adminSignupSchema';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { adminSignup, checkEmail } from '../api';
-import HospitalSearchModal from '@/shared/ui/HospitalSearchModal';
+import LocationSearchModal from '@/shared/ui/LocationSearchModal';
 import type { AdminSignupData } from '../type';
-import { UploadCloud } from 'lucide-react';
-import { Label } from '@/components/ui/label';
 import axiosInstance from '@/lib/axios';
+import { ROUTES } from '@/shared/constants/routes';
+import { UploadCloud } from 'lucide-react';
+import { checkCareUnitExist } from '@/shared/api';
+
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { SelectSeparator } from '@/components/ui/select';
+import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 export default function AdminSignupForm() {
   const router = useRouter();
-  const [hospitalModalOpen, setHospitalModalOpen] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const inputFileRef = useRef<HTMLInputElement | null>(null);
 
+  const [hospitalModalOpen, setHospitalModalOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [checking, setChecking] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    setError,
-    formState: { errors },
-  } = useForm({
+  const form = useForm<AdminSignupData & { isCareUnitVerified: boolean }>({
     resolver: zodResolver(adminSignupSchema),
     defaultValues: {
-      email: 'test@clinic.com',
-      password: 'Test1234!',
-      name: '홍길동',
-      latitude: '37.5665',
-      longitude: '126.978',
-      careUnitName: '테스트병원',
-      careUnitAddress: '서울특별시 종로구 세종대로 110',
-      careUnitCategory: '병원',
-      imageUrl: '',
+      email: '',
+      password: '',
+      name: '',
+      careUnitName: '',
+      careUnitAddress: '',
+      careUnitCategory: '',
+      isCareUnitVerified: false,
     },
   });
 
-  const handleHospitalSelect = (data: {
+  const setValue = form.setValue;
+
+  const handleHospitalSelect = async (data: {
     name: string;
     address: string;
     lat: string;
     lng: string;
   }) => {
-    console.log(data);
     setValue('careUnitName', data.name, { shouldDirty: true });
     setValue('careUnitAddress', data.address, { shouldDirty: true });
-    setValue('longitude', data.lng, { shouldDirty: true });
+    form.clearErrors('isCareUnitVerified');
+    setValue('isCareUnitVerified', false); // 유효성 검사 초기화
+
+    handleCareUnitValidation();
   };
 
-  const handleImageUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file); // file이라는 키로 업로드
+  const handleCareUnitValidation = async () => {
+    const { careUnitName, careUnitAddress, careUnitCategory } =
+      form.getValues();
+
+    if (!careUnitName || !careUnitAddress || !careUnitCategory) {
+      toast.warning('기관주소, 유형을 모두 입력해주세요.');
+      return;
+    }
 
     try {
-      setUploading(true);
-      const res = await axiosInstance.post(
-        '/images/business-license/upload',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data', // 이건 사실 생략해도 axios가 자동 처리
-          },
-        }
-      );
+      const exists = await checkCareUnitExist({
+        name: careUnitName,
+        address: careUnitAddress,
+        category: careUnitCategory,
+      });
 
-      setValue('imageUrl', res.data.url, { shouldDirty: true });
-    } catch (error) {
-      alert('이미지 업로드에 실패했습니다.');
-      console.error(error);
-    } finally {
-      setUploading(false);
+      if (exists) {
+        setValue('isCareUnitVerified', true, { shouldDirty: true });
+      } else {
+        toast.warning('등록되지 않은 의료기관입니다.');
+        setValue('isCareUnitVerified', false);
+        setValue('careUnitName', '');
+        setValue('careUnitAddress', '');
+      }
+    } catch (e: any) {
+      console.log(e);
+      if (e.status == 500) {
+        toast.warning('등록되지 않은 의료기관입니다.');
+        setValue('isCareUnitVerified', false);
+        setValue('careUnitName', '');
+        setValue('careUnitAddress', '');
+      }
     }
   };
 
   const onSubmit = async (data: AdminSignupData) => {
-    setChecking(true);
-    const isDuplicated = await checkEmail(data.email);
-    setChecking(false);
-    if (isDuplicated) {
-      setError('email', { message: '이미 사용 중인 이메일입니다' });
+    const isCareUnitVerified = form.getValues('isCareUnitVerified');
+    if (!isCareUnitVerified) {
+      toast.warning('의료기관 확인을 완료해주세요.');
       return;
     }
 
-    const signupData: AdminSignupData = {
-      ...data,
-      latitude: Number(data.latitude),
-      longitude: Number(data.longitude),
-    };
-    console.log(signupData);
-    await adminSignup(signupData);
-    router.push('/');
+    setChecking(true);
+    const isDuplicated = await checkEmail(data.email);
+    setChecking(false);
+
+    if (isDuplicated) {
+      form.setError('email', { message: '이미 사용 중인 이메일입니다' });
+      return;
+    }
+
+    await adminSignup(data);
+    router.push(ROUTES.LOGIN);
+  };
+
+  const handleClickHospitalInput = () => {
+    if (form.getValues('careUnitCategory') === '') {
+      toast.warning('의료기관 유형을 선택해주세요.');
+      return;
+    }
+    setHospitalModalOpen(true);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4 max-w-md mx-auto"
-    >
-      <Input placeholder="관리자명" {...register('name')} />
-      {errors.name && <p className="text-red-500">{errors.name.message}</p>}
-      <Input placeholder="이메일" {...register('email')} />
-      {errors.email && <p className="text-red-500">{errors.email.message}</p>}
-
-      <Input type="password" placeholder="비밀번호" {...register('password')} />
-      {errors.password && (
-        <p className="text-red-500">{errors.password.message}</p>
-      )}
-
-      <div className="space-y-1">
-        <label className="text-sm">병원 검색</label>
-        <button
-          type="button"
-          onClick={() => setHospitalModalOpen(true)}
-          className="border p-2 rounded w-full bg-gray-50 text-left"
+    <>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="!space-y-3 !max-w-md !mx-auto"
         >
-          병원 검색 팝업 열기
-        </button>
-      </div>
+          <FormField
+            control={form.control}
+            name="careUnitCategory"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>의료기관 유형</FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="emergency">응급실</SelectItem>
+                      <SelectItem value="hospital">병원</SelectItem>
+                      <SelectItem value="pharmacy">약국</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      <Input placeholder="기관명" {...register('careUnitName')} />
-      {errors.careUnitName && (
-        <p className="text-red-500">{errors.careUnitName.message}</p>
-      )}
+          {form.getValues('careUnitAddress') ? (
+            <FormField
+              control={form.control}
+              name="careUnitName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>기관명</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="의료기관명"
+                      {...field}
+                      readOnly
+                      disabled
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
 
-      <Input placeholder="기관 주소" {...register('careUnitAddress')} />
-      {errors.careUnitAddress && (
-        <p className="text-red-500">{errors.careUnitAddress.message}</p>
-      )}
+          <FormField
+            control={form.control}
+            name="careUnitAddress"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>기관 주소</FormLabel>
+                <FormControl>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="의료기관 주소"
+                      {...field}
+                      readOnly
+                      className="flex-1"
+                      onClick={handleClickHospitalInput}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      <HospitalSearchModal
-        open={hospitalModalOpen}
-        onClose={() => setHospitalModalOpen(false)}
-        onSelect={handleHospitalSelect}
-      />
+          {form.watch('isCareUnitVerified') && (
+            <p className="text-green-600 text-sm">가입 가능한 의료기관입니다</p>
+          )}
 
-      <label className="text-sm">의료기관 유형</label>
-      <select
-        {...register('careUnitCategory')}
-        className="border p-2 rounded w-full"
-      >
-        <option value="">선택하세요</option>
-        <option value="emergency">응급실</option>
-        <option value="hospital">병원</option>
-        <option value="pharmacy">약국</option>
-      </select>
-      {errors.careUnitCategory && (
-        <p className="text-red-500">{errors.careUnitCategory.message}</p>
-      )}
+          <input type="hidden" {...form.register('isCareUnitVerified')} />
+          <SelectSeparator className="!my-[20px]" />
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>관리자명</FormLabel>
+                <FormControl>
+                  <Input placeholder="홍길동" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      <Label className="text-sm">사업자 등록증 업로드</Label>
-      <Button
-        type="button"
-        variant="secondary"
-        className="w-full"
-        disabled={uploading}
-        onClick={() => inputFileRef.current?.click()}
-      >
-        <UploadCloud className="mr-2 h-4 w-4" />
-        {uploading ? '업로드 중...' : '이미지 선택하기'}
-      </Button>
-      <Input
-        id="picture"
-        type="file"
-        accept="image/*"
-        ref={inputFileRef}
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) handleImageUpload(file);
-        }}
-        className="hidden"
-      />
-      {errors.imageUrl && (
-        <p className="text-red-500 text-sm">{errors.imageUrl.message}</p>
-      )}
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>이메일</FormLabel>
+                <FormControl>
+                  <Input placeholder="example@clinic.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      {/* 숨겨진 위도/경도/imageUrl 필드 */}
-      <input type="hidden" {...register('latitude')} />
-      <input type="hidden" {...register('longitude')} />
-      <input type="hidden" {...register('imageUrl')} />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>비밀번호</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="8자 이상,대소문자,숫자,특수문자 포함"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      <Button type="submit" disabled={uploading || checking} className="w-full">
-        {uploading ? '업로드 중...' : checking ? '이메일 체크중' : '회원가입'}
-      </Button>
-    </form>
+          <Button
+            type="submit"
+            disabled={uploading || checking}
+            className="w-full"
+          >
+            {checking ? '이메일 확인 중...' : '회원가입'}
+          </Button>
+        </form>
+      </Form>
+
+      {hospitalModalOpen ? (
+        <LocationSearchModal
+          title="의료기관 위치 검색"
+          subtitle="의료기관명을 통해 검색하세요"
+          open={true}
+          onClose={() => setHospitalModalOpen(false)}
+          onSelect={handleHospitalSelect}
+        />
+      ) : null}
+    </>
   );
 }

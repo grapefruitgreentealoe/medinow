@@ -2,7 +2,6 @@ import {
   Controller,
   Post,
   Body,
-  HttpStatus,
   UseInterceptors,
   ClassSerializerInterceptor,
   Res,
@@ -16,7 +15,6 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import {
   ApiOperation,
   ApiBody,
-  ApiResponse,
   ApiTags,
   ApiCreatedResponse,
   ApiBadRequestResponse,
@@ -88,15 +86,46 @@ export class AuthController {
     @RequestOrigin() requestOrigin: string,
     @Res({ passthrough: true }) response: Response,
   ): Promise<LoginResponseDto> {
-    const { accessToken, accessOptions } = await this.authService.login(
-      loginDto,
-      requestOrigin,
-    );
+    const login = await this.authService.login(loginDto, requestOrigin);
 
-    response.cookie('accessToken', accessToken, accessOptions);
+    response.cookie('accessToken', login.accessToken, login.accessOptions);
 
     return plainToInstance(LoginResponseDto, {
       message: '로그인 성공',
+      email: login.email,
+      role: login.role,
+      userProfile: {
+        name: login.userProfile?.name,
+        nickname: login.userProfile?.nickname,
+        address: login.userProfile?.address,
+      },
+      careUnit: login.careUnit
+        ? {
+            name: login.careUnit?.name,
+            address: login.careUnit?.address,
+            tel: login.careUnit?.tel,
+            category: login.careUnit?.category,
+            mondayOpen: login.careUnit?.mondayOpen,
+            mondayClose: login.careUnit?.mondayClose,
+            tuesdayOpen: login.careUnit?.tuesdayOpen,
+            tuesdayClose: login.careUnit?.tuesdayClose,
+            wednesdayOpen: login.careUnit?.wednesdayOpen,
+            wednesdayClose: login.careUnit?.wednesdayClose,
+            thursdayOpen: login.careUnit?.thursdayOpen,
+            thursdayClose: login.careUnit?.thursdayClose,
+            fridayOpen: login.careUnit?.fridayOpen,
+            fridayClose: login.careUnit?.fridayClose,
+            saturdayOpen: login.careUnit?.saturdayOpen,
+            saturdayClose: login.careUnit?.saturdayClose,
+            sundayOpen: login.careUnit?.sundayOpen,
+            sundayClose: login.careUnit?.sundayClose,
+            holidayOpen: login.careUnit?.holidayOpen,
+            holidayClose: login.careUnit?.holidayClose,
+            isBadged: login.careUnit?.isBadged,
+            nowOpen: login.careUnit?.nowOpen,
+            departments: login.careUnit?.departments,
+          }
+        : null,
     });
   }
 

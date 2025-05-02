@@ -8,7 +8,6 @@ import {
 import { CareUnit } from '../entities/care-unit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, Raw, Like } from 'typeorm';
-import { ResponseCareUnitDto } from '../dto/response-care-unit.dto';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
 import {
   PaginatedResponse,
@@ -20,9 +19,7 @@ import { CongestionOneService } from 'src/modules/congestion/services/congestion
 import { User } from 'src/modules/users/entities/user.entity';
 import { FavoritesService } from 'src/modules/favorites/favorites.service';
 import { CustomLoggerService } from 'src/shared/logger/logger.service';
-import { CareUnitCategory } from 'src/common/enums/careUnits.enum';
 import { ExtendedCareUnit } from 'src/common/interfaces/extended-care-unit.interface';
-
 @Injectable()
 export class CareUnitService {
   private readonly EMERGENCY_API_URL = this.appConfigService.emergencyApiUrl;
@@ -48,6 +45,95 @@ export class CareUnitService {
     return this.careUnitRepository.findOne({ where: { id } });
   }
 
+  // careUnit 단일 조회 by id와 user (목록 조회와 같은 return 형식)
+  async getCareUnitDetailById(
+    id: string,
+    user?: User,
+  ): Promise<ExtendedCareUnit> {
+    const careUnit = await this.careUnitRepository.findOne({
+      where: { id },
+      relations: ['departments', 'reviews'],
+    });
+    if (!careUnit) {
+      throw new NotFoundException('조회된 의료기관이 없습니다');
+    }
+    // 응급실인 경우 혼잡도 데이터도 함께 반환
+    let congestionData = null;
+    if (careUnit.category === 'emergency') {
+      try {
+        congestionData = await this.congestionOneService
+          .getCongestion(careUnit.id)
+          .catch((error) => {
+            this.logger.error(
+              `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
+            );
+            return null;
+          });
+      } catch (error) {
+        const err = error as Error;
+        this.logger.error(
+          `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
+        );
+      }
+    }
+
+    const isOpen = await this.checkNowOpen(careUnit.id);
+
+    const adminUser = await this.usersService.getUserByCareUnitId(careUnit.id);
+
+    let isFavorite = false;
+    if (user && user.id) {
+      try {
+        isFavorite = await this.favoritesService.checkIsFavorite(
+          user.id,
+          careUnit.id,
+        );
+      } catch (error) {
+        const err = error as Error;
+        this.logger.error(`즐겨찾기 확인 중 오류: ${err.message}`);
+        isFavorite = false;
+      }
+    } else {
+      this.logger.log('사용자 정보 없음 - 즐겨찾기 확인 건너뜀');
+    }
+
+    const { favorites, reviews, ...restCareUnit } = careUnit;
+    return {
+      ...restCareUnit,
+      nowOpen: isOpen,
+      isChatAvailable: !!adminUser,
+      congestion: congestionData,
+      isFavorite: isFavorite,
+      averageRating: careUnit.averageRating,
+      reviewCount: careUnit.reviews.length || 0,
+      departments:
+        careUnit.departments.map((department) => {
+          return { id: department.id, name: department.name };
+        }) || [],
+    };
+  }
+
+  // 상세 정보 조회 + department by id
+  async getCareUnitDetailWithDepartment(id: string) {
+    const careUnit = await this.careUnitRepository.findOne({
+      where: { id },
+      relations: ['departments'],
+    });
+    if (!careUnit) {
+      throw new NotFoundException('조회된 의료기관이 없습니다');
+    }
+    const { departments, ...restCareUnit } = careUnit;
+    return {
+      ...restCareUnit,
+      departments: departments.map((department) => {
+        return {
+          id: department.id,
+          name: department.name,
+        };
+      }),
+    };
+  }
+
   //🏥 상세 정보 조회 by hpId & category
   async getCareUnitDetailByHpid(hpId: string, category?: string) {
     if (category) {
@@ -57,60 +143,40 @@ export class CareUnitService {
     }
   }
 
-  //🏥 위치, 주소, 이름 필터 조회
-  async findCareUnitByFilters(
-    lat: number,
-    lng: number,
-    address: string,
-    name: string,
-    category: string,
-  ) {
-    if (!lat || !lng || !address || !name || !category) {
-      throw new BadRequestException('입력값이 올바르지 않습니다');
-    }
+  //🏥 이름, 주소, 카테고리 필터 조회
+  async findCareUnitByFilters(name: string, address: string, category: string) {
+    const queryBuilder = this.careUnitRepository
+      .createQueryBuilder('careUnit')
+      .leftJoinAndSelect('careUnit.departments', 'departments');
 
-    const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
-
-    if (lat) {
-      const latPrefix = Math.floor(lat * 10) / 10;
-      queryBuilder.andWhere(`CAST(careUnit.lat AS TEXT) LIKE :lat`, {
-        lat: `${latPrefix}%`,
+    if (name) {
+      const nameParts = name.trim().split(/\s+/);
+      const searchConditions = nameParts.map((part, index) => {
+        return `careUnit.name LIKE :namePart${index}`;
       });
+      queryBuilder.andWhere(
+        `(${searchConditions.join(' OR ')})`,
+        nameParts.reduce(
+          (acc, part, index) => ({
+            ...acc,
+            [`namePart${index}`]: `%${part}%`,
+          }),
+          {},
+        ),
+      );
     } else {
-      throw new BadRequestException('위도 값이 없습니다');
-    }
-
-    if (lng) {
-      const lngPrefix = Math.floor(lng * 10) / 10;
-      queryBuilder.andWhere(`CAST(careUnit.lng AS TEXT) LIKE :lng`, {
-        lng: `${lngPrefix}%`,
-      });
-    } else {
-      throw new BadRequestException('경도 값이 없습니다');
+      throw new BadRequestException('병원 이름이 잘못되었습니다');
     }
 
     if (address) {
-      const addressParts = address.split(' ');
-      if (addressParts.length > 1) {
-        const remainingAddress = addressParts.slice(1).join(' ');
-        queryBuilder.andWhere('careUnit.address LIKE :address', {
-          address: `%${remainingAddress}%`,
+      const addressParts = address.trim().split(/\s+/);
+      addressParts.forEach((part, index) => {
+        queryBuilder.andWhere(`careUnit.address LIKE :part${index}`, {
+          [`part${index}`]: `%${part}%`,
         });
-      } else {
-        queryBuilder.andWhere('careUnit.address LIKE :address', {
-          address: `%${address}%`,
-        });
-      }
-    } else {
-      throw new BadRequestException('주소 값이 없습니다');
-    }
-
-    if (name) {
-      queryBuilder.andWhere('careUnit.name LIKE :name', {
-        name: `%${name}%`,
       });
     } else {
-      throw new BadRequestException('이름 값이 없습니다');
+      throw new BadRequestException('주소 값이 잘못되었습니다');
     }
 
     if (category) {
@@ -123,7 +189,21 @@ export class CareUnitService {
     if (!careUnit) {
       throw new NotFoundException('조회된 의료기관이 없습니다');
     }
-    return careUnit;
+    return {
+      id: careUnit.id,
+      name: careUnit.name,
+      address: careUnit.address,
+      departments:
+        careUnit.departments.map((department) => {
+          if (!department) {
+            return null;
+          }
+          return {
+            id: department.id,
+            name: department.name,
+          };
+        }) || null,
+    };
   }
 
   //🏥 상세 정보 조회 by 위치
@@ -159,6 +239,12 @@ export class CareUnitService {
 
     const queryBuilder = this.careUnitRepository.createQueryBuilder('careUnit');
 
+    // 거리 계산을 위한 서브쿼리 추가
+    queryBuilder.addSelect(
+      `POWER(careUnit.lat - :lat, 2) + POWER(careUnit.lng - :lng, 2)`,
+      'distance',
+    );
+
     // 거리 계산 (필요시 Haversine 공식 등 더 정확한 계산 방식 고려)
     queryBuilder
       .where('careUnit.lat BETWEEN :minLat AND :maxLat', {
@@ -168,7 +254,8 @@ export class CareUnitService {
       .andWhere('careUnit.lng BETWEEN :minLng AND :maxLng', {
         minLng: lng - 0.005 * level,
         maxLng: lng + 0.005 * level,
-      });
+      })
+      .setParameters({ lat, lng });
 
     // 카테고리 필터링
     if (category) {
@@ -184,26 +271,16 @@ export class CareUnitService {
           'favorites.userId = :userId',
           { userId: user.id },
         )
-        .orderBy('favorites.id', 'DESC') // 즐겨찾기 우선
+        .orderBy('favorites.id', 'ASC') // 즐겨찾기 우선
         .addOrderBy('careUnit.isBadged', 'DESC') // 배지 우선
-        .addOrderBy(
-          `ST_Distance(
-              ST_SetSRID(ST_MakePoint(careUnit.lng, careUnit.lat), 4326),
-              ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
-            )`,
-          'ASC',
-        );
+        // .addOrderBy('careUnit.nowOpen', 'DESC') // 운영중인 곳 우선
+        .addOrderBy('distance', 'ASC'); // 거리순
     } else {
       // 비로그인 사용자인 경우
       queryBuilder
         .orderBy('careUnit.isBadged', 'DESC') // 배지 우선
-        .addOrderBy(
-          `ST_Distance(
-              ST_SetSRID(ST_MakePoint(careUnit.lng, careUnit.lat), 4326),
-              ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
-            )`,
-          'ASC',
-        );
+        // .addOrderBy('careUnit.nowOpen', 'DESC') // 운영중인 곳 우선
+        .addOrderBy('distance', 'ASC'); // 거리순
     }
 
     // 페이지네이션
@@ -211,6 +288,7 @@ export class CareUnitService {
 
     const [careUnits, total] = await queryBuilder
       .leftJoinAndSelect('careUnit.departments', 'departments')
+      .leftJoinAndSelect('careUnit.reviews', 'reviews')
       .getManyAndCount();
 
     this.logger.log(
@@ -221,30 +299,31 @@ export class CareUnitService {
     try {
       const careUnitsWithStatus = await Promise.all(
         careUnits.map(async (careUnit) => {
+          // 자동 모드인 경우 운영 시간에 따라 계산
           const isOpen = await this.checkNowOpen(careUnit.id);
           const adminUser = await this.usersService
             .getUserByCareUnitId(careUnit.id)
             .catch(() => null);
 
           // 응급실인 경우 혼잡도 데이터도 함께 반환
-          // let congestionData = null;
-          // if (category === 'emergency' || careUnit.category === 'emergency') {
-          //   try {
-          //     congestionData = await this.congestionOneService
-          //       .getCongestion(careUnit.id)
-          //       .catch((error) => {
-          //         this.logger.error(
-          //           `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
-          //         );
-          //         return null;
-          //       });
-          //   } catch (error) {
-          //     const err = error as Error;
-          //     this.logger.error(
-          //       `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
-          //     );
-          //   }
-          // }
+          let congestionData = null;
+          if (category === 'emergency' || careUnit.category === 'emergency') {
+            try {
+              congestionData = await this.congestionOneService
+                .getCongestion(careUnit.id)
+                .catch((error) => {
+                  this.logger.error(
+                    `혼잡도 데이터 조회 실패 (${careUnit.name}): ${error.message}`,
+                  );
+                  return null;
+                });
+            } catch (error) {
+              const err = error as Error;
+              this.logger.error(
+                `혼잡도 데이터 조회 중 오류 (${careUnit.name}): ${err.message}`,
+              );
+            }
+          }
 
           // 사용자가 제공된 경우 즐겨찾기 정보 추가
           let isFavorite = false;
@@ -268,14 +347,19 @@ export class CareUnitService {
           } else {
             this.logger.log('사용자 정보 없음 - 즐겨찾기 확인 건너뜀');
           }
-
+          const { favorites, reviews, ...restCareUnit } = careUnit;
           return {
-            ...careUnit,
+            ...restCareUnit,
             nowOpen: isOpen,
             isChatAvailable: !!adminUser,
-            // congestion: congestionData,
+            congestion: congestionData,
             isFavorite: isFavorite,
-            departments: careUnit.departments || [],
+            averageRating: careUnit.averageRating,
+            reviewCount: careUnit.reviews.length || 0,
+            departments:
+              careUnit.departments.map((department) => {
+                return { id: department.id, name: department.name };
+              }) || [],
           };
         }),
       );
@@ -379,8 +463,20 @@ export class CareUnitService {
   async checkNowOpen(id: string) {
     const careUnit = await this.careUnitRepository.findOne({ where: { id } });
     if (!careUnit) {
-      throw new NotFoundException('Care unit not found');
+      throw new NotFoundException('의료기관을 찾을 수 없습니다.');
     }
+
+    // isReverse 필드가 있고 true인 경우 수동 설정값을 반환
+    if (careUnit.isReverse) {
+      return careUnit.nowOpen;
+    }
+
+    // 자동 모드인 경우 운영 시간에 따라 계산
+    return await this.calculateOpenStatus(careUnit);
+  }
+
+  // 운영 상태 계산 (자동 모드)
+  private async calculateOpenStatus(careUnit: CareUnit): Promise<boolean> {
     let open;
     let close;
     const date = new Date();
@@ -424,10 +520,53 @@ export class CareUnitService {
     return false;
   }
 
+  // 운영 모드 토글
+  async toggleOperationMode(userId: string, isReverse: boolean) {
+    const user = await this.usersService.findUserByIdWithRelations(userId);
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+    const careUnit = await this.careUnitRepository.findOne({
+      where: { id: user.userProfile?.careUnit?.id },
+    });
+    if (!careUnit) {
+      throw new NotFoundException('의료기관을 찾을 수 없습니다.');
+    }
+    if (isReverse) {
+      // 수동 모드로 전환하고 현재 상태를 반전
+      careUnit.nowOpen = !careUnit.nowOpen;
+      careUnit.isReverse = true;
+    } else {
+      // 자동 모드로 전환
+      careUnit.isReverse = false;
+      careUnit.nowOpen = await this.calculateOpenStatus(careUnit);
+    }
+
+    // 변경사항 저장
+    await this.careUnitRepository.save(careUnit);
+
+    return {
+      message: isReverse
+        ? careUnit.nowOpen
+          ? '수동으로 운영 중으로 설정되었습니다.'
+          : '수동으로 운영 종료로 설정되었습니다.'
+        : '자동 운영 모드로 전환되었습니다.',
+      isOpen: careUnit.nowOpen,
+      isReverse: careUnit.isReverse,
+    };
+  }
+
   // careUnit을 hpId와 카테고리로 조회하여 가져오기 (department 조회 시 사용)
   async getHospitalCareUnit(hpId: string, category: string) {
     return this.careUnitRepository.findOne({
       where: { hpId: hpId, category },
+    });
+  }
+
+  // 평균 평점 업데이트
+  async updateAverageRating(careUnitId: string, averageRating: number) {
+    await this.careUnitRepository.update(careUnitId, {
+      averageRating: Number(averageRating.toFixed(1)),
     });
   }
 }

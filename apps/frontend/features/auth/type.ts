@@ -16,12 +16,11 @@ export interface AdminSignupData {
   email: string;
   password: string;
   name: string;
-  latitude: number;
-  longitude: number;
+
   careUnitName: string;
   careUnitAddress: string;
   careUnitCategory: string;
-  imageUrl?: string;
+  // imageUrl?: string;
 }
 
 export interface SignupData {

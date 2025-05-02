@@ -2,13 +2,13 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   Param,
   Query,
   UseGuards,
+  Patch,
+  Body,
 } from '@nestjs/common';
 import { CareUnitService } from './services/care-unit.service';
-import { ResponseCareUnitDto } from './dto/response-care-unit.dto';
 import {
   ApiBody,
   ApiOperation,
@@ -29,6 +29,7 @@ import { RequestUser } from 'src/common/decorators/request-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DepartmentsService } from '../departments/departments.service';
+import { ReviewsService } from '../reviews/reviews.service';
 @ApiTags('의료기관')
 @Controller('care-units')
 export class CareUnitController {
@@ -37,6 +38,7 @@ export class CareUnitController {
     private readonly careUnitAdminService: CareUnitAdminService,
     private readonly congestionService: CongestionOneService,
     private readonly departmentsService: DepartmentsService,
+    private readonly reviewsService: ReviewsService,
   ) {}
 
   @Post('full')
@@ -373,6 +375,41 @@ export class CareUnitController {
     );
   }
 
+  @Get('exist')
+  @Public()
+  @ApiOperation({ summary: '사용자 : 기관 존재 여부 확인' })
+  @ApiQuery({
+    name: 'name',
+    required: true,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'address',
+    required: true,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'category',
+    required: true,
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공',
+    example: {
+      id: 'uuid-example',
+      name: '서울대학교병원',
+      address: '서울특별시 종로구 대학로 101',
+    },
+  })
+  async getCareUnitExist(
+    @Query('name') name: string,
+    @Query('address') address: string,
+    @Query('category') category: string,
+  ) {
+    return this.careUnitService.findCareUnitByFilters(name, address, category);
+  }
+
   @Get(':id')
   @Public()
   @ApiOperation({ summary: '사용자, 기관관리자 : Care Unit 상세 정보 조회' })
@@ -387,11 +424,11 @@ export class CareUnitController {
     description: '성공',
     type: CareUnit,
   })
-  async getCareUnitDetail(@Param('id') id: string): Promise<CareUnit | null> {
-    return this.careUnitService.getCareUnitDetail(id);
+  async getCareUnitDetail(@Param('id') id: string) {
+    return this.careUnitService.getCareUnitDetailById(id);
   }
 
-  @Post('check-now-open')
+  @Get('check-now-open/:id')
   @Public()
   @ApiOperation({ summary: '기관관리자 : 실시간 운영 여부 확인' })
   @ApiParam({
@@ -425,5 +462,52 @@ export class CareUnitController {
   })
   async getCongestion(@Param('id') id: string) {
     return this.congestionService.getCongestion(id);
+  }
+
+  @Get('reviews/:id')
+  @Public()
+  @ApiOperation({ summary: '사용자 : 특정 기관 리뷰 조회' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    type: String,
+    description: '기관 고유 아이디',
+    example: '46dcef6e-b986-4688-adea-04dd39fe8323',
+  })
+  @ApiOkResponse({
+    description: '성공',
+  })
+  async getReviewsByCareUnit(
+    @Param('id') id: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    const reviews = await this.reviewsService.getReviewsByCareUnitId(
+      id,
+      page,
+      limit,
+    );
+    return reviews;
+  }
+
+  @Patch('update-now-open')
+  @ApiOperation({ summary: '기관관리자 : 실시간 운영 여부 수동 설정' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        isReverse: { type: 'boolean' },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: String,
+  })
+  async updateNowOpen(
+    @RequestUser() user: User,
+    @Body('isReverse') isReverse: boolean,
+  ) {
+    return await this.careUnitService.toggleOperationMode(user.id, isReverse);
   }
 }
