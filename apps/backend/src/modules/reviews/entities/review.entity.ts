@@ -12,7 +12,7 @@ export class Review extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   thankMessage: string;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'float', default: 0 })
   rating: number;
 
   @Column({ type: 'boolean', default: true })

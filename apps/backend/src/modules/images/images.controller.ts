@@ -23,12 +23,15 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { RequestUser } from '../../common/decorators/request-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { Public } from '../auth/decorators/public.decorator';
-
+import { UsersService } from '../users/users.service';
 @ApiTags('이미지')
 @Controller('images')
 @ApiCookieAuth()
 export class ImagesController {
-  constructor(private readonly imagesService: ImagesService) {}
+  constructor(
+    private readonly imagesService: ImagesService,
+    private readonly usersService: UsersService,
+  ) {}
 
   // 사업자등록증 이미지 업로드
   @ApiOperation({ summary: '사업자등록증 이미지 업로드' })
@@ -78,8 +81,17 @@ export class ImagesController {
         throw new BadRequestException('이미지 업로드 실패');
       }
 
+      const IsUser = await this.usersService.findUserByEmail(user.email);
+
+      if (!IsUser) {
+        throw new BadRequestException('사용자를 찾을 수 없습니다.');
+      }
+
       // 이미지 업로드 후 사용자와 연결
-      await this.imagesService.createBusinessLicenseImage(imgUrl, user);
+      await this.imagesService.createBusinessLicenseImage(
+        imgUrl,
+        IsUser.userProfile,
+      );
 
       return { url: imgUrl };
     } catch (error: unknown) {

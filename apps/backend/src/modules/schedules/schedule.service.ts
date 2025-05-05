@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Schedule, ScheduleStatus } from './entities/schedule.entity';
 import { CareUnitAdminService } from '../care-units/services/care-unit-admin.service';
 import { DepartmentsService } from '../departments/departments.service';
+import { CustomLoggerService } from '../../shared/logger/logger.service';
 
 @Injectable()
 // export class ScheduleService {
@@ -13,40 +14,28 @@ export class ScheduleService implements OnModuleInit {
     private readonly scheduleRepository: Repository<Schedule>,
     private readonly careUnitAdminService: CareUnitAdminService,
     private readonly departmentsService: DepartmentsService,
+    private readonly logger: CustomLoggerService,
   ) {}
 
   onModuleInit() {
-    console.log('🚀🚀🚀 ScheduleService onModuleInit 호출됨');
-    console.log('현재 시간:', new Date().toISOString());
-    console.log('3초 후에 데이터 초기화 실행 예정');
+    if (process.env.NODE_ENV !== 'production') {
+      return;
+    }
 
-    setTimeout(() => {
-      console.log('⏰ 타이머 실행됨 -', new Date().toISOString());
-      this.initializeData().catch((error) => {
-        console.error('❌ 초기 데이터 저장 실패:', error);
-      });
-    }, 3000); // 서버 시작 후 3초 후에 실행
+    this.initializeData();
   }
 
   // 서버 시작 시 초기 데이터 저장
   async initializeData() {
-    console.log('🚀 ScheduleService initialData 시작');
     try {
-      // 1. 의료기관 데이터 저장
-      console.log('1️⃣ 의료기관 데이터 저장 시작');
       const careUnitResult = await this.careUnitAdminService.saveAllCareUnits();
       console.log('✅ 의료기관 데이터 저장 완료:', careUnitResult);
 
-      // 2. 5초 대기 후 진료과목 데이터 저장
-      console.log('⏳ 3초 대기 후 진료과목 데이터 저장 시작');
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      console.log('2️⃣ 진료과목 데이터 저장 시작');
       const departmentResult =
         await this.departmentsService.saveHospitalDepartments();
       console.log('✅ 진료과목 데이터 저장 완료:', departmentResult);
 
-      // 3. 스케줄 저장
+      // 스케줄 저장
       await this.scheduleRepository.save({
         scheduleName: 'INITIAL_DATA_LOAD',
         status: ScheduleStatus.COMPLETED,
@@ -60,6 +49,7 @@ export class ScheduleService implements OnModuleInit {
       });
 
       console.log('🎉 모든 초기 데이터 저장 완료');
+      this.logger.log('🎉 모든 초기 데이터 저장 완료');
       return {
         status: 'success',
         message: '초기 데이터 저장 완료',
@@ -67,6 +57,7 @@ export class ScheduleService implements OnModuleInit {
     } catch (error) {
       const err = error as Error;
       console.error('❌ 초기 데이터 저장 실패:', err);
+      this.logger.error('❌ 초기 데이터 저장 실패:', err.message);
       await this.scheduleRepository.save({
         scheduleName: 'INITIAL_DATA_LOAD',
         status: ScheduleStatus.FAILED,

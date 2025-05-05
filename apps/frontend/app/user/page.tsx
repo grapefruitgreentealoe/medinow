@@ -1,26 +1,79 @@
-import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
+'use client';
 
-interface DecodedToken {
-  role: string;
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import axiosInstance from '@/lib/axios';
+import { Card, CardContent } from '@/components/ui/card';
+
+interface User {
   email: string;
+  name: string;
+  address: string;
+  age: number;
 }
 
-export default async function UserPage() {
-  const cookieStore = await cookies();
-  const token = Array.from(cookieStore)[0][1].value;
+export default function UserProfilePage() {
+  const [user, setUser] = useState<User | null>(null);
 
-  let role = null;
-  let email = null;
+  useEffect(() => {
+    axiosInstance
+      .get('/users', { withCredentials: true })
+      .then((res) => setUser(res.data.user))
+      .catch(() => setUser(null));
+  }, []);
 
-  const decoded = jwt.decode(token) as DecodedToken;
-  role = decoded.role;
-  email = decoded.email;
+  useEffect(() => {
+    const setVh = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+    setVh();
+    window.addEventListener('resize', setVh);
+    return () => window.removeEventListener('resize', setVh);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  if (!user) {
+    return (
+      <div className="space-y-4 flex flex-col w-full gap-[20px] !p-[20px] !m-[20px]">
+        <Skeleton className="h-[60px] w-full" />
+        <Skeleton className="h-[60px] w-full" />
+        <Skeleton className="h-[60px] w-full" />
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h1>안녕하세요, {role}님</h1>
-      <p>이메일: {email}</p>
-    </div>
+    <Card className="max-w-5xl !m-[20px] !mx-auto max-md:!mx-[10px]">
+      <CardContent>
+        <div className="h-auto flex flex-col gap-[20px]">
+          <div className="h-[60px] w-full">
+            <p className="text-sm text-muted-foreground">이메일</p>
+            <p className="font-medium">{user.email}</p>
+          </div>
+          <div className="h-[60px] w-full">
+            <p className="text-sm text-muted-foreground">이름</p>
+            <p className="font-medium">{user.name}</p>
+          </div>
+          <div className="h-[60px] w-full">
+            <p className="text-sm text-muted-foreground">나이</p>
+            <p className="font-medium">{user.age}</p>
+          </div>
+          <div className="h-[60px] w-full">
+            <p className="text-sm text-muted-foreground">주소</p>
+            <p className="font-medium">{user.address}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

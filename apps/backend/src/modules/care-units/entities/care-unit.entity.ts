@@ -86,8 +86,14 @@ export class CareUnit extends BaseEntity {
   @Column({ default: true })
   nowOpen: boolean;
 
+  @Column({ default: false })
+  isReverse: boolean;
+
   @Column({ nullable: true })
   kakaoUrl: string;
+
+  @Column({ type: 'float', default: 0 })
+  averageRating: number;
 
   @OneToOne(() => UserProfile, (userProfile) => userProfile.careUnit, {
     nullable: true,

@@ -1,5 +1,5 @@
 import axiosInstance from '@/lib/axios';
-import { CareUnit } from './type';
+import { CareUnit } from '../../shared/type';
 
 interface LocationByCategoryData {
   lat: number;
@@ -23,7 +23,6 @@ export const locationByCategory = async (
 };
 
 export const toggleFavorite = async (careUnitId: string) => {
-  console.log(careUnitId);
   const res = await axiosInstance.post('/favorites', {
     careUnitId,
   });

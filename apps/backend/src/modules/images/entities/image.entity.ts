@@ -17,13 +17,6 @@ export class Image extends BaseEntity {
   @Column({ type: 'enum', enum: ImageType, nullable: true })
   type: ImageType | null;
 
-  @ManyToOne(() => User, (user) => user.images, {
-    nullable: true,
-    onDelete: 'SET NULL',
-  })
-  @JoinColumn()
-  user: User | null;
-
   @OneToOne(() => UserProfile, (userProfile) => userProfile.image, {
     nullable: true,
     onDelete: 'SET NULL',

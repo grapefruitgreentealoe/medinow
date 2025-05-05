@@ -22,14 +22,23 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: Request) => request?.cookies?.accessToken,
-        ExtractJwt.fromAuthHeaderAsBearerToken(),
         (request: Request) => {
-          const socket = (request as any).handshake.query.token;
-          if (!socket) return null;
-          const cookie = JSON.parse(socket);
-          if (!cookie?.accessToken) return null;
-          return cookie.accessToken;
+          // 1. 쿠키
+          if (request?.cookies?.accessToken) {
+            return request.cookies.accessToken;
+          }
+
+          // 2. WebSocket handshake - auth 방식 (Socket.IO 권장)
+          if ((request as any)?.handshake?.auth?.token) {
+            return (request as any).handshake.auth.token;
+          }
+
+          // 3. WebSocket handshake - query 방식 (비권장)
+          if ((request as any)?.handshake?.query?.token) {
+            return (request as any).handshake.query.token;
+          }
+
+          return null;
         },
       ]),
       ignoreExpiration: false,
@@ -55,10 +64,9 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, 'jwt') {
       }
 
       return plainToInstance(User, user);
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : '알 수 없는 오류';
-      throw error;
+    } catch (error: any) {
+      const err = error as Error;
+      throw new UnauthorizedException(err.message);
     }
   }
 }

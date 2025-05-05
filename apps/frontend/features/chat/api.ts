@@ -1,11 +1,17 @@
 import axiosInstance from '@/lib/axios';
-import { CareUnit } from '../map/type';
+import { CareUnit, User } from '@/shared/type';
 
 export interface ChatRoom {
   id: string;
-  target: CareUnit;
   createdAt: string;
   updatedAt: string;
+  deletedAt: string | null;
+  lastMessageAt: string | null;
+  unreadCount: number;
+  lastReadAt: string | null;
+  isActive: boolean;
+  user: User;
+  careUnit: CareUnit;
 }
 
 export const getChatRooms = async (): Promise<ChatRoom[]> => {

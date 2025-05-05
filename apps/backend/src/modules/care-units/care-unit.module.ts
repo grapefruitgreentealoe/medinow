@@ -13,7 +13,7 @@ import { UsersModule } from '../users/users.module';
 import { FavoritesModule } from '../favorites/favorites.module';
 import { DepartmentsModule } from '../departments/departments.module';
 import { Favorite } from '../favorites/entities/favorite.entity';
-
+import { ReviewsModule } from '../reviews/reviews.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([CareUnit, Department, Favorite]),
@@ -24,6 +24,7 @@ import { Favorite } from '../favorites/entities/favorite.entity';
     forwardRef(() => CongestionModule),
     forwardRef(() => FavoritesModule),
     forwardRef(() => DepartmentsModule),
+    forwardRef(() => ReviewsModule),
   ],
   controllers: [CareUnitController],
   providers: [CareUnitService, CareUnitAdminService],
