@@ -76,7 +76,7 @@ export default function Header() {
           </span>
         </Link>
 
-        {isLoggedIn !== null ? (
+        {isLoggedIn !== null && (
           <nav className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -143,7 +143,7 @@ export default function Header() {
               )}
             </div>
           </nav>
-        ) : null}
+        )}
       </div>
 
       {/* 모바일 햄버거 버튼 */}

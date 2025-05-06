@@ -93,7 +93,7 @@ export function SearchCareUnitForReview() {
           </Card>
         )}
       </div>
-      {modalOpen ? (
+      {modalOpen && (
         <LocationSearchModal
           title="의료기관 위치 검색"
           subtitle="의료기관명을 입력하세요"
@@ -101,7 +101,7 @@ export function SearchCareUnitForReview() {
           onClose={() => setModalOpen(false)}
           onSelect={handleSelect}
         />
-      ) : null}
+      )}
     </div>
   );
 }
