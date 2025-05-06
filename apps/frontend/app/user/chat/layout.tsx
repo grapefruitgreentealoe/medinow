@@ -61,13 +61,13 @@ export default function ChatLayout({
   useEffect(() => {
     if (careUnitId && !id) {
       fetchSelectedUnit(careUnitId);
-    } else if (id) {
+    } else if (id && roomList.length > 0) {
       const selectedRoom = roomList.find((room) => room.id === id);
       if (selectedRoom) {
         fetchSelectedUnit(selectedRoom.careUnit.id);
       }
     }
-  }, [id, careUnitId]);
+  }, [id, careUnitId, roomList]);
 
   const onSelectRoom = ({
     roomId,
