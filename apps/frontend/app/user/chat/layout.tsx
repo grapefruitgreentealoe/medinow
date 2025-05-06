@@ -84,7 +84,7 @@ export default function ChatLayout({
 
   return (
     <div
-      className="relative flex !overflow-y-hidden"
+      className="relative flex !overflow-y-hidden scrollbar-hide"
       style={{ height: 'calc(var(--vh, 1vh) * 100 - 61px)' }}
     >
       {/* 왼쪽 - 채팅방 목록 */}
@@ -155,7 +155,7 @@ export default function ChatLayout({
             <SheetTitle>의료기관 정보</SheetTitle>
           </SheetHeader>
 
-          <div className="h-[calc(100%-64px)] overflow-y-hidden p-4">
+          <div className="h-[calc(100%-64px)] p-4">
             {(id || careUnitId) && selectedUnit ? (
               <HospitalSimpleCard unit={selectedUnit} />
             ) : (
