@@ -177,7 +177,7 @@ export function HospitalSimpleCard({ unit }: HospitalSimpleCardProps) {
         </AccordionItem>
       </Accordion>
 
-      <Separator />
+      {/* <Separator /> */}
 
       {/* 방문자 리뷰 */}
       <div className="flex items-center gap-2 !pt-6">

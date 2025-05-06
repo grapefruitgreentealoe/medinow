@@ -83,10 +83,7 @@ export default function ChatLayout({
   if (loading) return <div>로딩중...</div>;
 
   return (
-    <div
-      className="relative flex !overflow-y-hidden scrollbar-hide"
-      style={{ height: 'calc(var(--vh, 1vh) * 100 - 61px)' }}
-    >
+    <div className="relative flex !overflow-y-hidden scrollbar-hide h-[calc(100vh-64px)]">
       {/* 왼쪽 - 채팅방 목록 */}
       <div
         className={cn(
@@ -150,12 +147,15 @@ export default function ChatLayout({
         </SheetTrigger>
 
         {/* 열리는 컨텐츠 */}
-        <SheetContent side="right" className="w-3/4 p-0">
+        <SheetContent
+          side="right"
+          className="w-3/4 p-0 flex flex-col max-h-screen"
+        >
           <SheetHeader className="p-4">
             <SheetTitle>의료기관 정보</SheetTitle>
           </SheetHeader>
 
-          <div className="h-[calc(100%-64px)] p-4">
+          <div className="flex-1 overflow-y-auto p-4">
             {(id || careUnitId) && selectedUnit ? (
               <HospitalSimpleCard unit={selectedUnit} />
             ) : (

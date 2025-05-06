@@ -55,10 +55,7 @@ export default function ChatLayout({
   if (loading) return <div>로딩중...</div>;
 
   return (
-    <div
-      className="flex !overflow-y-hidden scrollbar-hide"
-      style={{ height: 'calc(var(--vh, 1vh) * 100 - 61px)' }}
-    >
+    <div className="flex !overflow-y-hidden scrollbar-hide h-[calc(100vh-64px)]">
       <div
         className={cn(
           'w-1/3 border-r',
