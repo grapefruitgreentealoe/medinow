@@ -164,7 +164,7 @@ export default function AdminSignupForm() {
             )}
           />
 
-          {form.getValues('careUnitAddress') ? (
+          {form.getValues('careUnitAddress') && (
             <FormField
               control={form.control}
               name="careUnitName"
@@ -183,7 +183,7 @@ export default function AdminSignupForm() {
                 </FormItem>
               )}
             />
-          ) : null}
+          )}
 
           <FormField
             control={form.control}
@@ -269,7 +269,7 @@ export default function AdminSignupForm() {
         </form>
       </Form>
 
-      {hospitalModalOpen ? (
+      {hospitalModalOpen && (
         <LocationSearchModal
           title="의료기관 위치 검색"
           subtitle="의료기관명을 통해 검색하세요"
@@ -277,7 +277,7 @@ export default function AdminSignupForm() {
           onClose={() => setHospitalModalOpen(false)}
           onSelect={handleHospitalSelect}
         />
-      ) : null}
+      )}
     </>
   );
 }

@@ -141,14 +141,14 @@ export default function AdminUserProfilePage() {
                 label="현재 운영 상태"
                 value={isOpen ? '운영 중' : '운영 중 아님'}
               />
-              {isReverse ? (
+              {isReverse && (
                 <Badge
                   variant={isReverse ? 'secondary' : 'default'}
                   className="inline-block"
                 >
                   {'수동 전환 됨'}
                 </Badge>
-              ) : null}
+              )}
             </div>
             <p className="text-sm text-muted-foreground !mb-[5px]">
               수동 전환 버튼

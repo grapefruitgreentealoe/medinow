@@ -24,6 +24,7 @@ import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CareUnitCardLayout } from '@/shared/ui/CardLayout';
+import { CopyLinkButton } from '@/shared/ui/CopyLinkButton';
 
 interface CareUnitCardProps {
   unit: CareUnit;
@@ -133,7 +134,6 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
               <Star size={18} />
             )}
           </Button>
-
           {unit.isChatAvailable && (
             <Button
               size="icon"
@@ -147,7 +147,6 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
               <MessageSquare className="text-blue-500" size={18} />
             </Button>
           )}
-
           <Button
             size="icon"
             variant="ghost"
@@ -159,7 +158,7 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
           >
             <PencilIcon className="text-blue-500" size={18} />
           </Button>
-
+          <CopyLinkButton careUnitId={unit.id} />
           {unit.tel && (
             <a href={`tel:${unit.tel}`}>
               <Button

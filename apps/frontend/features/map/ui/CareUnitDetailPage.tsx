@@ -31,6 +31,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { renderTodayTime } from '../utils';
 import { useRenderTimeRow } from '@/shared/model/useRenderTimeRow';
 import { HospitalTimeTable } from '@/shared/ui/HospitalTimeTable';
+import { CopyLinkButton } from '@/shared/ui/CopyLinkButton';
 export default function CareUnitDetailPage() {
   const router = useRouter();
   const [unit] = useAtom(selectedCareUnitAtom);
@@ -109,6 +110,7 @@ export default function CareUnitDetailPage() {
           >
             <PencilIcon className="text-blue-500" size={18} />
           </Button>
+          <CopyLinkButton careUnitId={unit.id} />
           {unit.tel && (
             <Button
               size="icon"

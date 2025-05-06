@@ -112,7 +112,7 @@ export default function ReviewPaginationPage() {
         ctaText="확인"
         onCtaClick={() => setDetailReview(null)}
       >
-        {detailReview ? (
+        {detailReview && (
           <ReviewBody
             nickname={detailReview.nickname}
             rating={detailReview.rating}
@@ -120,7 +120,7 @@ export default function ReviewPaginationPage() {
             createdAt={detailReview.createdAt}
             thankMessage={detailReview.thankMessage}
           />
-        ) : null}
+        )}
       </ContentDialog>
 
       {isFetching && (

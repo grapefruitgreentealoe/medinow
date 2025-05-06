@@ -56,7 +56,7 @@ export default function ChatLayout({
 
   return (
     <div
-      className="flex !overflow-y-hidden"
+      className="flex !overflow-y-hidden scrollbar-hide"
       style={{ height: 'calc(var(--vh, 1vh) * 100 - 61px)' }}
     >
       <div

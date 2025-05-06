@@ -170,7 +170,7 @@ export default function SignupForm() {
           </Button>
         </form>
       </Form>
-      {modalOpen ? (
+      {modalOpen && (
         <LocationSearchModal
           title="주소 검색"
           subtitle="키워드를 통해 검색하세요"
@@ -181,7 +181,7 @@ export default function SignupForm() {
             setModalOpen(false);
           }}
         />
-      ) : null}
+      )}
     </>
   );
 }

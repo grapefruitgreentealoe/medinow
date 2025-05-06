@@ -42,9 +42,9 @@ export function ReviewBody({
   };
   return (
     <div className="!space-y-2">
-      {nickname ? (
+      {nickname && (
         <div className="text-sm text-muted-foreground">{nickname}</div>
-      ) : null}
+      )}
       {/* 작성일 */}
       <div className="text-xs text-muted-foreground mt-4">
         {new Date(createdAt).toLocaleDateString('ko-KR')}
