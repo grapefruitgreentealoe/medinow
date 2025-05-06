@@ -21,7 +21,6 @@
 ## 📂 작업 디렉토리
 
 - [ ] frontend
-- [ ] backend
 - [ ] shared
 - [ ] config (eslint, tsconfig 등)
 
