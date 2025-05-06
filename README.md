@@ -14,19 +14,15 @@ medinow/
 │   └── common-variables.yml          # 공통 변수 설정 yml
 │
 ├── apps/
-│   ├── frontend/             # Next.js 기반 프론트엔드
-│   │   └── .env.local        # 로컬 개발용
-│   └── backend/              # NestJS 기반 백엔드
-│       └── .env.local
+│   └──  frontend/             # Next.js 기반 프론트엔드
+│      └── .env.local        # 로컬 개발용
+
 ├── packages/
 │   ├── shared/               # 실행 코드에서 사용하는 공통 타입, 상수, 이벤트
 │   ├── eslint-config-custom/ # ESLint 공통 설정 패키지
 │   └── tsconfig/             # TypeScript base 설정
 ├── scripts                   # VM에서 사용되는 배포 스크립트(실행이나 배포용X 아카이브용)
 ├── .env.frontend             # Docker용 프론트 env
-├── .env.backend              # Docker용 백엔드 env
-├── .env.frontend.template    # 프론트 env 템플릿 (Git에 포함)
-├── .env.backend.template     # 백엔드 env 템플릿 (Git에 포함)
 ├── .env.template             # 전체 공통 샘플 (선택)
 ├── turbo.json                # Turborepo pipeline 설정
 ├── pnpm-workspace.yaml       # pnpm workspace 구성
@@ -46,7 +42,7 @@ medinow/
   "build": "turbo run build",
   "lint": "turbo run lint",
   "test": "turbo run test",
-  "setup:env": "cp .env.frontend.template .env.frontend && cp .env.backend.template .env.backend"
+  "setup:env": "cp .env.frontend.template .env.frontend"
 }
 ```
 
@@ -65,17 +61,6 @@ pnpm setup:env
 NEXT_PUBLIC_API_URL=http://localhost:3001
 NEXT_PUBLIC_KAKAO_MAP_KEY=your-kakao-key
 ```
-
-**백엔드 (`.env.backend`) 예시:**
-
-```env
-JWT_SECRET=your-secret
-DATABASE_URL=postgres://user:pass@localhost:5432/medinow
-REDIS_URL=redis://localhost:6379
-```
-
-> `.env.frontend.template`, `.env.backend.template`는 Git에 포함  
-> 실제 `.env.frontend`, `.env.backend`, `.env.local`은 Git에 무시됨
 
 ---
 
@@ -101,7 +86,7 @@ REDIS_URL=redis://localhost:6379
 
 - ESLint + Prettier + TSConfig 통합
 - 모든 앱은 `eslint-config-custom`, `tsconfig/base.json`을 확장하여 사용
-- `apps/frontend`, `apps/backend` 내부에서 각각 다음처럼 작성:
+- `apps/frontend`, `apps/*` 내부에서 각각 다음처럼 작성:
 
 ```js
 // .eslintrc.js
@@ -126,7 +111,6 @@ module.exports = {
 | --------- | ---------------------------------------------------- |
 | Monorepo  | Turborepo, pnpm                                      |
 | Frontend  | Next.js, Tailwind, Recoil, socket.io-client          |
-| Backend   | NestJS, TypeORM, Swagger, Redis(pub/sub), PostgreSQL |
 | Dev Tools | ESLint, Prettier, husky, lint-staged, GitLab CI/CD   |
 | 배포      | Docker, docker-compose, GitLab SSH 배포              |
 
