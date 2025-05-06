@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { HeartPulseIcon, Menu } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
 import { ROUTES } from '@/shared/constants/routes';
 import axiosInstance from '@/lib/axios';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { isLoggedInAtom, userRoleAtom } from '@/atoms/auth';
 
 import {
   Sheet,
@@ -15,44 +16,20 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-type Role = 'user' | 'admin';
-
-interface User {
-  id: string;
-  email: string;
-  role: Role;
-  userProfile: {
-    name: string;
-    nickname: string;
-  };
-}
-
-declare global {
-  interface Window {
-    __INITIAL_IS_LOGGED_IN__?: boolean;
-    __USER_ROLE__?: string;
-  }
-}
 
 export default function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<string>('');
+  const isLoggedIn = useAtomValue(isLoggedInAtom);
+  const role = useAtomValue(userRoleAtom);
+  const setIsLoggedIn = useSetAtom(isLoggedInAtom);
 
-  useEffect(() => {
-    const isInitLoggedIn = window.__INITIAL_IS_LOGGED_IN__ ?? false;
-    const userRole = window.__USER_ROLE__ ?? '';
-    setIsLoggedIn(isInitLoggedIn);
-    setRole(userRole);
-  }, []);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
       await axiosInstance.post('/auth/logout', null, {
         withCredentials: true,
       });
-      window.__INITIAL_IS_LOGGED_IN__ = false;
+      setIsLoggedIn(false); // 상태 업데이트
       location.reload();
     } catch (e) {
       console.error('Logout failed', e);
@@ -67,6 +44,7 @@ export default function Header() {
         { href: ROUTES.LOGIN, label: '로그인' },
       ];
     }
+
     if (role === 'admin') {
       return [
         { href: ROUTES.ADMIN.DASHBOARD, label: '관리자 대시보드' },
@@ -107,7 +85,7 @@ export default function Header() {
             >
               <Menu size={24} />
             </Button>
-            {/* 데스크탑: 로그인 상태에 따라 버튼 분기 */}
+
             <div className="hidden lg:flex gap-[20px]">
               {isLoggedIn ? (
                 <>

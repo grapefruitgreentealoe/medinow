@@ -17,10 +17,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useSetAtom } from 'jotai';
+import { isLoggedInAtom } from '@/atoms/auth';
 
 type FormData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
+  const setIsLoggedIn = useSetAtom(isLoggedInAtom);
   const form = useForm<FormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -38,11 +41,7 @@ export default function LoginForm() {
   const onSubmit = async (data: FormData) => {
     try {
       await login(data);
-
-      if (typeof window !== 'undefined') {
-        window.__INITIAL_IS_LOGGED_IN__ = true;
-      }
-
+      setIsLoggedIn(true);
       toast.success('로그인에 성공했어요!');
       setTimeout(() => {
         location.href = '/';
