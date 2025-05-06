@@ -12,7 +12,7 @@ export function ChatLayout({
   right: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen scrollbar-hide">
       <aside className="w-[20%] border-r border-gray-200">
         <ScrollArea className="h-full">{left}</ScrollArea>
       </aside>
