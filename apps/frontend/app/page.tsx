@@ -1,16 +1,21 @@
 import { getCareUnitById } from '@/shared/api';
 import type { Metadata, ResolvingMetadata } from 'next';
 import dayjs from 'dayjs';
+import HomePageClient from '@/features/map/ui/HomePage';
 
-export async function generateMetadata(
-  {
-    searchParams,
-  }: { searchParams: Record<string, string | string[] | undefined> },
-  _parent: ResolvingMetadata
-): Promise<Metadata> {
-  const careUnitId = searchParams?.careUnitId;
+// 1. 타입 정의
+type Props = {
+  searchParams: Record<string, string | string[] | undefined>;
+};
+
+// 2. 동적 메타데이터 생성
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
+  const { careUnitId } = await searchParams;
   if (typeof careUnitId !== 'string') return fallbackMeta;
 
+  const unit = await getCareUnitById(careUnitId);
   try {
     const unit = await getCareUnitById(careUnitId);
 
@@ -74,4 +79,8 @@ function formatTime(value: number): string {
   const hour = Math.floor(value / 100);
   const minute = value % 100;
   return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+export default function Page() {
+  return <HomePageClient />;
 }
