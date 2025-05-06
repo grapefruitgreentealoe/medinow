@@ -2,20 +2,14 @@ import { getCareUnitById } from '@/shared/api';
 import type { Metadata, ResolvingMetadata } from 'next';
 import dayjs from 'dayjs';
 import HomePageClient from '@/features/map/ui/HomePage';
+import { PageProps } from '@/.next/types/app/page';
 
-// 1. 타입 정의
-type Props = {
-  searchParams: Record<string, string | string[] | undefined>;
-};
-
-// 2. 동적 메타데이터 생성
+// 동적 메타데이터 생성
 export async function generateMetadata({
   searchParams,
-}: Props): Promise<Metadata> {
+}: PageProps): Promise<Metadata> {
   const { careUnitId } = await searchParams;
   if (typeof careUnitId !== 'string') return fallbackMeta;
-
-  const unit = await getCareUnitById(careUnitId);
   try {
     const unit = await getCareUnitById(careUnitId);
 
