@@ -26,6 +26,7 @@ import {
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/shared/constants/routes';
 import { renderTodayTime } from '@/features/map/utils';
+import { CopyLinkButton } from './CopyLinkButton';
 
 interface HospitalSimpleCardProps {
   unit: CareUnit;
@@ -89,6 +90,7 @@ export function HospitalSimpleCard({ unit }: HospitalSimpleCardProps) {
           >
             <PencilIcon className="text-blue-500" size={18} />
           </Button>
+          <CopyLinkButton careUnitId={unit.id} />
           {unit.tel && (
             <a href={`tel:${unit.tel}`}>
               <Button size="icon" variant="ghost" className="w-8 h-8">

@@ -18,6 +18,7 @@ import {
   PencilIcon,
 } from 'lucide-react';
 import { CareUnitCardLayout } from '@/shared/ui/CardLayout';
+import { CopyLinkButton } from '@/shared/ui/CopyLinkButton';
 
 interface CareUnitCardProps {
   unit: CareUnit;
@@ -140,7 +141,7 @@ export function CareUnitCard({
           >
             <PencilIcon className="text-blue-500" size={18} />
           </Button>
-
+          <CopyLinkButton careUnitId={unit.id} />
           {unit.tel && (
             <a href={`tel:${unit.tel}`}>
               <Button
