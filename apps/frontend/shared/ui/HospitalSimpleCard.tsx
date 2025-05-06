@@ -33,12 +33,6 @@ interface HospitalSimpleCardProps {
 
 export function HospitalSimpleCard({ unit }: HospitalSimpleCardProps) {
   const router = useRouter();
-  const [isFavorite, setIsFavorite] = useState(unit.isFavorite);
-
-  const handleFavorite = () => {
-    setIsFavorite((prev) => !prev);
-    // 여기서 바로 toggleFavorite API 호출 가능 (필요 시 추가)
-  };
 
   const handleChat = (e: React.MouseEvent<HTMLButtonElement>) => {
     // 의료기관 채팅 연결 로직 (필요 시 추가)
