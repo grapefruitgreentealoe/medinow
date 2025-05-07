@@ -3,11 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChatRoomList } from '@/features/chat/ui/ChatRoomList';
-import { HospitalSimpleCard } from '@/shared/ui/HospitalSimpleCard';
 import { RoomInfo } from '@/features/chat/type';
 import { getChatRooms } from '@/features/chat/api';
-import { getCareUnitById } from '@/shared/api';
-import { CareUnit } from '@/shared/type';
 import { cn } from '@/lib/utils';
 
 export default function ChatLayout({
@@ -27,7 +24,6 @@ export default function ChatLayout({
     const fetchRooms = async () => {
       try {
         const res = await getChatRooms();
-        setSelectedRoomId(id);
         setRoomList(res);
       } catch (error) {
         console.error('방 목록 불러오기 실패', error);
@@ -41,11 +37,9 @@ export default function ChatLayout({
 
   const onSelectRoom = ({
     roomId,
-    selectedUnitId,
     userId,
   }: {
     roomId: string;
-    selectedUnitId: string;
     userId: string;
   }) => {
     router.push(`/admin/chat?id=${roomId}`);
