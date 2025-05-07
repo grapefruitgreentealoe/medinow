@@ -15,7 +15,7 @@ export function CopyLinkButton({ careUnitId }: CopyLinkButtonProps) {
       e.stopPropagation();
 
       try {
-        const url = new URL(window.location.href);
+        const url = new URL(window.location.origin);
         url.searchParams.set('careUnitId', careUnitId);
 
         navigator.clipboard.writeText(url.toString()).then(() => {

@@ -1,24 +1,15 @@
 'use client';
 
 import { CareUnit, CongestionLevel } from '@/shared/type';
-import { useAtomValue, useSetAtom } from 'jotai';
-import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
+import { useSetAtom } from 'jotai';
 import { unfavoriteConfirmUnitAtom } from '../atoms/unfavoriteConfirmModalAtom';
 import { openKakaoMap, renderTodayTime } from '@/features/map/utils';
 import { CATEGORY_LABEL, congestionClassMap } from '@/shared/constants/const';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { ROUTES } from '@/shared/constants/routes';
 import { Badge } from '@/components/ui/badge';
-import {
-  Star,
-  StarOff,
-  MessageSquare,
-  PhoneCallIcon,
-  PencilIcon,
-} from 'lucide-react';
 import { CareUnitCardLayout } from '@/shared/ui/CardLayout';
-import { CopyLinkButton } from '@/shared/ui/CopyLinkButton';
+import { CareUnitMoreMenu } from '@/shared/ui/CareUnitMoreMenu';
 
 interface CareUnitCardProps {
   unit: CareUnit;
@@ -33,7 +24,6 @@ export function CareUnitCard({
   onConfirmUnfavorite,
 }: CareUnitCardProps) {
   const setConfirmUnit = useSetAtom(unfavoriteConfirmUnitAtom);
-  const setChat = useSetAtom(chatModalAtom);
   const router = useRouter();
 
   const handleFavoriteButton = (e: React.MouseEvent) => {
@@ -102,59 +92,7 @@ export function CareUnitCard({
         </div>
 
         {/* 오른쪽 버튼 */}
-        <div className="flex gap-2 items-center">
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={handleFavoriteButton}
-            className="w-8 h-8"
-          >
-            {unit.isFavorite ? (
-              <Star className="text-yellow-500 fill-yellow-500" size={18} />
-            ) : (
-              <Star size={18} />
-            )}
-          </Button>
-
-          {unit.isChatAvailable && (
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                setChat({ isOpen: true, target: unit });
-                router.push(ROUTES.USER.CHAT(unit.id));
-              }}
-              className="w-8 h-8"
-            >
-              <MessageSquare className="text-blue-500" size={18} />
-            </Button>
-          )}
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(ROUTES.USER.WRITE_REVIEW + `?careUnitId=${unit.id}`);
-            }}
-            className="w-8 h-8"
-          >
-            <PencilIcon className="text-blue-500" size={18} />
-          </Button>
-          <CopyLinkButton careUnitId={unit.id} />
-          {unit.tel && (
-            <a href={`tel:${unit.tel}`}>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={(e) => e.stopPropagation()}
-                className="w-8 h-8"
-              >
-                <PhoneCallIcon className="text-slate-500" size={18} />
-              </Button>
-            </a>
-          )}
-        </div>
+        <CareUnitMoreMenu unit={unit} onClickFavorite={handleFavoriteButton} />
       </div>
     </CareUnitCardLayout>
   );

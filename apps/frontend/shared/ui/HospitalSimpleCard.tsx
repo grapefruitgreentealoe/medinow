@@ -16,17 +16,11 @@ import {
 } from '@/components/ui/accordion';
 import { HospitalTimeTable } from '@/shared/ui/HospitalTimeTable';
 import { ReviewList } from '@/features/review/ui/ReviewList';
-import {
-  Star,
-  StarOff,
-  MessageSquare,
-  PhoneCallIcon,
-  PencilIcon,
-} from 'lucide-react';
+import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/shared/constants/routes';
 import { renderTodayTime } from '@/features/map/utils';
-import { CopyLinkButton } from './CopyLinkButton';
+import { CareUnitMoreMenu } from './CareUnitMoreMenu';
 
 interface HospitalSimpleCardProps {
   unit: CareUnit;
@@ -69,36 +63,7 @@ export function HospitalSimpleCard({ unit }: HospitalSimpleCardProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
-          {unit.isChatAvailable && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-8 h-8"
-              onClick={handleChat}
-            >
-              <MessageSquare className="text-blue-500" size={18} />
-            </Button>
-          )}
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() =>
-              router.push(ROUTES.USER.WRITE_REVIEW + `?careUnitId=${unit.id}`)
-            }
-            className="w-8 h-8"
-          >
-            <PencilIcon className="text-blue-500" size={18} />
-          </Button>
-          <CopyLinkButton careUnitId={unit.id} />
-          {unit.tel && (
-            <a href={`tel:${unit.tel}`}>
-              <Button size="icon" variant="ghost" className="w-8 h-8">
-                <PhoneCallIcon className="text-slate-500" size={18} />
-              </Button>
-            </a>
-          )}
-        </div>
+        <CareUnitMoreMenu unit={unit} />
       </div>
 
       <div className="h-[1rem]" />
