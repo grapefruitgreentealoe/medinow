@@ -21,6 +21,7 @@ import { CareUnit, CongestionLevel } from '../../../shared/type';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getCareUnitById } from '@/shared/api';
 import { congestionClassMap } from '@/shared/constants/const';
+import { ROUTES } from '@/shared/constants/routes';
 
 const store = getDefaultStore();
 
@@ -431,11 +432,11 @@ export default function NearbyCareUnitsMap() {
             className="text-xs"
             onClick={() =>
               router.push(
-                'https://medinow.co.kr/user/chat?id=ff9af261-0d28-4abc-9bf8-210d0b6fcaa7'
+                ROUTES.USER.CHAT('be8a7508-d911-49cb-99e6-4891c5f77afb')
               )
             }
           >
-            채팅 사용해보기(Beta)
+           채팅 사용해보기(Beta)
           </Button>
         </div>
       </div>
