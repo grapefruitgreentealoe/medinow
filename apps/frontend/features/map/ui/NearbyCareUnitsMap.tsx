@@ -18,9 +18,10 @@ import FilterMenu from './FilterMenu';
 import { ListIcon } from 'lucide-react';
 import LocationSearchModal from '@/shared/ui/LocationSearchModal';
 import { CareUnit, CongestionLevel } from '../../../shared/type';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getCareUnitById } from '@/shared/api';
 import { congestionClassMap } from '@/shared/constants/const';
+import { ROUTES } from '@/shared/constants/routes';
 
 const store = getDefaultStore();
 
@@ -28,8 +29,7 @@ export default function NearbyCareUnitsMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const markersRef = useRef<kakao.maps.CustomOverlay[]>([]);
-  const circleRef = useRef<kakao.maps.Circle | null>(null);
-
+  const router = useRouter();
   const [initialLocation, setInitialLocation] = useState<{
     lat: number;
     lng: number;
@@ -425,6 +425,18 @@ export default function NearbyCareUnitsMap() {
             onClick={() => setHospitalSearchModal(true)}
           >
             위치 검색
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs"
+            onClick={() =>
+              router.push(
+                ROUTES.USER.CHAT('be8a7508-d911-49cb-99e6-4891c5f77afb')
+              )
+            }
+          >
+           채팅 사용해보기(Beta)
           </Button>
         </div>
       </div>
