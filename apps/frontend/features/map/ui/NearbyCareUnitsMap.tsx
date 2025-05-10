@@ -426,18 +426,6 @@ export default function NearbyCareUnitsMap() {
           >
             위치 검색
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-xs"
-            onClick={() =>
-              router.push(
-                ROUTES.USER.CHAT('be8a7508-d911-49cb-99e6-4891c5f77afb')
-              )
-            }
-          >
-           채팅 사용해보기(Beta)
-          </Button>
         </div>
       </div>
 
