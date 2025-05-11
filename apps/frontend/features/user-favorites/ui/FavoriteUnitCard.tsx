@@ -24,10 +24,8 @@ export function CareUnitCard({
   onConfirmUnfavorite,
 }: CareUnitCardProps) {
   const setConfirmUnit = useSetAtom(unfavoriteConfirmUnitAtom);
-  const router = useRouter();
 
   const handleFavoriteButton = (e: React.MouseEvent) => {
-    e.stopPropagation();
     if (unit.isFavorite) {
       setConfirmUnit(unit);
       onConfirmUnfavorite();
@@ -35,7 +33,6 @@ export function CareUnitCard({
   };
 
   const handleUrlButton = (e: React.MouseEvent) => {
-    e.stopPropagation();
     openKakaoMap(unit);
   };
 

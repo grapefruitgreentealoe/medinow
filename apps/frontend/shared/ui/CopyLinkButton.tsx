@@ -12,8 +12,6 @@ interface CopyLinkButtonProps {
 export function CopyLinkButton({ careUnitId }: CopyLinkButtonProps) {
   const handleCopy = useCallback(
     (e: React.MouseEvent) => {
-      e.stopPropagation();
-
       try {
         const url = new URL(window.location.origin);
         url.searchParams.set('careUnitId', careUnitId);

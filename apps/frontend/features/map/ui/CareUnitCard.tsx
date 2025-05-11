@@ -34,12 +34,10 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
   const { mutate: toggleFavorite } = useOptimisticToggleFavorite(queryKey);
 
   const handleUrlButton = (e: { stopPropagation: () => void }) => {
-    e.stopPropagation();
     openKakaoMap(unit);
   };
 
   const handleFavoriteButton = (e: { stopPropagation: () => void }) => {
-    e.stopPropagation();
     toggleFavorite({ unitId: unit.id });
   };
 

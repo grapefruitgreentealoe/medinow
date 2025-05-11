@@ -41,7 +41,6 @@ export function CareUnitMoreMenu({
         {unit.isChatAvailable && (
           <DropdownMenuItem
             onClick={(e) => {
-              e.stopPropagation();
               router.push(ROUTES.USER.CHAT(unit.id));
             }}
           >
@@ -51,7 +50,6 @@ export function CareUnitMoreMenu({
 
         <DropdownMenuItem
           onClick={(e) => {
-            e.stopPropagation();
             router.push(`${ROUTES.USER.WRITE_REVIEW}?careUnitId=${unit.id}`);
           }}
         >
@@ -60,7 +58,6 @@ export function CareUnitMoreMenu({
 
         <DropdownMenuItem
           onClick={(e) => {
-            e.stopPropagation();
             navigator.clipboard
               .writeText(`${window.location.origin}/?careUnitId=${unit.id}`)
               .then(() => toast.success('링크가 복사되었습니다!'))
@@ -73,7 +70,6 @@ export function CareUnitMoreMenu({
         {unit.tel && (
           <DropdownMenuItem
             onClick={(e) => {
-              e.stopPropagation();
               window.location.href = `tel:${unit.tel}`;
             }}
           >

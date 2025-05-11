@@ -27,14 +27,6 @@ interface HospitalSimpleCardProps {
 }
 
 export function HospitalSimpleCard({ unit }: HospitalSimpleCardProps) {
-  const router = useRouter();
-
-  const handleChat = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // 의료기관 채팅 연결 로직 (필요 시 추가)
-    e.stopPropagation();
-    router.push(ROUTES.USER.CHAT(unit.id));
-  };
-
   const categoryLabel =
     unit.category === 'emergency'
       ? '응급실'
