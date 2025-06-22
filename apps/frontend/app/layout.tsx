@@ -40,7 +40,6 @@ export default async function RootLayout({
           <HeaderWithSocket />
           <main className="flex-1 !pt-[61px]">{children}</main>
         </AuthStateInitializer>
-        <Footer />
         <Toaster position="bottom-center" duration={1000} />
       </body>
     </html>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { HeartPulseIcon, Menu } from 'lucide-react';
+import { HeartPulseIcon, Menu, MapPinIcon } from 'lucide-react';
 import { useState } from 'react';
 import { ROUTES } from '@/shared/constants/routes';
 import axiosInstance from '@/lib/axios';
@@ -37,8 +37,11 @@ export default function Header() {
   };
 
   const getMenuItems = () => {
+    const commonItems = [{ href: ROUTES.MAP, label: '지도 보기' }];
+
     if (!isLoggedIn) {
       return [
+        ...commonItems,
         { href: ROUTES.SIGN_UP.ADMIN, label: '관리자 회원가입' },
         { href: ROUTES.SIGN_UP.USER, label: '회원가입' },
         { href: ROUTES.LOGIN, label: '로그인' },
@@ -47,6 +50,7 @@ export default function Header() {
 
     if (role === 'admin') {
       return [
+        ...commonItems,
         { href: ROUTES.ADMIN.DASHBOARD, label: '관리자 대시보드' },
         { href: ROUTES.ADMIN.REVIEWS, label: '리뷰 보기' },
         { href: ROUTES.ADMIN.CHAT, label: '채팅' },
@@ -55,6 +59,7 @@ export default function Header() {
     }
 
     return [
+      ...commonItems,
       { href: ROUTES.USER.ROOT, label: '마이페이지' },
       { href: ROUTES.USER.FAVORITES, label: '즐겨찾기' },
       { href: ROUTES.USER.WRITE_REVIEW, label: '리뷰 작성하기' },
@@ -90,6 +95,15 @@ export default function Header() {
             </Button>
 
             <div className="hidden lg:flex gap-[20px]">
+              <Link href={ROUTES.MAP}>
+                <Button
+                  variant="ghost"
+                  className="text-sm flex items-center gap-1"
+                >
+                  <MapPinIcon size={16} /> 지도 보기
+                </Button>
+              </Link>
+
               {isLoggedIn ? (
                 <>
                   {role === 'admin' ? (
