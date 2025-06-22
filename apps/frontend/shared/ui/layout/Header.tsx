@@ -36,7 +36,13 @@ export default function Header() {
     }
   };
 
-  const getMenuItems = () => {
+  type getMenuItemsType = {
+    href: string;
+    label: string;
+    onClick?: () => void;
+  };
+
+  const getMenuItems = (): getMenuItemsType[] => {
     const commonItems = [{ href: ROUTES.MAP, label: '지도 보기' }];
 
     if (!isLoggedIn) {
