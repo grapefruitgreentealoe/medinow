@@ -17,7 +17,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
     { href: ROUTES.USER.REVIEWS, label: '내 리뷰' },
     { href: ROUTES.USER.WRITE_REVIEW, label: '리뷰 작성하러 가기' },
     {
-      href: ROUTES.USER.CHAT('be8a7508-d911-49cb-99e6-4891c5f77afb'),
+      href: ROUTES.USER.CHAT('91f2b072-256b-48cc-9e5a-0e0da3f065e5'),
       label: '채팅(베타체험)',
     },
   ];
