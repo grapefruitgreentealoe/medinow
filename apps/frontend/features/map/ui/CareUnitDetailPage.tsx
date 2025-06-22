@@ -1,24 +1,13 @@
 'use client';
 
 import { useAtom, useAtomValue } from 'jotai';
-import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
-import { useSetAtom } from 'jotai';
 import { cn } from '@/lib/utils';
-import {
-  Star,
-  StarOff,
-  MessageSquare,
-  PhoneCallIcon,
-  PencilIcon,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Star } from 'lucide-react';
 import { useOptimisticToggleFavorite } from '../model/useOptimisticToggleFavorite';
 import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
 import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 import { ReviewList } from '@/features/review/ui/ReviewList';
 import { useRouter } from 'next/navigation';
-import { ROUTES } from '@/shared/constants/routes';
-
 import { Badge } from '@/components/ui/badge';
 import {
   Accordion,
@@ -29,12 +18,11 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { renderTodayTime } from '../utils';
-import { useRenderTimeRow } from '@/shared/model/useRenderTimeRow';
 import { HospitalTimeTable } from '@/shared/ui/HospitalTimeTable';
+import { CareUnitMoreMenu } from '@/shared/ui/CareUnitMoreMenu';
 export default function CareUnitDetailPage() {
   const router = useRouter();
   const [unit] = useAtom(selectedCareUnitAtom);
-  const setChat = useSetAtom(chatModalAtom);
   const queryKey = useAtomValue(careUnitsQueryKeyAtom);
   const { mutate: toggleFavorite } = useOptimisticToggleFavorite(queryKey);
 
@@ -43,11 +31,6 @@ export default function CareUnitDetailPage() {
   const handleFavorite = () => {
     toggleFavorite({ unitId: unit.id });
   };
-
-  const handleChat = () => {
-    router.push(ROUTES.USER.CHAT(unit.id));
-  };
-
   const categoryLabel =
     unit.category === 'emergency'
       ? '응급실'
@@ -75,53 +58,7 @@ export default function CareUnitDetailPage() {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-8 h-8"
-            onClick={handleFavorite}
-          >
-            {unit.isFavorite ? (
-              <Star className="text-yellow-500 fill-yellow-500" size={18} />
-            ) : (
-              <Star size={18} />
-            )}
-          </Button>
-          {unit.isChatAvailable && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-8 h-8"
-              onClick={handleChat}
-            >
-              <MessageSquare className="text-blue-500" size={18} />
-            </Button>
-          )}
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(ROUTES.USER.WRITE_REVIEW + `?careUnitId=${unit.id}`);
-            }}
-            className="w-8 h-8"
-          >
-            <PencilIcon className="text-blue-500" size={18} />
-          </Button>
-          {unit.tel && (
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={(e) => e.stopPropagation()}
-              className="w-8 h-8"
-            >
-              <a href={`tel:${unit.tel}`}>
-                <PhoneCallIcon className="text-slate-500" size={18} />
-              </a>
-            </Button>
-          )}
-        </div>
+        <CareUnitMoreMenu unit={unit} onClickFavorite={handleFavorite} />
       </div>
 
       <div className="h-[1rem]" />

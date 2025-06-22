@@ -86,9 +86,9 @@ export function ReviewForm({
           <p className="text-xs text-muted-foreground">리뷰 대상 의료기관</p>
           <h3 className="text-base font-bold">{careUnit?.name}</h3>
           <p className="text-sm text-muted-foreground">{careUnit?.address}</p>
-          {!isEditing ? (
+          {!isEditing && (
             <Button onClick={onClickReChoiceButton}>다시 선택</Button>
-          ) : null}
+          )}
         </CardContent>
       </Card>
 

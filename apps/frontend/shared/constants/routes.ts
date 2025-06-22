@@ -1,5 +1,6 @@
 export const ROUTES = {
   HOME: '/',
+  MAP: '/map',
   LOGIN: '/login',
 
   SIGN_UP: {

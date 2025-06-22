@@ -16,7 +16,10 @@ export default function UserLayout({ children }: { children: ReactNode }) {
     { href: ROUTES.USER.FAVORITES, label: '즐겨찾기한 의료기관' },
     { href: ROUTES.USER.REVIEWS, label: '내 리뷰' },
     { href: ROUTES.USER.WRITE_REVIEW, label: '리뷰 작성하러 가기' },
-    { href: ROUTES.USER.CHAT_LIST, label: '채팅' },
+    {
+      href: ROUTES.USER.CHAT('91f2b072-256b-48cc-9e5a-0e0da3f065e5'),
+      label: '채팅(베타체험)',
+    },
   ];
 
   return (

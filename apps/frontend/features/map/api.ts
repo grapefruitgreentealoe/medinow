@@ -12,10 +12,9 @@ interface LocationByCategoryData {
 }
 
 export const locationByCategory = async (
-  data: LocationByCategoryData
+  data: LocationByCategoryData & { isLogin: boolean }
 ): Promise<CareUnit[]> => {
-  const { lat, lng, level, category, page, limit, OpenStatus } = data;
-  const isLogin = window.__INITIAL_IS_LOGGED_IN__;
+  const { lat, lng, level, category, page, limit, OpenStatus, isLogin } = data;
   const res = await axiosInstance.get(
     `/care-units/${isLogin ? 'location-by-category-login' : 'location-by-category'}?lat=${lat}&lng=${lng}&level=${level}${category ? `&category=${category}` : ''}&page=${page}&limit=${limit}&OpenStatus=${OpenStatus}`
   );

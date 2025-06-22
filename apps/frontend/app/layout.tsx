@@ -1,10 +1,9 @@
 import Script from 'next/script';
 import { cookies } from 'next/headers';
 import './globals.css';
-import Header from '@/shared/ui/layout/Header';
 import { Toaster } from '@/components/ui/sonner';
-import Footer from '@/shared/ui/Footer';
 import HeaderWithSocket from '@/shared/ui/layout/HeaderWithSocket';
+import { AuthStateInitializer } from '@/shared/provider/AuthStateInitializer';
 
 export const metadata = {
   title: 'MediNow',
@@ -25,20 +24,10 @@ export default async function RootLayout({
     : {};
   const isLoggedIn = !!token;
   const role = payload?.role || '';
-
   return (
     <html lang="ko">
       <head>
         <>
-          <Script
-            id="initial-is-logged-in"
-            dangerouslySetInnerHTML={{
-              __html: `window.__INITIAL_IS_LOGGED_IN__ = ${JSON.stringify(
-                isLoggedIn
-              )};
-              window.__USER_ROLE__ = '${role}';`,
-            }}
-          />
           <Script
             strategy="beforeInteractive"
             src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY}&libraries=services&autoload=false`}
@@ -46,9 +35,10 @@ export default async function RootLayout({
         </>
       </head>
       <body className="flex min-h-screen flex-col" suppressHydrationWarning>
-        <HeaderWithSocket />
-        <main className="flex-1 !pt-[61px]">{children}</main>
-        <Footer />
+        <AuthStateInitializer isLoggedIn={isLoggedIn} userRole={role}>
+          <HeaderWithSocket />
+          <main className="flex-1 !pt-[61px]">{children}</main>
+        </AuthStateInitializer>
         <Toaster position="bottom-center" duration={1000} />
       </body>
     </html>

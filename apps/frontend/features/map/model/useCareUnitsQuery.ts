@@ -1,9 +1,10 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { locationByCategory } from '../api'; // 또는 locationByCategoryMock
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
 import { UseCareUnitsQueryResult } from '../type';
 import { useEffect } from 'react';
+import { isLoggedInAtom } from '@/atoms/auth';
 
 interface UseCareUnitsQueryProps {
   lat: number | null;
@@ -22,6 +23,7 @@ export function useCareUnitsQuery({
 }: UseCareUnitsQueryProps): UseCareUnitsQueryResult & { queryKey: any[] } {
   const queryKey = ['careUnits', lat, lng, selectedCategory, OpenStatus];
   const setQueryKeyAtom = useSetAtom(careUnitsQueryKeyAtom);
+  const isLogin = useAtomValue(isLoggedInAtom);
 
   // queryKeyAtom을 업데이트하는 useEffect
   useEffect(() => {
@@ -39,6 +41,7 @@ export function useCareUnitsQuery({
     queryKey,
     queryFn: async ({ pageParam = 1 }) => {
       const items = await locationByCategory({
+        isLogin,
         lat: lat!,
         lng: lng!,
         level: level!,

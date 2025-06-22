@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { HeartPulseIcon, Menu } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { HeartPulseIcon, Menu, MapPinIcon } from 'lucide-react';
+import { useState } from 'react';
 import { ROUTES } from '@/shared/constants/routes';
 import axiosInstance from '@/lib/axios';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { isLoggedInAtom, userRoleAtom } from '@/atoms/auth';
 
 import {
   Sheet,
@@ -15,60 +16,47 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-type Role = 'user' | 'admin';
-
-interface User {
-  id: string;
-  email: string;
-  role: Role;
-  userProfile: {
-    name: string;
-    nickname: string;
-  };
-}
-
-declare global {
-  interface Window {
-    __INITIAL_IS_LOGGED_IN__?: boolean;
-    __USER_ROLE__?: string;
-  }
-}
 
 export default function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<string>('');
+  const isLoggedIn = useAtomValue(isLoggedInAtom);
+  const role = useAtomValue(userRoleAtom);
+  const setIsLoggedIn = useSetAtom(isLoggedInAtom);
 
-  useEffect(() => {
-    const isInitLoggedIn = window.__INITIAL_IS_LOGGED_IN__ ?? false;
-    const userRole = window.__USER_ROLE__ ?? '';
-    setIsLoggedIn(isInitLoggedIn);
-    setRole(userRole);
-  }, []);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
       await axiosInstance.post('/auth/logout', null, {
         withCredentials: true,
       });
-      window.__INITIAL_IS_LOGGED_IN__ = false;
+      setIsLoggedIn(false); // 상태 업데이트
       location.reload();
     } catch (e) {
       console.error('Logout failed', e);
     }
   };
 
-  const getMenuItems = () => {
+  type getMenuItemsType = {
+    href: string;
+    label: string;
+    onClick?: () => void;
+  };
+
+  const getMenuItems = (): getMenuItemsType[] => {
+    const commonItems = [{ href: ROUTES.MAP, label: '지도 보기' }];
+
     if (!isLoggedIn) {
       return [
+        ...commonItems,
         { href: ROUTES.SIGN_UP.ADMIN, label: '관리자 회원가입' },
         { href: ROUTES.SIGN_UP.USER, label: '회원가입' },
         { href: ROUTES.LOGIN, label: '로그인' },
       ];
     }
+
     if (role === 'admin') {
       return [
+        ...commonItems,
         { href: ROUTES.ADMIN.DASHBOARD, label: '관리자 대시보드' },
         { href: ROUTES.ADMIN.REVIEWS, label: '리뷰 보기' },
         { href: ROUTES.ADMIN.CHAT, label: '채팅' },
@@ -77,11 +65,15 @@ export default function Header() {
     }
 
     return [
+      ...commonItems,
       { href: ROUTES.USER.ROOT, label: '마이페이지' },
       { href: ROUTES.USER.FAVORITES, label: '즐겨찾기' },
       { href: ROUTES.USER.WRITE_REVIEW, label: '리뷰 작성하기' },
       { href: ROUTES.USER.REVIEWS, label: '내 리뷰' },
-      { href: ROUTES.USER.CHAT_LIST, label: '채팅' },
+      {
+        href: ROUTES.USER.CHAT('91f2b072-256b-48cc-9e5a-0e0da3f065e5'),
+        label: '채팅(베타체험)',
+      },
       { href: '#', label: '로그아웃', onClick: handleLogout },
     ];
   };
@@ -98,7 +90,7 @@ export default function Header() {
           </span>
         </Link>
 
-        {isLoggedIn !== null ? (
+        {isLoggedIn !== null && (
           <nav className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -107,8 +99,17 @@ export default function Header() {
             >
               <Menu size={24} />
             </Button>
-            {/* 데스크탑: 로그인 상태에 따라 버튼 분기 */}
+
             <div className="hidden lg:flex gap-[20px]">
+              <Link href={ROUTES.MAP}>
+                <Button
+                  variant="ghost"
+                  className="text-sm flex items-center gap-1"
+                >
+                  <MapPinIcon size={16} /> 지도 보기
+                </Button>
+              </Link>
+
               {isLoggedIn ? (
                 <>
                   {role === 'admin' ? (
@@ -129,7 +130,11 @@ export default function Header() {
                           리뷰작성
                         </Button>
                       </Link>
-                      <Link href={ROUTES.USER.CHAT_LIST}>
+                      <Link
+                        href={ROUTES.USER.CHAT(
+                          '91f2b072-256b-48cc-9e5a-0e0da3f065e5'
+                        )}
+                      >
                         <Button variant="ghost" className="text-sm ">
                           채팅
                         </Button>
@@ -165,7 +170,7 @@ export default function Header() {
               )}
             </div>
           </nav>
-        ) : null}
+        )}
       </div>
 
       {/* 모바일 햄버거 버튼 */}

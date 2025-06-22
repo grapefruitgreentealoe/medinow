@@ -1,29 +1,20 @@
 'use client';
 
 import { CareUnit, CongestionLevel } from '@/shared/type';
-import { useAtomValue, useSetAtom } from 'jotai';
-import { chatModalAtom } from '@/features/chat/atoms/chatModalAtom';
-import {
-  Star,
-  StarOff,
-  MessageSquare,
-  PhoneCallIcon,
-  PencilIcon,
-} from 'lucide-react';
+import { useAtomValue } from 'jotai';
+import { Star } from 'lucide-react';
 import { openKakaoMap, renderTodayTime } from '../utils';
 import { useOptimisticToggleFavorite } from '../model/useOptimisticToggleFavorite';
 import { careUnitsQueryKeyAtom } from '../atoms/careUnitsQueryKeyAtom';
-import { selectedCareUnitAtom } from '../atoms/selectedCareUnitAtom';
 import {
   CATEGORY_LABEL,
   congestionClassMap,
 } from '../../../shared/constants/const';
 import { useQueryClient } from '@tanstack/react-query';
-import { ROUTES } from '@/shared/constants/routes';
-import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CareUnitCardLayout } from '@/shared/ui/CardLayout';
+import { CareUnitMoreMenu } from '@/shared/ui/CareUnitMoreMenu';
 
 interface CareUnitCardProps {
   unit: CareUnit;
@@ -31,8 +22,6 @@ interface CareUnitCardProps {
 }
 
 export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
-  const router = useRouter();
-  const setChat = useSetAtom(chatModalAtom);
   const queryClient = useQueryClient();
   const queryKey = useAtomValue(careUnitsQueryKeyAtom);
   const cacheData = queryClient.getQueryData<any>(queryKey);
@@ -45,12 +34,10 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
   const { mutate: toggleFavorite } = useOptimisticToggleFavorite(queryKey);
 
   const handleUrlButton = (e: { stopPropagation: () => void }) => {
-    e.stopPropagation();
     openKakaoMap(unit);
   };
 
   const handleFavoriteButton = (e: { stopPropagation: () => void }) => {
-    e.stopPropagation();
     toggleFavorite({ unitId: unit.id });
   };
 
@@ -120,59 +107,10 @@ export function CareUnitCard({ unit, onSelect }: CareUnitCardProps) {
         </div>
 
         {/* 오른쪽: 즐겨찾기, 채팅, 리뷰쓰기 */}
-        <div className="flex gap-2 items-center">
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={handleFavoriteButton}
-            className="w-8 h-8"
-          >
-            {freshUnit.isFavorite ? (
-              <Star className="text-yellow-500 fill-yellow-500" size={18} />
-            ) : (
-              <Star size={18} />
-            )}
-          </Button>
-
-          {unit.isChatAvailable && (
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(ROUTES.USER.CHAT(unit.id));
-              }}
-              className="w-8 h-8"
-            >
-              <MessageSquare className="text-blue-500" size={18} />
-            </Button>
-          )}
-
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(ROUTES.USER.WRITE_REVIEW + `?careUnitId=${unit.id}`);
-            }}
-            className="w-8 h-8"
-          >
-            <PencilIcon className="text-blue-500" size={18} />
-          </Button>
-
-          {unit.tel && (
-            <a href={`tel:${unit.tel}`}>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={(e) => e.stopPropagation()}
-                className="w-8 h-8"
-              >
-                <PhoneCallIcon className="text-slate-500" size={18} />
-              </Button>
-            </a>
-          )}
-        </div>
+        <CareUnitMoreMenu
+          unit={freshUnit}
+          onClickFavorite={handleFavoriteButton}
+        />
       </div>
     </CareUnitCardLayout>
   );

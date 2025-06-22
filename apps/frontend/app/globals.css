@@ -1,31 +1,8 @@
+@config "../tailwind.config.js";
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
-
-@layer base {
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
-
-  * {
-    margin: 0;
-
-    padding: 0;
-
-    box-sizing: border-box;
-  }
-
-  html {
-    /* color: #333; */
-  }
-}
-
-:root {
-  --vh: 1vh;
-}
 
 html,
 body {
