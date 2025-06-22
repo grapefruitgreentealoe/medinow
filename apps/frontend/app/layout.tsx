@@ -2,7 +2,6 @@ import Script from 'next/script';
 import { cookies } from 'next/headers';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
-import Footer from '@/shared/ui/Footer';
 import HeaderWithSocket from '@/shared/ui/layout/HeaderWithSocket';
 import { AuthStateInitializer } from '@/shared/provider/AuthStateInitializer';
 
