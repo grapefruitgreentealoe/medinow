@@ -13,7 +13,7 @@ export function CopyLinkButton({ careUnitId }: CopyLinkButtonProps) {
   const handleCopy = useCallback(
     (e: React.MouseEvent) => {
       try {
-        const url = new URL(window.location.origin);
+        const url = new URL(`${window.location.origin}/map`);
         url.searchParams.set('careUnitId', careUnitId);
 
         navigator.clipboard.writeText(url.toString()).then(() => {
